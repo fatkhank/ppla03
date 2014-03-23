@@ -1,6 +1,7 @@
 package com.ppla03.collapaint.model.object;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
@@ -9,8 +10,10 @@ public class OvalObject extends BasicObject {
 
 	@Override
 	public void draw(Canvas canvas) {
-		// TODO Auto-generated method stub
-
+		if (fillPaint.getColor() != Color.TRANSPARENT)
+			canvas.drawOval(bound, fillPaint);
+		if (paint.getColor() != Color.TRANSPARENT)
+			canvas.drawOval(bound, paint);
 	}
 
 	@Override
@@ -39,8 +42,7 @@ public class OvalObject extends BasicObject {
 
 	@Override
 	public void translate(int x, int y) {
-		// TODO Auto-generated method stub
-
+		bound.offset(x, y);
 	}
 
 }

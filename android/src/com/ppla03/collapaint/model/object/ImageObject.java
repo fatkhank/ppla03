@@ -12,8 +12,7 @@ public class ImageObject extends CanvasObject {
 
 	@Override
 	public void draw(Canvas canvas) {
-		// TODO Auto-generated method stub
-
+		canvas.drawBitmap(bitmap, srcRect, destRect, paint);
 	}
 
 	@Override
@@ -42,8 +41,7 @@ public class ImageObject extends CanvasObject {
 
 	@Override
 	public void translate(int x, int y) {
-		// TODO Auto-generated method stub
-
+		destRect.offset(x, y);
 	}
 
 }

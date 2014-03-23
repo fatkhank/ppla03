@@ -10,8 +10,7 @@ public class TextObject extends CanvasObject {
 
 	@Override
 	public void draw(Canvas canvas) {
-		// TODO Auto-generated method stub
-
+		canvas.drawText(text, x, y, paint);
 	}
 
 	@Override
@@ -40,8 +39,8 @@ public class TextObject extends CanvasObject {
 
 	@Override
 	public void translate(int x, int y) {
-		// TODO Auto-generated method stub
-
+		this.x += x;
+		this.y += y;
 	}
 
 }

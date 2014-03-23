@@ -1,19 +1,7 @@
-<<<<<<< HEAD
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.ppla03.collapaint.ui.WorkspaceActivity"
-    tools:ignore="MergeRootFrame" />
+    android:layout_height="match_parent" >
 
-=======
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.ppla03.collapaint.WorkspaceActivity"
-    tools:ignore="MergeRootFrame" />
-
->>>>>>> branch 'master' of https://github.com/fatkhank/ppla03.git
+</RelativeLayout>

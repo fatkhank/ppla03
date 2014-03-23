@@ -1,16 +1,22 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 public class PathObject extends BasicObject {
 	private Path path;
+	private ArrayList<Point> points;
 
 	@Override
 	public void draw(Canvas canvas) {
-		// TODO Auto-generated method stub
-
+		if (fillPaint.getColor() != Color.TRANSPARENT)
+			canvas.drawPath(path, fillPaint);
+		canvas.drawPath(path, paint);
 	}
 
 	@Override
@@ -39,8 +45,10 @@ public class PathObject extends BasicObject {
 
 	@Override
 	public void translate(int x, int y) {
-		// TODO Auto-generated method stub
-
+		path.offset(x, y);
+		int len = points.size();
+		for (int i = 0; i < len; i++)
+			points.get(i).offset(x, y);
 	}
 
 }
