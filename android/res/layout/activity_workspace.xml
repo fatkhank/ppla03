@@ -4,4 +4,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <Button
+        android:id="@+id/w_shape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="rect" />
+
+    <Button
+        android:id="@+id/w_fill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/w_shape"
+        android:text="fill" />
+
+    <Button
+        android:id="@+id/w_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/w_fill"
+        android:text="appr" />
+
+    <Button
+        android:id="@+id/w_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/w_ok"
+        android:text="send" />
+
+    <com.ppla03.collapaint.CanvasView
+        android:id="@+id/w_canvas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/w_shape" />
+
 </RelativeLayout>

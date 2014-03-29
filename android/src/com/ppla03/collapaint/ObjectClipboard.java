@@ -6,20 +6,18 @@ import java.util.List;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 public class ObjectClipboard {
-	private static ArrayList<CanvasObject> copiedObjects;
+	private static final ArrayList<CanvasObject> copiedObjects = new ArrayList<>();
 
 	public static void put(List<CanvasObject> objects) {
-		// TODO
-
+		copiedObjects.clear();
+		copiedObjects.addAll(objects);
 	}
 
 	public static boolean hasObject() {
-		// TODO
-		return false;
+		return !copiedObjects.isEmpty();
 	}
 
 	public static ArrayList<CanvasObject> retrieve() {
-		// TODO
-		return null;
+		return copiedObjects;
 	}
 }

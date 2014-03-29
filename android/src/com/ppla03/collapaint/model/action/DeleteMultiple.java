@@ -1,9 +1,20 @@
 package com.ppla03.collapaint.model.action;
 
+import java.util.ArrayList;
+
 import com.ppla03.collapaint.model.object.CanvasObject;
 
-public class DrawingAction extends UserAction {
-	private CanvasObject object;
+public class DeleteMultiple extends UserAction {
+	public final ArrayList<CanvasObject> objects;
+
+	DeleteMultiple(ArrayList<CanvasObject> objects) {
+		this.objects = objects;
+	}
+
+	DeleteMultiple(ArrayList<CanvasObject> objects, UserAction inverse) {
+		this.objects = objects;
+		this.inverse = inverse;
+	}
 
 	@Override
 	public UserAction getInverse() {
