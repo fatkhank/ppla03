@@ -1,7 +1,10 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 public class ImageObject extends CanvasObject {
@@ -20,25 +23,7 @@ public class ImageObject extends CanvasObject {
 	}
 
 	@Override
-	public String getStyleParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStyleParam(String param) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	@Override
-	public String getShapeParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setShapeParam(String param) {
+	public void setShapeParam(ArrayList<Point> param) {
 		// TODO Auto-generated method stub
 
 	}

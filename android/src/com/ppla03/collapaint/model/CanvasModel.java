@@ -20,4 +20,12 @@ public class CanvasModel {
 		this.height = height;
 		objects = new ArrayList<CanvasObject>();
 	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setid(int id) {
+		this.id = id;
+	}
 }

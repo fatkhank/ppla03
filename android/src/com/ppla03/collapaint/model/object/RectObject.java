@@ -1,11 +1,19 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 public class RectObject extends BasicObject {
 	private Rect rect;
+	
+	public RectObject() {
+		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
+		this.rect = new Rect();
+	}
 
 	public RectObject(int x, int y, int fillColor, int strokeColor,
 			int strokeWidth, int strokeStyle) {
@@ -29,25 +37,7 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public String getStyleParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStyleParam(String param) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	@Override
-	public String getShapeParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setShapeParam(String param) {
+	public void setShapeParam(ArrayList<Point> param) {
 		// TODO Auto-generated method stub
 
 	}

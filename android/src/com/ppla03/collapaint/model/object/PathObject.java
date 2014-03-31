@@ -16,11 +16,17 @@ public class PathObject extends BasicObject {
 			ControlPoint.Type.MOVE, 0, 0, 0) };
 
 	private static final ShapeHandler handler = new ShapeHandler(mover);
+	
+	public PathObject() {
+		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
+		path = new Path();
+		points = new ArrayList<>();
+	}
 
 	public PathObject(int x, int y, int fillColor, int strokeColor,
 			int strokeWidth, int strokeStyle) {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
-		points = new ArrayList<Point>();
+		points = new ArrayList<>();
 		points.add(new Point(x, y));
 		path = new Path();
 		path.moveTo(x, y);
@@ -41,27 +47,9 @@ public class PathObject extends BasicObject {
 	public void close() {
 		path.close();
 	}
-
-	@Override
-	public String getStyleParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStyleParam(String param) {
-		// TODO Auto-generated method stub
-
-	}
 	
 	@Override
-	public String getShapeParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setShapeParam(String param) {
+	public void setShapeParam(ArrayList<Point> param) {
 		// TODO Auto-generated method stub
 
 	}

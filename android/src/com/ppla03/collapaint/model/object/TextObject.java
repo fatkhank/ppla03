@@ -1,7 +1,10 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
@@ -14,6 +17,11 @@ public class TextObject extends CanvasObject {
 	private static final ControlPoint[] points = new ControlPoint[] { new ControlPoint(
 			ControlPoint.Type.MOVE, 0, 0, 0) };
 	private static final ShapeHandler handler = new ShapeHandler(points);
+	
+	public TextObject() {
+		super();
+		text = "";
+	}
 
 	public TextObject(String text, int x, int y, int color, int size,
 			boolean center) {
@@ -41,25 +49,7 @@ public class TextObject extends CanvasObject {
 	}
 
 	@Override
-	public String getStyleParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStyleParam(String param) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	@Override
-	public String getShapeParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setShapeParam(String param) {
+	public void setShapeParam(ArrayList<Point> param) {
 		// TODO Auto-generated method stub
 
 	}

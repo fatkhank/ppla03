@@ -1,7 +1,10 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 public abstract class CanvasObject {
@@ -10,16 +13,17 @@ public abstract class CanvasObject {
 	protected int globalID = -1;
 	protected Paint paint;
 	private boolean selected;
-	
+	private int offsetX, offsetY;
+
 	public CanvasObject() {
 		id = idCounter++;
 	}
-	
-	public void setGlobaID(int id){
+
+	public void setGlobaID(int id) {
 		globalID = id;
 	}
-	
-	public int getGlobalID(){
+
+	public int getGlobalID() {
 		return globalID;
 	}
 
@@ -29,15 +33,13 @@ public abstract class CanvasObject {
 
 	public abstract void draw(Canvas canvas);
 
-	public abstract String getStyleParameter();
-
-	public abstract void setStyleParam(String param);
-	
-	public abstract String getShapeParameter();
-
-	public abstract void setShapeParam(String param);
+	public abstract void setShapeParam(ArrayList<Point> param);
 
 	public abstract boolean selectedBy(Rect area);
+	
+	public int getXOffset(){return offsetX;}
+	
+	public int getYOffset(){return offsetY;}
 
 	public abstract void translate(int x, int y);
 
@@ -51,6 +53,7 @@ public abstract class CanvasObject {
 		if (!(o instanceof CanvasObject))
 			return false;
 		CanvasObject co = (CanvasObject) o;
-		return this.globalID == co.globalID || this.id == co.id;
+		return (this.globalID == co.globalID && this.globalID != -1)
+				|| this.id == co.id;
 	}
 }

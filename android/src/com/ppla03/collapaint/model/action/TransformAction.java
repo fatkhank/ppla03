@@ -2,36 +2,36 @@ package com.ppla03.collapaint.model.action;
 
 import java.util.ArrayList;
 
-import android.graphics.Point;
-
 import com.ppla03.collapaint.model.object.CanvasObject;
 
-public class ReshapeAction extends UserAction {
+public class TransformAction extends UserAction {
+	private int oriX, oriY;
+	private int destX, destY;
 	public final CanvasObject object;
-	public final ArrayList<Point> param;
-
-	public ReshapeAction(CanvasObject object) {
-		// TODO Auto-generated constructor stub
+	
+	public TransformAction(CanvasObject object) {
 		this.object = object;
-		param = new ArrayList<>();
+		oriX = object.getXOffset();
+		oriY = object.getYOffset();
 	}
-
-	public String getParameter() {
-		// TODO
-		return "";
+	
+	public String getParameter(){
+		//TODO
+		return null;
 	}
-
-	public void setParameter(String param) {
-		// TODO
+	
+	public TransformAction setParameter(String param){
+		//TODO
+		return this;
 	}
 	
 	public static String getParameterOf(CanvasObject object){
-		//TODO get reshape parameter
+		//TODO get transform parameter
 		return "";
 	}
 	
 	public static void apply(String param, CanvasObject object){
-		//TODO apply shape action
+		//TODO apply transform to object
 	}
 
 	@Override

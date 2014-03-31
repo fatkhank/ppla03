@@ -11,6 +11,8 @@ import com.ppla03.collapaint.model.action.DeleteAction;
 import com.ppla03.collapaint.model.action.DeleteMultiple;
 import com.ppla03.collapaint.model.action.DrawAction;
 import com.ppla03.collapaint.model.action.DrawMultiple;
+import com.ppla03.collapaint.model.action.TransformAction;
+import com.ppla03.collapaint.model.action.TransformMultiple;
 import com.ppla03.collapaint.model.action.UserAction;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
@@ -36,11 +38,11 @@ public class CanvasSynchronizer {
 
 	private int sync_time = 5000;
 	private boolean syncing;
+	private boolean forced;
 
 	public CanvasSynchronizer(CanvasView canvas) {
 		this.canvas = canvas;
-		connector = CanvasConnector.getInstance();
-		connector.setSynchronizer(this);
+		connector = CanvasConnector.getInstance().setSynchronizer(this);
 		actionBuffer = new ArrayList<>();
 		playbackList = new ArrayList<>();
 		sentList = new ArrayList<>();
@@ -49,7 +51,7 @@ public class CanvasSynchronizer {
 
 	public void start() {
 		Log.d("POS", "----- synchronizer started ------");
-		handler.postDelayed(update, sync_time);
+		handler.postDelayed(updater, sync_time);
 	}
 
 	public void stop() {
@@ -57,20 +59,20 @@ public class CanvasSynchronizer {
 	}
 
 	public void forceUpdate() {
-		// TODO
+		forced = true;
+		if (!syncing)
+			updater.run();
 	}
 
-	private final Runnable update = new Runnable() {
+	private final Runnable updater = new Runnable() {
 
 		@Override
 		public void run() {
 			Log.d("POS", "CSYNC:update (" + actionBuffer.size() + ")");
-
 			// add buffer to sentList
 			int size = actionBuffer.size();
 			for (int i = 0; i < size; i++) {
 				UserAction act = actionBuffer.get(i);
-
 				// ubah aksi berobjek jamak ke aksi berobjek tunggal
 				ArrayList<CanvasObject> objs = null;
 				if (act instanceof DrawMultiple) {
@@ -84,22 +86,31 @@ public class CanvasSynchronizer {
 					for (int j = 0; j < len; j++)
 						sentList.add(new DeleteAction(objs.get(j)));
 				} else if (act instanceof CopyAction) {
-					objs = ((DeleteMultiple) act).objects;
+					objs = ((CopyAction) act).objects;
 					int len = objs.size();
 					for (int j = 0; j < len; j++)
 						sentList.add(new DrawAction(objs.get(j)));
+					// TODO translate copy to draw + move
+				} else if (act instanceof TransformMultiple) {
+					TransformMultiple tm = (TransformMultiple) act;
+					objs = tm.objects;
+					int len = objs.size();
+					for (int j = 0; j < len; j++)
+						sentList.add(new TransformAction(objs.get(j))
+								.setParameter(tm.getParameter()));
 				} else
 					sentList.add(act);
 			}
 			actionBuffer.clear();
 			syncing = true;
-			connector.updateActions(lastActNum, sentList);
+			connector.updateActions(canvas.getModel().getId(), lastActNum,
+					sentList);
 		}
 	};
 
 	public void test() {
 		// TODO
-		update.run();
+		updater.run();
 	}
 
 	public void addToBuffer(UserAction action) {
@@ -119,19 +130,26 @@ public class CanvasSynchronizer {
 
 	public void onActionUpdated(int newId, ArrayList<UserAction> actions) {
 		playbackList.clear();
+		// undo aksi yang dilakukan selama proses update
 		int c = actionBuffer.size() - 1;
 		for (int i = c; i >= 0; i++)
 			playbackList.add(actionBuffer.get(i).getInverse());
+		// undo aksi yang sedang diupdate
 		c = sentList.size() - 1;
 		for (int i = c; i >= 0; i++)
 			playbackList.add(sentList.get(i).getInverse());
-		c = actions.size();
+		// jalankan aksi dari server
 		playbackList.addAll(actions);
+		// redo aksi yang dilakukan selama proses update
 		playbackList.addAll(actionBuffer);
 		syncing = false;
 		canvas.execute(playbackList);
 		lastActNum = newId;
-		handler.postDelayed(update, sync_time);
 		sentList.clear();
+		if (forced) {
+			forced = false;
+			updater.run();
+		} else
+			handler.postDelayed(updater, sync_time);
 	}
 }

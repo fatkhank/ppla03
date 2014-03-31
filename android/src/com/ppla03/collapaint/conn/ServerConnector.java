@@ -15,6 +15,8 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 public class ServerConnector {
+	public static final String HOST = "http://192.168.43.64:8080/colla/";
+	
 	protected interface ReplyListener {
 		void process(JSONObject reply);
 	}

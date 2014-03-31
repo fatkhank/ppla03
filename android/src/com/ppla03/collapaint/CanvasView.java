@@ -9,7 +9,7 @@ import com.ppla03.collapaint.model.action.CopyAction;
 import com.ppla03.collapaint.model.action.DeleteMultiple;
 import com.ppla03.collapaint.model.action.DeleteAction;
 import com.ppla03.collapaint.model.action.DrawAction;
-import com.ppla03.collapaint.model.action.MoveAction;
+import com.ppla03.collapaint.model.action.TransformAction;
 import com.ppla03.collapaint.model.action.ReshapeAction;
 import com.ppla03.collapaint.model.action.StyleAction;
 import com.ppla03.collapaint.model.action.DrawMultiple;
@@ -112,7 +112,7 @@ public class CanvasView extends View {
 		strokeWidth = 5;
 
 		syncon = new CanvasSynchronizer(this);
-//		syncon.start();
+		// syncon.start();
 	}
 
 	public void setModel(CanvasModel model) {
@@ -285,7 +285,8 @@ public class CanvasView extends View {
 	}
 
 	public void setMode(Mode mode) {
-		this.mode = mode;
+		if (this.mode != Mode.DRAW_EDIT && this.mode != Mode.EDIT_SHAPE)
+			this.mode = mode;
 	}
 
 	public void approveAction() {
@@ -322,7 +323,7 @@ public class CanvasView extends View {
 	}
 
 	public void setStrokeStyle(int style) {
-		// TODO
+		// TODO cv stroke style
 	}
 
 	public void insertImage(Bitmap bitmap) {
@@ -456,7 +457,7 @@ public class CanvasView extends View {
 			DrawAction da = (DrawAction) action;
 			da.object.draw(cacheCanvas);
 			model.objects.add(da.object);
-		} else if (action instanceof MoveAction) {
+		} else if (action instanceof TransformAction) {
 		} else if (action instanceof ReshapeAction) {
 		} else if (action instanceof StyleAction) {
 		} else if (action instanceof DeleteAction) {
@@ -484,10 +485,9 @@ public class CanvasView extends View {
 	public void onCanvasClosed(int status) {
 		// TODO
 	}
-	
-	
-	public void test(){
-		//TODO
+
+	public void test() {
+		// TODO
 		syncon.test();
 	}
 }

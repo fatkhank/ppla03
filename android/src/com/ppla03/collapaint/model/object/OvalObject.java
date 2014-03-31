@@ -1,12 +1,20 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.ArrayList;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
 public class OvalObject extends BasicObject {
 	private RectF bound;
+	
+	public OvalObject(){
+		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
+		bound = new RectF();
+	}
 
 	public OvalObject(int x, int y, int fillColor, int strokeColor,
 			int strokeWidth, int strokeStyle) {
@@ -27,25 +35,7 @@ public class OvalObject extends BasicObject {
 	}
 
 	@Override
-	public String getStyleParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStyleParam(String param) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	@Override
-	public String getShapeParameter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setShapeParam(String param) {
+	public void setShapeParam(ArrayList<Point> param) {
 		// TODO Auto-generated method stub
 
 	}

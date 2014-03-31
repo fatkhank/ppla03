@@ -5,8 +5,13 @@ import java.util.ArrayList;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 public class CopyAction extends UserAction {
-	private ArrayList<CanvasObject> objects;
+	public final ArrayList<CanvasObject> objects;
 	private int dx, dy;
+	
+	public CopyAction(ArrayList<CanvasObject> objects) {
+		// TODO Auto-generated constructor stub
+		this.objects = objects;
+	}
 
 	@Override
 	public UserAction getInverse() {

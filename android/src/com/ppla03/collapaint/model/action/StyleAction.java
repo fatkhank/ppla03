@@ -26,20 +26,6 @@ public class StyleAction extends UserAction {
 		this.strokeStyle = strokeStyle;
 	}
 
-	public void applyFillStyle(Paint paint) {
-		paint.setColor(fillColor);
-	}
-
-	public void applyStrokeStyle(Paint paint) {
-		paint.setColor(strokeColor);
-		paint.setStrokeWidth(strokeWidth);
-		paint.setPathEffect(StrokeStyle.getEffect(strokeStyle, strokeWidth));
-	}
-	
-	public void applyTextStyle(Paint paint){
-		//TODO
-	}
-
 	public String getParameter() {
 		// TODO
 		StringBuilder sb = new StringBuilder();
@@ -48,9 +34,18 @@ public class StyleAction extends UserAction {
 		// String res =
 		return sb.toString();
 	}
-
-	public void setParameter(String param) {
-
+	
+	public void setParameter(String param){
+		
+	}
+	
+	public static String getParameterOf(CanvasObject object){
+		//TODO style parameter
+		return null;
+	}
+	
+	public static void applyStyle(String param, CanvasObject object){
+		//TODO apply style to object
 	}
 
 	@Override

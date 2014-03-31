@@ -24,7 +24,7 @@ import android.widget.Button;
 import android.os.Build;
 
 public class WorkspaceActivity extends Activity implements OnClickListener {
-	private Button shape, fill, ok, send;
+	private Button select, shape, fill, approve, send, undo, redo;
 	private CanvasView canvas;
 
 	@Override
@@ -37,14 +37,21 @@ public class WorkspaceActivity extends Activity implements OnClickListener {
 		CanvasModel cmod = new CanvasModel("njajal", 800, 400);
 		canvas.setModel(cmod);
 
+		select = (Button) findViewById(R.id.w_select);
 		shape = (Button) findViewById(R.id.w_shape);
-		shape.setOnClickListener(this);
 		fill = (Button) findViewById(R.id.w_fill);
-		fill.setOnClickListener(this);
-		ok = (Button) findViewById(R.id.w_ok);
-		ok.setOnClickListener(this);
+		approve = (Button) findViewById(R.id.w_approve);
 		send = (Button) findViewById(R.id.w_send);
+		undo = (Button) findViewById(R.id.w_undo);
+		redo = (Button) findViewById(R.id.w_redo);
+
+		select.setOnClickListener(this);
+		shape.setOnClickListener(this);
+		fill.setOnClickListener(this);
+		approve.setOnClickListener(this);
 		send.setOnClickListener(this);
+		undo.setOnClickListener(this);
+		redo.setOnClickListener(this);
 	}
 
 	@Override
@@ -57,8 +64,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if (v == shape) {
-			canvas.insertPolygon(5);
+		if(v == select){
+			canvas.setMode(CanvasView.Mode.SELECT);
+		}else if (v == shape) {
+			canvas.insertPrimitive(CanvasView.ObjectType.RECT);
 		} else if (v == fill) {
 			if (turn) {
 				canvas.setTextParameter(30, Typeface.MONOSPACE);
@@ -66,10 +75,18 @@ public class WorkspaceActivity extends Activity implements OnClickListener {
 				canvas.setTextParameter(35, Typeface.SERIF);
 			}
 			turn = !turn;
-		} else if (v == ok) {
+		} else if (v == approve) {
 			canvas.approveAction();
 		} else if (v == send) {
 			canvas.test();
+		}else if(v == undo){
+			canvas.undo();
+			redo.setEnabled(canvas.isRedoable());
+			undo.setEnabled(canvas.isUndoable());
+		}else if(v == redo){
+			canvas.redo();
+			redo.setEnabled(canvas.isRedoable());
+			undo.setEnabled(canvas.isUndoable());
 		}
 	}
 
