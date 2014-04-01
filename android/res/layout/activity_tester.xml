@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:id="@+id/w_leftpane"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/w_select"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sel" />
+
+            <Button
+                android:id="@+id/w_hand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hand" />
+
+            <Button
+                android:id="@+id/w_draw_rect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="rect" />
+
+            <Button
+                android:id="@+id/w_draw_oval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="oval" />
+
+            <Button
+                android:id="@+id/w_draw_poly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="poly" />
+
+            <Button
+                android:id="@+id/w_draw_lines"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="lines" />
+
+            <Button
+                android:id="@+id/w_draw_path"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="free" />
+
+            <Button
+                android:id="@+id/w_draw_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="text" />
+
+            <Button
+                android:id="@+id/w_draw_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="img" />
+
+            <Button
+                android:id="@+id/w_fill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="fill" />
+
+            <Button
+                android:id="@+id/w_stroke_width"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sWidth" />
+
+            <Button
+                android:id="@+id/w_stroke_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sStyle" />
+
+            <Button
+                android:id="@+id/w_text_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="tSize" />
+
+            <Button
+                android:id="@+id/w_text_font"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="tFont" />
+
+            <Button
+                android:id="@+id/w_approve"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="appr" />
+
+            <Button
+                android:id="@+id/w_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cancel" />
+
+            <Button
+                android:id="@+id/w_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="undo" />
+
+            <Button
+                android:id="@+id/w_redo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="redo" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.ppla03.collapaint.CanvasView
+        android:id="@+id/w_canvas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/w_leftpane" />
+
+</RelativeLayout>

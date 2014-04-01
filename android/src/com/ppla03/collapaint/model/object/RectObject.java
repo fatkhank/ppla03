@@ -6,10 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Log;
 
 public class RectObject extends BasicObject {
 	private Rect rect;
-	
+
 	public RectObject() {
 		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
 		this.rect = new Rect();
@@ -25,8 +26,8 @@ public class RectObject extends BasicObject {
 	public void draw(Canvas canvas) {
 		if (fillPaint.getColor() != Color.TRANSPARENT)
 			canvas.drawRect(rect, fillPaint);
-		if (paint.getColor() != Color.TRANSPARENT)
-			canvas.drawRect(rect, paint);
+		if (strokePaint.getColor() != Color.TRANSPARENT)
+			canvas.drawRect(rect, strokePaint);
 	}
 
 	public void setDimension(int left, int top, int right, int bottom) {
@@ -37,15 +38,19 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public void setShapeParam(ArrayList<Point> param) {
-		// TODO Auto-generated method stub
-
+	public boolean selectedBy(Rect area) {
+		return (selected = area.contains(rect));
 	}
 
 	@Override
-	public boolean selectedBy(Rect area) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean selectedBy(int x, int y, int radius) {
+		if (fillPaint.getColor() != Color.TRANSPARENT)
+			return rect.contains(x, y);
+		int tol = (int) strokePaint.getStrokeWidth() + radius;
+		return (selected = (x > rect.left - tol && x < rect.right + tol
+				&& y > rect.top - tol && y < rect.bottom + tol)
+				&& !(x > rect.left + tol && x < rect.right - tol
+						&& y > rect.top + tol && y < rect.bottom - tol));
 	}
 
 	@Override

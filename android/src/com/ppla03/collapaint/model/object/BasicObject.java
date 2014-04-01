@@ -5,21 +5,21 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 
 public abstract class BasicObject extends CanvasObject {
+	protected Paint strokePaint;
 	protected Paint fillPaint;
+	private int strokeStyle;
 
 	protected BasicObject(int fillColor, int strokeColor, int strokeWidth,
 			int strokeStyle) {
-		super();
-		fillPaint = new Paint();
+		fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		fillPaint.setStyle(Style.FILL);
 		fillPaint.setColor(fillColor);
-		fillPaint.setAntiAlias(true);
-		paint = new Paint();
-		paint.setStyle(Style.STROKE);
-		paint.setColor(strokeColor);
-		paint.setStrokeWidth(strokeWidth);
-		paint.setPathEffect(StrokeStyle.getEffect(strokeStyle, strokeWidth));
-		paint.setAntiAlias(true);
+		this.strokeStyle = strokeStyle;
+		strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		strokePaint.setStyle(Style.STROKE);
+		strokePaint.setColor(strokeColor);
+		strokePaint.setStrokeWidth(strokeWidth);
+		StrokeStyle.applyEffect(strokeStyle, strokePaint);
 	}
 
 	public void setFillMode(boolean filled, int color) {
@@ -29,9 +29,31 @@ public abstract class BasicObject extends CanvasObject {
 			fillPaint.setColor(Color.TRANSPARENT);
 	}
 
-	public void setStrokeMode(int color, int strokeWidth, int strokeStyle) {
-		paint.setColor(color);
-		paint.setStrokeWidth(strokeWidth);
-		paint.setPathEffect(StrokeStyle.getEffect(strokeStyle, strokeWidth));
+	public void setStrokeStyle(int style) {
+		StrokeStyle.applyEffect(style, strokePaint);
+	}
+
+	public void setStrokeColor(int color) {
+		strokePaint.setColor(color);
+	}
+
+	public void setStrokeWidth(int width) {
+		strokePaint.setStrokeWidth(width);
+	}
+	
+	public int getFillColor(){
+		return fillPaint.getColor();
+	}
+	
+	public int getStrokeStyle(){
+		return this.strokeStyle;
+	}
+	
+	public int getStrokeColor(){
+		return strokePaint.getColor();
+	}
+	
+	public int getStrokeWidth(){
+		return (int) strokePaint.getStrokeWidth();
 	}
 }

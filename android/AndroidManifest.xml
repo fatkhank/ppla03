@@ -14,10 +14,14 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ppla03.collapaint.ui.WorkspaceActivity"
+            android:name="com.ppla03.collapaint.ui.TesterActivity"
+            android:label="@string/app_name"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
-            android:label="@string/app_name" >
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+        </activity>
+        <activity
+            android:name="com.ppla03.collapaint.LoaderActivity"
+            android:label="@string/title_activity_loader" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

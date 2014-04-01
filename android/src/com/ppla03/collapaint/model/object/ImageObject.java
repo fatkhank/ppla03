@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.Rect;
 
@@ -12,6 +14,11 @@ public class ImageObject extends CanvasObject {
 	private Rect srcRect;
 	private Rect destRect;
 	private String imageID;
+	protected Paint paint;
+	
+	public ImageObject() {
+		super();
+	}
 
 	@Override
 	public void draw(Canvas canvas) {
@@ -21,11 +28,9 @@ public class ImageObject extends CanvasObject {
 	public void setTransparency(int alpha) {
 		paint.setAlpha(alpha);
 	}
-
-	@Override
-	public void setShapeParam(ArrayList<Point> param) {
-		// TODO Auto-generated method stub
-
+	
+	public int getTransparency(){
+		return paint.getAlpha();
 	}
 
 	@Override
@@ -33,6 +38,13 @@ public class ImageObject extends CanvasObject {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public boolean selectedBy(int x, int y, int radius) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 	@Override
 	public void translate(int x, int y) {
@@ -51,5 +63,4 @@ public class ImageObject extends CanvasObject {
 		// TODO Auto-generated method stub
 
 	}
-
 }

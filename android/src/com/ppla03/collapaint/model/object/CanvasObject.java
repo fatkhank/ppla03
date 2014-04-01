@@ -1,18 +1,15 @@
 package com.ppla03.collapaint.model.object;
 
-import java.util.ArrayList;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.Paint.Style;
 import android.graphics.Rect;
 
 public abstract class CanvasObject {
 	private static int idCounter = 1;
 	public final int id;
 	protected int globalID = -1;
-	protected Paint paint;
-	private boolean selected;
+	protected boolean selected;
 	private int offsetX, offsetY;
 
 	public CanvasObject() {
@@ -30,12 +27,16 @@ public abstract class CanvasObject {
 	public boolean isSelected() {
 		return selected;
 	}
+	
+	public void deselect(){
+		selected = false;
+	}
 
 	public abstract void draw(Canvas canvas);
 
-	public abstract void setShapeParam(ArrayList<Point> param);
-
 	public abstract boolean selectedBy(Rect area);
+	
+	public abstract boolean selectedBy(int x, int y, int radius);
 	
 	public int getXOffset(){return offsetX;}
 	

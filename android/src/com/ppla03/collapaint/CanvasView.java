@@ -1,31 +1,11 @@
 package com.ppla03.collapaint;
 
 import java.util.ArrayList;
-import java.util.Formatter.BigDecimalLayoutForm;
 import java.util.Stack;
 
 import com.ppla03.collapaint.model.CanvasModel;
-import com.ppla03.collapaint.model.action.CopyAction;
-import com.ppla03.collapaint.model.action.DeleteMultiple;
-import com.ppla03.collapaint.model.action.DeleteAction;
-import com.ppla03.collapaint.model.action.DrawAction;
-import com.ppla03.collapaint.model.action.TransformAction;
-import com.ppla03.collapaint.model.action.ReshapeAction;
-import com.ppla03.collapaint.model.action.StyleAction;
-import com.ppla03.collapaint.model.action.DrawMultiple;
-import com.ppla03.collapaint.model.action.UserAction;
-import com.ppla03.collapaint.model.object.BasicObject;
-import com.ppla03.collapaint.model.object.CanvasObject;
-import com.ppla03.collapaint.model.object.ImageObject;
-import com.ppla03.collapaint.model.object.LinesObject;
-import com.ppla03.collapaint.model.object.OvalObject;
-import com.ppla03.collapaint.model.object.PathObject;
-import com.ppla03.collapaint.model.object.PolygonObject;
-import com.ppla03.collapaint.model.object.RectObject;
-import com.ppla03.collapaint.model.object.ControlPoint;
-import com.ppla03.collapaint.model.object.ShapeHandler;
-import com.ppla03.collapaint.model.object.TextObject;
-import com.ppla03.collapaint.ui.WorkspaceActivity;
+import com.ppla03.collapaint.model.action.*;
+import com.ppla03.collapaint.model.object.*;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -35,27 +15,35 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 
-public class CanvasView extends View {
-	public static enum Mode {
-		DRAW, SELECT, DRAW_EDIT, SELECTION_EDIT, EDIT_SHAPE, HAND
+public class CanvasView extends View implements OnLongClickListener {
+	public static class Mode {
+		public static final int SELECT = 3, DRAW = 5, HAND = 8;
+		private static final int EDIT = 16, SELECTION_MODE = 32;
 	}
 
-	private Mode mode;
+	private int mode;
 
 	public static class ObjectType {
-		public static int LINES, RECT, OVAL, PATH;
-		private static int IMAGE, TEXT;
+		public static final int LINES = 1, RECT = 2, OVAL = 3, PATH = 4;
+		private static final int IMAGE = 5, TEXT = 6;
 	}
 
 	private boolean hidden_mode;
 
-	private final int SELECTION_COVER_COLOR = Color.argb(100, 0, 0, 0);
+	static final int CANVAS_BACKGROUND_COLOR = Color.rgb(80, 80, 80);
+	static final int CANVAS_COLOR = Color.WHITE;
+	static final int CANVAS_SHADOW_COLOR = Color.argb(150, 40, 40, 40);
+	static final int CANVAS_SHADOW_RADIUS = 10;
+	static final int CANVAS_SHADOW_DX = 0;
+	static final int CANVAS_SHADOW_DY = 0;
+	static final int CANVAS_MARGIN = 50;
+	static final int SELECTION_COVER_COLOR = Color.argb(100, 0, 0, 0);
+	static final int SELECTION_MIN_SIZE = 10;
 	private int scrollX, scrollY;
 	private int limitScrollX, limitScrollY;
 	private int anchorX, anchorY;
@@ -70,12 +58,15 @@ public class CanvasView extends View {
 	private PathObject protoPath;
 	private LinesObject protoLines;
 	private BasicObject protoBasic;
+	private TransformMultiple protaTransform;
+	private StyleAction protaStyle;
+	private ReshapeAction protaShape;
 
 	private ArrayList<CanvasObject> selectedObjects;
 	private Stack<UserAction> userActions;
 	private Stack<UserAction> redoStack;
 
-	private WorkspaceActivity activity;
+	private CanvasListener listener;
 	private CanvasSynchronizer syncon;
 	private CanvasModel model;
 	private int fillColor;
@@ -83,11 +74,14 @@ public class CanvasView extends View {
 	private int strokeWidth;
 	private int strokeStyle;
 	private int textSize;
+	private int textFont;
 	private boolean makeLoop;
 
 	private Bitmap cacheImage;
+	private Bitmap cacheImageSelected;
 	private Canvas cacheCanvas;
 	private Paint cachePaint;
+	private Paint canvasPaint;
 
 	private Rect selectRect;
 	private Paint selectPaint;
@@ -107,17 +101,38 @@ public class CanvasView extends View {
 		selectPaint.setStyle(Style.FILL);
 		selectPaint.setColor(Color.argb(160, 100, 140, 255));
 
-		fillColor = Color.argb(160, 255, 100, 50);
-		strokeColor = Color.argb(200, 100, 250, 40);
+		fillColor = Color.RED;
+		strokeColor = Color.BLUE;
 		strokeWidth = 5;
+		strokeStyle = StrokeStyle.DOTTED;
+		textSize = 30;
+		textFont = 0;
+
+		scrollX = CANVAS_MARGIN;
+		scrollY = CANVAS_MARGIN;
+		canvasPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		canvasPaint.setStyle(Style.FILL);
+		canvasPaint.setColor(CANVAS_COLOR);
+		canvasPaint.setShadowLayer(CANVAS_SHADOW_RADIUS, CANVAS_SHADOW_DX,
+				CANVAS_SHADOW_DY, CANVAS_SHADOW_COLOR);
 
 		syncon = new CanvasSynchronizer(this);
 		// syncon.start();
+
+		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
+		setOnLongClickListener(this);
+		setLongClickable(true);
+	}
+
+	public void setListener(CanvasListener activity) {
+		this.listener = activity;
 	}
 
 	public void setModel(CanvasModel model) {
 		this.model = model;
 		cacheImage = Bitmap.createBitmap(model.width, model.height,
+				Config.ARGB_8888);
+		cacheImageSelected = Bitmap.createBitmap(model.width, model.height,
 				Config.ARGB_8888);
 		cacheCanvas = new Canvas(cacheImage);
 		cachePaint = new Paint();
@@ -131,86 +146,99 @@ public class CanvasView extends View {
 	}
 
 	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		if (model != null) {
+			limitScrollX = w - CANVAS_MARGIN - model.width;
+			limitScrollY = h - CANVAS_MARGIN - model.height;
+		}
+	}
+
+	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		canvas.drawColor(CANVAS_BACKGROUND_COLOR);
 		if (model != null) {
-			if (mode == Mode.SELECTION_EDIT) {
-				int i = 0;
-				int size = model.objects.size();
-				for (i = 0; i < size; i++) {
-					CanvasObject obj = model.objects.get(i);
-					if (!obj.isSelected())
-						obj.draw(canvas);
-				}
-				canvas.drawColor(SELECTION_COVER_COLOR);
-				size = selectedObjects.size();
-				for (i = 0; i < size; i++)
-					selectedObjects.get(i).draw(canvas);
-			} else {
-				canvas.translate(scrollX, scrollY);
-				if (cacheImage != null)
-					canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
-				if (currentObject != null)
-					currentObject.draw(canvas);
-				if (mode == Mode.SELECT)
-					canvas.drawRect(selectRect, selectPaint);
-				else if (mode == Mode.EDIT_SHAPE || mode == Mode.DRAW_EDIT)
-					if (handler != null)
-						handler.draw(canvas);
-			}
+			canvas.translate(scrollX, scrollY);
+			canvas.drawRect(0, 0, model.width, model.height, canvasPaint);
+			if (cacheImage != null)
+				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
+			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+				canvas.drawBitmap(cacheImageSelected, 0, 0, cachePaint);
+			if (currentObject != null)
+				currentObject.draw(canvas);
+			if (mode == Mode.SELECT)
+				canvas.drawRect(selectRect, selectPaint);
+			else if ((mode & Mode.EDIT) == Mode.EDIT)
+				if (handler != null)
+					handler.draw(canvas);
 		}
 	}
 
 	private void reloadCache() {
-		cacheCanvas.drawColor(Color.WHITE);
 		int size = model.objects.size();
-		for (int i = 0; i < size; i++)
-			model.objects.get(i).draw(cacheCanvas);
+		cacheCanvas.drawColor(Color.TRANSPARENT,
+				android.graphics.PorterDuff.Mode.CLEAR);
+		if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
+			for (int i = 0; i < size; i++) {
+				CanvasObject obj = model.objects.get(i);
+				if (!obj.isSelected())
+					obj.draw(cacheCanvas);
+			}
+			if ((mode & Mode.EDIT) != Mode.EDIT) {
+				cacheCanvas.drawColor(SELECTION_COVER_COLOR,
+						android.graphics.PorterDuff.Mode.XOR);
+				cacheCanvas.setBitmap(cacheImageSelected);
+				size = selectedObjects.size();
+				for (int i = 0; i < size; i++)
+					selectedObjects.get(i).draw(cacheCanvas);
+				cacheCanvas.setBitmap(cacheImage);
+			}
+		} else {
+			for (int i = 0; i < size; i++)
+				model.objects.get(i).draw(cacheCanvas);
+		}
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// TODO Auto-generated method stub
 		int act = event.getActionMasked();
 		if (act == MotionEvent.ACTION_DOWN) {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
-			if (mode == Mode.SELECT) {
-				anchorX = x;
-				anchorY = y;
-				selectRect.left = x;
-				selectRect.top = y;
-				selectRect.right = x;
-				selectRect.bottom = y;
-
-			} else if (mode == Mode.HAND) {
+			if ((mode & Mode.HAND) == Mode.HAND) {
 				anchorX = scrollX - x;
 				anchorY = scrollY - y;
 			} else {
 				anchorX = x - scrollX;
 				anchorY = y - scrollY;
-				if (mode == Mode.DRAW) {
-					if (objectType == ObjectType.RECT) {
-						protoRect = new RectObject(anchorX, anchorY, fillColor,
-								strokeColor, strokeWidth, strokeStyle);
-						protoBasic = protoRect;
-					} else if (objectType == ObjectType.OVAL) {
-						protoOval = new OvalObject(anchorX, anchorY, fillColor,
-								strokeColor, strokeWidth, strokeStyle);
-						protoBasic = protoOval;
-					} else if (objectType == ObjectType.PATH) {
-						protoPath = new PathObject(anchorX, anchorY, fillColor,
-								strokeColor, strokeWidth, strokeStyle);
-						protoBasic = protoPath;
-					} else if (objectType == ObjectType.LINES) {
+				if (mode == Mode.SELECT)
+					selectRect.set(anchorX, anchorY, anchorX, anchorY);
+				else if (mode == Mode.DRAW) {
+					if (objectType == ObjectType.LINES) {
 						protoLines = new LinesObject(anchorX, anchorY,
-								fillColor, strokeColor, strokeWidth,
-								strokeStyle);
-						protoLines.newLine(anchorX, anchorY);
-						protoBasic = protoLines;
+								strokeColor, strokeWidth, strokeStyle);
+						currentObject = protoLines;
+					} else {
+						if (objectType == ObjectType.RECT) {
+							protoRect = new RectObject(anchorX, anchorY,
+									fillColor, strokeColor, strokeWidth,
+									strokeStyle);
+							protoBasic = protoRect;
+						} else if (objectType == ObjectType.OVAL) {
+							protoOval = new OvalObject(anchorX, anchorY,
+									fillColor, strokeColor, strokeWidth,
+									strokeStyle);
+							protoBasic = protoOval;
+						} else if (objectType == ObjectType.PATH) {
+							protoPath = new PathObject(anchorX, anchorY,
+									fillColor, strokeColor, strokeWidth,
+									strokeStyle);
+							protoBasic = protoPath;
+						}
+						currentObject = protoBasic;
 					}
-					currentObject = protoBasic;
-				} else if (mode == Mode.EDIT_SHAPE || mode == Mode.DRAW_EDIT) {
+				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 					if (handler != null) {
 						grabbedCPoint = handler.grab(anchorX, anchorY);
 					}
@@ -219,26 +247,28 @@ public class CanvasView extends View {
 		} else if (act == MotionEvent.ACTION_MOVE) {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
-			if (mode == Mode.SELECT) {
-				selectRect.left = Math.min(anchorX, x);
-				selectRect.top = Math.min(anchorY, y);
-				selectRect.right = Math.max(anchorX, x);
-				selectRect.bottom = Math.max(anchorY, y);
-			} else if (mode == Mode.HAND) {
-				// scrollX = x + anchorX;
-				// if (scrollX > CANVAS_MARGIN)
-				// scrollX = CANVAS_MARGIN;
-				// else if (scrollX < minScrollX)
-				// scrollX = minScrollX;
-				// scrollY = y + anchorY;
-				// if (scrollY > CANVAS_MARGIN)
-				// scrollY = CANVAS_MARGIN;
-				// else if (scrollY < minScrollY)
-				// scrollY = minScrollY;
+			if ((mode & Mode.HAND) == Mode.HAND) {
+				scrollX = x + anchorX;
+				if (scrollX > CANVAS_MARGIN)
+					scrollX = CANVAS_MARGIN;
+				else if (scrollX < limitScrollX)
+					scrollX = limitScrollX;
+				scrollY = y + anchorY;
+				if (scrollY > CANVAS_MARGIN)
+					scrollY = CANVAS_MARGIN;
+				else if (scrollY < limitScrollY)
+					scrollY = limitScrollY;
 			} else {
 				x -= scrollX;
 				y -= scrollY;
-				if (mode == Mode.DRAW) {
+				if (x < 0 && x > model.width && y < 0 && y > model.height)
+					return true;
+				if (mode == Mode.SELECT) {
+					selectRect.left = Math.min(anchorX, x);
+					selectRect.top = Math.min(anchorY, y);
+					selectRect.right = Math.max(anchorX, x);
+					selectRect.bottom = Math.max(anchorY, y);
+				} else if (mode == Mode.DRAW) {
 					if (objectType == ObjectType.PATH) {
 						protoPath.penTo(x, y);
 					} else if (objectType == ObjectType.LINES) {
@@ -254,7 +284,7 @@ public class CanvasView extends View {
 							protoOval.setDimension(left, top, right, bottom);
 						}
 					}
-				} else if (mode == Mode.EDIT_SHAPE || mode == Mode.DRAW_EDIT) {
+				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 					if (grabbedCPoint != null) {
 						int ox = grabbedCPoint.getX();
 						int oy = grabbedCPoint.getY();
@@ -265,17 +295,37 @@ public class CanvasView extends View {
 				}
 			}
 		} else if (act == MotionEvent.ACTION_UP) {
-			if (mode == Mode.DRAW) {
+			if (mode == Mode.SELECT) {
+				int dx = selectRect.right - selectRect.left;
+				int dy = selectRect.bottom - selectRect.top;
+				boolean selected;
+				if (dy < SELECTION_MIN_SIZE && dx < SELECTION_MIN_SIZE) {
+					currentObject = selectAt(anchorX, anchorY,
+							SELECTION_MIN_SIZE);
+					selected = currentObject != null;
+					if (selected)
+						editObject(currentObject);
+				} else {
+					selected = selectArea(selectRect);
+					if (selectedObjects.size() == 1)
+						editObject(selectedObjects.get(0));
+				}
+				if (selected) {
+					mode |= Mode.SELECTION_MODE;
+					reloadCache();
+				}
+				selectRect.set(0, 0, 0, 0);
+				listener.onCanvasSelection(selected);
+			} else if (mode == Mode.DRAW) {
 				if (objectType == ObjectType.RECT
 						|| objectType == ObjectType.OVAL
 						|| objectType == ObjectType.PATH
 						|| objectType == ObjectType.LINES) {
 					if (objectType == ObjectType.PATH && makeLoop)
 						protoPath.close();
-					handler = currentObject.getHandlers();
-					mode = Mode.DRAW_EDIT;
+					editObject(currentObject);
 				}
-			} else if (mode == Mode.DRAW || mode == Mode.DRAW_EDIT) {
+			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (grabbedCPoint != null)
 					grabbedCPoint.release();
 			}
@@ -284,50 +334,133 @@ public class CanvasView extends View {
 		return true;
 	}
 
-	public void setMode(Mode mode) {
-		if (this.mode != Mode.DRAW_EDIT && this.mode != Mode.EDIT_SHAPE)
+	@Override
+	public boolean onLongClick(View v) {
+		// TODO onlong click
+		if ((mode & Mode.SELECT) == Mode.SELECT) {
+			currentObject = selectAt(anchorX, anchorY, SELECTION_MIN_SIZE);
+			if (currentObject != null) {
+				mode |= Mode.SELECTION_MODE;
+				selectedObjects.clear();
+				selectedObjects.add(currentObject);
+				// editObject(currentObject);
+			}
+		}
+		return true;
+	}
+
+	public void setMode(int mode) {
+		if (mode == Mode.HAND)
+			this.mode ^= Mode.HAND;
+		else {
+			if (mode == Mode.SELECT
+					&& (this.mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+				cancelSelect();
+			if ((this.mode & Mode.EDIT) == Mode.EDIT)
+				cancelAction();
 			this.mode = mode;
+		}
+	}
+
+	private void editObject(CanvasObject co) {
+		currentObject = co;
+		handler = co.getHandlers();
+		mode |= Mode.EDIT;
 	}
 
 	public void approveAction() {
-		if (mode == Mode.DRAW_EDIT) {
+		if ((mode & Mode.DRAW) == Mode.DRAW) {
 			currentObject.draw(cacheCanvas);
+			model.objects.add(currentObject);
 			UserAction action = new DrawAction(currentObject);
 			userActions.push(action);
 			if (!hidden_mode)
 				syncon.addToBuffer(action);
-			currentObject = null;
-			handler = null;
-			mode = Mode.DRAW;
-			invalidate();
+		} else {
+			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
+
+			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
+				if (protaShape != null) {
+					userActions.push(protaShape);
+					if (!hidden_mode)
+						syncon.addToBuffer(protaShape);
+				} else if (protaStyle != null) {
+					userActions.push(protaStyle);
+					if (!hidden_mode)
+						syncon.addToBuffer(protaStyle);
+				}
+				// TODO approve action
+			}
+			cancelSelect();
 		}
+		currentObject = null;
+		handler = null;
+		mode = Mode.SELECT;
+		invalidate();
 		redoStack.clear();
 	}
 
 	public void cancelAction() {
-		// TODO
-	}
-
-	public void setColor(int color) {
-		// TODO
-	}
-
-	public void setStrokeWidth(int width) {
-		// TODO
-		strokeWidth = width;
-		if (objectType == ObjectType.RECT || objectType == ObjectType.OVAL
-				|| objectType == ObjectType.PATH) {
-			protoBasic.setStrokeMode(strokeColor, strokeWidth, strokeStyle);
-		}
+		handler = null;
+		mode &= ~Mode.EDIT;
+		protaStyle = null;
+		protaShape = null;
+		protaTransform = null;
+		currentObject = null;
+		reloadCache();
 		invalidate();
 	}
 
+	public void setStrokeColor(int color) {
+		strokeColor = color;
+		if (currentObject != null) {
+			if (currentObject instanceof BasicObject)
+				protoBasic.setStrokeColor(color);
+			else if (currentObject instanceof LinesObject)
+				protoLines.setLineColor(color);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				protaStyle.setStyle(fillColor, color, strokeWidth, strokeStyle);
+			}
+			postInvalidate();
+		}
+	}
+
+	public void setStrokeWidth(int width) {
+		strokeWidth = width;
+		if (currentObject != null) {
+			if (currentObject instanceof BasicObject)
+				protoBasic.setStrokeWidth(width);
+			else if (currentObject instanceof LinesObject)
+				protoLines.setLineWidth(width);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				protaStyle.setStyle(fillColor, strokeColor, width, strokeStyle);
+			}
+			postInvalidate();
+		}
+	}
+
 	public void setStrokeStyle(int style) {
-		// TODO cv stroke style
+		strokeStyle = style;
+		if (currentObject != null) {
+			if (currentObject instanceof BasicObject)
+				protoBasic.setStrokeStyle(strokeStyle);
+			else if (currentObject instanceof LinesObject)
+				protoLines.setLineStyle(style);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				protaStyle.setStyle(fillColor, strokeColor, strokeWidth, style);
+			}
+			postInvalidate();
+		}
 	}
 
 	public void insertImage(Bitmap bitmap) {
-		// TODO
+		// TODO insert image
 		objectType = ObjectType.IMAGE;
 	}
 
@@ -339,23 +472,32 @@ public class CanvasView extends View {
 		objectType = ObjectType.TEXT;
 		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
 		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
-		protoText = new TextObject(text, x, y, strokeColor, textSize, true);
-		currentObject = protoText;
-		mode = Mode.DRAW_EDIT;
-		handler = protoText.getHandlers();
+		protoText = new TextObject(text, x, y, strokeColor, textFont, textSize,
+				true);
+		mode = Mode.DRAW;
+		editObject(protoText);
 		invalidate();
 	}
 
-	public void setTextParameter(int size, Typeface font) {
+	public void setFontSize(int size) {
 		textSize = size;
 		if (protoText != null) {
-			protoText.setPararameter(size, font);
+			protoText.setParameter(strokeColor, size, textFont);
+			invalidate();
+		}
+	}
+
+	public void setFontType(int font) {
+		textFont = font;
+		if (protoText != null) {
+			protoText.setParameter(strokeColor, textSize, font);
 			invalidate();
 		}
 	}
 
 	public void insertPrimitive(int type) {
 		objectType = type;
+		mode = Mode.DRAW;
 	}
 
 	public void insertPolygon(int corner) {
@@ -364,48 +506,74 @@ public class CanvasView extends View {
 		protoPoly = new PolygonObject(corner, x, y, fillColor, strokeColor,
 				strokeWidth, strokeStyle);
 		protoBasic = protoPoly;
-		currentObject = protoBasic;
-		mode = Mode.DRAW_EDIT;
-		handler = protoPoly.getHandlers();
+		mode = Mode.DRAW;
+		editObject(protoPoly);
 		invalidate();
 	}
 
 	public void setFillParameter(boolean filled, int color) {
-		// TODO
-		if (objectType == ObjectType.RECT || objectType == ObjectType.OVAL
-				|| objectType == ObjectType.PATH)
+		fillColor = (filled) ? color : Color.TRANSPARENT;
+		if (currentObject != null && currentObject instanceof BasicObject) {
 			protoBasic.setFillMode(filled, color);
-		invalidate();
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				protaStyle.setStyle(fillColor, strokeColor, strokeWidth,
+						strokeStyle);
+			}
+		}
+		postInvalidate();
 	}
 
 	public void setMakeLoop(boolean loop) {
 		this.makeLoop = loop;
-		// TODO
+		// TODO makeloop
 	}
 
 	private boolean selectArea(Rect area) {
-		// TODO
-		return false;
+		selectedObjects.clear();
+		int size = model.objects.size();
+		for (int i = 0; i < size; i++) {
+			CanvasObject co = model.objects.get(i);
+			if (co.selectedBy(selectRect))
+				selectedObjects.add(co);
+		}
+		return !selectedObjects.isEmpty();
 	}
 
-	private void selectAt(int x, int y, int radius) {
-		// TODO
+	private CanvasObject selectAt(int x, int y, int radius) {
+		int last = model.objects.size();
+		if (last == 0)
+			return null;
+		last--;
+		for (int i = last; i >= 0; i--) {
+			CanvasObject co = model.objects.get(i);
+			if (co.selectedBy(x, y, radius))
+				return co;
+		}
+		return null;
 	}
 
 	public void moveSelectedObject() {
-		// TODO
+		// TODO move selected
 	}
 
 	public void copySelectedObjects() {
-		// TODO
+		// TODO copy selected
 	}
 
 	public void deleteSelectedObjects() {
-		// TODO
+		// TODO delete selected
 	}
 
 	public void cancelSelect() {
-		// TODO
+		currentObject = null;
+		mode &= ~Mode.SELECTION_MODE;
+		int size = selectedObjects.size();
+		for (int i = 0; i < size; i++)
+			selectedObjects.get(i).deselect();
+		reloadCache();
+		postInvalidate();
 	}
 
 	public boolean isUndoable() {
@@ -413,15 +581,18 @@ public class CanvasView extends View {
 	}
 
 	public void undo() {
-		// TODO
-		UserAction action = userActions.pop();
-		redoStack.push(action);
-		UserAction inverse = action.getInverse();
-		execute(inverse);
-		if (!hidden_mode)
-			syncon.addToBuffer(inverse);
-		reloadCache();
-		invalidate();
+		if (!userActions.isEmpty()) {
+			UserAction action = userActions.pop();
+			UserAction inverse = action.getInverse();
+			if (inverse == null)
+				return;
+			redoStack.push(action);
+			execute(inverse);
+			if (!hidden_mode)
+				syncon.addToBuffer(inverse);
+			reloadCache();
+			invalidate();
+		}
 	}
 
 	public boolean isRedoable() {
@@ -429,14 +600,15 @@ public class CanvasView extends View {
 	}
 
 	public void redo() {
-		// TODO
-		UserAction action = redoStack.pop();
-		userActions.push(action);
-		execute(action);
-		if (!hidden_mode)
-			syncon.addToBuffer(action);
-		reloadCache();
-		invalidate();
+		if (!redoStack.isEmpty()) {
+			UserAction action = redoStack.pop();
+			userActions.push(action);
+			execute(action);
+			if (!hidden_mode)
+				syncon.addToBuffer(action);
+			reloadCache();
+			invalidate();
+		}
 	}
 
 	public void setHideMode(boolean hidden) {
@@ -444,7 +616,7 @@ public class CanvasView extends View {
 	}
 
 	public void execute(ArrayList<UserAction> actions) {
-		// TODO
+		// TODO execute
 		int size = actions.size();
 		for (int i = 0; i < size; i++)
 			execute(actions.get(i));
@@ -460,9 +632,12 @@ public class CanvasView extends View {
 		} else if (action instanceof TransformAction) {
 		} else if (action instanceof ReshapeAction) {
 		} else if (action instanceof StyleAction) {
+			StyleAction sa = (StyleAction) action;
+			sa.applyStyle();
 		} else if (action instanceof DeleteAction) {
 			DeleteAction da = (DeleteAction) action;
 			int idx = model.objects.lastIndexOf(da.object);
+			model.objects.remove(idx);
 		} else if (action instanceof DeleteMultiple) {
 			DeleteMultiple da = (DeleteMultiple) action;
 			model.objects.removeAll(da.objects);
@@ -470,20 +645,20 @@ public class CanvasView extends View {
 			DrawMultiple dm = (DrawMultiple) action;
 			model.objects.addAll(dm.objects);
 		} else if (action instanceof CopyAction) {
-
+			// TODO copy action
 		}
 	}
 
 	public void closeCanvas() {
-		// TODO
+		// TODO on close canvas
 	}
 
 	public void onUpdateComplete(int status) {
-		// TODO
+		// TODO onupdate complete
 	}
 
 	public void onCanvasClosed(int status) {
-		// TODO
+		// TODO canvas close
 	}
 
 	public void test() {

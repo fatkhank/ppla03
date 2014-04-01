@@ -57,7 +57,7 @@ public class CanvasConnector extends ServerConnector {
 	public static final String COMMIT_URL = HOST+"action";
 
 	private static CanvasConnector instance;
-	private static CanvasSynchronizer syncer;
+	private static SyncEventListener syncer;
 	private ArrayList<UserAction> sentActions;
 	private ArrayList<CanvasObject> sentObjects;
 	private ArrayList<UserAction> replyActions;
@@ -79,7 +79,7 @@ public class CanvasConnector extends ServerConnector {
 		return instance;
 	}
 
-	public CanvasConnector setSynchronizer(CanvasSynchronizer cs) {
+	public CanvasConnector setUpdateSynchronizer(SyncEventListener cs) {
 		syncer = cs;
 		return this;
 	}
@@ -308,7 +308,7 @@ public class CanvasConnector extends ServerConnector {
 			ra.setParameter(param);
 			return ra;
 		} else if (code == ActionCode.STYLE_ACTION) {
-			StyleAction sa = new StyleAction(object);
+			StyleAction sa = new StyleAction(object, false);
 			sa.setParameter(param);
 			return sa;
 		} else if (code == ActionCode.TRANSFORM_ACTION)

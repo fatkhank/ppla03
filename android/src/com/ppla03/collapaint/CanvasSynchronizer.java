@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.ppla03.collapaint.conn.CanvasConnector;
+import com.ppla03.collapaint.conn.SyncEventListener;
 import com.ppla03.collapaint.model.action.CopyAction;
 import com.ppla03.collapaint.model.action.DeleteAction;
 import com.ppla03.collapaint.model.action.DeleteMultiple;
@@ -16,7 +17,7 @@ import com.ppla03.collapaint.model.action.TransformMultiple;
 import com.ppla03.collapaint.model.action.UserAction;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
-public class CanvasSynchronizer {
+public class CanvasSynchronizer implements SyncEventListener {
 	private CanvasView canvas;
 	private CanvasConnector connector;
 	private int lastActNum;
@@ -42,7 +43,7 @@ public class CanvasSynchronizer {
 
 	public CanvasSynchronizer(CanvasView canvas) {
 		this.canvas = canvas;
-		connector = CanvasConnector.getInstance().setSynchronizer(this);
+		connector = CanvasConnector.getInstance().setUpdateSynchronizer(this);
 		actionBuffer = new ArrayList<>();
 		playbackList = new ArrayList<>();
 		sentList = new ArrayList<>();
@@ -128,6 +129,7 @@ public class CanvasSynchronizer {
 		}
 	}
 
+	@Override
 	public void onActionUpdated(int newId, ArrayList<UserAction> actions) {
 		playbackList.clear();
 		// undo aksi yang dilakukan selama proses update
