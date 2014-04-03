@@ -10,7 +10,6 @@ public abstract class CanvasObject {
 	public final int id;
 	protected int globalID = -1;
 	protected boolean selected;
-	private int offsetX, offsetY;
 
 	public CanvasObject() {
 		id = idCounter++;
@@ -27,27 +26,31 @@ public abstract class CanvasObject {
 	public boolean isSelected() {
 		return selected;
 	}
-	
-	public void deselect(){
+
+	public void deselect() {
 		selected = false;
 	}
 
 	public abstract void draw(Canvas canvas);
 
 	public abstract boolean selectedBy(Rect area);
-	
+
 	public abstract boolean selectedBy(int x, int y, int radius);
-	
-	public int getXOffset(){return offsetX;}
-	
-	public int getYOffset(){return offsetY;}
 
-	public abstract void translate(int x, int y);
+	public abstract void setShape(int[] param, int start, int end);
 
-	public abstract ShapeHandler getHandlers();
+	public abstract int paramLength();
+
+	public abstract int extractShape(int[] data, int start);
+
+	public abstract void translate(int dx, int dy);
+
+	public abstract ShapeHandler getHandlers(int filter);
 
 	public abstract void onHandlerMoved(ShapeHandler handler,
 			ControlPoint point, int oldX, int oldY);
+
+	public abstract Rect getBounds();
 
 	@Override
 	public boolean equals(Object o) {

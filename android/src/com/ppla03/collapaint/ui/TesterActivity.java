@@ -30,8 +30,8 @@ import android.os.Build;
 public class TesterActivity extends Activity implements OnClickListener,
 		CanvasListener {
 	private Button select, hand, fill, strokeWidth, strokeStyle, textSize,
-			textFont, approve, cancel, undo, redo;
-	private Button rect, oval, poly, lines, path, text, image;
+			textFont, approve, cancel, undo, redo, move, copy, delete;
+	private Button rect, oval, poly, lines, path, text, image, test;
 	private CanvasView canvas;
 
 	@Override
@@ -40,7 +40,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		setContentView(R.layout.activity_tester);
 
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
-		canvas.setMode(Mode.DRAW);
+		canvas.setMode(Mode.SELECT);
 		CanvasModel cmod = new CanvasModel("njajal", 1000, 400);
 		canvas.setModel(cmod);
 		canvas.setListener(this);
@@ -56,6 +56,9 @@ public class TesterActivity extends Activity implements OnClickListener,
 		cancel = (Button) findViewById(R.id.w_cancel);
 		undo = (Button) findViewById(R.id.w_undo);
 		redo = (Button) findViewById(R.id.w_redo);
+		move = (Button) findViewById(R.id.w_select_move);
+		copy = (Button) findViewById(R.id.w_select_copy);
+		delete = (Button) findViewById(R.id.w_select_del);
 
 		rect = (Button) findViewById(R.id.w_draw_rect);
 		oval = (Button) findViewById(R.id.w_draw_oval);
@@ -64,6 +67,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		lines = (Button) findViewById(R.id.w_draw_lines);
 		text = (Button) findViewById(R.id.w_draw_text);
 		image = (Button) findViewById(R.id.w_draw_image);
+		test = (Button) findViewById(R.id.w_test);
 
 		select.setOnClickListener(this);
 		hand.setOnClickListener(this);
@@ -76,6 +80,9 @@ public class TesterActivity extends Activity implements OnClickListener,
 		cancel.setOnClickListener(this);
 		undo.setOnClickListener(this);
 		redo.setOnClickListener(this);
+		move.setOnClickListener(this);
+		copy.setOnClickListener(this);
+		delete.setOnClickListener(this);
 
 		rect.setOnClickListener(this);
 		oval.setOnClickListener(this);
@@ -84,6 +91,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		path.setOnClickListener(this);
 		text.setOnClickListener(this);
 		image.setOnClickListener(this);
+		test.setOnClickListener(this);
 	}
 
 	@Override
@@ -106,7 +114,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 			canvas.insertPrimitive(CanvasView.ObjectType.OVAL);
 		} else if (v == poly) {
 			canvas.insertPolygon(6);
-		}else if(v == lines){
+		} else if (v == lines) {
 			canvas.insertPrimitive(ObjectType.LINES);
 		} else if (v == path) {
 			canvas.insertPrimitive(CanvasView.ObjectType.PATH);
@@ -134,7 +142,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == textFont) {
 			if (++fontTypeTurn >= FontManager.size())
 				fontTypeTurn = 0;
-			canvas.setFontType(fontTypeTurn);
+			canvas.setFontStyle(fontTypeTurn);
 		} else if (v == approve) {
 			canvas.approveAction();
 		} else if (v == cancel) {
@@ -143,13 +151,20 @@ public class TesterActivity extends Activity implements OnClickListener,
 			canvas.undo();
 		} else if (v == redo) {
 			canvas.redo();
+		} else if (v == copy) {
+			canvas.copySelectedObjects();
+		} else if (v == delete) {
+			canvas.deleteSelectedObjects();
+		} else if (v == move) {
+			canvas.moveSelectedObject();
+		} else if (v == test) {
+			canvas.invalidate();
 		}
 	}
 
 	int fillTurn, strStyleTurn, strWidthTurn = 1, fontSizeTurn, fontTypeTurn;
 	int[] fillColors = new int[] { Color.TRANSPARENT,
-			Color.argb(120, 250, 100, 20), Color.TRANSPARENT,
-			Color.argb(120, 100, 250, 20), Color.TRANSPARENT,
+			Color.argb(120, 250, 100, 20), Color.argb(120, 100, 250, 20),
 			Color.argb(120, 25, 100, 250) };
 	int[] strokeStyles = new int[] { StrokeStyle.SOLID, StrokeStyle.DASHED,
 			StrokeStyle.DOTTED };
@@ -162,7 +177,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onURChange(boolean undoable, boolean redoable) {
+	public void onURStatusChange(boolean undoable, boolean redoable) {
 		undo.setEnabled(undoable);
 		redo.setEnabled(redoable);
 	}

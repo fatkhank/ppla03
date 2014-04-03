@@ -25,27 +25,32 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f080014;
-        public static final int w_approve=0x7f08000f;
-        public static final int w_cancel=0x7f080010;
-        public static final int w_canvas=0x7f080013;
-        public static final int w_draw_image=0x7f080009;
-        public static final int w_draw_lines=0x7f080006;
-        public static final int w_draw_oval=0x7f080004;
-        public static final int w_draw_path=0x7f080007;
-        public static final int w_draw_poly=0x7f080005;
-        public static final int w_draw_rect=0x7f080003;
-        public static final int w_draw_text=0x7f080008;
-        public static final int w_fill=0x7f08000a;
-        public static final int w_hand=0x7f080002;
-        public static final int w_leftpane=0x7f080000;
-        public static final int w_redo=0x7f080012;
-        public static final int w_select=0x7f080001;
-        public static final int w_stroke_style=0x7f08000c;
-        public static final int w_stroke_width=0x7f08000b;
-        public static final int w_text_font=0x7f08000e;
-        public static final int w_text_size=0x7f08000d;
-        public static final int w_undo=0x7f080011;
+        public static final int action_settings=0x7f080019;
+        public static final int w_approve=0x7f08000d;
+        public static final int w_bar_top=0x7f080000;
+        public static final int w_cancel=0x7f08000e;
+        public static final int w_canvas=0x7f08000a;
+        public static final int w_draw_image=0x7f080008;
+        public static final int w_draw_lines=0x7f080005;
+        public static final int w_draw_oval=0x7f080003;
+        public static final int w_draw_path=0x7f080006;
+        public static final int w_draw_poly=0x7f080004;
+        public static final int w_draw_rect=0x7f080002;
+        public static final int w_draw_text=0x7f080007;
+        public static final int w_fill=0x7f080011;
+        public static final int w_hand=0x7f08000c;
+        public static final int w_leftpane=0x7f080001;
+        public static final int w_redo=0x7f080010;
+        public static final int w_select=0x7f08000b;
+        public static final int w_select_copy=0x7f080017;
+        public static final int w_select_del=0x7f080018;
+        public static final int w_select_move=0x7f080016;
+        public static final int w_stroke_style=0x7f080013;
+        public static final int w_stroke_width=0x7f080012;
+        public static final int w_test=0x7f080009;
+        public static final int w_text_font=0x7f080015;
+        public static final int w_text_size=0x7f080014;
+        public static final int w_undo=0x7f08000f;
     }
     public static final class layout {
         public static final int activity_tester=0x7f030000;

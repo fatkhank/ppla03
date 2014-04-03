@@ -12,8 +12,8 @@ import com.ppla03.collapaint.model.action.DeleteAction;
 import com.ppla03.collapaint.model.action.DeleteMultiple;
 import com.ppla03.collapaint.model.action.DrawAction;
 import com.ppla03.collapaint.model.action.DrawMultiple;
-import com.ppla03.collapaint.model.action.TransformAction;
-import com.ppla03.collapaint.model.action.TransformMultiple;
+import com.ppla03.collapaint.model.action.MoveAction;
+import com.ppla03.collapaint.model.action.MoveMultiple;
 import com.ppla03.collapaint.model.action.UserAction;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
@@ -92,12 +92,12 @@ public class CanvasSynchronizer implements SyncEventListener {
 					for (int j = 0; j < len; j++)
 						sentList.add(new DrawAction(objs.get(j)));
 					// TODO translate copy to draw + move
-				} else if (act instanceof TransformMultiple) {
-					TransformMultiple tm = (TransformMultiple) act;
+				} else if (act instanceof MoveMultiple) {
+					MoveMultiple tm = (MoveMultiple) act;
 					objs = tm.objects;
 					int len = objs.size();
 					for (int j = 0; j < len; j++)
-						sentList.add(new TransformAction(objs.get(j))
+						sentList.add(new MoveAction(objs.get(j))
 								.setParameter(tm.getParameter()));
 				} else
 					sentList.add(act);
@@ -108,11 +108,6 @@ public class CanvasSynchronizer implements SyncEventListener {
 					sentList);
 		}
 	};
-
-	public void test() {
-		// TODO
-		updater.run();
-	}
 
 	public void addToBuffer(UserAction action) {
 		if (actionBuffer.isEmpty())

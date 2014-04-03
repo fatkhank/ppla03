@@ -54,7 +54,7 @@ public class CanvasConnector extends ServerConnector {
 		public static char IMAGE = 'I';
 	}
 
-	public static final String COMMIT_URL = HOST+"action";
+	public static final String COMMIT_URL = HOST + "action";
 
 	private static CanvasConnector instance;
 	private static SyncEventListener syncer;
@@ -130,8 +130,8 @@ public class CanvasConnector extends ServerConnector {
 					joAct.put(JCode.ACTION_CODE, "" + ActionCode.STYLE_ACTION);
 					joAct.put(JCode.ACTION_PARAM, sa.getParameter());
 					co = sa.object;
-				} else if (ua instanceof TransformAction) {
-					TransformAction ta = (TransformAction) ua;
+				} else if (ua instanceof MoveAction) {
+					MoveAction ta = (MoveAction) ua;
 					joAct.put(JCode.ACTION_CODE, ""
 							+ ActionCode.TRANSFORM_ACTION);
 					joAct.put(JCode.ACTION_PARAM, ta.getParameter());
@@ -184,7 +184,7 @@ public class CanvasConnector extends ServerConnector {
 				}
 				joObj.put(JCode.OBJECT_ID, co.id);
 				joObj.put(JCode.OBJECT_TRANSFORM,
-						TransformAction.getParameterOf(co));
+						MoveAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_SHAPE, ReshapeAction.getParameterOf(co));
 				jarObj.put(joObj);
@@ -293,7 +293,7 @@ public class CanvasConnector extends ServerConnector {
 		else if (code == ObjectCode.IMAGE)
 			co = new ImageObject();
 		ReshapeAction.apply(shape, co);
-		TransformAction.apply(transform, co);
+		MoveAction.applyTransform(transform, co);
 		StyleAction.applyStyle(style, co);
 		return co;
 	}
@@ -304,7 +304,7 @@ public class CanvasConnector extends ServerConnector {
 		} else if (code == ActionCode.DELETE_ACTION) {
 			return new DeleteAction(object);
 		} else if (code == ActionCode.RESHAPE_ACTION) {
-			ReshapeAction ra = new ReshapeAction(object);
+			ReshapeAction ra = new ReshapeAction(object, false);
 			ra.setParameter(param);
 			return ra;
 		} else if (code == ActionCode.STYLE_ACTION) {
@@ -312,7 +312,7 @@ public class CanvasConnector extends ServerConnector {
 			sa.setParameter(param);
 			return sa;
 		} else if (code == ActionCode.TRANSFORM_ACTION)
-			return new TransformAction(object).setParameter(param);
+			return new MoveAction(object).setParameter(param);
 		return null;
 	}
 

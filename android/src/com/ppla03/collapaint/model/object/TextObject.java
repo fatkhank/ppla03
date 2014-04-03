@@ -1,7 +1,5 @@
 package com.ppla03.collapaint.model.object;
 
-import java.util.ArrayList;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -15,10 +13,11 @@ public class TextObject extends CanvasObject {
 	private int fontStyle;
 	private int x;
 	private int y;
-	protected final Paint paint; 
+	protected final Paint paint;
 
-	private static final ControlPoint[] points = new ControlPoint[] { new ControlPoint(
-			ControlPoint.Type.MOVE, 0, 0, 0) };
+	private static final ControlPoint cp = new ControlPoint(
+			ControlPoint.Type.MOVE, 0, 0, 0);
+	private static final ControlPoint[] points = new ControlPoint[] { cp };
 	private static final ShapeHandler handler = new ShapeHandler(points);
 
 	public TextObject() {
@@ -38,33 +37,72 @@ public class TextObject extends CanvasObject {
 		this.x = x;
 		if (center) {
 			this.x -= bounds.centerX();
-			this.y -= bounds.centerY();
+			y += bounds.centerY();
+			this.y = y + bounds.height();
 		}
-		bounds.offsetTo(this.x, this.y);
+		bounds.offsetTo(this.x, y);
 	}
 
-	public void setParameter(int color,int size, int fontStyle) {
-		paint.setTextSize(size);
-		this.fontStyle = fontStyle;
-		paint.setTypeface(FontManager.getFont(fontStyle));
+	private void calculateBounds() {
 		int cx = bounds.centerX();
 		int cy = bounds.centerY();
 		paint.getTextBounds(text, 0, text.length(), bounds);
 		x = cx - bounds.centerX();
-		y = cy - bounds.centerY();
-		bounds.offsetTo(x, y);
+		cy += bounds.centerY();
+		y = cy + bounds.height();
+		bounds.offsetTo(x, cy);
 	}
-	
-	public int getTextColor(){
+
+	public void setParameter(int color, int size, int fontStyle) {
+		paint.setTextSize(size);
+		this.fontStyle = fontStyle;
+		paint.setTypeface(FontManager.getFont(fontStyle));
+		calculateBounds();
+	}
+
+	public void setColor(int color) {
+		paint.setColor(color);
+	}
+
+	public void setSize(int size) {
+		paint.setTextSize(size);
+		calculateBounds();
+	}
+
+	public void setFontStyle(int fontStyle) {
+		this.fontStyle = fontStyle;
+		paint.setTypeface(FontManager.getFont(fontStyle));
+		calculateBounds();
+	}
+
+	public int getTextColor() {
 		return paint.getColor();
 	}
-	
-	public int getFontSize(){
+
+	public int getFontSize() {
 		return (int) paint.getTextSize();
 	}
-	
-	public int getFontStyle(){
+
+	public int getFontStyle() {
 		return fontStyle;
+	}
+
+	@Override
+	public void setShape(int[] param, int start, int end) {
+		x = param[start++];
+		y = param[start];
+	}
+
+	@Override
+	public int paramLength() {
+		return 2;
+	}
+
+	@Override
+	public int extractShape(int[] data, int start) {
+		data[start++] = x;
+		data[start] = y;
+		return 2;
 	}
 
 	@Override
@@ -83,15 +121,16 @@ public class TextObject extends CanvasObject {
 	}
 
 	@Override
-	public void translate(int x, int y) {
-		this.x += x;
-		this.y += y;
+	public void translate(int dx, int dy) {
+		this.x += dx;
+		this.y += dy;
 	}
 
 	@Override
-	public ShapeHandler getHandlers() {
-		points[0].x = bounds.centerX();
-		points[0].y = bounds.centerY();
+	public ShapeHandler getHandlers(int filter) {
+		cp.x = bounds.centerX();
+		cp.y = bounds.centerY();
+		cp.enable = (filter & ShapeHandler.TRANSFORM_ONLY) == ShapeHandler.TRANSFORM_ONLY;
 		return handler;
 	}
 
@@ -100,7 +139,13 @@ public class TextObject extends CanvasObject {
 			int oldX, int oldY) {
 		this.x += point.x - oldX;
 		this.y += point.y - oldY;
-		bounds.offsetTo(this.x, this.y);
+		bounds.offsetTo(this.x, this.y - bounds.height());
+	}
+
+	@Override
+	public Rect getBounds() {
+		return new Rect((int) bounds.left, (int) bounds.top,
+				(int) bounds.right, (int) bounds.bottom);
 	}
 
 }

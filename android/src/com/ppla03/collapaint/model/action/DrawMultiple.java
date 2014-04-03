@@ -4,13 +4,12 @@ import java.util.ArrayList;
 
 import com.ppla03.collapaint.model.object.CanvasObject;
 
-public class CopyAction extends UserAction {
+public class DrawMultiple extends UserAction {
 	public final ArrayList<CanvasObject> objects;
-	private int dx, dy;
 
-	public CopyAction(ArrayList<CanvasObject> objects) {
-		this.objects = new ArrayList<>(objects);
-		this.inverse = new DeleteMultiple(this.objects, this);
+	DrawMultiple(ArrayList<CanvasObject> objects, UserAction inverse) {
+		this.objects = objects;
+		this.inverse = inverse;
 	}
 
 	@Override
@@ -20,13 +19,12 @@ public class CopyAction extends UserAction {
 
 	@Override
 	public boolean inverseOf(UserAction action) {
-		// TODO Auto-generated method stub
-		return false;
+		return (action instanceof DeleteMultiple)
+				&& ((DeleteMultiple) action).objects.equals(objects);
 	}
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

@@ -23,13 +23,11 @@ public abstract class BasicObject extends CanvasObject {
 	}
 
 	public void setFillMode(boolean filled, int color) {
-		if (filled)
-			fillPaint.setColor(color);
-		else
-			fillPaint.setColor(Color.TRANSPARENT);
+		fillPaint.setColor(filled ? color : Color.TRANSPARENT);
 	}
 
 	public void setStrokeStyle(int style) {
+		strokeStyle = style;
 		StrokeStyle.applyEffect(style, strokePaint);
 	}
 
@@ -40,20 +38,20 @@ public abstract class BasicObject extends CanvasObject {
 	public void setStrokeWidth(int width) {
 		strokePaint.setStrokeWidth(width);
 	}
-	
-	public int getFillColor(){
+
+	public int getFillColor() {
 		return fillPaint.getColor();
 	}
-	
-	public int getStrokeStyle(){
+
+	public int getStrokeStyle() {
 		return this.strokeStyle;
 	}
-	
-	public int getStrokeColor(){
+
+	public int getStrokeColor() {
 		return strokePaint.getColor();
 	}
-	
-	public int getStrokeWidth(){
+
+	public int getStrokeWidth() {
 		return (int) strokePaint.getStrokeWidth();
 	}
 }

@@ -20,14 +20,19 @@ public class DeleteAction extends UserAction {
 
 	@Override
 	public boolean inverseOf(UserAction action) {
-		if (action instanceof DrawAction)
-			return ((DrawAction) action).object.equals(this.object);
-		return false;
+		return ((action instanceof DrawAction) && ((DrawAction) action).object
+				.equals(this.object));
 	}
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		return ((DeleteAction) action).object.equals(this.object);
+		if (action != null) {
+			if (action instanceof DeleteAction)
+				return ((DeleteAction) action).object.equals(this.object);
+			else if (action instanceof DeleteMultiple)
+				return ((DeleteMultiple) action).objects.contains(object);
+		}
+		return false;
 	}
 
 }

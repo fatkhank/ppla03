@@ -20,15 +20,14 @@ public class DrawAction extends UserAction {
 
 	@Override
 	public boolean inverseOf(UserAction action) {
-		// TODO Auto-generated method stub
-		if (action instanceof DeleteMultiple)
+		if (action instanceof DeleteAction)
 			return ((DeleteAction) action).object.equals(this.object);
 		return false;
 	}
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		return false;
+		return ((action instanceof DrawAction) && ((DrawAction) action).object
+				.equals(object));
 	}
-
 }

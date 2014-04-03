@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,8 +23,36 @@ import android.view.View.OnLongClickListener;
 
 public class CanvasView extends View implements OnLongClickListener {
 	public static class Mode {
-		public static final int SELECT = 3, DRAW = 5, HAND = 8;
-		private static final int EDIT = 16, SELECTION_MODE = 32;
+		/**
+		 * Mode untuk menyeleksi objek yang ada di kanvas.
+		 */
+		public static final int SELECT = 3;
+
+		/**
+		 * Mode untuk menggeser kanvas.
+		 */
+		public static final int HAND = 8;
+
+		/**
+		 * Mode untuk menggambar.
+		 */
+		private static final int DRAW = 5;
+
+		/**
+		 * Mode saat ada satu objek yang sedang diseleksi (current objek dijamin
+		 * tidak null). Bisa digabung dengan DRAW atau SELECTION_MODE
+		 */
+		private static final int EDIT = 16;
+
+		/**
+		 * Mode di mana ada objek yang diseleksi (selectedObject tidak kosong)
+		 */
+		private static int SELECTION_MODE = 32;
+
+		/**
+		 * Mode saat ada objek yang dipindah.
+		 */
+		private static int MOVING = 128;
 	}
 
 	private int mode;
@@ -44,6 +73,7 @@ public class CanvasView extends View implements OnLongClickListener {
 	static final int CANVAS_MARGIN = 50;
 	static final int SELECTION_COVER_COLOR = Color.argb(100, 0, 0, 0);
 	static final int SELECTION_MIN_SIZE = 10;
+	static final int EDIT_BORDER_PADDING = 10;
 	private int scrollX, scrollY;
 	private int limitScrollX, limitScrollY;
 	private int anchorX, anchorY;
@@ -58,13 +88,18 @@ public class CanvasView extends View implements OnLongClickListener {
 	private PathObject protoPath;
 	private LinesObject protoLines;
 	private BasicObject protoBasic;
-	private TransformMultiple protaTransform;
+	private MoveMultiple protaMove;
 	private StyleAction protaStyle;
-	private ReshapeAction protaShape;
+	private ReshapeAction protaReshape;
+	private int changeCounter;
 
 	private ArrayList<CanvasObject> selectedObjects;
 	private Stack<UserAction> userActions;
 	private Stack<UserAction> redoStack;
+	private ArrayList<UserAction> pendingStyleActions;
+	private ArrayList<UserAction> pendingReshapeActions;
+	private ArrayList<UserAction> pendingMoveActions;
+	private ArrayList<UserAction> pendingDeleteActions;
 
 	private CanvasListener listener;
 	private CanvasSynchronizer syncon;
@@ -82,6 +117,8 @@ public class CanvasView extends View implements OnLongClickListener {
 	private Canvas cacheCanvas;
 	private Paint cachePaint;
 	private Paint canvasPaint;
+	private Paint editPaint;
+	private int cacheSelX, cacheSelY;
 
 	private Rect selectRect;
 	private Paint selectPaint;
@@ -95,11 +132,20 @@ public class CanvasView extends View implements OnLongClickListener {
 		selectedObjects = new ArrayList<>();
 		userActions = new Stack<>();
 		redoStack = new Stack<>();
+		pendingStyleActions = new ArrayList<>();
+		pendingReshapeActions = new ArrayList<>();
+		pendingMoveActions = new ArrayList<>();
+		pendingDeleteActions = new ArrayList<>();
 
 		selectRect = new Rect();
 		selectPaint = new Paint();
 		selectPaint.setStyle(Style.FILL);
 		selectPaint.setColor(Color.argb(160, 100, 140, 255));
+		editPaint = new Paint();
+		editPaint.setStyle(Style.STROKE);
+		editPaint.setColor(Color.BLACK);
+		editPaint.setStrokeWidth(1);
+		StrokeStyle.applyEffect(StrokeStyle.DASHED, editPaint);
 
 		fillColor = Color.RED;
 		strokeColor = Color.BLUE;
@@ -115,7 +161,6 @@ public class CanvasView extends View implements OnLongClickListener {
 		canvasPaint.setColor(CANVAS_COLOR);
 		canvasPaint.setShadowLayer(CANVAS_SHADOW_RADIUS, CANVAS_SHADOW_DX,
 				CANVAS_SHADOW_DY, CANVAS_SHADOW_COLOR);
-
 		syncon = new CanvasSynchronizer(this);
 		// syncon.start();
 
@@ -164,20 +209,79 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (cacheImage != null)
 				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
 			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
-				canvas.drawBitmap(cacheImageSelected, 0, 0, cachePaint);
-			if (currentObject != null)
+				canvas.drawBitmap(cacheImageSelected, cacheSelX, cacheSelY,
+						cachePaint);
+			if (currentObject != null) {
 				currentObject.draw(canvas);
+				Rect r = currentObject.getBounds();
+				canvas.drawRect(r.left - EDIT_BORDER_PADDING, r.top
+						- EDIT_BORDER_PADDING, r.right + EDIT_BORDER_PADDING,
+						r.bottom + EDIT_BORDER_PADDING, editPaint);
+			}
 			if (mode == Mode.SELECT)
 				canvas.drawRect(selectRect, selectPaint);
 			else if ((mode & Mode.EDIT) == Mode.EDIT)
 				if (handler != null)
 					handler.draw(canvas);
+			debug(canvas);
+		}
+	}
+
+	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	static {
+		debugPaint.setColor(Color.RED);
+		debugPaint.setTextSize(20);
+		debugPaint.setTypeface(Typeface.MONOSPACE);
+	}
+
+	void debug(Canvas canvas) {
+		canvas.translate(-scrollX, -scrollY);
+		canvas.drawText("U[" + userActions.size() + "]", 250, 20, debugPaint);
+		canvas.drawText("R[" + redoStack.size() + "]", 330, 20, debugPaint);
+		canvas.drawText("C[" + changeCounter + "]", 410, 20, debugPaint);
+		if (handler != null)
+			canvas.drawText("[hnd]", getWidth() - 370, 45, debugPaint);
+		if (grabbedCPoint != null)
+			canvas.drawText("[gcb]", getWidth() - 310, 45, debugPaint);
+		if (protaStyle != null)
+			canvas.drawText("[sty]", getWidth() - 250, 45, debugPaint);
+		if (protaReshape != null)
+			canvas.drawText("[shp]", getWidth() - 190, 45, debugPaint);
+		if (protaMove != null)
+			canvas.drawText("[mov]", getWidth() - 130, 45, debugPaint);
+		if (currentObject != null)
+			canvas.drawText("[cob]", getWidth() - 70, 45, debugPaint);
+		String res = "|";
+		if ((mode & Mode.SELECT) == Mode.SELECT)
+			res += "SE|";
+		if ((mode & Mode.DRAW) == Mode.DRAW)
+			res += "DW|";
+		if ((mode & Mode.EDIT) == Mode.EDIT)
+			res += "ED|";
+		if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+			res += "SM|";
+		if ((mode & Mode.HAND) == Mode.HAND)
+			res += "HD|";
+		if ((mode & Mode.MOVING) == Mode.MOVING)
+			res += "MV|";
+		canvas.drawText(res, getWidth() - 300, 20, debugPaint);
+		for (int i = 0; i < userActions.size(); i++) {
+			UserAction ua = userActions.get(i);
+			canvas.drawText(ua.getClass().getSimpleName() + " >< "
+					+ ua.getInverse().getClass().getSimpleName(), 10,
+					30 + i * 20, debugPaint);
+		}
+		for (int i = 0; i < redoStack.size(); i++) {
+			UserAction ua = redoStack.get(i);
+			canvas.drawText(ua.getClass().getSimpleName() + " >< "
+					+ ua.getInverse().getClass().getSimpleName(), 10,
+					getHeight() - 20 - i * 20, debugPaint);
 		}
 	}
 
 	private void reloadCache() {
 		int size = model.objects.size();
-		cacheCanvas.drawColor(Color.TRANSPARENT,
+		cacheCanvas.drawColor(Color.WHITE,
 				android.graphics.PorterDuff.Mode.CLEAR);
 		if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
 			for (int i = 0; i < size; i++) {
@@ -186,9 +290,10 @@ public class CanvasView extends View implements OnLongClickListener {
 					obj.draw(cacheCanvas);
 			}
 			if ((mode & Mode.EDIT) != Mode.EDIT) {
-				cacheCanvas.drawColor(SELECTION_COVER_COLOR,
-						android.graphics.PorterDuff.Mode.XOR);
+				cacheCanvas.drawColor(SELECTION_COVER_COLOR);
 				cacheCanvas.setBitmap(cacheImageSelected);
+				cacheCanvas.drawColor(Color.TRANSPARENT,
+						android.graphics.PorterDuff.Mode.CLEAR);
 				size = selectedObjects.size();
 				for (int i = 0; i < size; i++)
 					selectedObjects.get(i).draw(cacheCanvas);
@@ -209,6 +314,10 @@ public class CanvasView extends View implements OnLongClickListener {
 			if ((mode & Mode.HAND) == Mode.HAND) {
 				anchorX = scrollX - x;
 				anchorY = scrollY - y;
+			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
+				anchorX = cacheSelX - x;
+				anchorY = cacheSelY - y;
+				protaMove.anchorDown(x - scrollX, y - scrollY);
 			} else {
 				anchorX = x - scrollX;
 				anchorY = y - scrollY;
@@ -239,9 +348,8 @@ public class CanvasView extends View implements OnLongClickListener {
 						currentObject = protoBasic;
 					}
 				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
-					if (handler != null) {
+					if (handler != null)
 						grabbedCPoint = handler.grab(anchorX, anchorY);
-					}
 				}
 			}
 		} else if (act == MotionEvent.ACTION_MOVE) {
@@ -258,6 +366,12 @@ public class CanvasView extends View implements OnLongClickListener {
 					scrollY = CANVAS_MARGIN;
 				else if (scrollY < limitScrollY)
 					scrollY = limitScrollY;
+			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
+				cacheSelX = x + anchorX;
+				cacheSelY = y + anchorY;
+				x -= scrollX;
+				y -= scrollY;
+				protaMove.moveTo(x, y);
 			} else {
 				x -= scrollX;
 				y -= scrollY;
@@ -288,7 +402,7 @@ public class CanvasView extends View implements OnLongClickListener {
 					if (grabbedCPoint != null) {
 						int ox = grabbedCPoint.getX();
 						int oy = grabbedCPoint.getY();
-						grabbedCPoint.setPosition(x, y);
+						grabbedCPoint.moveTo(x, y);
 						currentObject.onHandlerMoved(handler, grabbedCPoint,
 								ox, oy);
 					}
@@ -303,12 +417,15 @@ public class CanvasView extends View implements OnLongClickListener {
 					currentObject = selectAt(anchorX, anchorY,
 							SELECTION_MIN_SIZE);
 					selected = currentObject != null;
-					if (selected)
-						editObject(currentObject);
+					if (selected) {
+						selectedObjects.add(currentObject);
+						editObject(currentObject, ShapeHandler.SHAPE_ONLY);
+					}
 				} else {
 					selected = selectArea(selectRect);
 					if (selectedObjects.size() == 1)
-						editObject(selectedObjects.get(0));
+						editObject(selectedObjects.get(0),
+								ShapeHandler.SHAPE_ONLY);
 				}
 				if (selected) {
 					mode |= Mode.SELECTION_MODE;
@@ -323,11 +440,23 @@ public class CanvasView extends View implements OnLongClickListener {
 						|| objectType == ObjectType.LINES) {
 					if (objectType == ObjectType.PATH && makeLoop)
 						protoPath.close();
-					editObject(currentObject);
+					redoStack.clear();
+					listener.onURStatusChange(true, false);
+					editObject(currentObject, ShapeHandler.ALL);
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
-				if (grabbedCPoint != null)
+				if (grabbedCPoint != null) {
 					grabbedCPoint.release();
+					grabbedCPoint = null;
+					if (protaReshape != null) {
+						changeCounter++;
+						redoStack.clear();
+						pushToUAStack(protaReshape.capture(), false);
+					}
+				}
+			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
+				redoStack.clear();
+				pushToUAStack(protaMove.anchorUp(), false);
 			}
 		}
 		invalidate();
@@ -362,37 +491,50 @@ public class CanvasView extends View implements OnLongClickListener {
 		}
 	}
 
-	private void editObject(CanvasObject co) {
+	private void editObject(CanvasObject co, int filter) {
 		currentObject = co;
-		handler = co.getHandlers();
+		handler = co.getHandlers(filter);
+		if ((mode & Mode.DRAW) != Mode.DRAW)
+			protaReshape = new ReshapeAction(co, true);
 		mode |= Mode.EDIT;
 	}
 
 	public void approveAction() {
+		while (changeCounter-- > 0)
+			userActions.pop();
 		if ((mode & Mode.DRAW) == Mode.DRAW) {
 			currentObject.draw(cacheCanvas);
 			model.objects.add(currentObject);
 			UserAction action = new DrawAction(currentObject);
-			userActions.push(action);
-			if (!hidden_mode)
-				syncon.addToBuffer(action);
+			pushToUAStack(action, !hidden_mode);
+			reloadCache();
 		} else {
-			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
-
-			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
-				if (protaShape != null) {
-					userActions.push(protaShape);
-					if (!hidden_mode)
-						syncon.addToBuffer(protaShape);
-				} else if (protaStyle != null) {
-					userActions.push(protaStyle);
-					if (!hidden_mode)
-						syncon.addToBuffer(protaStyle);
+			int size = pendingDeleteActions.size();
+			for (int i = 0; i < size; i++)
+				execute(pendingDeleteActions.get(i), false);
+			pendingDeleteActions.clear();
+			if ((mode & Mode.MOVING) == Mode.MOVING) {
+				if (protaMove != null) {
+					protaMove.apply();
+					pushToUAStack(protaMove, !hidden_mode);
+					protaMove = null;
+					pendingMoveActions.clear();
 				}
-				// TODO approve action
+			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
+				if (protaReshape != null) {
+					pushToUAStack(protaReshape, !hidden_mode);
+					protaReshape = null;
+					pendingReshapeActions.clear();
+				}
+				if (protaStyle != null) {
+					pushToUAStack(protaStyle, !hidden_mode);
+					protaStyle = null;
+					pendingStyleActions.clear();
+				}
 			}
 			cancelSelect();
 		}
+		changeCounter = 0;
 		currentObject = null;
 		handler = null;
 		mode = Mode.SELECT;
@@ -402,11 +544,46 @@ public class CanvasView extends View implements OnLongClickListener {
 
 	public void cancelAction() {
 		handler = null;
-		mode &= ~Mode.EDIT;
-		protaStyle = null;
-		protaShape = null;
-		protaTransform = null;
 		currentObject = null;
+		while (changeCounter-- > 0)
+			userActions.pop();
+		if ((mode & Mode.EDIT) == Mode.EDIT) {
+			mode &= ~Mode.EDIT;
+			if (protaStyle != null) {
+				execute(protaStyle.getInverse(), true);
+				if (!hidden_mode)
+					syncon.addToBuffer(protaStyle);
+				protaStyle = null;
+			}
+			if (protaReshape != null) {
+				execute(protaReshape.getInverse(), true);
+				if (!hidden_mode)
+					syncon.addToBuffer(protaReshape);
+				protaReshape = null;
+			}
+			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+				cancelSelect();
+		} else if ((mode & Mode.MOVING) == Mode.MOVING) {
+			if (protaMove != null) {
+				execute(protaMove.getInverse(), true);
+				if (!hidden_mode)
+					syncon.addToBuffer(protaStyle);
+				protaMove = null;
+			}
+		} else
+			return;
+		for (int i = 0; i < pendingStyleActions.size(); i++)
+			execute(pendingStyleActions.get(i), true);
+		for (int i = 0; i < pendingReshapeActions.size(); i++)
+			execute(pendingReshapeActions.get(i), true);
+		for (int i = 0; i < pendingMoveActions.size(); i++)
+			execute(pendingMoveActions.get(i), true);
+		for (int i = 0; i < pendingDeleteActions.size(); i++)
+			execute(pendingDeleteActions.get(i), true);
+		pendingStyleActions.clear();
+		pendingReshapeActions.clear();
+		pendingMoveActions.clear();
+		pendingDeleteActions.clear();
 		reloadCache();
 		invalidate();
 	}
@@ -417,11 +594,12 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeColor(color);
 			else if (currentObject instanceof LinesObject)
-				protoLines.setLineColor(color);
+				protoLines.setColor(color);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
 				if (protaStyle == null)
 					protaStyle = new StyleAction(currentObject, true);
-				protaStyle.setStyle(fillColor, color, strokeWidth, strokeStyle);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
 			}
 			postInvalidate();
 		}
@@ -433,11 +611,12 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeWidth(width);
 			else if (currentObject instanceof LinesObject)
-				protoLines.setLineWidth(width);
+				protoLines.setWidth(width);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
 				if (protaStyle == null)
 					protaStyle = new StyleAction(currentObject, true);
-				protaStyle.setStyle(fillColor, strokeColor, width, strokeStyle);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
 			}
 			postInvalidate();
 		}
@@ -449,11 +628,12 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeStyle(strokeStyle);
 			else if (currentObject instanceof LinesObject)
-				protoLines.setLineStyle(style);
+				protoLines.setStrokeStyle(style);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
 				if (protaStyle == null)
 					protaStyle = new StyleAction(currentObject, true);
-				protaStyle.setStyle(fillColor, strokeColor, strokeWidth, style);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
 			}
 			postInvalidate();
 		}
@@ -462,6 +642,7 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void insertImage(Bitmap bitmap) {
 		// TODO insert image
 		objectType = ObjectType.IMAGE;
+		setMode(Mode.DRAW);
 	}
 
 	public void setImageTransparency(int alpha) {
@@ -474,52 +655,83 @@ public class CanvasView extends View implements OnLongClickListener {
 		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
 		protoText = new TextObject(text, x, y, strokeColor, textFont, textSize,
 				true);
-		mode = Mode.DRAW;
-		editObject(protoText);
+		setMode(Mode.DRAW);
+		editObject(protoText, ShapeHandler.ALL);
 		invalidate();
+	}
+
+	public void setTextColor(int color) {
+		strokeColor = color;
+		if (currentObject != null && currentObject instanceof TextObject) {
+			protoText = (TextObject) currentObject;
+			protoText.setColor(color);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
+			}
+			postInvalidate();
+		}
 	}
 
 	public void setFontSize(int size) {
 		textSize = size;
-		if (protoText != null) {
-			protoText.setParameter(strokeColor, size, textFont);
-			invalidate();
+		if (currentObject != null && currentObject instanceof TextObject) {
+			protoText = (TextObject) currentObject;
+			protoText.setSize(size);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
+			}
+			postInvalidate();
 		}
 	}
 
-	public void setFontType(int font) {
+	public void setFontStyle(int font) {
 		textFont = font;
-		if (protoText != null) {
-			protoText.setParameter(strokeColor, textSize, font);
-			invalidate();
+		if (currentObject != null && currentObject instanceof TextObject) {
+			protoText = (TextObject) currentObject;
+			protoText.setFontStyle(font);
+			if ((mode & Mode.DRAW) != Mode.DRAW) {
+				if (protaStyle == null)
+					protaStyle = new StyleAction(currentObject, true);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
+			}
+			postInvalidate();
 		}
 	}
 
 	public void insertPrimitive(int type) {
 		objectType = type;
-		mode = Mode.DRAW;
+		setMode(Mode.DRAW);
 	}
 
 	public void insertPolygon(int corner) {
 		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
 		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
-		protoPoly = new PolygonObject(corner, x, y, fillColor, strokeColor,
-				strokeWidth, strokeStyle);
+		int radius = getWidth() >> 1 - 20;
+		protoPoly = new PolygonObject(corner, radius, x, y, fillColor,
+				strokeColor, strokeWidth, strokeStyle);
 		protoBasic = protoPoly;
-		mode = Mode.DRAW;
-		editObject(protoPoly);
+		setMode(Mode.DRAW);
+		editObject(protoPoly, ShapeHandler.ALL);
 		invalidate();
 	}
 
 	public void setFillParameter(boolean filled, int color) {
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		if (currentObject != null && currentObject instanceof BasicObject) {
+			protoBasic = (BasicObject) currentObject;
 			protoBasic.setFillMode(filled, color);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
 				if (protaStyle == null)
 					protaStyle = new StyleAction(currentObject, true);
-				protaStyle.setStyle(fillColor, strokeColor, strokeWidth,
-						strokeStyle);
+				changeCounter++;
+				pushToUAStack(protaStyle.capture(), false);
 			}
 		}
 		postInvalidate();
@@ -555,7 +767,13 @@ public class CanvasView extends View implements OnLongClickListener {
 	}
 
 	public void moveSelectedObject() {
-		// TODO move selected
+		if (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+				&& ((mode & Mode.DRAW) != Mode.DRAW)) {
+			if (protaMove == null) {
+				protaMove = new MoveMultiple(selectedObjects, true);
+				mode |= Mode.MOVING;
+			}
+		}
 	}
 
 	public void copySelectedObjects() {
@@ -563,7 +781,9 @@ public class CanvasView extends View implements OnLongClickListener {
 	}
 
 	public void deleteSelectedObjects() {
-		// TODO delete selected
+		DeleteMultiple dm = new DeleteMultiple(selectedObjects);
+		model.objects.removeAll(selectedObjects);
+		pushToUAStack(dm, !hidden_mode);
 	}
 
 	public void cancelSelect() {
@@ -576,22 +796,38 @@ public class CanvasView extends View implements OnLongClickListener {
 		postInvalidate();
 	}
 
+	private void pushToUAStack(UserAction action, boolean flush) {
+		if (action == null)
+			return;
+		userActions.push(action);
+		if (flush)
+			syncon.addToBuffer(action);
+		listener.onURStatusChange(true, !redoStack.isEmpty());
+	}
+
 	public boolean isUndoable() {
 		return !userActions.isEmpty();
 	}
 
 	public void undo() {
 		if (!userActions.isEmpty()) {
+			if (changeCounter <= 0
+					&& (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) || ((mode & Mode.DRAW) == Mode.DRAW))) {
+				cancelAction();
+				return;
+			}
 			UserAction action = userActions.pop();
 			UserAction inverse = action.getInverse();
 			if (inverse == null)
 				return;
 			redoStack.push(action);
-			execute(inverse);
+			execute(inverse, true);
+			changeCounter--;
 			if (!hidden_mode)
 				syncon.addToBuffer(inverse);
 			reloadCache();
 			invalidate();
+			listener.onURStatusChange(!userActions.isEmpty(), true);
 		}
 	}
 
@@ -602,10 +838,9 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void redo() {
 		if (!redoStack.isEmpty()) {
 			UserAction action = redoStack.pop();
-			userActions.push(action);
-			execute(action);
-			if (!hidden_mode)
-				syncon.addToBuffer(action);
+			execute(action, true);
+			pushToUAStack(action, !hidden_mode);
+			changeCounter++;
 			reloadCache();
 			invalidate();
 		}
@@ -616,31 +851,70 @@ public class CanvasView extends View implements OnLongClickListener {
 	}
 
 	public void execute(ArrayList<UserAction> actions) {
-		// TODO execute
 		int size = actions.size();
 		for (int i = 0; i < size; i++)
-			execute(actions.get(i));
+			execute(actions.get(i), false);
 		reloadCache();
 		invalidate();
 	}
 
-	private void execute(UserAction action) {
+	/**
+	 * Mengeksekusi suatu perintah.
+	 * @param action aksi yang dieksekusi
+	 * @param forced jika true -> aksi langsung dijalankan. jika false -> aksi
+	 *            akan ditunda jika objek yang berkaitan dengan aksi tersebut
+	 *            sedang diedit.
+	 */
+	private void execute(UserAction action, boolean forced) {
 		if (action instanceof DrawAction) {
 			DrawAction da = (DrawAction) action;
 			da.object.draw(cacheCanvas);
 			model.objects.add(da.object);
-		} else if (action instanceof TransformAction) {
+		} else if (action instanceof MoveAction) {
+			MoveAction ma = (MoveAction) action;
+			if (!forced && (protaMove != null) && protaMove.overwrites(ma))
+				pendingMoveActions.add(ma);
+			else
+				ma.apply();
 		} else if (action instanceof ReshapeAction) {
+			ReshapeAction ra = (ReshapeAction) action;
+			if (!forced && protaReshape != null && protaReshape.overwrites(ra))
+				pendingReshapeActions.add(ra);
+			else {
+				ra.apply();
+				if (handler != null) {
+					if (grabbedCPoint != null) {
+						grabbedCPoint.release();
+						grabbedCPoint = null;
+					}
+					handler = currentObject
+							.getHandlers(ShapeHandler.SHAPE_ONLY);
+				}
+			}
 		} else if (action instanceof StyleAction) {
 			StyleAction sa = (StyleAction) action;
-			sa.applyStyle();
+			if (!forced && (protaStyle != null) && protaStyle.overwrites(sa))
+				pendingStyleActions.add(sa);
+			else
+				sa.applyStyle();
 		} else if (action instanceof DeleteAction) {
 			DeleteAction da = (DeleteAction) action;
-			int idx = model.objects.lastIndexOf(da.object);
-			model.objects.remove(idx);
+			if (!forced && currentObject != null
+					&& da.object.equals(currentObject))
+				pendingDeleteActions.add(da);
+			else {
+				int idx = model.objects.lastIndexOf(da.object);
+				model.objects.remove(idx);
+			}
+		} else if (action instanceof MoveMultiple) {
+			((MoveMultiple) action).apply();
 		} else if (action instanceof DeleteMultiple) {
 			DeleteMultiple da = (DeleteMultiple) action;
-			model.objects.removeAll(da.objects);
+			if (!forced && currentObject != null
+					&& da.objects.contains(currentObject))
+				pendingDeleteActions.add(da);
+			else
+				model.objects.removeAll(da.objects);
 		} else if (action instanceof DrawMultiple) {// undelete
 			DrawMultiple dm = (DrawMultiple) action;
 			model.objects.addAll(dm.objects);
@@ -653,16 +927,7 @@ public class CanvasView extends View implements OnLongClickListener {
 		// TODO on close canvas
 	}
 
-	public void onUpdateComplete(int status) {
-		// TODO onupdate complete
-	}
-
 	public void onCanvasClosed(int status) {
 		// TODO canvas close
-	}
-
-	public void test() {
-		// TODO
-		syncon.test();
 	}
 }
