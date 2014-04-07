@@ -3,16 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package collapaint.transact;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 /**
  *
@@ -20,6 +35,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "image", urlPatterns = {"/image"})
 public class Image extends HttpServlet {
+
+    final String url = "jdbc:mysql://localhost/collapaint";
+    final String uname = "root";
+    final String pwd = "";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -33,18 +52,43 @@ public class Image extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet image</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet image at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+            JsonObjectBuilder job = Json.createObjectBuilder();
+            job.add("lan", 2);
+            job.add("canvas_id", 2);
+
+            JsonArrayBuilder ojab = Json.createArrayBuilder();
+
+            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "r").
+                    add("geom", "geom1").add("style", "sty1").add("tran", "wo"));
+            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "c").
+                    add("geom", "geom2").add("style", "sty2").add("tran", "wo"));
+
+//            job.add("object", ojab);
+
+            JsonArrayBuilder ajab = Json.createArrayBuilder();
+
+            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "w").
+                    add("param", "paramamama"));
+            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "d").
+                    add("param", ""));
+            ajab.add(Json.createObjectBuilder().add("id", 1).add("code", "w").
+                    add("param", "draw again"));
+
+  //          job.add("action", ajab);
+            
+            char cd = 'd';
+            job.add("char", cd);
+
+            out.println(job.build().toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            out.write("error:" + ex.toString());
+            Logger.getLogger(Image.class.getName()).log(Level.SEVERE, null, ex);
         }
+        out.close();
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
