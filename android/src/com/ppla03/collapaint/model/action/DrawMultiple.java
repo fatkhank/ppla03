@@ -12,6 +12,11 @@ public class DrawMultiple extends UserAction {
 		this.inverse = inverse;
 	}
 
+	public DrawMultiple(ArrayList<CanvasObject> objects) {
+		this.objects = new ArrayList<>(objects);
+		this.inverse = new DeleteMultiple(this.objects, this);
+	}
+
 	@Override
 	public UserAction getInverse() {
 		return inverse;

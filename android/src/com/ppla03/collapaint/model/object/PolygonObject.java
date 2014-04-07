@@ -1,40 +1,93 @@
 package com.ppla03.collapaint.model.object;
 
+import com.ppla03.collapaint.model.object.ControlPoint.Type;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 
+/**
+ * Objek dialam kanvas yang berbentuk poligon, memiliki sisi minimal tiga
+ * (segitiga). Jumlah sisinya tetap, namun titik-titik sudutnya bisa digeser
+ * sehingga memiliki yang tidak beraturan. Objek bisa dirotasi dan translasi.
+ * @author hamba v7
+ * 
+ */
 public class PolygonObject extends BasicObject {
+	/**
+	 * Minimal radius awal poigon.
+	 */
+	public static final int MINIMAL_RADIUS = 10;
 
-	private Path path;
-	private int[] xLocs;
-	private int[] yLocs;
+	/**
+	 * Jarak minimal tiap titik poligon atau panjang minimal sisi.
+	 */
+	public static final int MIN_POINT_DISTANCE = 3;
 
-	private RectF bounds = new RectF();
-	private static final ShapeHandler handler = new ShapeHandler(
+	private final Path path;
+
+	/**
+	 * Koordinat x titik-titik di poligon.
+	 */
+	private float[] xLocs;
+
+	/**
+	 * Koordinat y titik-titik di poigon.
+	 */
+	private float[] yLocs;
+
+	/**
+	 * Batas-batas objek.
+	 */
+	private final RectF bounds;
+
+	/**
+	 * Default handler untuk poligon
+	 */
+	private static final ShapeHandler handler = new ShapeHandler(null,
 			new ControlPoint[] {});
 
+	/**
+	 * Membuat objek poligon kosong.
+	 */
 	public PolygonObject() {
 		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
-		xLocs = new int[0];
-		yLocs = new int[0];
 		path = new Path();
+		bounds = new RectF();
 	}
 
-	public PolygonObject(int corner, int radius, int x, int y, int fillColor,
-			int strokeColor, int strokeWidth, int strokeStyle) {
+	/**
+	 * Membuat objek poligon dengan parameter tertentu.
+	 * @param corner jumlah sudut/sisi poligon
+	 * @param radius jari-jari poligon. Jika kurang dari {@code MINIMAL_RADIUS},
+	 *            jari-jari poligon = {@code MINIMAL_RADIUS}.
+	 * @param worldX koordinat x titik tengah poligon (koordinat kanvas).
+	 * @param worldY koordinat y titik tengah poligon (koordinat kanvas).
+	 * @param fillColor warna isian poligon. Jika warna =
+	 *            {@code Color.TRANSPARENT}, poligon dianggap tidak memiliki
+	 *            isian. Lihat {@link Color}.
+	 * @param strokeColor warna pinggiran poligon. Lihat {@link Color}.
+	 * @param strokeWidth tebal garis pinggiran poligon.
+	 * @param strokeStyle jenis dekorasi pinggiran poligon.
+	 */
+	public PolygonObject(int corner, int radius, int worldX, int worldY,
+			int fillColor, int strokeColor, int strokeWidth, int strokeStyle) {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
-		xLocs = new int[corner];
-		yLocs = new int[corner];
+		if (corner < 3)
+			corner = 3;
+		offsetX = worldX;
+		offsetY = worldY;
+		xLocs = new float[corner];
+		yLocs = new float[corner];
+		if (radius <= MINIMAL_RADIUS)
+			radius = MINIMAL_RADIUS;
 		double inc = (Math.PI + Math.PI) / corner;
-		float deg = 0;
+		double deg = 0;
 		for (int i = 0; i < corner; i++) {
-			xLocs[i] = x + (int) (radius * Math.cos(deg));
-			yLocs[i] = y + (int) (radius * Math.sin(deg));
+			xLocs[i] = (float) (radius * Math.cos(deg));
+			yLocs[i] = (float) (radius * Math.sin(deg));
 			deg += inc;
 		}
 		path = new Path();
@@ -42,16 +95,25 @@ public class PolygonObject extends BasicObject {
 		for (int i = 1; i < corner; i++)
 			path.lineTo(xLocs[i], yLocs[i]);
 		path.close();
+		bounds = new RectF();
 		path.computeBounds(bounds, true);
 	}
 
+	/*
+	 * parameter berisi array xLocs, diikuti array yLocs
+	 */
 	@Override
-	public void setShape(int[] param, int start, int end) {
-		System.arraycopy(param, start, xLocs, 0, xLocs.length);
-		System.arraycopy(param, start + xLocs.length, yLocs, 0, yLocs.length);
+	public void setShape(float[] param, int start, int end) {
+		int corner = (end - start) >> 1;
+		if (xLocs == null) {
+			xLocs = new float[corner];
+			yLocs = new float[corner];
+		}
+		System.arraycopy(param, start, xLocs, 0, corner);
+		System.arraycopy(param, start + xLocs.length, yLocs, 0, corner);
 		path.rewind();
 		path.moveTo(xLocs[0], yLocs[0]);
-		for (int i = 1; i < xLocs.length; i++)
+		for (int i = 1; i < corner; i++)
 			path.lineTo(xLocs[i], yLocs[i]);
 		path.close();
 		path.computeBounds(bounds, true);
@@ -63,14 +125,14 @@ public class PolygonObject extends BasicObject {
 	}
 
 	@Override
-	public int extractShape(int[] data, int start) {
+	public int extractShape(float[] data, int start) {
 		System.arraycopy(xLocs, 0, data, start, xLocs.length);
 		System.arraycopy(yLocs, 0, data, start + xLocs.length, yLocs.length);
 		return xLocs.length << 1;
 	}
 
 	@Override
-	public void draw(Canvas canvas) {
+	public void drawSelf(Canvas canvas) {
 		if (fillPaint.getColor() != Color.TRANSPARENT)
 			canvas.drawPath(path, fillPaint);
 		if (strokePaint.getColor() != Color.TRANSPARENT)
@@ -78,120 +140,142 @@ public class PolygonObject extends BasicObject {
 	}
 
 	@Override
-	public boolean selectedBy(Rect area) {
-		return (selected = area.contains((int) bounds.left, (int) bounds.top,
-				(int) bounds.right, (int) bounds.bottom));
-	}
-
-	@Override
-	public boolean selectedBy(int x, int y, int radius) {
-		selected = false;
-		if (bounds.contains(x, y)) {
+	public boolean selectedBy(float x, float y, float radius) {
+		if (bounds.contains(x, y)) {// quick reject
 			if (fillPaint.getColor() == Color.TRANSPARENT) {
 				int last = xLocs.length - 1;
-				int x1 = xLocs[last];
-				int y1 = yLocs[last];
+				float x1 = xLocs[last];
+				float y1 = yLocs[last];
+				float tol = strokePaint.getStrokeWidth() + radius;
 				for (int i = 0; i <= last; i++) {
-					int x2 = xLocs[i];
-					int y2 = yLocs[i];
-					int dx = x2 - x1;
-					int dy = y2 - y1;
-					if (Math.abs(dy) > Math.abs(dy)) {
-						int py = y1 + dy / dx * (x - x1);
-						selected = Math.abs(py - y) < radius;
+					float x2 = xLocs[i];
+					float y2 = yLocs[i];
+					float dx = x2 - x1;
+					float dy = y2 - y1;
+					if (Math.abs(dx) > Math.abs(dy)) {
+						float py = (y1 + dy / dx * (x - x1));
+						if (Math.abs(py - y) < tol)
+							return true;
 					} else {
-						int px = x1 + dx / dy * (y - y1);
-						selected = Math.abs(px - x) < radius;
+						float px = (x1 + dx / dy * (y - y1));
+						if (Math.abs(px - x) < tol)
+							return true;
 					}
-					if (selected)
-						break;
-					else {
-						x1 = x2;
-						y1 = y2;
-					}
+					x1 = x2;
+					y1 = y2;
 				}
 			} else {
 				Region rg = new Region();
-				rg.setPath(path, new Region((int) bounds.left, (int) bounds.top,
-						(int) bounds.right, (int) bounds.bottom));
-				selected = rg.contains(x, y);
+				rg.setPath(path, new Region((int) bounds.left,
+						(int) bounds.top, (int) bounds.right,
+						(int) bounds.bottom));
+				selected = rg.contains((int) x, (int) y);
 			}
 		}
-		return selected;
-	}
-
-	@Override
-	public void translate(int dx, int dy) {
-		path.offset(dx, dy);
-		int len = xLocs.length;
-		for (int i = 0; i < len; i++) {
-			xLocs[i] += dx;
-			yLocs[i] += dy;
-		}
+		return false;
 	}
 
 	@Override
 	public ShapeHandler getHandlers(int filter) {
-		path.computeBounds(bounds, true);
+		handler.object = this;
+
+		// pastikan jumlah ControlPoint pada handler mencukupi
 		handler.size = xLocs.length + 1;
-		if (xLocs.length > handler.points.length - 1) {
-			handler.points = new ControlPoint[xLocs.length + 1];
-			for (int i = 0; i < xLocs.length; i++) {
+		if (xLocs.length >= handler.points.length) {
+			handler.points = new ControlPoint[handler.size];
+			for (int i = 0; i < xLocs.length; i++)
 				handler.points[i] = new ControlPoint(ControlPoint.Type.JOINT,
 						xLocs[i], yLocs[i], i);
-			}
-			int midX = (int) bounds.centerX();
-			int midY = (int) bounds.centerY();
 			handler.points[xLocs.length] = new ControlPoint(
-					ControlPoint.Type.MOVE, midX, midY, xLocs.length);
-		} else {
+					ControlPoint.Type.MOVE, 0, 0, xLocs.length);
+		}
+		handler.setEnableAllPoint(false);
+
+		// jika menampilkan pengatur shape
+		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {
 			for (int i = 0; i < xLocs.length; i++) {
 				ControlPoint cp = handler.points[i];
 				cp.x = xLocs[i];
 				cp.y = yLocs[i];
+				cp.enable = true;
 			}
-			ControlPoint cp = handler.points[xLocs.length];
-			cp.x = (int) bounds.centerX();
-			cp.y = (int) bounds.centerY();
 		}
-		handler.setEnableAllPoint(((filter & ShapeHandler.SHAPE_ONLY) == ShapeHandler.SHAPE_ONLY));
-		handler.points[xLocs.length].enable = ((filter & ShapeHandler.TRANSFORM_ONLY) == ShapeHandler.TRANSFORM_ONLY);
+
+		// jika menampilkan pengatur translasi
+		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
+			ControlPoint cp = handler.points[handler.points.length - 1];
+			cp.setPosition(0, 0);
+			cp.enable = true;
+		}
 		return handler;
 	}
 
 	@Override
 	public void onHandlerMoved(ShapeHandler handler, ControlPoint point,
-			int oldX, int oldY) {
-		if (point.id == xLocs.length) {
-			int dx = point.x - oldX;
-			int dy = point.y - oldY;
-			for (int i = 0; i < xLocs.length; i++) {
-				ControlPoint cp = handler.points[i];
-				cp.x += dx;
-				cp.y += dy;
-				xLocs[i] = cp.x;
-				yLocs[i] = cp.y;
-			}
-			path.offset(dx, dy);
+			float oldX, float oldY) {
+		if (point.type == Type.MOVE) {
+			// jika yang berpindah adalah pengatur translasi
+			offsetX += point.x - oldX;
+			offsetY += point.y - oldY;
+			point.setPosition(0, 0);
 		} else {
-			xLocs[point.id] = point.x;
-			yLocs[point.id] = point.y;
-			path.rewind();
-			path.moveTo(xLocs[0], yLocs[0]);
-			for (int i = 1; i < xLocs.length; i++)
-				path.lineTo(xLocs[i], yLocs[i]);
-			path.close();
-			path.computeBounds(bounds, true);
+			// jika yang berpindah adalah pengatur sudut
+			int prev = (point.id == 0) ? xLocs.length - 1 : point.id - 1;
+			int next = (point.id == xLocs.length - 1) ? 0 : point.id + 1;
 
-			ControlPoint cp = handler.points[xLocs.length];
-			cp.x = (int) bounds.centerX();
-			cp.y = (int) bounds.centerY();
+			// abaikan jika jarak dengan titik sebelumnya atau sesudahnya kurang
+			// dari jarak minimum
+			if (((Math.abs(xLocs[prev] - point.x) < MIN_POINT_DISTANCE) && (Math
+					.abs(yLocs[prev] - point.y) < MIN_POINT_DISTANCE))
+					|| ((Math.abs(xLocs[next] - point.x) < MIN_POINT_DISTANCE) && (Math
+							.abs(yLocs[next] - point.y) < MIN_POINT_DISTANCE))) {
+				point.x = oldX;
+				point.y = oldY;
+			} else {
+				xLocs[point.id] = point.x;
+				yLocs[point.id] = point.y;
+
+				path.rewind();
+				path.moveTo(xLocs[0], yLocs[0]);
+				for (int i = 1; i < xLocs.length; i++)
+					path.lineTo(xLocs[i], yLocs[i]);
+				path.close();
+				path.computeBounds(bounds, true);
+
+				float cx = -bounds.centerX();
+				float cy = -bounds.centerY();
+				path.offset(cx, cy);
+				bounds.offset(cx, cy);
+				for (int i = 0; i < xLocs.length; i++) {
+					xLocs[i] += cx;
+					yLocs[i] += cy;
+					handler.points[i].setPosition(xLocs[i], yLocs[i]);
+				}
+				offsetX -= cx;
+				offsetY -= cy;
+				handler.points[handler.points.length - 1].setPosition(0, 0);
+			}
 		}
 	}
 
 	@Override
-	public Rect getBounds() {
-		return new Rect((int) bounds.left, (int) bounds.top, (int) bounds.right,
-				(int) bounds.bottom);
+	public void getBounds(RectF bounds) {
+		bounds.set(this.bounds);
+	}
+
+	@Override
+	public CanvasObject cloneObject() {
+		PolygonObject po = new PolygonObject();
+		po.path.set(this.path);
+		po.xLocs = new float[this.xLocs.length];
+		po.yLocs = new float[this.yLocs.length];
+		System.arraycopy(this.xLocs, 0, po.xLocs, 0, this.xLocs.length);
+		System.arraycopy(this.yLocs, 0, po.yLocs, 0, this.yLocs.length);
+		po.bounds.set(this.bounds);
+		po.offsetX = this.offsetX;
+		po.offsetY = this.offsetY;
+		po.rotation = this.rotation;
+		changeStyles(po);
+		return po;
 	}
 }

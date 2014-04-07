@@ -4,26 +4,28 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
-import android.graphics.RectF;
 import android.graphics.Paint.Style;
 import android.graphics.Shader.TileMode;
-import android.util.Log;
 
+/**
+ * Titik kontrol suatu objek.
+ * @author hamba v7
+ * 
+ */
 public class ControlPoint {
 	public static enum Type {
-		MOVE, JOINT
+		MOVE, JOINT, ROTATE
 	}
 
 	private static final int DRAW_RADIUS = 15;
 	private static final int GRAB_RADIUS_SQUARED = 30 * 30;
 	private static final int JOINT_COLOR1 = Color.argb(200, 255, 150, 150);
 	private static final int JOINT_COLOR2 = Color.argb(200, 250, 0, 0);
-	private static final int MOVER_COLOR1 = Color.argb(200, 150, 150, 150);
-	private static final int MOVER_COLOR2 = Color.argb(100, 0, 0, 0);
+	private static final float MOVER_CROSS_SIZE = 10;
 	private static Paint jointPaint;
 	private static Paint moverPaint;
 
-	private static int anchorX, anchorY, refX, refY;
+	private static float anchorX, anchorY, refX, refY;
 
 	static {
 		jointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -31,30 +33,52 @@ public class ControlPoint {
 		jointPaint.setShader(new RadialGradient(5, -5, DRAW_RADIUS,
 				JOINT_COLOR1, JOINT_COLOR2, TileMode.CLAMP));
 		moverPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		moverPaint.setStyle(Style.FILL);
-		moverPaint.setShader(new RadialGradient(10, -10, DRAW_RADIUS << 1,
-				MOVER_COLOR1, MOVER_COLOR2, TileMode.CLAMP));
+		moverPaint.setStyle(Style.STROKE);
+		moverPaint.setStrokeWidth(1);
+		moverPaint.setColor(Color.BLACK);
 	}
 
-	private final Type type;
-	private boolean grabbed;
-	int x, y;
+	final Type type;
 	final int id;
+
+	/**
+	 * Menandakan titik sedang digerakkan.
+	 */
+	boolean grabbed;
+
+	float x, y;
+
+	/**
+	 * Menandakan titik dapat dicengkeram.
+	 */
 	boolean enable;
 
-	public ControlPoint(Type type, int x, int y, int id) {
+	/**
+	 * Membuat titik kontrol baru.
+	 * @param type tipe titik kontrol. Lihat {@link Type}.
+	 * @param x koordinat x titik kontrol relatif terhadap pusat objek.
+	 * @param y koordinat y titik kontrol relatif terhadap pusat objek.
+	 * @param id id titik kontrol.
+	 */
+	public ControlPoint(Type type, float x, float y, int id) {
 		this.type = type;
 		this.x = x;
 		this.y = y;
 		this.id = id;
 		jointPaint.setAlpha(100);
-		moverPaint.setAlpha(100);
+		moverPaint.setAlpha(200);
 		enable = true;
 	}
 
-	public boolean grabbed(int x, int y) {
-		int dx = this.x - x;
-		int dy = this.y - y;
+	/**
+	 * Mencoba mencengkeram titik untuk sehingga bisa digerakkan.
+	 * @param x koordinat x cengkeraman relatif terhadap pusat objek.
+	 * @param y koordinat y cengkeraman relatif terhadap pusat objek.
+	 * @return berhasil atau tidak.
+	 */
+	public boolean grabbed(float x, float y) {
+		float dx = this.x - x;
+		float dy = this.y - y;
 		grabbed = (type == Type.MOVE)
 				|| (dx * dx + dy * dy) < GRAB_RADIUS_SQUARED;
 		if (grabbed) {
@@ -65,42 +89,58 @@ public class ControlPoint {
 			if (type == Type.JOINT)
 				jointPaint.setAlpha(255);
 			else
-				moverPaint.setAlpha(255);
+				moverPaint.setAlpha(250);
 		}
 		return grabbed;
 	}
 
+	/**
+	 * Melepaskan cengkeraman ke titik.
+	 */
 	public void release() {
 		grabbed = false;
 		jointPaint.setAlpha(100);
-		moverPaint.setAlpha(100);
+		moverPaint.setAlpha(200);
 	}
 
-	public void moveTo(int x, int y) {
-		this.x = refX + (x - anchorX);
-		this.y = refY + (y - anchorY);
+	/**
+	 * Mencoba menggeser titik ke koordinat tertentu. Perpidahan akan
+	 * dikalibrasi berdasarkan posisi terakhir titik berhasil dicengkeram.
+	 * Posisi titik akan bergantung dari tipe titik.
+	 * @param dx perpindahan dalam sumbu x.
+	 * @param dy perpindahan dalam sumbu y.
+	 */
+	void moveTo(float dx, float dy) {
+		this.x = refX + (dx - anchorX);
+		this.y = refY + (dy - anchorY);
 	}
 
-	void setPosition(int x, int y) {
+	/**
+	 * Memindahkan titik ke koordinat tertentu. Tidak tergantung dari tipe titik
+	 * ini.
+	 * @param x koordinat x relatif terhadap pusat objek.
+	 * @param y koordinat y relatif terhadap pusat objek.
+	 */
+	void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
 	}
 
+	/**
+	 * Menggambar titik kontrol pada suatu kanvas.
+	 * @param canvas
+	 */
 	public void draw(Canvas canvas) {
 		canvas.save();
 		canvas.translate(x, y);
 		if (type == Type.JOINT)
 			canvas.drawCircle(0, 0, DRAW_RADIUS, jointPaint);
-		else
-			canvas.drawCircle(0, 0, DRAW_RADIUS << 1, moverPaint);
+		else {
+			canvas.drawLine(x - MOVER_CROSS_SIZE, y - MOVER_CROSS_SIZE, x
+					+ MOVER_CROSS_SIZE, y + MOVER_CROSS_SIZE, moverPaint);
+			canvas.drawLine(x - MOVER_CROSS_SIZE, y + MOVER_CROSS_SIZE, x
+					+ MOVER_CROSS_SIZE, y - MOVER_CROSS_SIZE, moverPaint);
+		}
 		canvas.restore();
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
 	}
 }

@@ -6,11 +6,12 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 
 public class ImageObject extends CanvasObject {
 	private Bitmap bitmap;
 	private Rect srcRect;
-	private Rect destRect;
+	private RectF destRect;
 	private String imageID;
 	protected Paint paint;
 
@@ -19,7 +20,7 @@ public class ImageObject extends CanvasObject {
 	}
 
 	@Override
-	public void draw(Canvas canvas) {
+	public void drawSelf(Canvas canvas) {
 		canvas.drawBitmap(bitmap, srcRect, destRect, paint);
 	}
 
@@ -32,7 +33,7 @@ public class ImageObject extends CanvasObject {
 	}
 
 	@Override
-	public void setShape(int[] param, int start, int end) {
+	public void setShape(float[] param, int start, int end) {
 		destRect.left = param[start++];
 		destRect.top = param[start++];
 		destRect.right = param[start++];
@@ -45,7 +46,7 @@ public class ImageObject extends CanvasObject {
 	}
 
 	@Override
-	public int extractShape(int[] data, int start) {
+	public int extractShape(float[] data, int start) {
 		data[start++] = destRect.left;
 		data[start++] = destRect.top;
 		data[start++] = destRect.right;
@@ -54,20 +55,9 @@ public class ImageObject extends CanvasObject {
 	}
 
 	@Override
-	public boolean selectedBy(Rect area) {
+	public boolean selectedBy(float x, float y, float radius) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public boolean selectedBy(int x, int y, int radius) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void translate(int dx, int dy) {
-		destRect.offset(dx, dy);
 	}
 
 	@Override
@@ -78,13 +68,19 @@ public class ImageObject extends CanvasObject {
 
 	@Override
 	public void onHandlerMoved(ShapeHandler handler, ControlPoint point,
-			int oldX, int oldY) {
+			float oldX, float oldY) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Rect getBounds() {
-		return destRect;
+	public void getBounds(RectF bounds) {
+		bounds.set(destRect);
+	}
+
+	@Override
+	public CanvasObject cloneObject() {
+		// TODO clone image
+		return null;
 	}
 }

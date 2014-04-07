@@ -38,7 +38,7 @@ public class MoveAction extends UserAction {
 	}
 
 	private static void applyTransform(int ofX, int ofY, CanvasObject object) {
-		object.translate(ofX, ofY);
+		object.setOffset(ofX, ofY);
 	}
 
 	private static void decodeTo(String param, int[] res) {

@@ -7,7 +7,7 @@ import android.util.Base64;
 import com.ppla03.collapaint.model.object.BasicObject;
 import com.ppla03.collapaint.model.object.CanvasObject;
 import com.ppla03.collapaint.model.object.ImageObject;
-import com.ppla03.collapaint.model.object.LinesObject;
+import com.ppla03.collapaint.model.object.LineObject;
 import com.ppla03.collapaint.model.object.TextObject;
 
 public class StyleAction extends UserAction {
@@ -124,8 +124,8 @@ public class StyleAction extends UserAction {
 			style[STROKE_COLOR] = bo.getStrokeColor();
 			style[STROKE_WIDTH] = bo.getStrokeWidth();
 			style[STROKE_STYLE] = bo.getStrokeStyle();
-		} else if (object instanceof LinesObject) {
-			LinesObject lo = (LinesObject) object;
+		} else if (object instanceof LineObject) {
+			LineObject lo = (LineObject) object;
 			style[STROKE_COLOR] = lo.getColor();
 			style[STROKE_WIDTH] = lo.getWidth();
 			style[STROKE_STYLE] = lo.getStrokeStyle();
@@ -146,8 +146,8 @@ public class StyleAction extends UserAction {
 			bo.setStrokeColor(style[STROKE_COLOR]);
 			bo.setStrokeWidth(style[STROKE_WIDTH]);
 			bo.setStrokeStyle(style[STROKE_STYLE]);
-		} else if (co instanceof LinesObject) {
-			LinesObject lo = (LinesObject) co;
+		} else if (co instanceof LineObject) {
+			LineObject lo = (LineObject) co;
 			lo.setColor(style[STROKE_COLOR]);
 			lo.setWidth(style[STROKE_WIDTH]);
 			lo.setStrokeStyle(style[STROKE_STYLE]);

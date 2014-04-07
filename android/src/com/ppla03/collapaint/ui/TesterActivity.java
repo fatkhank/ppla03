@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView.BufferType;
 import android.widget.Toast;
 import android.os.Build;
 
@@ -117,7 +119,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == lines) {
 			canvas.insertPrimitive(ObjectType.LINES);
 		} else if (v == path) {
-			canvas.insertPrimitive(CanvasView.ObjectType.PATH);
+			canvas.insertPrimitive(CanvasView.ObjectType.FREE);
 		} else if (v == text) {
 			canvas.insertText("Sample Text");
 		} else if (v == image) {
@@ -164,13 +166,13 @@ public class TesterActivity extends Activity implements OnClickListener,
 
 	int fillTurn, strStyleTurn, strWidthTurn = 1, fontSizeTurn, fontTypeTurn;
 	int[] fillColors = new int[] { Color.TRANSPARENT,
-			Color.argb(120, 250, 100, 20), Color.argb(120, 100, 250, 20),
+			Color.argb(120, 250, 50, 20), Color.argb(120, 10, 250, 50),
 			Color.argb(120, 25, 100, 250) };
 	int[] strokeStyles = new int[] { StrokeStyle.SOLID, StrokeStyle.DASHED,
 			StrokeStyle.DOTTED };
 
 	@Override
-	public void onCanvasSelection(boolean success) {
+	public void onSelectionEvent(boolean success) {
 		if (!success)
 			Toast.makeText(this, "No object selected", Toast.LENGTH_SHORT)
 					.show();

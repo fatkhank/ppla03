@@ -14,7 +14,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -58,7 +58,7 @@ public class CanvasView extends View implements OnLongClickListener {
 	private int mode;
 
 	public static class ObjectType {
-		public static final int LINES = 1, RECT = 2, OVAL = 3, PATH = 4;
+		public static final int LINES = 1, RECT = 2, OVAL = 3, FREE = 4;
 		private static final int IMAGE = 5, TEXT = 6;
 	}
 
@@ -77,6 +77,7 @@ public class CanvasView extends View implements OnLongClickListener {
 	private int scrollX, scrollY;
 	private int limitScrollX, limitScrollY;
 	private int anchorX, anchorY;
+	private int centerX, centerY;
 
 	private int objectType;
 	private CanvasObject currentObject;
@@ -85,8 +86,8 @@ public class CanvasView extends View implements OnLongClickListener {
 	private OvalObject protoOval;
 	private RectObject protoRect;
 	private PolygonObject protoPoly;
-	private PathObject protoPath;
-	private LinesObject protoLines;
+	private FreeObject protoFree;
+	private LineObject protoLine;
 	private BasicObject protoBasic;
 	private MoveMultiple protaMove;
 	private StyleAction protaStyle;
@@ -120,7 +121,8 @@ public class CanvasView extends View implements OnLongClickListener {
 	private Paint editPaint;
 	private int cacheSelX, cacheSelY;
 
-	private Rect selectRect;
+	private RectF editRect;
+	private RectF selectRect;
 	private Paint selectPaint;
 	private ShapeHandler handler;
 	private ControlPoint grabbedCPoint;
@@ -137,20 +139,21 @@ public class CanvasView extends View implements OnLongClickListener {
 		pendingMoveActions = new ArrayList<>();
 		pendingDeleteActions = new ArrayList<>();
 
-		selectRect = new Rect();
+		selectRect = new RectF();
+		editRect = new RectF();
 		selectPaint = new Paint();
 		selectPaint.setStyle(Style.FILL);
-		selectPaint.setColor(Color.argb(160, 100, 140, 255));
+		selectPaint.setARGB(100, 0, 30, 200);
 		editPaint = new Paint();
 		editPaint.setStyle(Style.STROKE);
 		editPaint.setColor(Color.BLACK);
 		editPaint.setStrokeWidth(1);
 		StrokeStyle.applyEffect(StrokeStyle.DASHED, editPaint);
 
-		fillColor = Color.RED;
-		strokeColor = Color.BLUE;
-		strokeWidth = 5;
-		strokeStyle = StrokeStyle.DOTTED;
+		fillColor = Color.TRANSPARENT;
+		strokeColor = Color.BLACK;
+		strokeWidth = 1;
+		strokeStyle = StrokeStyle.SOLID;
 		textSize = 30;
 		textFont = 0;
 
@@ -194,6 +197,8 @@ public class CanvasView extends View implements OnLongClickListener {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		if (model != null) {
+			centerX = (w >> 1) - scrollX;
+			centerY = (h >> 1) - scrollY;
 			limitScrollX = w - CANVAS_MARGIN - model.width;
 			limitScrollY = h - CANVAS_MARGIN - model.height;
 		}
@@ -213,20 +218,26 @@ public class CanvasView extends View implements OnLongClickListener {
 						cachePaint);
 			if (currentObject != null) {
 				currentObject.draw(canvas);
-				Rect r = currentObject.getBounds();
-				canvas.drawRect(r.left - EDIT_BORDER_PADDING, r.top
-						- EDIT_BORDER_PADDING, r.right + EDIT_BORDER_PADDING,
-						r.bottom + EDIT_BORDER_PADDING, editPaint);
-			}
-			if (mode == Mode.SELECT)
-				canvas.drawRect(selectRect, selectPaint);
-			else if ((mode & Mode.EDIT) == Mode.EDIT)
+				currentObject.getWorldBounds(editRect);
+				editRect.left -= EDIT_BORDER_PADDING;
+				editRect.top -= EDIT_BORDER_PADDING;
+				editRect.right += EDIT_BORDER_PADDING;
+				editRect.bottom += EDIT_BORDER_PADDING;
+				canvas.drawRect(editRect, editPaint);
 				if (handler != null)
 					handler.draw(canvas);
-			debug(canvas);
+			} else if (mode == Mode.SELECT)
+				canvas.drawRect(selectRect, selectPaint);
+
 		}
+
+		// /* CHANGE TO COMMENT TO DEBUG
+		if (model != null)
+			debug(canvas);
+		// */
 	}
 
+	// /** CHANGE TO LINE COMMENT TO DEBUG
 	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
 		debugPaint.setColor(Color.RED);
@@ -279,6 +290,8 @@ public class CanvasView extends View implements OnLongClickListener {
 		}
 	}
 
+	// */
+
 	private void reloadCache() {
 		int size = model.objects.size();
 		cacheCanvas.drawColor(Color.WHITE,
@@ -295,8 +308,15 @@ public class CanvasView extends View implements OnLongClickListener {
 				cacheCanvas.drawColor(Color.TRANSPARENT,
 						android.graphics.PorterDuff.Mode.CLEAR);
 				size = selectedObjects.size();
-				for (int i = 0; i < size; i++)
-					selectedObjects.get(i).draw(cacheCanvas);
+				editRect.setEmpty();
+				for (int i = 0; i < size; i++) {
+					CanvasObject co = selectedObjects.get(i);
+					co.draw(cacheCanvas);
+					co.getWorldBounds(selectRect);
+					editRect.union(selectRect);
+				}
+				selectRect.setEmpty();
+				cacheCanvas.drawRect(editRect, editPaint);
 				cacheCanvas.setBitmap(cacheImage);
 			}
 		} else {
@@ -325,26 +345,14 @@ public class CanvasView extends View implements OnLongClickListener {
 					selectRect.set(anchorX, anchorY, anchorX, anchorY);
 				else if (mode == Mode.DRAW) {
 					if (objectType == ObjectType.LINES) {
-						protoLines = new LinesObject(anchorX, anchorY,
+						protoLine = new LineObject(anchorX, anchorY,
 								strokeColor, strokeWidth, strokeStyle);
-						currentObject = protoLines;
-					} else {
-						if (objectType == ObjectType.RECT) {
-							protoRect = new RectObject(anchorX, anchorY,
-									fillColor, strokeColor, strokeWidth,
-									strokeStyle);
-							protoBasic = protoRect;
-						} else if (objectType == ObjectType.OVAL) {
-							protoOval = new OvalObject(anchorX, anchorY,
-									fillColor, strokeColor, strokeWidth,
-									strokeStyle);
-							protoBasic = protoOval;
-						} else if (objectType == ObjectType.PATH) {
-							protoPath = new PathObject(anchorX, anchorY,
-									fillColor, strokeColor, strokeWidth,
-									strokeStyle);
-							protoBasic = protoPath;
-						}
+						currentObject = protoLine;
+					} else if (objectType == ObjectType.FREE) {
+						protoFree = new FreeObject(makeLoop, fillColor,
+								strokeColor, strokeWidth, strokeStyle).penDown(
+								anchorX, anchorY);
+						protoBasic = protoFree;
 						currentObject = protoBasic;
 					}
 				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
@@ -383,35 +391,23 @@ public class CanvasView extends View implements OnLongClickListener {
 					selectRect.right = Math.max(anchorX, x);
 					selectRect.bottom = Math.max(anchorY, y);
 				} else if (mode == Mode.DRAW) {
-					if (objectType == ObjectType.PATH) {
-						protoPath.penTo(x, y);
+					if (objectType == ObjectType.FREE) {
+						protoFree.penTo(x, y);
 					} else if (objectType == ObjectType.LINES) {
-						protoLines.penTo(x, y);
-					} else {
-						int left = Math.min(anchorX, x);
-						int top = Math.min(anchorY, y);
-						int right = Math.max(anchorX, x);
-						int bottom = Math.max(anchorY, y);
-						if (objectType == ObjectType.RECT) {
-							protoRect.setDimension(left, top, right, bottom);
-						} else if (objectType == ObjectType.OVAL) {
-							protoOval.setDimension(left, top, right, bottom);
-						}
+						protoLine.penTo(x, y);
 					}
 				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
-					if (grabbedCPoint != null) {
-						int ox = grabbedCPoint.getX();
-						int oy = grabbedCPoint.getY();
-						grabbedCPoint.moveTo(x, y);
-						currentObject.onHandlerMoved(handler, grabbedCPoint,
-								ox, oy);
-					}
+					if (grabbedCPoint != null)
+						handler.dragPoint(grabbedCPoint, x, y);
 				}
 			}
 		} else if (act == MotionEvent.ACTION_UP) {
-			if (mode == Mode.SELECT) {
-				int dx = selectRect.right - selectRect.left;
-				int dy = selectRect.bottom - selectRect.top;
+			if ((mode & Mode.HAND) == Mode.HAND) {
+				centerX = (getWidth() >> 1) - scrollX;
+				centerY = (getHeight() >> 1) - scrollY;
+			} else if (mode == Mode.SELECT) {
+				float dx = selectRect.right - selectRect.left;
+				float dy = selectRect.bottom - selectRect.top;
 				boolean selected;
 				if (dy < SELECTION_MIN_SIZE && dx < SELECTION_MIN_SIZE) {
 					currentObject = selectAt(anchorX, anchorY,
@@ -419,27 +415,24 @@ public class CanvasView extends View implements OnLongClickListener {
 					selected = currentObject != null;
 					if (selected) {
 						selectedObjects.add(currentObject);
-						editObject(currentObject, ShapeHandler.SHAPE_ONLY);
+						editObject(currentObject, ShapeHandler.SHAPE);
 					}
 				} else {
 					selected = selectArea(selectRect);
 					if (selectedObjects.size() == 1)
-						editObject(selectedObjects.get(0),
-								ShapeHandler.SHAPE_ONLY);
+						editObject(selectedObjects.get(0), ShapeHandler.SHAPE);
 				}
 				if (selected) {
 					mode |= Mode.SELECTION_MODE;
 					reloadCache();
 				}
-				selectRect.set(0, 0, 0, 0);
-				listener.onCanvasSelection(selected);
+				selectRect.setEmpty();
+				listener.onSelectionEvent(selected);
 			} else if (mode == Mode.DRAW) {
-				if (objectType == ObjectType.RECT
-						|| objectType == ObjectType.OVAL
-						|| objectType == ObjectType.PATH
+				if (objectType == ObjectType.FREE
 						|| objectType == ObjectType.LINES) {
-					if (objectType == ObjectType.PATH && makeLoop)
-						protoPath.close();
+					if (objectType == ObjectType.FREE)
+						protoFree.penUp();
 					redoStack.clear();
 					listener.onURStatusChange(true, false);
 					editObject(currentObject, ShapeHandler.ALL);
@@ -493,6 +486,7 @@ public class CanvasView extends View implements OnLongClickListener {
 
 	private void editObject(CanvasObject co, int filter) {
 		currentObject = co;
+		changeCounter = 0;
 		handler = co.getHandlers(filter);
 		if ((mode & Mode.DRAW) != Mode.DRAW)
 			protaReshape = new ReshapeAction(co, true);
@@ -567,7 +561,7 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (protaMove != null) {
 				execute(protaMove.getInverse(), true);
 				if (!hidden_mode)
-					syncon.addToBuffer(protaStyle);
+					syncon.addToBuffer(protaMove);
 				protaMove = null;
 			}
 		} else
@@ -591,13 +585,13 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void setStrokeColor(int color) {
 		strokeColor = color;
 		if (currentObject != null) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeColor(color);
-			else if (currentObject instanceof LinesObject)
-				protoLines.setColor(color);
+			else if (currentObject instanceof LineObject)
+				protoLine.setColor(color);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -608,13 +602,13 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void setStrokeWidth(int width) {
 		strokeWidth = width;
 		if (currentObject != null) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeWidth(width);
-			else if (currentObject instanceof LinesObject)
-				protoLines.setWidth(width);
+			else if (currentObject instanceof LineObject)
+				protoLine.setWidth(width);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -625,13 +619,13 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void setStrokeStyle(int style) {
 		strokeStyle = style;
 		if (currentObject != null) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			if (currentObject instanceof BasicObject)
 				protoBasic.setStrokeStyle(strokeStyle);
-			else if (currentObject instanceof LinesObject)
-				protoLines.setStrokeStyle(style);
+			else if (currentObject instanceof LineObject)
+				protoLine.setStrokeStyle(style);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -643,6 +637,8 @@ public class CanvasView extends View implements OnLongClickListener {
 		// TODO insert image
 		objectType = ObjectType.IMAGE;
 		setMode(Mode.DRAW);
+		redoStack.clear();
+		listener.onURStatusChange(!userActions.empty(), false);
 	}
 
 	public void setImageTransparency(int alpha) {
@@ -653,21 +649,22 @@ public class CanvasView extends View implements OnLongClickListener {
 		objectType = ObjectType.TEXT;
 		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
 		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
-		protoText = new TextObject(text, x, y, strokeColor, textFont, textSize,
-				true);
+		protoText = new TextObject(text, x, y, strokeColor, textFont, textSize);
 		setMode(Mode.DRAW);
 		editObject(protoText, ShapeHandler.ALL);
+		redoStack.clear();
+		listener.onURStatusChange(!userActions.empty(), false);
 		invalidate();
 	}
 
 	public void setTextColor(int color) {
 		strokeColor = color;
 		if (currentObject != null && currentObject instanceof TextObject) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setColor(color);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -678,11 +675,11 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void setFontSize(int size) {
 		textSize = size;
 		if (currentObject != null && currentObject instanceof TextObject) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setSize(size);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -693,11 +690,11 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void setFontStyle(int font) {
 		textFont = font;
 		if (currentObject != null && currentObject instanceof TextObject) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setFontStyle(font);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -708,28 +705,43 @@ public class CanvasView extends View implements OnLongClickListener {
 	public void insertPrimitive(int type) {
 		objectType = type;
 		setMode(Mode.DRAW);
+		if (objectType == ObjectType.RECT) {
+			protoRect = new RectObject(centerX, centerY, centerY - 20,
+					fillColor, strokeColor, strokeWidth, strokeStyle);
+			protoBasic = protoRect;
+			currentObject = protoBasic;
+			editObject(currentObject, ShapeHandler.ALL);
+		} else if (objectType == ObjectType.OVAL) {
+			protoOval = new OvalObject(centerX, centerY, centerY - 20,
+					fillColor, strokeColor, strokeWidth, strokeStyle);
+			protoBasic = protoOval;
+			currentObject = protoBasic;
+			editObject(currentObject, ShapeHandler.ALL);
+		}
+		redoStack.clear();
+		listener.onURStatusChange(!userActions.empty(), false);
+		invalidate();
 	}
 
 	public void insertPolygon(int corner) {
-		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
-		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
-		int radius = getWidth() >> 1 - 20;
-		protoPoly = new PolygonObject(corner, radius, x, y, fillColor,
-				strokeColor, strokeWidth, strokeStyle);
+		protoPoly = new PolygonObject(corner, centerY - 20, centerX, centerY,
+				fillColor, strokeColor, strokeWidth, strokeStyle);
 		protoBasic = protoPoly;
 		setMode(Mode.DRAW);
 		editObject(protoPoly, ShapeHandler.ALL);
+		redoStack.clear();
+		listener.onURStatusChange(!userActions.empty(), false);
 		invalidate();
 	}
 
 	public void setFillParameter(boolean filled, int color) {
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		if (currentObject != null && currentObject instanceof BasicObject) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
+				protaStyle = new StyleAction(currentObject, true);
 			protoBasic = (BasicObject) currentObject;
 			protoBasic.setFillMode(filled, color);
 			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				if (protaStyle == null)
-					protaStyle = new StyleAction(currentObject, true);
 				changeCounter++;
 				pushToUAStack(protaStyle.capture(), false);
 			}
@@ -739,28 +751,28 @@ public class CanvasView extends View implements OnLongClickListener {
 
 	public void setMakeLoop(boolean loop) {
 		this.makeLoop = loop;
-		// TODO makeloop
 	}
 
-	private boolean selectArea(Rect area) {
+	private boolean selectArea(RectF area) {
 		selectedObjects.clear();
 		int size = model.objects.size();
 		for (int i = 0; i < size; i++) {
 			CanvasObject co = model.objects.get(i);
-			if (co.selectedBy(selectRect))
+			if (co.selectIn(area))
 				selectedObjects.add(co);
 		}
 		return !selectedObjects.isEmpty();
 	}
 
 	private CanvasObject selectAt(int x, int y, int radius) {
+		selectedObjects.clear();
 		int last = model.objects.size();
 		if (last == 0)
 			return null;
 		last--;
 		for (int i = last; i >= 0; i--) {
 			CanvasObject co = model.objects.get(i);
-			if (co.selectedBy(x, y, radius))
+			if (co.selectAt(x, y, radius))
 				return co;
 		}
 		return null;
@@ -777,21 +789,35 @@ public class CanvasView extends View implements OnLongClickListener {
 	}
 
 	public void copySelectedObjects() {
-		// TODO copy selected
+		ObjectClipboard.put(selectedObjects);
 	}
 
 	public void deleteSelectedObjects() {
 		DeleteMultiple dm = new DeleteMultiple(selectedObjects);
 		model.objects.removeAll(selectedObjects);
 		pushToUAStack(dm, !hidden_mode);
+		cancelSelect();
 	}
 
 	public void cancelSelect() {
 		currentObject = null;
+		selectRect.setEmpty();
 		mode &= ~Mode.SELECTION_MODE;
 		int size = selectedObjects.size();
 		for (int i = 0; i < size; i++)
 			selectedObjects.get(i).deselect();
+		reloadCache();
+		postInvalidate();
+	}
+
+	public void pasteFromClipboard() {
+		selectedObjects.clear();
+		ArrayList<CanvasObject> objs = ObjectClipboard.retrieve();
+		for (int i = 0; i < objs.size(); i++)
+			selectedObjects.add(objs.get(i).cloneObject());
+		DrawMultiple dm = new DrawMultiple(selectedObjects);
+		pushToUAStack(dm, !hidden_mode);
+		mode |= Mode.SELECTION_MODE;
 		reloadCache();
 		postInvalidate();
 	}
@@ -814,6 +840,9 @@ public class CanvasView extends View implements OnLongClickListener {
 			if (changeCounter <= 0
 					&& (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) || ((mode & Mode.DRAW) == Mode.DRAW))) {
 				cancelAction();
+				redoStack.clear();
+				listener.onURStatusChange(!userActions.isEmpty(), false);
+				mode = Mode.SELECT;
 				return;
 			}
 			UserAction action = userActions.pop();
@@ -887,8 +916,7 @@ public class CanvasView extends View implements OnLongClickListener {
 						grabbedCPoint.release();
 						grabbedCPoint = null;
 					}
-					handler = currentObject
-							.getHandlers(ShapeHandler.SHAPE_ONLY);
+					handler = currentObject.getHandlers(ShapeHandler.SHAPE);
 				}
 			}
 		} else if (action instanceof StyleAction) {
@@ -918,8 +946,6 @@ public class CanvasView extends View implements OnLongClickListener {
 		} else if (action instanceof DrawMultiple) {// undelete
 			DrawMultiple dm = (DrawMultiple) action;
 			model.objects.addAll(dm.objects);
-		} else if (action instanceof CopyAction) {
-			// TODO copy action
 		}
 	}
 

@@ -67,7 +67,7 @@ public class MoveMultiple extends UserAction {
 		int dy = trans[OFFSET_Y];
 		int size = objects.size();
 		for (int i = 0; i < size; i++)
-			objects.get(i).translate(dx, dy);
+			objects.get(i).setOffset(dx, dy);
 	}
 
 	@Override

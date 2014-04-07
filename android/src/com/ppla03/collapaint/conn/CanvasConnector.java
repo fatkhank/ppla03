@@ -147,7 +147,7 @@ public class CanvasConnector extends ServerConnector {
 						// if object is new but the action is not draw, find in
 						// object list
 						for (int j = 0; j < sentObjects.size(); j++) {
-							if (sentObjects.get(j).id == co.id) {
+							if (sentObjects.get(j).privateID == co.privateID) {
 								joAct.put(JCode.ACTION_OBJ_LISTED, j);
 								break;
 							}
@@ -170,11 +170,11 @@ public class CanvasConnector extends ServerConnector {
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.RECT);
 				else if (co instanceof OvalObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.OVAL);
-				else if (co instanceof LinesObject)
+				else if (co instanceof LineObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.LINES);
 				else if (co instanceof PolygonObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.POLYGON);
-				else if (co instanceof PathObject)
+				else if (co instanceof FreeObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.PATH);
 				else if (co instanceof TextObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.TEXT);
@@ -182,7 +182,7 @@ public class CanvasConnector extends ServerConnector {
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.IMAGE);
 					// TODO upload image
 				}
-				joObj.put(JCode.OBJECT_ID, co.id);
+				joObj.put(JCode.OBJECT_ID, co.privateID);
 				joObj.put(JCode.OBJECT_TRANSFORM,
 						MoveAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
@@ -222,7 +222,7 @@ public class CanvasConnector extends ServerConnector {
 						int j = 0;
 						do {
 							co = sentObjects.get(j++);
-						} while (co.id != oid);
+						} while (co.privateID != oid);
 						co.setGlobaID(gid);
 					} else {
 						// if object is new create object from reply
@@ -283,11 +283,11 @@ public class CanvasConnector extends ServerConnector {
 		else if (code == ObjectCode.OVAL)
 			co = new OvalObject();
 		else if (code == ObjectCode.LINES)
-			co = new LinesObject();
+			co = new LineObject();
 		else if (code == ObjectCode.POLYGON)
 			co = new PolygonObject();
 		else if (code == ObjectCode.PATH)
-			co = new PathObject();
+			co = new FreeObject();
 		else if (code == ObjectCode.TEXT)
 			co = new TextObject();
 		else if (code == ObjectCode.IMAGE)

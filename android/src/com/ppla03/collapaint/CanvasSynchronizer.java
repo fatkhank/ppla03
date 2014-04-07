@@ -7,15 +7,8 @@ import android.util.Log;
 
 import com.ppla03.collapaint.conn.CanvasConnector;
 import com.ppla03.collapaint.conn.SyncEventListener;
-import com.ppla03.collapaint.model.action.CopyAction;
-import com.ppla03.collapaint.model.action.DeleteAction;
-import com.ppla03.collapaint.model.action.DeleteMultiple;
-import com.ppla03.collapaint.model.action.DrawAction;
-import com.ppla03.collapaint.model.action.DrawMultiple;
-import com.ppla03.collapaint.model.action.MoveAction;
-import com.ppla03.collapaint.model.action.MoveMultiple;
-import com.ppla03.collapaint.model.action.UserAction;
-import com.ppla03.collapaint.model.object.CanvasObject;
+import com.ppla03.collapaint.model.action.*;
+import com.ppla03.collapaint.model.object.*;
 
 public class CanvasSynchronizer implements SyncEventListener {
 	private CanvasView canvas;
@@ -86,12 +79,6 @@ public class CanvasSynchronizer implements SyncEventListener {
 					int len = objs.size();
 					for (int j = 0; j < len; j++)
 						sentList.add(new DeleteAction(objs.get(j)));
-				} else if (act instanceof CopyAction) {
-					objs = ((CopyAction) act).objects;
-					int len = objs.size();
-					for (int j = 0; j < len; j++)
-						sentList.add(new DrawAction(objs.get(j)));
-					// TODO translate copy to draw + move
 				} else if (act instanceof MoveMultiple) {
 					MoveMultiple tm = (MoveMultiple) act;
 					objs = tm.objects;
