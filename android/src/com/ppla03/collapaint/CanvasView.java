@@ -131,13 +131,13 @@ public class CanvasView extends View implements OnLongClickListener {
 		super(context, attrs);
 		mode = Mode.SELECT;
 
-		selectedObjects = new ArrayList<>();
-		userActions = new Stack<>();
-		redoStack = new Stack<>();
-		pendingStyleActions = new ArrayList<>();
-		pendingReshapeActions = new ArrayList<>();
-		pendingMoveActions = new ArrayList<>();
-		pendingDeleteActions = new ArrayList<>();
+		selectedObjects = new ArrayList<CanvasObject>();
+		userActions = new Stack<UserAction>();
+		redoStack = new Stack<UserAction>();
+		pendingStyleActions = new ArrayList<UserAction>();
+		pendingReshapeActions = new ArrayList<UserAction>();
+		pendingMoveActions = new ArrayList<UserAction>();
+		pendingDeleteActions = new ArrayList<UserAction>();
 
 		selectRect = new RectF();
 		editRect = new RectF();

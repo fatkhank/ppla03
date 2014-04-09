@@ -37,9 +37,9 @@ public class CanvasSynchronizer implements SyncEventListener {
 	public CanvasSynchronizer(CanvasView canvas) {
 		this.canvas = canvas;
 		connector = CanvasConnector.getInstance().setUpdateSynchronizer(this);
-		actionBuffer = new ArrayList<>();
-		playbackList = new ArrayList<>();
-		sentList = new ArrayList<>();
+		actionBuffer = new ArrayList<UserAction>();
+		playbackList = new ArrayList<UserAction>();
+		sentList = new ArrayList<UserAction>();
 		handler = new Handler();
 	}
 

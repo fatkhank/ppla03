@@ -13,7 +13,7 @@ public class DeleteMultiple extends UserAction {
 	}
 
 	public DeleteMultiple(ArrayList<CanvasObject> objects) {
-		this.objects = new ArrayList<>(objects);
+		this.objects = new ArrayList<CanvasObject>(objects);
 		this.inverse = new DrawMultiple(this.objects, this);
 	}
 
