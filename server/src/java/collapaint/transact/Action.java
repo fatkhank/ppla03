@@ -42,9 +42,9 @@ public class Action extends HttpServlet {
         static final String LAST_ACTION_NUM = "lan";
         static final String CANVAS_ID = "cid";
         static final String ACTION_LIST = "act";
-        static final String ACTION_OBJ_LISTED = "id";
-        static final String ACTION_OBJ_KNOWN = "gid";
-        static final String ACTION_SUBMITTED = "sid";
+        static final String ACTION_OBJ_LISTED = "ol";
+        static final String ACTION_OBJ_KNOWN = "ok";
+        static final String ACTION_SUBMITTED = "as";
         static final String ACTION_CODE = "cd";
         static final String ACTION_PARAM = "par";
         static final String OBJECT_LIST = "obj";
@@ -52,17 +52,17 @@ public class Action extends HttpServlet {
         static final String OBJECT_GLOBAL_ID = "gid";
         static final String OBJECT_CODE = "cd";
         static final String OBJECT_SHAPE = "sh";
-        static final String OBJECT_STYLE = "sty";
-        static final String OBJECT_TRANSFORM = "txf";
+        static final String OBJECT_STYLE = "st";
+        static final String OBJECT_TRANSFORM = "tx";
     }
 
     public static final class ActionCode {
 
-        public static char DRAW_ACTION = 'A';
-        public static char DELETE_ACTION = 'B';
-        public static char RESHAPE_ACTION = 'C';
-        public static char STYLE_ACTION = 'D';
-        public static char TRANSFORM_ACTION = 'E';
+        public static final int DRAW_ACTION = 1;
+        public static final int DELETE_ACTION = 2;
+        public static final int RESHAPE_ACTION = 3;
+        public static final int STYLE_ACTION = 4;
+        public static final int TRANSFORM_ACTION = 5;
     }
 
     static final class ActionCol {
@@ -87,10 +87,10 @@ public class Action extends HttpServlet {
 
         int id;
         int objectID;
-        String code;
+        int code;
         String param;
 
-        public ActionObject(int objectID, String code, String param) {
+        public ActionObject(int objectID, int code, String param) {
             this.objectID = objectID;
             this.code = code;
             this.param = param;
@@ -101,12 +101,12 @@ public class Action extends HttpServlet {
 
         int id;
         int globalId;
-        String code;
+        int code;
         String shape;
         String style;
         String transform;
 
-        public CanvasObject(int id, int globalId, String code, String shape,
+        public CanvasObject(int id, int globalId, int code, String shape,
                 String style, String transform) {
             this.id = id;
             this.globalId = globalId;
@@ -131,9 +131,7 @@ public class Action extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(DB.URL, DB.USERNAME,
                     DB.PASSWORD);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Action.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(Action.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -152,7 +150,7 @@ public class Action extends HttpServlet {
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param is inputstream
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
@@ -162,15 +160,14 @@ public class Action extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        PrintWriter out = null;
-        try {
-            out = response.getWriter();
+        try (PrintWriter out = response.getWriter()) {
 
             //*************************** SAVE REQUEST *************************
             ArrayList<CanvasObject> objectPool = new ArrayList<>();
             ArrayList<ActionObject> userActions = new ArrayList<>();
 
             JsonObject json = Json.createReader(is).readObject();
+            System.out.println("recieve:" + json);
 
             //------------ process objects ------------
             JsonArray objs = json.getJsonArray(JCode.OBJECT_LIST);
@@ -180,7 +177,7 @@ public class Action extends HttpServlet {
                 int id = obj.getInt(JCode.OBJECT_ID);
                 int gid = (obj.containsKey(JCode.OBJECT_GLOBAL_ID)) ? obj.
                         getInt(JCode.OBJECT_GLOBAL_ID) : -1;
-                String code = obj.getString(JCode.OBJECT_CODE);
+                int code = obj.getInt(JCode.OBJECT_CODE);
                 String shape = obj.getString(JCode.OBJECT_SHAPE);
                 String style = obj.getString(JCode.OBJECT_STYLE);
                 String transform = obj.getString(JCode.OBJECT_TRANSFORM);
@@ -200,8 +197,8 @@ public class Action extends HttpServlet {
                         ? obj.getInt(JCode.ACTION_OBJ_KNOWN)
                         : objectPool.get(obj.getInt(JCode.ACTION_OBJ_LISTED)).globalId;
 
-                String code = obj.getString(JCode.ACTION_CODE);
-                String param = obj.getString(JCode.ACTION_PARAM);
+                int code = obj.getInt(JCode.ACTION_CODE);
+                String param = obj.getString(JCode.ACTION_PARAM, "");
                 ActionObject ao = new ActionObject(oid, code, param);
                 userActions.add(ao);
             }
@@ -235,7 +232,7 @@ public class Action extends HttpServlet {
                         }
                     }
                     //if not a submitted action
-                    char code = result.getString(ActionCol.CODE).charAt(0);
+                    int code = result.getInt(ActionCol.CODE);
                     if (id != -1) {
                         String param = result.getString(ActionCol.PARAMETER);
                         ob.add(JCode.ACTION_PARAM, param);
@@ -243,6 +240,7 @@ public class Action extends HttpServlet {
                         id = -1;
                     }
                     int objectID = result.getInt(ActionCol.OBJECT_ID);
+
                     //search object in object pool
                     for (int i = 0; i < objectPool.size(); i++) {
                         if (objectPool.get(i).globalId == objectID) {
@@ -284,13 +282,16 @@ public class Action extends HttpServlet {
 
                 reply.add(JCode.LAST_ACTION_NUM, lan);
                 out.println(reply.build());
+
+                System.out.println("reply:" + reply.build());
             }
-        } catch (Exception ex) {
+        } catch (IOException | SQLException ex) {
             StackTraceElement[] ste = ex.getStackTrace();
+            PrintWriter out = response.getWriter();
             out.println("error:" + ex.toString() + ":" + ex.getCause());
             out.print("<pre>");
-            for (int i = 0; i < ste.length; i++) {
-                out.println(ste[i].toString());
+            for (StackTraceElement ste1 : ste) {
+                out.println(ste1.toString());
             }
             out.print("</pre>");
             Logger.getLogger(Action.class.getName()).log(Level.SEVERE, null, ex);
@@ -358,7 +359,7 @@ public class Action extends HttpServlet {
                     append("'");
             ResultSet result = statement.executeQuery(sb.toString());
             result.next();
-            obj.code = result.getString(ObjectCol.CODE);
+            obj.code = result.getInt(ObjectCol.CODE);
             obj.transform = result.getString(ObjectCol.TRANSFORM);
             obj.style = result.getString(ObjectCol.STYLE);
             obj.shape = result.getString(ObjectCol.SHAPE);
@@ -378,8 +379,8 @@ public class Action extends HttpServlet {
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(new StringInputStream(request.
-                getParameter("json")), response);
+//        processRequest(new StringInputStream(request.
+//                getParameter("json")), response);
     }
 
     /**
