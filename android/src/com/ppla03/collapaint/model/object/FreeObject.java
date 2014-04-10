@@ -40,7 +40,7 @@ public class FreeObject extends BasicObject {
 	 * Daftar untuk mencatat titik-titik goresan pena, terurut dari yang
 	 * pertama.
 	 */
-	private static final ArrayList<PointF> points = new ArrayList<>();
+	private static final ArrayList<PointF> points = new ArrayList<PointF>();
 
 	private static final int EDIT_MASK = 1, EDITABLE = 1, PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;

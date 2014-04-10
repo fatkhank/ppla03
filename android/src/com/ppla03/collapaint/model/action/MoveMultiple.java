@@ -61,7 +61,7 @@ public class MoveMultiple extends UserAction {
 	 *            sehingga aksi perubahan bersifat permanen.
 	 */
 	public MoveMultiple(ArrayList<CanvasObject> objects, boolean reversible) {
-		this.objects = new ArrayList<>(objects);
+		this.objects = new ArrayList<CanvasObject>(objects);
 		if (reversible) {
 			MoveMultiple tm = new MoveMultiple(this.objects, this);
 			tm.trans[OFFSET_X] = -this.trans[OFFSET_X];

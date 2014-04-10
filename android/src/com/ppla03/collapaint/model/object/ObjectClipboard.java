@@ -9,7 +9,7 @@ import java.util.List;
  * 
  */
 public class ObjectClipboard {
-	private static final ArrayList<CanvasObject> copiedObjects = new ArrayList<>();
+	private static final ArrayList<CanvasObject> copiedObjects = new ArrayList<CanvasObject>();
 
 	/**
 	 * Menyimpan objek-objek kanvas untuk disalin. Perubahan pada objek yang

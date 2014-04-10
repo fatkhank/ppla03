@@ -31,7 +31,7 @@ public class DrawMultiple extends UserAction {
 	 *            tersimpan oleh aksi ini.
 	 */
 	public DrawMultiple(ArrayList<CanvasObject> objects) {
-		this.objects = new ArrayList<>(objects);
+		this.objects = new ArrayList<CanvasObject>(objects);
 		this.inverse = new DeleteMultiple(this.objects, this);
 	}
 
