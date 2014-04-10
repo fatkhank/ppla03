@@ -35,6 +35,8 @@ import javax.transaction.UserTransaction;
  */
 @WebServlet(name = "image", urlPatterns = {"/image"})
 public class Image extends HttpServlet {
+    
+    public static String res = "empty";
 
     final String url = "jdbc:mysql://localhost/collapaint";
     final String uname = "root";
@@ -55,34 +57,37 @@ public class Image extends HttpServlet {
         PrintWriter out = null;
         try {
             out = response.getWriter();
-            JsonObjectBuilder job = Json.createObjectBuilder();
-            job.add("lan", 2);
-            job.add("canvas_id", 2);
-
-            JsonArrayBuilder ojab = Json.createArrayBuilder();
-
-            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "r").
-                    add("geom", "geom1").add("style", "sty1").add("tran", "wo"));
-            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "c").
-                    add("geom", "geom2").add("style", "sty2").add("tran", "wo"));
-
-//            job.add("object", ojab);
-
-            JsonArrayBuilder ajab = Json.createArrayBuilder();
-
-            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "w").
-                    add("param", "paramamama"));
-            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "d").
-                    add("param", ""));
-            ajab.add(Json.createObjectBuilder().add("id", 1).add("code", "w").
-                    add("param", "draw again"));
-
-  //          job.add("action", ajab);
+            out.println(res);
             
-            char cd = 'd';
-            job.add("char", cd);
-
-            out.println(job.build().toString());
+            
+//            JsonObjectBuilder job = Json.createObjectBuilder();
+//            job.add("lan", 2);
+//            job.add("canvas_id", 2);
+//
+//            JsonArrayBuilder ojab = Json.createArrayBuilder();
+//
+//            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "r").
+//                    add("geom", "geom1").add("style", "sty1").add("tran", "wo"));
+//            ojab.add(Json.createObjectBuilder().add("id", "4").add("code", "c").
+//                    add("geom", "geom2").add("style", "sty2").add("tran", "wo"));
+//
+////            job.add("object", ojab);
+//
+//            JsonArrayBuilder ajab = Json.createArrayBuilder();
+//
+//            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "w").
+//                    add("param", "paramamama"));
+//            ajab.add(Json.createObjectBuilder().add("id", 0).add("code", "d").
+//                    add("param", ""));
+//            ajab.add(Json.createObjectBuilder().add("id", 1).add("code", "w").
+//                    add("param", "draw again"));
+//
+//  //          job.add("action", ajab);
+//            
+//            char cd = 'd';
+//            job.add("char", cd);
+//
+//            out.println(job.build().toString());
         } catch (Exception ex) {
             ex.printStackTrace();
             out.write("error:" + ex.toString());

@@ -6,7 +6,6 @@
 package collapaint.transact;
 
 import collapaint.DB;
-import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -196,7 +195,7 @@ public class Action extends HttpServlet {
                 int oid = (obj.containsKey(JCode.ACTION_OBJ_KNOWN))
                         ? obj.getInt(JCode.ACTION_OBJ_KNOWN)
                         : objectPool.get(obj.getInt(JCode.ACTION_OBJ_LISTED)).globalId;
-
+                //TODO error
                 int code = obj.getInt(JCode.ACTION_CODE);
                 String param = obj.getString(JCode.ACTION_PARAM, "");
                 ActionObject ao = new ActionObject(oid, code, param);

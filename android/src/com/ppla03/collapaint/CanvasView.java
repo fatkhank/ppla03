@@ -254,14 +254,15 @@ public class CanvasView extends View {
 	}
 
 	/**
-	 * Memuat data kanvas dari server. Jika proses sudah selesai, maka akan memanggil {@link CanvasListener#onCanvasModelLoaded(CanvasModel, int)}
+	 * Memuat data kanvas dari server. Jika proses sudah selesai, maka akan
+	 * memanggil {@link CanvasListener#onCanvasModelLoaded(CanvasModel, int)}
 	 * @param model model kanvas yang akan dibuka, minimal harus memiliki data
 	 *            id kanvas.
 	 */
 	public void open(CanvasModel model) {
 		this.model = model;
 		synczer.loadCanvas(model);
-		//TODO remove autoload
+		// TODO remove autoload
 		onCanvasLoaded(1);
 	}
 
@@ -567,6 +568,12 @@ public class CanvasView extends View {
 		return true;
 	}
 
+	/**
+	 * Mengubah mode kanvas. Mode {@link Mode#HAND} bisa dibuat toogle. Jika
+	 * mode yang dipilih = {@link Mode#SELECT} dan ada objek yan gsedang
+	 * diseleksi, maka akan menghilangkan seleksi.
+	 * @param mode
+	 */
 	public void setMode(int mode) {
 		if (mode == Mode.HAND)
 			this.mode ^= Mode.HAND;
@@ -581,9 +588,6 @@ public class CanvasView extends View {
 	}
 
 	private void editObject(CanvasObject co, int filter) {
-		// TODO debug edit
-		Log.d("POS", "id:" + co.privateID + ", gid:" + co.getGlobalID());
-
 		currentObject = co;
 		changeCounter = 0;
 		handler = co.getHandlers(filter);
@@ -592,6 +596,9 @@ public class CanvasView extends View {
 		mode |= Mode.EDIT;
 	}
 
+	/**
+	 * Menyetujui aksi edit yang dilakukan pengguna.
+	 */
 	public void approveAction() {
 		while (changeCounter-- > 0)
 			userActions.pop();
@@ -635,6 +642,13 @@ public class CanvasView extends View {
 		redoStack.clear();
 	}
 
+	/**
+	 * Membatalkan aksi pengguna.<br/>
+	 * Jika sedang mengedit satu objek, maka perubahan yang dilakukan akan
+	 * dibatalkan dan seleksi pada objek dihilangkan.<br/>
+	 * Jika sedang memindah banyak objek, maka aksi dibatalkan. Namun
+	 * objek-objek tersebut masih diseleksi.
+	 */
 	public void cancelAction() {
 		handler = null;
 		currentObject = null;
