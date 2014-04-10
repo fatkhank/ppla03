@@ -10,12 +10,23 @@ import com.ppla03.collapaint.model.object.ImageObject;
 import com.ppla03.collapaint.model.object.LineObject;
 import com.ppla03.collapaint.model.object.TextObject;
 
+/**
+ * Aksi mengubah <i>style</i> dari suatu objek kanvas.
+ * @author hamba v7
+ * 
+ */
 public class StyleAction extends UserAction {
+	/**
+	 * Objek kanvas yang dikenai aksi.
+	 */
 	public final CanvasObject object;
 	private static final int FILL_COLOR = 0, STROKE_COLOR = 1,
 			STROKE_WIDTH = 2, STROKE_STYLE = 3, TEXT_COLOR = STROKE_COLOR,
 			TEXT_SIZE = STROKE_WIDTH, TEXT_STYLE = STROKE_STYLE;
 
+	/**
+	 * Parameter <i>style</i> objek.
+	 */
 	private final int[] styles = new int[4];
 
 	/**
@@ -91,14 +102,25 @@ public class StyleAction extends UserAction {
 		return sa;
 	}
 
+	/**
+	 * Menjalankan aksi ini.
+	 */
 	public void applyStyle() {
 		applyStyle(styles, object);
 	}
 
+	/**
+	 * Mendapatkan parameter dari aksi ini dalam bentuk String.
+	 * @return parameter.
+	 */
 	public String getParameter() {
 		return encode(styles);
 	}
 
+	/**
+	 * Mengatur paramete raksi ini dalam bentuk String.
+	 * @param param
+	 */
 	public void setParameter(String param) {
 		decodeTo(param, styles);
 	}
@@ -113,8 +135,10 @@ public class StyleAction extends UserAction {
 	private static final int[] styleTemp = new int[4];
 
 	public static void applyStyle(String param, CanvasObject object) {
-		decodeTo(param, styleTemp);
-		applyStyle(styleTemp, object);
+		if (param != null && !param.isEmpty()) {
+			decodeTo(param, styleTemp);
+			applyStyle(styleTemp, object);
+		}
 	}
 
 	private static void extractStyle(CanvasObject object, int[] style) {
@@ -152,8 +176,8 @@ public class StyleAction extends UserAction {
 			lo.setWidth(style[STROKE_WIDTH]);
 			lo.setStrokeStyle(style[STROKE_STYLE]);
 		} else if (co instanceof TextObject) {
-			((TextObject) co).setParameter(style[TEXT_COLOR], style[TEXT_SIZE],
-					style[TEXT_STYLE]);
+			((TextObject) co).setParameter(style[TEXT_COLOR],
+					style[TEXT_STYLE], style[TEXT_SIZE]);
 		} else if (co instanceof ImageObject) {
 			((ImageObject) co).setTransparency(style[FILL_COLOR]);
 		}

@@ -263,9 +263,6 @@ public class FreeObject extends BasicObject {
 	@Override
 	public CanvasObject cloneObject() {
 		FreeObject fo = new FreeObject();
-		fo.offsetX = this.offsetX;
-		fo.offsetY = this.offsetY;
-		fo.rotation = this.rotation;
 		fo.path.set(this.path);
 		fo.bounds.set(this.bounds);
 		fo.xLocs = new float[this.xLocs.length];
@@ -273,6 +270,7 @@ public class FreeObject extends BasicObject {
 		System.arraycopy(this.xLocs, 0, fo.xLocs, 0, this.xLocs.length);
 		System.arraycopy(this.yLocs, 0, fo.yLocs, 0, this.yLocs.length);
 		fo.state = this.state;
+		copyTransformData(fo);
 		changeStyles(fo);
 		return fo;
 	}

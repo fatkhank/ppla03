@@ -102,9 +102,7 @@ public class RectObject extends BasicObject {
 	public CanvasObject cloneObject() {
 		RectObject ro = new RectObject();
 		ro.rect.set(this.rect);
-		ro.offsetX = this.offsetX;
-		ro.offsetY = this.offsetY;
-		ro.rotation = this.rotation;
+		copyTransformData(ro);
 		changeStyles(ro);
 		return ro;
 	}

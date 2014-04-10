@@ -2,9 +2,21 @@ package com.ppla03.collapaint.model.action;
 
 import com.ppla03.collapaint.model.object.CanvasObject;
 
+/**
+ * Aksi menghapus suatu objek kanvas. Aksi ini merupakan lawan dari {@link DrawAction}.
+ * @author hamba v7
+ * 
+ */
 public class DeleteAction extends UserAction {
+	/**
+	 * Objek kanvas yang dihapus.
+	 */
 	public final CanvasObject object;
 
+	/**
+	 * Membuat aksi {@link DeleteAction}.
+	 * @param object objek yang dihapus.
+	 */
 	public DeleteAction(CanvasObject object) {
 		this.object = object;
 	}

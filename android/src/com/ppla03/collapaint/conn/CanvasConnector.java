@@ -6,12 +6,9 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.app.Notification.Style;
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.view.animation.Transformation;
 
-import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.action.*;
@@ -22,9 +19,9 @@ public class CanvasConnector extends ServerConnector {
 		static final String LAST_ACTION_NUM = "lan";
 		static final String CANVAS_ID = "cid";
 		static final String ACTION_LIST = "act";
-		static final String ACTION_OBJ_LISTED = "id";
-		static final String ACTION_OBJ_KNOWN = "gid";
-		static final String ACTION_SUBMITTED = "sid";
+		static final String ACTION_OBJ_LISTED = "ol";
+		static final String ACTION_OBJ_KNOWN = "ok";
+		static final String ACTION_SUBMITTED = "as";
 		static final String ACTION_CODE = "cd";
 		static final String ACTION_PARAM = "par";
 		static final String OBJECT_LIST = "obj";
@@ -32,32 +29,32 @@ public class CanvasConnector extends ServerConnector {
 		static final String OBJECT_GLOBAL_ID = "gid";
 		static final String OBJECT_CODE = "cd";
 		static final String OBJECT_SHAPE = "sh";
-		static final String OBJECT_STYLE = "sty";
-		static final String OBJECT_TRANSFORM = "txf";
+		static final String OBJECT_STYLE = "st";
+		static final String OBJECT_TRANSFORM = "tx";
 	}
 
 	public static final class ActionCode {
-		public static char DRAW_ACTION = 'A';
-		public static char DELETE_ACTION = 'B';
-		public static char RESHAPE_ACTION = 'C';
-		public static char STYLE_ACTION = 'D';
-		public static char TRANSFORM_ACTION = 'E';
+		public static final int DRAW_ACTION = 1;
+		public static final int DELETE_ACTION = 2;
+		public static final int RESHAPE_ACTION = 3;
+		public static final int STYLE_ACTION = 4;
+		public static final int TRANSFORM_ACTION = 5;
 	}
 
 	public static final class ObjectCode {
-		public static char RECT = 'R';
-		public static char OVAL = 'O';
-		public static char LINES = 'L';
-		public static char POLYGON = 'P';
-		public static char PATH = 'F';
-		public static char TEXT = 'T';
-		public static char IMAGE = 'I';
+		public static final int RECT = 1;
+		public static final int OVAL = 2;
+		public static final int LINES = 3;
+		public static final int POLYGON = 4;
+		public static final int PATH = 5;
+		public static final int TEXT = 6;
+		public static final int IMAGE = 7;
 	}
 
 	public static final String COMMIT_URL = HOST + "action";
 
 	private static CanvasConnector instance;
-	private static SyncEventListener syncer;
+	private static SyncEventListener syncListener;
 	private ArrayList<UserAction> sentActions;
 	private ArrayList<CanvasObject> sentObjects;
 	private ArrayList<UserAction> replyActions;
@@ -79,8 +76,8 @@ public class CanvasConnector extends ServerConnector {
 		return instance;
 	}
 
-	public CanvasConnector setUpdateSynchronizer(SyncEventListener cs) {
-		syncer = cs;
+	public CanvasConnector setSyncListener(SyncEventListener cs) {
+		syncListener = cs;
 		return this;
 	}
 
@@ -115,28 +112,30 @@ public class CanvasConnector extends ServerConnector {
 				JSONObject joAct = new JSONObject();
 				CanvasObject co = null;
 				if (ua instanceof DrawAction) {
-					joAct.put(JCode.ACTION_CODE, "" + ActionCode.DRAW_ACTION);
+					joAct.put(JCode.ACTION_CODE, ActionCode.DRAW_ACTION);
+					joAct.put(JCode.ACTION_PARAM, "");
 					co = ((DrawAction) ua).object;
 				} else if (ua instanceof DeleteAction) {
-					joAct.put(JCode.ACTION_CODE, "" + ActionCode.DELETE_ACTION);
+					joAct.put(JCode.ACTION_CODE, ActionCode.DELETE_ACTION);
+					joAct.put(JCode.ACTION_PARAM, "");
 					co = ((DeleteAction) ua).object;
 				} else if (ua instanceof ReshapeAction) {
 					ReshapeAction ra = (ReshapeAction) ua;
-					joAct.put(JCode.ACTION_CODE, "" + ActionCode.RESHAPE_ACTION);
+					joAct.put(JCode.ACTION_CODE, ActionCode.RESHAPE_ACTION);
 					joAct.put(JCode.ACTION_PARAM, ra.getParameter());
 					co = ra.object;
 				} else if (ua instanceof StyleAction) {
 					StyleAction sa = (StyleAction) ua;
-					joAct.put(JCode.ACTION_CODE, "" + ActionCode.STYLE_ACTION);
+					joAct.put(JCode.ACTION_CODE, ActionCode.STYLE_ACTION);
 					joAct.put(JCode.ACTION_PARAM, sa.getParameter());
 					co = sa.object;
 				} else if (ua instanceof MoveAction) {
 					MoveAction ta = (MoveAction) ua;
-					joAct.put(JCode.ACTION_CODE, ""
-							+ ActionCode.TRANSFORM_ACTION);
+					joAct.put(JCode.ACTION_CODE, ActionCode.TRANSFORM_ACTION);
 					joAct.put(JCode.ACTION_PARAM, ta.getParameter());
 					co = ta.object;
 				}
+
 				if (co.getGlobalID() == -1) {
 					// if object is new and the action is draw, put in object
 					// list
@@ -183,8 +182,7 @@ public class CanvasConnector extends ServerConnector {
 					// TODO upload image
 				}
 				joObj.put(JCode.OBJECT_ID, co.privateID);
-				joObj.put(JCode.OBJECT_TRANSFORM,
-						MoveAction.getParameterOf(co));
+				joObj.put(JCode.OBJECT_TRANSFORM, MoveAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_SHAPE, ReshapeAction.getParameterOf(co));
 				jarObj.put(joObj);
@@ -195,8 +193,14 @@ public class CanvasConnector extends ServerConnector {
 			msg.put(JCode.LAST_ACTION_NUM, lastActNum);
 			msg.put(JCode.CANVAS_ID, canvasID);
 
-			new Client(COMMIT_URL, updateListener);
+			// TODO debug ccon
+			Log.d("POS", "send:" + msg.toString());
+
+			new Client(COMMIT_URL, updateListener).execute(msg);
 		} catch (Exception e) {
+			StackTraceElement[] ste = e.getStackTrace();
+			for (int k = 0; k < ste.length; k++)
+				Log.d("POS", "ce:" + ste[k].toString());
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -205,8 +209,15 @@ public class CanvasConnector extends ServerConnector {
 	private final ServerConnector.ReplyListener updateListener = new ReplyListener() {
 
 		@Override
-		public void process(JSONObject reply) {
+		public void process(int status, JSONObject reply) {
 			try {
+				// TODO debug ccon
+				if (status != SUCCESS) {
+					syncListener.onActionUpdatedFailed(status);
+					return;
+				}
+
+				Log.d("POS", "reply:" + reply.toString());
 				// parse objects
 				replyObjects.clear();
 				JSONArray jarObj = reply.getJSONArray(JCode.OBJECT_LIST);
@@ -226,8 +237,7 @@ public class CanvasConnector extends ServerConnector {
 						co.setGlobaID(gid);
 					} else {
 						// if object is new create object from reply
-						char code = joObj.getString(JCode.OBJECT_CODE)
-								.charAt(0);
+						int code = joObj.getInt(JCode.OBJECT_CODE);
 						String shape = joObj.getString(JCode.OBJECT_SHAPE);
 						String style = joObj.getString(JCode.OBJECT_STYLE);
 						String transform = joObj
@@ -250,8 +260,7 @@ public class CanvasConnector extends ServerConnector {
 						replyActions.add(sentActions.get(said));
 					} else {
 						// if action is new, create action from reply
-						char code = joAct.getString(JCode.ACTION_CODE)
-								.charAt(0);
+						int code = joAct.getInt(JCode.ACTION_CODE);
 						String param = joAct.getString(JCode.ACTION_PARAM);
 						CanvasObject co = null;
 						if (joAct.has(JCode.ACTION_OBJ_LISTED))
@@ -268,14 +277,17 @@ public class CanvasConnector extends ServerConnector {
 
 				}
 				int lan = reply.getInt(JCode.LAST_ACTION_NUM);
-				syncer.onActionUpdated(lan, replyActions);
+
+				syncListener.onActionUpdated(lan, replyActions);
+
+				Log.d("POS", "ccon: to sinczer:" + lan);
 			} catch (Exception e) {
-				e.printStackTrace();
+				syncListener.onActionUpdatedFailed(INTERNAL_PROBLEM);
 			}
 		}
 	};
 
-	CanvasObject createObject(char code, String shape, String style,
+	CanvasObject createObject(int code, String shape, String style,
 			String transform) {
 		CanvasObject co = null;
 		if (code == ObjectCode.RECT)
@@ -298,7 +310,7 @@ public class CanvasConnector extends ServerConnector {
 		return co;
 	}
 
-	UserAction createAction(char code, CanvasObject object, String param) {
+	UserAction createAction(int code, CanvasObject object, String param) {
 		if (code == ActionCode.DRAW_ACTION) {
 			return new DrawAction(object);
 		} else if (code == ActionCode.DELETE_ACTION) {

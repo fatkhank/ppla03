@@ -112,9 +112,7 @@ public class OvalObject extends BasicObject {
 	public CanvasObject cloneObject() {
 		OvalObject oo = new OvalObject();
 		oo.bounds.set(this.bounds);
-		oo.offsetX = this.offsetX;
-		oo.offsetY = this.offsetY;
-		oo.rotation = this.rotation;
+		copyTransformData(oo);
 		changeStyles(oo);
 		return oo;
 	}

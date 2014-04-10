@@ -237,10 +237,8 @@ public class TextObject extends CanvasObject {
 	public CanvasObject cloneObject() {
 		TextObject to = new TextObject();
 		to.text = this.text;
-		to.offsetX = this.offsetX;
-		to.offsetY = this.offsetY;
-		to.rotation = this.rotation;
 		to.bounds.set(this.bounds);
+		copyTransformData(to);
 		to.paint.set(this.paint);
 		to.fontStyle = this.fontStyle;
 		return to;

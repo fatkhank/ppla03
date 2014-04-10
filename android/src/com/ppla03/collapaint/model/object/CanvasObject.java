@@ -199,9 +199,20 @@ public abstract class CanvasObject {
 	 * @param x koordinat x
 	 * @param y koordinat y
 	 */
-	public final void setOffset(float x, float y) {
+	public final void offsetTo(float x, float y) {
 		offsetX = x;
 		offsetY = y;
+	}
+
+	/**
+	 * Menggeser objek dengan jarak tertentu. Hasilnya akan diakumulasi dengan
+	 * perpindahan objek yang sudah ada.
+	 * @param dx jarak pergeseran sumbu x.
+	 * @param dy jarak pergeseran sumbu y.
+	 */
+	public final void offset(float dx, float dy) {
+		this.offsetX += dx;
+		this.offsetY += dy;
 	}
 
 	/**
@@ -215,7 +226,7 @@ public abstract class CanvasObject {
 	 * Mengatur rotasi dari objek.
 	 * @param angle sudut rotasi dalam derajat.
 	 */
-	public final void setRotation(float angle) {
+	public final void rotateTo(float angle) {
 		rotation = angle;
 	}
 
@@ -274,4 +285,14 @@ public abstract class CanvasObject {
 	 * @return hasil salinan.
 	 */
 	public abstract CanvasObject cloneObject();
+
+	/**
+	 * Menyalin data tranformasi objek ke objek lain.
+	 * @param target
+	 */
+	protected void copyTransformData(CanvasObject target) {
+		target.offsetX = this.offsetX;
+		target.offsetY = this.offsetY;
+		target.rotation = this.rotation;
+	}
 }

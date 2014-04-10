@@ -1,11 +1,26 @@
 package com.ppla03.collapaint;
 
+import com.ppla03.collapaint.model.CanvasModel;
+
 /**
  * Listener untuk event-event dari {@link CanvasView}
  * @author hamba v7
  * 
  */
 public interface CanvasListener {
+	
+	/**
+	 * Dipicu saat proses memuat kanvas selesai.
+	 * @param model Model kanvas yang dimuat
+	 * @param status //TODO muat kanvas
+	 */
+	void onCanvasModelLoaded(CanvasModel model, int status);
+
+	/**
+	 * Dipicu saat hidden mode berubah.
+	 * @param hidden
+	 */
+	void onHideModeChange(boolean hidden);
 
 	/**
 	 * Dipicu saat ada operasi seleksi terjadi di kanvas.

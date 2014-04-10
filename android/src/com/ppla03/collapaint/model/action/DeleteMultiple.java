@@ -4,14 +4,33 @@ import java.util.ArrayList;
 
 import com.ppla03.collapaint.model.object.CanvasObject;
 
+/**
+ * Aksi menghapus kumpulan objek kanvas. Kebalikan dari aksi ini adalah {@link DrawMultiple}.
+ * @author hamba v7
+ * 
+ */
 public class DeleteMultiple extends UserAction {
+	/**
+	 * Daftar objek yang dihapus
+	 */
 	public final ArrayList<CanvasObject> objects;
 
+	/**
+	 * Membuat {@link DeleteMultiple}.
+	 * @param objects daftar objek yang dihapus. Perubahan pada parameter ini
+	 *            akan mengubah isi daftar objek yang dihapus.
+	 * @param inverse inverse dari aksi ini.
+	 */
 	DeleteMultiple(ArrayList<CanvasObject> objects, UserAction inverse) {
 		this.objects = objects;
 		this.inverse = inverse;
 	}
 
+	/**
+	 * Membuat {@link DeleteMultiple}.
+	 * @param objects daftar objek yang dihapus. Perubahan pada parameter ini
+	 *            tidak akan mempengaruhi daftar objek yang dihapus.
+	 */
 	public DeleteMultiple(ArrayList<CanvasObject> objects) {
 		this.objects = new ArrayList<>(objects);
 		this.inverse = new DrawMultiple(this.objects, this);

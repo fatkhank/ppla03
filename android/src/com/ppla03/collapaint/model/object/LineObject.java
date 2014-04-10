@@ -214,10 +214,9 @@ public class LineObject extends CanvasObject {
 	@Override
 	public CanvasObject cloneObject() {
 		LineObject lo = new LineObject();
-		lo.offsetX = this.offsetX;
-		lo.offsetY = this.offsetY;
 		lo.x2 = this.x2;
 		lo.y2 = this.y2;
+		copyTransformData(lo);
 		lo.paint.set(this.paint);
 		return lo;
 	}

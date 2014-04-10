@@ -171,6 +171,12 @@
                 android:text="copy" />
 
             <Button
+                android:id="@+id/w_paste"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="paste" />
+
+            <Button
                 android:id="@+id/w_select_del"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

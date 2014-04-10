@@ -5,34 +5,23 @@ import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.Mode;
 import com.ppla03.collapaint.CanvasView.ObjectType;
-import com.ppla03.collapaint.conn.CanvasConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.object.FontManager;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView.BufferType;
 import android.widget.Toast;
-import android.os.Build;
 
 public class TesterActivity extends Activity implements OnClickListener,
 		CanvasListener {
 	private Button select, hand, fill, strokeWidth, strokeStyle, textSize,
-			textFont, approve, cancel, undo, redo, move, copy, delete;
+			textFont, approve, cancel, undo, redo, move, copy, paste, delete;
 	private Button rect, oval, poly, lines, path, text, image, test;
 	private CanvasView canvas;
 
@@ -40,12 +29,6 @@ public class TesterActivity extends Activity implements OnClickListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tester);
-
-		canvas = (CanvasView) findViewById(R.id.w_canvas);
-		canvas.setMode(Mode.SELECT);
-		CanvasModel cmod = new CanvasModel("njajal", 1000, 400);
-		canvas.setModel(cmod);
-		canvas.setListener(this);
 
 		select = (Button) findViewById(R.id.w_select);
 		hand = (Button) findViewById(R.id.w_hand);
@@ -60,6 +43,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		redo = (Button) findViewById(R.id.w_redo);
 		move = (Button) findViewById(R.id.w_select_move);
 		copy = (Button) findViewById(R.id.w_select_copy);
+		paste = (Button) findViewById(R.id.w_paste);
 		delete = (Button) findViewById(R.id.w_select_del);
 
 		rect = (Button) findViewById(R.id.w_draw_rect);
@@ -84,6 +68,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		redo.setOnClickListener(this);
 		move.setOnClickListener(this);
 		copy.setOnClickListener(this);
+		paste.setOnClickListener(this);
 		delete.setOnClickListener(this);
 
 		rect.setOnClickListener(this);
@@ -94,14 +79,20 @@ public class TesterActivity extends Activity implements OnClickListener,
 		text.setOnClickListener(this);
 		image.setOnClickListener(this);
 		test.setOnClickListener(this);
+		
+		canvas = (CanvasView) findViewById(R.id.w_canvas);
+		canvas.setMode(Mode.SELECT);
+		canvas.setListener(this);
+		CanvasModel cmod = new CanvasModel("njajal", 1000, 400);
+		canvas.open(cmod);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.workspace, menu);
-		return true;
+//		getMenuInflater().inflate(R.menu.workspace, menu);
+		return false;
 	}
 
 	@Override
@@ -117,7 +108,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == poly) {
 			canvas.insertPolygon(6);
 		} else if (v == lines) {
-			canvas.insertPrimitive(ObjectType.LINES);
+			canvas.insertPrimitive(ObjectType.LINE);
 		} else if (v == path) {
 			canvas.insertPrimitive(CanvasView.ObjectType.FREE);
 		} else if (v == text) {
@@ -155,12 +146,15 @@ public class TesterActivity extends Activity implements OnClickListener,
 			canvas.redo();
 		} else if (v == copy) {
 			canvas.copySelectedObjects();
+		} else if (v == paste) {
+			canvas.pasteFromClipboard();
 		} else if (v == delete) {
 			canvas.deleteSelectedObjects();
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == test) {
-			canvas.invalidate();
+			canvas.test();
+//			canvas.invalidate();
 		}
 	}
 
@@ -182,5 +176,17 @@ public class TesterActivity extends Activity implements OnClickListener,
 	public void onURStatusChange(boolean undoable, boolean redoable) {
 		undo.setEnabled(undoable);
 		redo.setEnabled(redoable);
+	}
+
+	@Override
+	public void onHideModeChange(boolean hidden) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCanvasModelLoaded(CanvasModel model, int status) {
+		// TODO Auto-generated method stub
+		
 	}
 }

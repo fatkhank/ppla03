@@ -10,13 +10,23 @@ import android.graphics.RectF;
 
 public class ImageObject extends CanvasObject {
 	private Bitmap bitmap;
-	private Rect srcRect;
-	private RectF destRect;
+	private final Rect srcRect;
+	private final RectF destRect;
 	private String imageID;
 	protected Paint paint;
 
 	public ImageObject() {
 		super();
+		srcRect = new Rect();
+		destRect = new RectF();
+	}
+	
+	public ImageObject(Bitmap bitmap, float worldX, float worldY, int width, int height, int alpha){
+		this.bitmap = bitmap;
+		srcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		float halfWidth = width * 0.5f;
+		float halfHeight = height * 0.5f;
+		destRect = new RectF(-halfWidth,-halfHeight, halfWidth, halfHeight);
 	}
 
 	@Override
@@ -34,10 +44,10 @@ public class ImageObject extends CanvasObject {
 
 	@Override
 	public void setShape(float[] param, int start, int end) {
-		destRect.left = param[start++];
-		destRect.top = param[start++];
 		destRect.right = param[start++];
 		destRect.bottom = param[start++];
+		destRect.left = -destRect.right;
+		destRect.top = -destRect.bottom;
 	}
 
 	@Override

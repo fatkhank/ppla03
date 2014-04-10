@@ -272,9 +272,7 @@ public class PolygonObject extends BasicObject {
 		System.arraycopy(this.xLocs, 0, po.xLocs, 0, this.xLocs.length);
 		System.arraycopy(this.yLocs, 0, po.yLocs, 0, this.yLocs.length);
 		po.bounds.set(this.bounds);
-		po.offsetX = this.offsetX;
-		po.offsetY = this.offsetY;
-		po.rotation = this.rotation;
+		copyTransformData(po);
 		changeStyles(po);
 		return po;
 	}

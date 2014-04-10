@@ -78,8 +78,8 @@ public class ReshapeAction extends UserAction {
 	 * Mengaplikasikan parameter bentuk ke objek.
 	 */
 	public void apply() {
-		object.setOffset(params[OFSX_INDEX], params[OFSY_INDEX]);
-		object.setRotation(params[ROT_INDEX]);
+		object.offsetTo(params[OFSX_INDEX], params[OFSY_INDEX]);
+		object.rotateTo(params[ROT_INDEX]);
 		object.setShape(params, TRANSFORM_LENGTH, params.length);
 	}
 
@@ -110,12 +110,12 @@ public class ReshapeAction extends UserAction {
 	 * @param object objek kanvas.
 	 */
 	public static void apply(String param, CanvasObject object) {
-		int length = object.paramLength() + TRANSFORM_LENGTH;
+		int length = decodeSize(param);
 		if (applyTemp.length < length)
 			applyTemp = new float[length];
 		int size = decodeTo(param, applyTemp);
-		object.setOffset(applyTemp[OFSX_INDEX], applyTemp[OFSY_INDEX]);
-		object.setRotation(applyTemp[ROT_INDEX]);
+		object.offsetTo(applyTemp[OFSX_INDEX], applyTemp[OFSY_INDEX]);
+		object.rotateTo(applyTemp[ROT_INDEX]);
 		object.setShape(applyTemp, TRANSFORM_LENGTH, size);
 	}
 
@@ -178,6 +178,7 @@ public class ReshapeAction extends UserAction {
 		int c = count << 2;
 		if (encByte.length < c)
 			encByte = new byte[c];
+		c = 0;
 		for (int i = 0; i < count; i++) {
 			int p = Float.floatToIntBits(points[i]);
 			encByte[c++] = (byte) (p >> 24);
