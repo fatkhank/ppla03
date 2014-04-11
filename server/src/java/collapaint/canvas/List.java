@@ -11,6 +11,7 @@ import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletConfig;
@@ -33,20 +35,41 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author hamba v7
  */
-@WebServlet(name = "create", urlPatterns = {"/create"})
-public class Create extends HttpServlet {
+@WebServlet(name = "list", urlPatterns = {"/list"})
+public class List extends HttpServlet {
 
-    static class CreateJCode {
+    static class ListJCode {
 
         //--- request ---
-        static final String OWNER_ID = "oid";
-        static final String CANVAS_NAME = "name";
-        static final String CANVAS_WIDTH = "width";
-        static final String CANVAS_HEIGHT = "height";
+        static final String USER_ID = "uid";
         //--- reply ---
-        static final String CANVAS_ID = "id";
-        static final String RESULT_ERROR = "error";
-        static final int DUPLICATE_NAME = 2;
+        static final String CANVAS_OWNED = "own";
+        static final String CANVAS_OLD = "old";
+        static final String CANVAS_NEW = "new";
+        static final String CANVAS_ID = "i";
+        static final String NAME = "n";
+        static final String WIDTH = "w";
+        static final String HEIGHT = "h";
+        static final String OWNER_ID = "o";
+        static final String ERROR = "error";
+    }
+
+    static class PartiQu {
+
+        static final int CANVAS_ID = 1;
+        static final int STATUS = 2;
+        static final int CANVAS_NAME = 3;
+        static final int CANVAS_WIDTH = 4;
+        static final int CANVAS_HEIGHT = 5;
+        static final int CANVAS_OWNER = 6;
+    }
+
+    static class OwnedQu {
+
+        static final int CANVAS_ID = 1;
+        static final int CANVAS_NAME = 2;
+        static final int CANVAS_WIDTH = 3;
+        static final int CANVAS_HEIGHT = 4;
     }
 
     Connection connection;
@@ -87,32 +110,57 @@ public class Create extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-
             JsonObject request = Json.createReader(is).readObject();
             JsonObjectBuilder reply = Json.createObjectBuilder();
 
-            int ownerID = request.getInt(CreateJCode.OWNER_ID);
-            String name = request.getString(CreateJCode.CANVAS_NAME);
-            int width = request.getInt(CreateJCode.CANVAS_WIDTH);
-            int height = request.getInt(CreateJCode.CANVAS_HEIGHT);
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("insert into canvas(owner,name,width,height) values ");
-            sb.append("('").append(ownerID).append("','").append(name).
-                    append("','").append(width).append("','").append(height).
-                    append("');");
+            int userID = request.getInt(ListJCode.USER_ID);
 
             try (Statement statement = connection.createStatement()) {
-                statement.
-                        execute(sb.toString(), Statement.RETURN_GENERATED_KEYS);
-                ResultSet keys = statement.getGeneratedKeys();
-                if (keys.next())
-                    reply.add(CreateJCode.CANVAS_ID, keys.getInt(1));
-                reply.add(CreateJCode.CANVAS_NAME, name);
-            } catch (SQLIntegrityConstraintViolationException ex) {
-                reply.add(CreateJCode.RESULT_ERROR, CreateJCode.DUPLICATE_NAME);
+                //---------------- CANVAS OWNED --------------------
+                String ownQuery = "select * from canvas where owner = '" + userID + "';";
+                ResultSet result = statement.executeQuery(ownQuery);
+                JsonArrayBuilder ownList = Json.createArrayBuilder();
+                while (result.next()) {
+                    JsonObjectBuilder canvas = Json.createObjectBuilder();
+                    canvas.add(ListJCode.CANVAS_ID, result.
+                            getInt(OwnedQu.CANVAS_ID));
+                    canvas.add(ListJCode.NAME, result.
+                            getString(OwnedQu.CANVAS_NAME));
+                    canvas.add(ListJCode.WIDTH, result.
+                            getInt(OwnedQu.CANVAS_WIDTH));
+                    canvas.add(ListJCode.HEIGHT, result.
+                            getInt(OwnedQu.CANVAS_HEIGHT));
+                    ownList.add(canvas);
+                }
+                reply.add(ListJCode.CANVAS_OWNED, ownList);
+
+                String parQuery = "select p.canvas_id, p.status, c.name, c.width, c.height, c.owner from participation p, canvas c where p.user_id = '" + userID + "' and c.id = p.canvas_id;";
+                result = statement.executeQuery(parQuery);
+
+                JsonArrayBuilder oldList = Json.createArrayBuilder();
+                JsonArrayBuilder newList = Json.createArrayBuilder();
+                while (result.next()) {
+                    JsonObjectBuilder canvas = Json.createObjectBuilder();
+                    canvas.add(ListJCode.CANVAS_ID, result.
+                            getInt(PartiQu.CANVAS_ID));
+                    canvas.add(ListJCode.NAME, result.
+                            getString(PartiQu.CANVAS_NAME));
+                    canvas.add(ListJCode.WIDTH, result.
+                            getInt(PartiQu.CANVAS_WIDTH));
+                    canvas.add(ListJCode.HEIGHT, result.
+                            getInt(PartiQu.CANVAS_HEIGHT));
+                    canvas.add(ListJCode.OWNER_ID, result.
+                            getInt(PartiQu.CANVAS_OWNER));
+                    if (result.getString(PartiQu.STATUS).equals("n"))
+                        newList.add(canvas);
+                    else
+                        oldList.add(canvas);
+                }
+
+                reply.add(ListJCode.CANVAS_NEW, newList);
+                reply.add(ListJCode.CANVAS_OLD, oldList);
             } catch (Exception ex) {
-                reply.add(CreateJCode.RESULT_ERROR, "error");
+                reply.add(ListJCode.ERROR, ex.getMessage());
             }
 
             out.println(reply.build().toString());
@@ -133,7 +181,6 @@ public class Create extends HttpServlet {
             throws ServletException, IOException {
 //        processRequest(new StringInputStream(request.
 //                getParameter("json")), response);
-
     }
 
     /**

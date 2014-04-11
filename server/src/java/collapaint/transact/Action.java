@@ -157,7 +157,7 @@ public class Action extends HttpServlet {
     protected void processRequest(InputStream is,
             HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
 
