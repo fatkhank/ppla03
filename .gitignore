@@ -214,3 +214,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 /server/nbproject/private/
+android/res/drawable-mdpi/bg_down_small.png
+android/res/drawable-mdpi/bg_up_small.png
+android/res/drawable-mdpi/rect.png
+android/res/drawable/button_style1.xml
+ano3lws5.ufk.txt
