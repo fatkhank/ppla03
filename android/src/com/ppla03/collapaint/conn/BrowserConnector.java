@@ -97,17 +97,16 @@ public class BrowserConnector extends ServerConnector {
 		@Override
 		public void process(int status, JSONObject reply) {
 			if (status == SUCCESS) {
-				if (reply.has(CreateJCode.RESULT_ERROR)) {
+				if (reply.has(CreateJCode.RESULT_ERROR))
 					createListener.onCreated(proposedModel,
 							CanvasCreateListener.DUPLICATE_NAME);
-				} else {
+				else {
 					try {
 						if (reply.getString(CreateJCode.CANVAS_NAME).equals(
 								proposedModel)) {
 							proposedModel.setid(reply
 									.getInt(CreateJCode.CANVAS_ID));
-							createListener.onCreated(proposedModel,
-									CanvasCreateListener.SUCCESS);
+							createListener.onCreated(proposedModel, SUCCESS);
 						}
 					} catch (JSONException e) {
 						createListener.onCreated(proposedModel, UNKNOWN_REPLY);
@@ -131,6 +130,7 @@ public class BrowserConnector extends ServerConnector {
 		static final String WIDTH = "w";
 		static final String HEIGHT = "h";
 		static final String OWNER_ID = "o";
+		static final String OWNER_NAME = "on";
 		static final String ERROR = "error";
 	}
 
@@ -197,6 +197,7 @@ public class BrowserConnector extends ServerConnector {
 						JSONObject canvas = news.getJSONObject(i);
 						UserModel owner = new UserModel();
 						owner.id = canvas.getInt(ListJCode.OWNER_ID);
+						owner.username = canvas.getString(ListJCode.OWNER_NAME);
 						String name = canvas.getString(ListJCode.NAME);
 						int width = canvas.getInt(ListJCode.WIDTH);
 						int height = canvas.getInt(ListJCode.HEIGHT);

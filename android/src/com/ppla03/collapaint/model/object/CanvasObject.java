@@ -295,4 +295,9 @@ public abstract class CanvasObject {
 		target.offsetY = this.offsetY;
 		target.rotation = this.rotation;
 	}
+
+	@Override
+	public int hashCode() {
+		return globalID * 200 + privateID;
+	}
 }

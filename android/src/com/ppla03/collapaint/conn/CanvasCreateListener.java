@@ -9,10 +9,6 @@ import com.ppla03.collapaint.model.CanvasModel;
  */
 public interface CanvasCreateListener {
 	/**
-	 * Kanvas berhasil dibuat.
-	 */
-	int SUCCESS = 1;
-	/**
 	 * Kanvas dengan nama yang sama sudah pernah dibuat.
 	 */
 	int DUPLICATE_NAME = 32;
@@ -21,7 +17,7 @@ public interface CanvasCreateListener {
 	 * Dipicu saat pembuatan sebuah kanvas mendapat jawaban dari server.
 	 * @param newCanvas kanvas yang sedang dibuat.
 	 * @param status hasil pembuatan.<br/>
-	 *            {@link CanvasCreateListener#SUCCESS} berarti kanvas
+	 *            {@link ServerConnector#SUCCESS} berarti kanvas
 	 *            berhasil dibuat.<br/>
 	 *            {@link CanvasCreateListener#DUPLICATE_NAME} berarti kanvas
 	 *            dengan nama yang sama sudah pernah dibuat. <br/>

@@ -1,6 +1,12 @@
-package collapaint.canvas;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package collapaint.auth;
 
 import collapaint.DB;
+import collapaint.canvas.Create;
 import collapaint.transact.Action;
 import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
@@ -25,24 +31,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Menangani proses pembuatan kanvas baru oleh seorang user.
  *
  * @author hamba v7
  */
-@WebServlet(name = "create", urlPatterns = {"/create"})
-public class Create extends HttpServlet {
+@WebServlet(name = "newuser", urlPatterns = {"/newuser"})
+public class NewUser extends HttpServlet {
 
-    static class CreateJCode {
+    static class UserJCode {
 
-        //--- request ---
-        static final String OWNER_ID = "oid";
-        static final String CANVAS_NAME = "name";
-        static final String CANVAS_WIDTH = "width";
-        static final String CANVAS_HEIGHT = "height";
-        //--- reply ---
-        static final String CANVAS_ID = "id";
-        static final String RESULT_ERROR = "error";
-        static final int DUPLICATE_NAME = 2;
+        static final String NAME = "name";
+        static final String ID = "id";
+        static final String ERROR = "error";
+        static final int DUPLICATE_NAME = 3;
     }
 
     Connection connection;
@@ -87,28 +87,20 @@ public class Create extends HttpServlet {
             JsonObject request = Json.createReader(is).readObject();
             JsonObjectBuilder reply = Json.createObjectBuilder();
 
-            int ownerID = request.getInt(CreateJCode.OWNER_ID);
-            String name = request.getString(CreateJCode.CANVAS_NAME);
-            int width = request.getInt(CreateJCode.CANVAS_WIDTH);
-            int height = request.getInt(CreateJCode.CANVAS_HEIGHT);
+            String name = request.getString(UserJCode.NAME);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("insert into canvas(owner,name,width,height) values ");
-            sb.append("('").append(ownerID).append("','").append(name).
-                    append("','").append(width).append("','").append(height).
-                    append("');");
+            String query = "insert into user(username) values ('" + name + "')";
 
             try (Statement statement = connection.createStatement()) {
-                statement.
-                        execute(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+                statement.execute(query, Statement.RETURN_GENERATED_KEYS);
                 ResultSet keys = statement.getGeneratedKeys();
                 if (keys.next())
-                    reply.add(CreateJCode.CANVAS_ID, keys.getInt(1));
-                reply.add(CreateJCode.CANVAS_NAME, name);
+                    reply.add(UserJCode.ID, keys.getInt(1));
+                reply.add(UserJCode.NAME, name);
             } catch (SQLIntegrityConstraintViolationException ex) {
-                reply.add(CreateJCode.RESULT_ERROR, CreateJCode.DUPLICATE_NAME);
+                reply.add(UserJCode.ERROR, UserJCode.DUPLICATE_NAME);
             } catch (Exception ex) {
-                reply.add(CreateJCode.RESULT_ERROR, "error");
+                reply.add(UserJCode.ERROR, "error");
             }
 
             out.println(reply.build().toString());
@@ -127,9 +119,8 @@ public class Create extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new StringInputStream(request.
-//                getParameter("json")), response);
-
+        processRequest(new StringInputStream(request.
+                getParameter("json")), response);
     }
 
     /**

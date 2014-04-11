@@ -46,7 +46,7 @@ public class ServerConnector {
 	public static final int SERVER_PROBLEM = 8192;
 
 	/**
-	 * Jawaban dari server tidak dapat diterjemahkan
+	 * Jawaban dari server tidak dapat diterjemahkan atau formatnya tidak diketahui.
 	 */
 	public static final int UNKNOWN_REPLY = 16384;
 	

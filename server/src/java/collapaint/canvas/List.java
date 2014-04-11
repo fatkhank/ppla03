@@ -51,6 +51,7 @@ public class List extends HttpServlet {
         static final String WIDTH = "w";
         static final String HEIGHT = "h";
         static final String OWNER_ID = "o";
+        static final String OWNER_NAME = "on";
         static final String ERROR = "error";
     }
 
@@ -61,7 +62,8 @@ public class List extends HttpServlet {
         static final int CANVAS_NAME = 3;
         static final int CANVAS_WIDTH = 4;
         static final int CANVAS_HEIGHT = 5;
-        static final int CANVAS_OWNER = 6;
+        static final int OWNER_ID = 6;
+        static final int OWNER_NAME = 7;
     }
 
     static class OwnedQu {
@@ -134,7 +136,7 @@ public class List extends HttpServlet {
                 }
                 reply.add(ListJCode.CANVAS_OWNED, ownList);
 
-                String parQuery = "select p.canvas_id, p.status, c.name, c.width, c.height, c.owner from participation p, canvas c where p.user_id = '" + userID + "' and c.id = p.canvas_id;";
+                String parQuery = "select p.canvas_id, p.status, c.name, c.width, c.height, c.owner, u.username from participation p, canvas c, user u where p.user_id = '" + userID + "' and c.id = p.canvas_id and u.id = c.owner;";
                 result = statement.executeQuery(parQuery);
 
                 JsonArrayBuilder oldList = Json.createArrayBuilder();
@@ -150,7 +152,9 @@ public class List extends HttpServlet {
                     canvas.add(ListJCode.HEIGHT, result.
                             getInt(PartiQu.CANVAS_HEIGHT));
                     canvas.add(ListJCode.OWNER_ID, result.
-                            getInt(PartiQu.CANVAS_OWNER));
+                            getInt(PartiQu.OWNER_ID));
+                    canvas.add(ListJCode.OWNER_NAME, result.
+                            getInt(PartiQu.OWNER_NAME));
                     if (result.getString(PartiQu.STATUS).equals("n"))
                         newList.add(canvas);
                     else

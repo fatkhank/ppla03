@@ -13,7 +13,9 @@ import com.ppla03.collapaint.model.UserModel;
 public interface OnFetchListListener {
 
 	/**
-	 * Daftar kanvas berhasil dipanggil.
+	 * Daftar kanvas berhasil dipanggil. Semua data kanvas berisi id kanvas,
+	 * nama, lebar dan tinggi yang valid. Data owner berisi id dan username.
+	 * Pada daftar {@code owned}, owner dari kanvas adalah asker.
 	 * @param asker pengguna yang meminta
 	 * 
 	 * @param status hasil pemainggilan daftar kanvas, dapat berisi
