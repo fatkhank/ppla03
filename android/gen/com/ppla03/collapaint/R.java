@@ -46,14 +46,25 @@ public final class R {
         public static final int button_pink=0x7f020015;
         public static final int button_purple=0x7f020016;
         public static final int button_red=0x7f020017;
-        public static final int color=0x7f020018;
-        public static final int draw=0x7f020019;
-        public static final int hand=0x7f02001a;
-        public static final int ic_launcher=0x7f02001b;
-        public static final int image=0x7f02001c;
-        public static final int rainbow_line=0x7f02001d;
-        public static final int select=0x7f02001e;
-        public static final int stroke=0x7f02001f;
+        public static final int draw_ellipse=0x7f020018;
+        public static final int draw_free=0x7f020019;
+        public static final int draw_line=0x7f02001a;
+        public static final int draw_polygon=0x7f02001b;
+        public static final int draw_rect=0x7f02001c;
+        public static final int draw_text=0x7f02001d;
+        public static final int ic_launcher=0x7f02001e;
+        public static final int main_color=0x7f02001f;
+        public static final int main_draw=0x7f020020;
+        public static final int main_hand=0x7f020021;
+        public static final int main_image=0x7f020022;
+        public static final int main_select=0x7f020023;
+        public static final int main_stroke=0x7f020024;
+        public static final int rainbow_line=0x7f020025;
+        public static final int sel_copy=0x7f020026;
+        public static final int sel_cut=0x7f020027;
+        public static final int sel_delete=0x7f020028;
+        public static final int sel_move=0x7f020029;
+        public static final int sel_paste=0x7f02002a;
     }
     public static final class id {
         public static final int Button01=0x7f080031;
@@ -85,9 +96,9 @@ public final class R {
         public static final int cd_tab_pallete=0x7f080030;
         public static final int cd_tab_rgb=0x7f080022;
         public static final int cd_tabhost=0x7f080021;
-        public static final int imageView2=0x7f08001a;
-        public static final int toggleButton1=0x7f08001b;
-        public static final int toggleButton2=0x7f08001c;
+        public static final int imageView2=0x7f08001c;
+        public static final int toggleButton1=0x7f08001a;
+        public static final int toggleButton2=0x7f08001b;
         public static final int toggleButton3=0x7f08001d;
         public static final int toggleButton4=0x7f08001e;
         public static final int toggleButton5=0x7f08001f;

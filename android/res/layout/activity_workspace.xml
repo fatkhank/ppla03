@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="10dp"
         android:background="@drawable/button_blue"
-        android:button="@drawable/select"
+        android:button="@drawable/main_select"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
 
@@ -25,7 +25,7 @@
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/imageView2"
         android:background="@drawable/button_purple"
-        android:button="@drawable/draw"
+        android:button="@drawable/main_draw"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
 
@@ -38,7 +38,7 @@
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/imageView2"
         android:background="@drawable/button_pink"
-        android:button="@drawable/hand"
+        android:button="@drawable/main_hand"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
 
@@ -51,7 +51,7 @@
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/imageView2"
         android:background="@drawable/button_red"
-        android:button="@drawable/color"
+        android:button="@drawable/main_color"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
     
@@ -64,7 +64,7 @@
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/imageView2"
         android:background="@drawable/button_orange"
-        android:button="@drawable/stroke"
+        android:button="@drawable/main_stroke"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
     
@@ -77,7 +77,7 @@
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/imageView2"
         android:background="@drawable/button_green"
-        android:button="@drawable/image"
+        android:button="@drawable/main_image"
         android:textOff="@string/emptyString2"
         android:textOn="@string/emptyString2" />
 
