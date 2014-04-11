@@ -211,13 +211,11 @@ public class CanvasConnector extends ServerConnector {
 		@Override
 		public void process(int status, JSONObject reply) {
 			try {
-				// TODO debug ccon
 				if (status != SUCCESS) {
 					syncListener.onActionUpdatedFailed(status);
 					return;
 				}
 
-				Log.d("POS", "reply:" + reply.toString());
 				// parse objects
 				replyObjects.clear();
 				JSONArray jarObj = reply.getJSONArray(JCode.OBJECT_LIST);

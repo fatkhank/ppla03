@@ -3,6 +3,7 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.object.*;
@@ -238,8 +239,7 @@ public class CanvasView extends View {
 		scrollY = CANVAS_MARGIN;
 
 		synczer = new CanvasSynchronizer(this, context);
-		// TODO start synchronizer
-		// syncon.start();
+		synczer.start();
 
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
 		setLongClickable(true);
@@ -266,7 +266,15 @@ public class CanvasView extends View {
 		onCanvasLoaded(1);
 	}
 
+	/**
+	 * Proses muat kanvas selesai.
+	 * @param status
+	 */
 	public void onCanvasLoaded(int status) {
+		if (status != ServerConnector.SUCCESS) {
+			listener.onCanvasModelLoaded(model, status);
+			return;
+		}
 		// ---- reset ----
 		selectedObjects.clear();
 		userActions.clear();
@@ -288,6 +296,10 @@ public class CanvasView extends View {
 		listener.onCanvasModelLoaded(model, status);
 	}
 
+	/**
+	 * Mengambil model kanvas yang sedang aktif
+	 * @return
+	 */
 	public CanvasModel getModel() {
 		return model;
 	}
@@ -331,13 +343,12 @@ public class CanvasView extends View {
 						hideModeTextPaint);
 		}
 
-		// /* CHANGE TO LINE COMMENT TO DEBUG
-		if (model != null)
-			debug(canvas);
-		// */
+		/*
+		 * CHANGE TO LINE COMMENT TO DEBUG if (model != null) debug(canvas); //
+		 */
 	}
 
-	// /** CHANGE TO LINE COMMENT TO DEBUG
+/** CHANGE TO LINE COMMENT TO DEBUG
 	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
 		debugPaint.setColor(Color.RED);
@@ -394,6 +405,14 @@ public class CanvasView extends View {
 
 	// */
 
+	/**
+	 * Menggambar ulang daftar objek ke {@link #cacheImage}. Jika sedang
+	 * menyeleksi objek, maka objek yang tidak diseleksi akan digambar di
+	 * {@link #cacheImage} yang disamarkan dengan warna
+	 * {@link #SELECTION_COVER_COLOR}, kemudian menggambar objek-objek yang
+	 * sedang diseleksi akan digambar di {@link #selectedObjectsCache} dengan
+	 * garis putus-putus seleksi di sekitar objek.
+	 */
 	private void reloadCache() {
 		int size = model.objects.size();
 		cacheCanvas.drawColor(Color.WHITE,
@@ -587,6 +606,11 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Mengedit satu buah objek.
+	 * @param co
+	 * @param filter filter Handler
+	 */
 	private void editObject(CanvasObject co, int filter) {
 		currentObject = co;
 		changeCounter = 0;
@@ -771,6 +795,10 @@ public class CanvasView extends View {
 			protoImage.setTransparency(alpha);
 	}
 
+	/**
+	 * Memasukkan objek teks ke dalam kanvas.
+	 * @param text teks
+	 */
 	public void insertText(String text) {
 		objectType = ObjectType.TEXT;
 		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
@@ -783,6 +811,10 @@ public class CanvasView extends View {
 		invalidate();
 	}
 
+	/**
+	 * Mengatur warna teks.
+	 * @param color warna, lihat {@link Color}
+	 */
 	public void setTextColor(int color) {
 		strokeColor = color;
 		if (currentObject != null && currentObject instanceof TextObject) {
@@ -798,6 +830,10 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Mengubah ukuran huruf.
+	 * @param size ukuran
+	 */
 	public void setFontSize(int size) {
 		textSize = size;
 		if (currentObject != null && currentObject instanceof TextObject) {
@@ -813,6 +849,10 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Mengubah jenis huruf.
+	 * @param font indeks huruf di {@link FontManager}
+	 */
 	public void setFontStyle(int font) {
 		textFont = font;
 		if (currentObject != null && currentObject instanceof TextObject) {
@@ -828,6 +868,11 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Memasukkan objek primitive ke kanvas. Objek yang sedang digambar dan
+	 * belum disimpan akan tertimpa.
+	 * @param type {@link ObjectType#RECT} atau {@link ObjectType#OVAL}
+	 */
 	public void insertPrimitive(int type) {
 		objectType = type;
 		setMode(Mode.DRAW);
@@ -849,6 +894,11 @@ public class CanvasView extends View {
 		invalidate();
 	}
 
+	/**
+	 * Memasukkan objek poligon ke kanvas, objek yang sedang digambar dan belum
+	 * disimpan akan tertimpa.
+	 * @param corner jumah sudut, minimum 3
+	 */
 	public void insertPolygon(int corner) {
 		protoPoly = new PolygonObject(corner, centerY - 20, centerX, centerY,
 				fillColor, strokeColor, strokeWidth, strokeStyle);
@@ -860,6 +910,12 @@ public class CanvasView extends View {
 		invalidate();
 	}
 
+	/**
+	 * Mengubah warna isian dari {@link BasicObject}.
+	 * @param filled jika true berarti memiliki isian, jika false maka tidak
+	 *            memiliki isian dan nilai {@code color} diabaikan.
+	 * @param color warna isian, lihat {@link Color}
+	 */
 	public void setFillParameter(boolean filled, int color) {
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		if (currentObject != null && currentObject instanceof BasicObject) {
@@ -875,6 +931,11 @@ public class CanvasView extends View {
 		postInvalidate();
 	}
 
+	/**
+	 * Mengatur apakah {@link FreeObject} yang akan dibuat membentuk loop atau
+	 * tidak.
+	 * @param loop
+	 */
 	public void setMakeLoop(boolean loop) {
 		this.makeLoop = loop;
 	}

@@ -38,9 +38,13 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private Handler handler;
 
 	private int sync_time = 5000;
-	private boolean syncing;
-	private boolean forced;
-	private boolean loading;
+
+	private int mode;
+	private final int IDLE = 1;
+	private final int SYNCING = 2;
+	private final int FORCED = 4;
+	private final int LOADING = 7;
+	private final int STOP = 16;
 
 	public CanvasSynchronizer(CanvasView canvas, Context context) {
 		this.canvas = canvas;
@@ -49,14 +53,13 @@ public class CanvasSynchronizer implements SyncEventListener,
 		playbackList = new ArrayList<>();
 		sentList = new ArrayList<>();
 		handler = new Handler();
-		loading = false;
+		mode = IDLE;
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage("There is a connection problem. Change to Hide Mode?");
 		builder.setPositiveButton("YES", this);
 		builder.setNegativeButton("BACK", this);
-		//TODO remove
-//		hideModeDialog = builder.create();
+		hideModeDialog = builder.create();
 	}
 
 	public void loadCanvas(CanvasModel model) {
@@ -64,9 +67,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 		actionBuffer.clear();
 		playbackList.clear();
 		sentList.clear();
-		syncing = false;
-		forced = false;
-		loading = true;
+		mode = LOADING;
 		updater.run();
 	}
 
@@ -76,12 +77,12 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	public void stop() {
-		// TODO
+		mode |= STOP;
 	}
 
 	public void forceUpdate() {
-		forced = true;
-		if (!syncing)
+		mode |= FORCED;
+		if ((mode & SYNCING) != SYNCING)
 			updater.run();
 	}
 
@@ -94,7 +95,6 @@ public class CanvasSynchronizer implements SyncEventListener,
 
 		@Override
 		public void run() {
-			Log.d("POS", "CSYNC:update (" + actionBuffer.size() + ")");
 			// add buffer to sentList
 			int size = actionBuffer.size();
 			for (int i = 0; i < size; i++) {
@@ -122,7 +122,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 					sentList.add(act);
 			}
 			actionBuffer.clear();
-			syncing = true;
+			mode |= SYNCING;
 			connector.updateActions(canvas.getModel().getId(), lastActNum,
 					sentList);
 		}
@@ -145,8 +145,6 @@ public class CanvasSynchronizer implements SyncEventListener,
 
 	@Override
 	public void onActionUpdated(int newId, ArrayList<UserAction> actions) {
-		Log.d("POS", "csync:" + newId);
-
 		playbackList.clear();
 		// undo aksi yang dilakukan selama proses update
 		int c = actionBuffer.size() - 1;
@@ -160,29 +158,26 @@ public class CanvasSynchronizer implements SyncEventListener,
 		playbackList.addAll(actions);
 		// redo aksi yang dilakukan selama proses update
 		playbackList.addAll(actionBuffer);
-		syncing = false;
 		canvas.execute(playbackList);
 		lastActNum = newId;
 		sentList.clear();
 
-		if (loading) {
-			loading = false;
+		mode &= ~SYNCING;
+		if ((mode & LOADING) == LOADING) {
+			mode &= ~LOADING;
 			canvas.onCanvasLoaded(ServerConnector.SUCCESS);
-		} else if (forced) {
-			forced = false;
+		} else if ((mode & FORCED) == FORCED) {
+			mode &= ~FORCED;
 			updater.run();
-		} else
+		} else if ((mode & STOP) != STOP)
 			handler.postDelayed(updater, sync_time);
-
-		Log.d("POS", "csync finished:" + lastActNum);
 	}
 
 	@Override
 	public void onActionUpdatedFailed(int status) {
-		// TODO Auto-generated method stub
-		if (loading) {
-			loading = false;
-			// TODO failed loading
+		if ((mode & LOADING) == LOADING) {
+			mode &= ~LOADING;
+			canvas.onCanvasLoaded(status);
 		} else if (status == ServerConnector.CONNECTION_PROBLEM
 				|| status == ServerConnector.SERVER_PROBLEM) {
 			hideModeDialog.show();

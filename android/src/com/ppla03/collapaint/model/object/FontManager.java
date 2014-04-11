@@ -13,6 +13,10 @@ import android.graphics.Typeface;
 public class FontManager {
 	private static Typeface[] fonts;
 	private static String[] names;
+	static {
+		fonts = new Typeface[] { Typeface.SANS_SERIF, Typeface.MONOSPACE };
+		names = new String[] { "Serif", "Mono" };
+	}
 
 	/**
 	 * Memerintahkan untuk memuat daftar huruf dengan membaca daftar berkas

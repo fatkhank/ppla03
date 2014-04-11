@@ -1,5 +1,6 @@
 package com.ppla03.collapaint;
 
+import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 
 /**
@@ -8,11 +9,16 @@ import com.ppla03.collapaint.model.CanvasModel;
  * 
  */
 public interface CanvasListener {
-	
+
 	/**
 	 * Dipicu saat proses memuat kanvas selesai.
 	 * @param model Model kanvas yang dimuat
-	 * @param status //TODO muat kanvas
+	 * @param status berhasil atau tidak. <br/>
+	 *            {@link ServerConnector#SUCCESS} berarti berhasil.<br/>
+	 *            Status berikut berarti gagal:
+	 *            {@link ServerConnector#CONNECTION_PROBLEM},
+	 *            {@link ServerConnector#SERVER_PROBLEM},
+	 *            {@link ServerConnector#INTERNAL_PROBLEM}.
 	 */
 	void onCanvasModelLoaded(CanvasModel model, int status);
 
