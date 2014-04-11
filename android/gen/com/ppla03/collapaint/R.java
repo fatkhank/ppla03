@@ -22,43 +22,88 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int bg_down_small=0x7f020000;
+        public static final int bg_up_small=0x7f020001;
+        public static final int button_style1=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int rect=0x7f020004;
     }
     public static final class id {
-        public static final int w_approve=0x7f07000d;
-        public static final int w_bar_top=0x7f070000;
-        public static final int w_cancel=0x7f07000e;
-        public static final int w_canvas=0x7f07000a;
-        public static final int w_draw_image=0x7f070008;
-        public static final int w_draw_lines=0x7f070005;
-        public static final int w_draw_oval=0x7f070003;
-        public static final int w_draw_path=0x7f070006;
-        public static final int w_draw_poly=0x7f070004;
-        public static final int w_draw_rect=0x7f070002;
-        public static final int w_draw_text=0x7f070007;
-        public static final int w_fill=0x7f070011;
-        public static final int w_hand=0x7f07000c;
-        public static final int w_leftpane=0x7f070001;
-        public static final int w_paste=0x7f070018;
-        public static final int w_redo=0x7f070010;
-        public static final int w_select=0x7f07000b;
-        public static final int w_select_copy=0x7f070017;
-        public static final int w_select_del=0x7f070019;
-        public static final int w_select_move=0x7f070016;
-        public static final int w_stroke_style=0x7f070013;
-        public static final int w_stroke_width=0x7f070012;
-        public static final int w_test=0x7f070009;
-        public static final int w_text_font=0x7f070015;
-        public static final int w_text_size=0x7f070014;
-        public static final int w_undo=0x7f07000f;
+        public static final int Button01=0x7f08002b;
+        public static final int Button02=0x7f08002c;
+        public static final int Button03=0x7f08002d;
+        public static final int Button04=0x7f08002e;
+        public static final int Button05=0x7f08002f;
+        public static final int Button06=0x7f080030;
+        public static final int Button07=0x7f080031;
+        public static final int Button08=0x7f080032;
+        public static final int Button09=0x7f080033;
+        public static final int Button10=0x7f080034;
+        public static final int Button11=0x7f080035;
+        public static final int Button12=0x7f080036;
+        public static final int action_settings=0x7f080037;
+        public static final int cd_a_input=0x7f080028;
+        public static final int cd_a_label=0x7f080027;
+        public static final int cd_a_slider=0x7f080029;
+        public static final int cd_b_input=0x7f080025;
+        public static final int cd_b_label=0x7f080024;
+        public static final int cd_b_slider=0x7f080026;
+        public static final int cd_g_input=0x7f080022;
+        public static final int cd_g_label=0x7f080021;
+        public static final int cd_g_slider=0x7f080023;
+        public static final int cd_r_input=0x7f08001f;
+        public static final int cd_r_label=0x7f08001e;
+        public static final int cd_r_slider=0x7f080020;
+        public static final int cd_rgb_preview=0x7f08001d;
+        public static final int cd_tab_pallete=0x7f08002a;
+        public static final int cd_tab_rgb=0x7f08001c;
+        public static final int cd_tabhost=0x7f08001b;
+        public static final int container=0x7f080000;
+        public static final int w_approve=0x7f08000e;
+        public static final int w_bar_top=0x7f080001;
+        public static final int w_cancel=0x7f08000f;
+        public static final int w_canvas=0x7f08000b;
+        public static final int w_draw_image=0x7f080009;
+        public static final int w_draw_lines=0x7f080006;
+        public static final int w_draw_oval=0x7f080004;
+        public static final int w_draw_path=0x7f080007;
+        public static final int w_draw_poly=0x7f080005;
+        public static final int w_draw_rect=0x7f080003;
+        public static final int w_draw_text=0x7f080008;
+        public static final int w_fill=0x7f080012;
+        public static final int w_hand=0x7f08000d;
+        public static final int w_leftpane=0x7f080002;
+        public static final int w_paste=0x7f080019;
+        public static final int w_redo=0x7f080011;
+        public static final int w_select=0x7f08000c;
+        public static final int w_select_copy=0x7f080018;
+        public static final int w_select_del=0x7f08001a;
+        public static final int w_select_move=0x7f080017;
+        public static final int w_stroke_style=0x7f080014;
+        public static final int w_stroke_width=0x7f080013;
+        public static final int w_test=0x7f08000a;
+        public static final int w_text_font=0x7f080016;
+        public static final int w_text_size=0x7f080015;
+        public static final int w_undo=0x7f080010;
     }
     public static final class layout {
-        public static final int activity_tester=0x7f030000;
+        public static final int activity_color_tester=0x7f030000;
+        public static final int activity_tester=0x7f030001;
+        public static final int activity_workspace=0x7f030002;
+        public static final int dialog_color=0x7f030003;
+    }
+    public static final class menu {
+        public static final int color_tester=0x7f070000;
     }
     public static final class string {
         public static final int action_settings=0x7f050002;
         public static final int app_name=0x7f050000;
+        public static final int cd_a=0x7f050007;
+        public static final int cd_b=0x7f050006;
+        public static final int cd_g=0x7f050005;
+        public static final int cd_r=0x7f050004;
         public static final int hello_world=0x7f050001;
+        public static final int title_activity_color_tester=0x7f050008;
         public static final int title_activity_loader=0x7f050003;
     }
     public static final class style {

@@ -27,7 +27,11 @@
         <activity
             android:name="com.ppla03.collapaint.ui.LoaderActivity"
             android:label="@string/title_activity_loader" >
-            <intent-filter>
+        </activity>
+        <activity
+            android:name="com.ppla03.collapaint.ui.ColorTesterActivity"
+            android:label="@string/title_activity_color_tester" >
+             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />

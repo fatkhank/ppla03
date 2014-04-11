@@ -55,7 +55,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 		builder.setMessage("There is a connection problem. Change to Hide Mode?");
 		builder.setPositiveButton("YES", this);
 		builder.setNegativeButton("BACK", this);
-		hideModeDialog = builder.create();
+		//TODO remove
+//		hideModeDialog = builder.create();
 	}
 
 	public void loadCanvas(CanvasModel model) {

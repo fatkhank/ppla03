@@ -5,5 +5,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_loader">LoaderActivity</string>
+    <string name="cd_r">R</string>
+    <string name="cd_g">G</string>
+    <string name="cd_b">B</string>
+    <string name="cd_a">A</string>
+    <string name="title_activity_color_tester">ColorTesterActivity</string>
 
 </resources>
