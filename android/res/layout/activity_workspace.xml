@@ -4,36 +4,90 @@
     android:layout_height="match_parent"
     android:gravity="start" >
 
-    <ImageButton
-        android:id="@+id/imageButton1"
+    <ToggleButton
+        android:id="@+id/toggleButton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/select2_down" />
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/button_blue"
+        android:button="@drawable/select"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toggleButton1"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:background="@drawable/button_purple"
+        android:button="@drawable/draw"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toggleButton2"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:background="@drawable/button_pink"
+        android:button="@drawable/hand"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toggleButton3"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:background="@drawable/button_red"
+        android:button="@drawable/color"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
+    
+    <ToggleButton
+        android:id="@+id/toggleButton5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toggleButton4"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:background="@drawable/button_orange"
+        android:button="@drawable/stroke"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
+    
+    <ToggleButton
+        android:id="@+id/toggleButton6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toggleButton5"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:background="@drawable/button_green"
+        android:button="@drawable/image"
+        android:textOff="@string/emptyString2"
+        android:textOn="@string/emptyString2" />
 
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/imageButton1"
+        android:layout_marginLeft="12dp"
+        android:layout_toRightOf="@+id/toggleButton1"
         android:src="@drawable/rainbow_line" />
-
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/imageButton1"
-        android:src="@drawable/draw_down" />
-
-    <ImageButton
-        android:id="@+id/imageButton3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/imageButton2"
-        android:src="@drawable/hand_down" />
-
+    
 </RelativeLayout>
