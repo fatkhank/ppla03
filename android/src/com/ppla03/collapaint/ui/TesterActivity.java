@@ -6,6 +6,7 @@ import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.Mode;
 import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.model.CanvasModel;
+import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.object.FontManager;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 
@@ -83,7 +84,8 @@ public class TesterActivity extends Activity implements OnClickListener,
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setMode(Mode.SELECT);
 		canvas.setListener(this);
-		CanvasModel cmod = new CanvasModel("njajal", 1000, 400);
+		UserModel user = new UserModel();
+		CanvasModel cmod = new CanvasModel(user, "njajal", 1000, 400);
 		canvas.open(cmod);
 	}
 

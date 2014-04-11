@@ -22,7 +22,7 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 public class ServerConnector {
-	public static final String HOST = "http://192.168.43.64:8080/collapaint/";
+	public static String HOST = "http://192.168.43.64:8080/collapaint/";
 
 	/**
 	 * Operasi berhasil dan mendapatkan jawaban dari server dalam bentuk yang
@@ -33,23 +33,26 @@ public class ServerConnector {
 	/**
 	 * Terjadi masalah pada modul koneksi ke server.
 	 */
-	public static final int INTERNAL_PROBLEM = 2;
+	public static final int INTERNAL_PROBLEM = 2048;
 
 	/**
 	 * Terjadi masalah koneksi.
 	 */
-	public static final int CONNECTION_PROBLEM = 3;
+	public static final int CONNECTION_PROBLEM = 4096;
 
 	/**
 	 * Terjadi masalah pada server.
 	 */
-	public static final int SERVER_PROBLEM = 4;
+	public static final int SERVER_PROBLEM = 8192;
 
 	/**
 	 * Jawaban dari server tidak dapat diterjemahkan
 	 */
-	public static final int UNKNOWN_REPLY = 5;
+	public static final int UNKNOWN_REPLY = 16384;
 	
+	/**
+	 * Waktu tunggu jawaban dari server.
+	 */
 	private static final int TIMEOUT = 10000;
 
 	protected interface ReplyListener {
