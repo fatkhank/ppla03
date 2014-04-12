@@ -123,7 +123,7 @@ public class CanvasView extends View {
 	// Daftar aksi untuk redo
 	private final Stack<UserAction> redoStack = new Stack<>();
 	// Banyak perubahan yang terjadi terhadap objek sejak diseleksi.
-	private int changeCounter;
+	private int checkpoint;
 
 	/*
 	 * Berikut adalah beberapa tempat penyimpanan aksi-aksi yang ditampung
@@ -239,7 +239,6 @@ public class CanvasView extends View {
 		scrollY = CANVAS_MARGIN;
 
 		synczer = new CanvasSynchronizer(this, context);
-		synczer.start();
 
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
 		setLongClickable(true);
@@ -261,21 +260,6 @@ public class CanvasView extends View {
 	 */
 	public void open(CanvasModel model) {
 		this.model = model;
-		synczer.loadCanvas(model);
-		// TODO remove autoload
-		onCanvasLoaded(1);
-	}
-
-	/**
-	 * Proses muat kanvas selesai.
-	 * @param status
-	 */
-	public void onCanvasLoaded(int status) {
-		if (status != ServerConnector.SUCCESS) {
-			listener.onCanvasModelLoaded(model, status);
-			return;
-		}
-		// ---- reset ----
 		selectedObjects.clear();
 		userActions.clear();
 		redoStack.clear();
@@ -285,14 +269,26 @@ public class CanvasView extends View {
 		pendingStyleActions.clear();
 		selectRect.setEmpty();
 		editRect.setEmpty();
+		synczer.loadCanvas(model);
+	}
 
-		cacheImage = Bitmap.createBitmap(model.width, model.height,
-				Config.ARGB_8888);
-		selectedObjectsCache = Bitmap.createBitmap(model.width, model.height,
-				Config.ARGB_8888);
-		cacheCanvas.setBitmap(cacheImage);
+	/**
+	 * Proses muat kanvas selesai.
+	 * @param status
+	 */
+	public void onCanvasLoaded(int status) {
+		if (status == ServerConnector.SUCCESS) {
+			// ---- reset ----
+			cacheImage = Bitmap.createBitmap(model.width, model.height,
+					Config.ARGB_8888);
+			selectedObjectsCache = Bitmap.createBitmap(model.width,
+					model.height, Config.ARGB_8888);
+			cacheCanvas.setBitmap(cacheImage);
 
-		reloadCache();
+			reloadCache();
+			synczer.start();
+
+		}
 		listener.onCanvasModelLoaded(model, status);
 	}
 
@@ -567,7 +563,6 @@ public class CanvasView extends View {
 					grabbedCPoint.release();
 					grabbedCPoint = null;
 					if (protaReshape != null) {
-						changeCounter++;
 						redoStack.clear();
 						pushToUAStack(protaReshape.capture(), false);
 					}
@@ -576,7 +571,6 @@ public class CanvasView extends View {
 				socX = 0;
 				socY = 0;
 				redoStack.clear();
-				changeCounter++;
 				MoveMultiple mm = protaMove.anchorUp();
 				mm.apply();
 				pushToUAStack(mm, false);
@@ -613,7 +607,18 @@ public class CanvasView extends View {
 	 */
 	private void editObject(CanvasObject co, int filter) {
 		currentObject = co;
-		changeCounter = 0;
+		if (co instanceof BasicObject) {
+			protoBasic = (BasicObject) co;
+			if (protoBasic instanceof RectObject)
+				protoRect = (RectObject) protoBasic;
+			else if (protoBasic instanceof OvalObject)
+				protoOval = (OvalObject) protoBasic;
+			else if (protoBasic instanceof PolygonObject)
+				protoPoly = (PolygonObject) protoBasic;
+			else if (protoBasic instanceof FreeObject)
+				protoFree = (FreeObject) protoBasic;
+		}
+		checkpoint = userActions.size();
 		handler = co.getHandlers(filter);
 		if ((mode & Mode.DRAW) != Mode.DRAW)
 			protaReshape = new ReshapeAction(co, true);
@@ -624,7 +629,7 @@ public class CanvasView extends View {
 	 * Menyetujui aksi edit yang dilakukan pengguna.
 	 */
 	public void approveAction() {
-		while (changeCounter-- > 0)
+		while (userActions.size() > checkpoint)
 			userActions.pop();
 		if ((mode & Mode.DRAW) == Mode.DRAW) {
 			currentObject.draw(cacheCanvas);
@@ -658,7 +663,7 @@ public class CanvasView extends View {
 			}
 			cancelSelect();
 		}
-		changeCounter = 0;
+		checkpoint = userActions.size();
 		currentObject = null;
 		handler = null;
 		mode = Mode.SELECT;
@@ -676,7 +681,7 @@ public class CanvasView extends View {
 	public void cancelAction() {
 		handler = null;
 		currentObject = null;
-		while (changeCounter-- > 0)
+		while (userActions.size() > checkpoint)
 			userActions.pop();
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			mode &= ~Mode.EDIT;
@@ -728,10 +733,8 @@ public class CanvasView extends View {
 				protoBasic.setStrokeColor(color);
 			else if (currentObject instanceof LineObject)
 				protoLine.setColor(color);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -750,10 +753,8 @@ public class CanvasView extends View {
 				protoBasic.setStrokeWidth(width);
 			else if (currentObject instanceof LineObject)
 				protoLine.setWidth(width);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -772,10 +773,8 @@ public class CanvasView extends View {
 				protoBasic.setStrokeStyle(strokeStyle);
 			else if (currentObject instanceof LineObject)
 				protoLine.setStrokeStyle(style);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -822,10 +821,8 @@ public class CanvasView extends View {
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setColor(color);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -841,10 +838,8 @@ public class CanvasView extends View {
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setSize(size);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -860,10 +855,8 @@ public class CanvasView extends View {
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setFontStyle(font);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 			postInvalidate();
 		}
 	}
@@ -923,10 +916,8 @@ public class CanvasView extends View {
 				protaStyle = new StyleAction(currentObject, true);
 			protoBasic = (BasicObject) currentObject;
 			protoBasic.setFillMode(filled, color);
-			if ((mode & Mode.DRAW) != Mode.DRAW) {
-				changeCounter++;
+			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
-			}
 		}
 		postInvalidate();
 	}
@@ -980,9 +971,15 @@ public class CanvasView extends View {
 	}
 
 	public void deleteSelectedObjects() {
-		DeleteMultiple dm = new DeleteMultiple(selectedObjects);
-		model.objects.removeAll(selectedObjects);
-		pushToUAStack(dm, !hidden_mode);
+		if ((mode & Mode.EDIT) == Mode.EDIT) {
+			DeleteAction dm = new DeleteAction(currentObject);
+			model.objects.remove(currentObject);
+			pushToUAStack(dm, !hidden_mode);
+		} else {
+			DeleteMultiple dm = new DeleteMultiple(selectedObjects);
+			model.objects.removeAll(selectedObjects);
+			pushToUAStack(dm, !hidden_mode);
+		}
 		cancelSelect();
 	}
 
@@ -1028,7 +1025,7 @@ public class CanvasView extends View {
 
 	public void undo() {
 		if (!userActions.isEmpty()) {
-			if (changeCounter == 0
+			if (checkpoint == userActions.size()
 					&& (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) || ((mode & Mode.DRAW) == Mode.DRAW))) {
 				cancelAction();
 				redoStack.clear();
@@ -1049,7 +1046,6 @@ public class CanvasView extends View {
 				synczer.addToBuffer(inverse);
 			reloadCache();
 			redoStack.push(action);
-			changeCounter--;
 			invalidate();
 			listener.onURStatusChange(!userActions.isEmpty(), true);
 		}
@@ -1064,7 +1060,6 @@ public class CanvasView extends View {
 			UserAction action = redoStack.pop();
 			execute(action, true);
 			pushToUAStack(action, !hidden_mode);
-			changeCounter++;
 			reloadCache();
 			invalidate();
 		}
@@ -1151,7 +1146,7 @@ public class CanvasView extends View {
 	}
 
 	public void closeCanvas() {
-		// TODO on close canvas
+		synczer.closeCanvas(model);
 	}
 
 	public void onCanvasClosed(int status) {

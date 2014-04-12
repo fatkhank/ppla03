@@ -9,6 +9,7 @@ import collapaint.DB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,8 +21,10 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.stream.JsonParsingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -53,6 +56,9 @@ public class Action extends HttpServlet {
         static final String OBJECT_SHAPE = "sh";
         static final String OBJECT_STYLE = "st";
         static final String OBJECT_TRANSFORM = "tx";
+        static final String ERROR = "error";
+        static final int SERVER_ERROR = 5;
+        static final int BAD_REQUEST = 9;
     }
 
     public static final class ActionCode {
@@ -141,7 +147,6 @@ public class Action extends HttpServlet {
         try {
             connection.close();
         } catch (SQLException ex) {
-            Logger.getLogger(Action.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -160,144 +165,181 @@ public class Action extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
+            JsonObjectBuilder reply = Json.createObjectBuilder();
+            try {
+                JsonObject request = Json.createReader(is).readObject();
 
-            //*************************** SAVE REQUEST *************************
-            ArrayList<CanvasObject> objectPool = new ArrayList<>();
-            ArrayList<ActionObject> userActions = new ArrayList<>();
+                //*************************** SAVE REQUEST *************************
+                ArrayList<CanvasObject> objectPool = new ArrayList<>();
+                ArrayList<ActionObject> userActions = new ArrayList<>();
 
-            JsonObject json = Json.createReader(is).readObject();
-            System.out.println("recieve:" + json);
+                //------------ process objects ------------
+                processObject(request, objectPool);
+                insertObjects(objectPool);
 
-            //------------ process objects ------------
-            JsonArray objs = json.getJsonArray(JCode.OBJECT_LIST);
-            int size = objs.size();
-            for (int i = 0; i < size; i++) {
-                JsonObject obj = objs.getJsonObject(i);
-                int id = obj.getInt(JCode.OBJECT_ID);
-                int gid = (obj.containsKey(JCode.OBJECT_GLOBAL_ID)) ? obj.
-                        getInt(JCode.OBJECT_GLOBAL_ID) : -1;
-                int code = obj.getInt(JCode.OBJECT_CODE);
-                String shape = obj.getString(JCode.OBJECT_SHAPE);
-                String style = obj.getString(JCode.OBJECT_STYLE);
-                String transform = obj.getString(JCode.OBJECT_TRANSFORM);
-                CanvasObject co = new CanvasObject(id, gid, code, shape, style,
-                        transform);
-                objectPool.add(co);
+                //------------ process actions ------------
+                int canvasId = request.getInt(JCode.CANVAS_ID);
+                processActions(request, canvasId, userActions, objectPool);
+                insertActions(canvasId, userActions);
+
+                //*************************** REPLY *************************
+                processReply(request, canvasId, userActions, objectPool, reply);
+            } catch (JsonException | NullPointerException | ClassCastException ex) {
+                reply.add(JCode.ERROR, JCode.BAD_REQUEST);
+            } catch (SQLException ex) {
+                reply.add(JCode.ERROR, JCode.SERVER_ERROR);
             }
-
-            insertObjects(objectPool, out);
-
-            //------------ process actions ------------
-            JsonArray acts = json.getJsonArray(JCode.ACTION_LIST);
-            size = acts.size();
-            for (int i = 0; i < size; i++) {
-                JsonObject obj = acts.getJsonObject(i);
-                int oid = (obj.containsKey(JCode.ACTION_OBJ_KNOWN))
-                        ? obj.getInt(JCode.ACTION_OBJ_KNOWN)
-                        : objectPool.get(obj.getInt(JCode.ACTION_OBJ_LISTED)).globalId;
-                //TODO error
-                int code = obj.getInt(JCode.ACTION_CODE);
-                String param = obj.getString(JCode.ACTION_PARAM, "");
-                ActionObject ao = new ActionObject(oid, code, param);
-                userActions.add(ao);
-            }
-            int canvasId = json.getInt(JCode.CANVAS_ID);
-            insertActions(canvasId, userActions);
-
-            //*************************** REPLY *************************
-            try (Statement statement = connection.createStatement()) {
-                JsonObjectBuilder reply = Json.createObjectBuilder();
-
-                // ----- get latest action list
-                int lan = json.getInt(JCode.LAST_ACTION_NUM);
-                JsonArrayBuilder ajab = Json.createArrayBuilder();
-                StringBuilder sb = new StringBuilder();
-                sb.append("select * from action where canvas_id='").
-                        append(canvasId).
-                        append("' limit ").append(lan).append(",256");
-
-                ResultSet result = statement.executeQuery(sb.toString());
-                int pointer = 0;
-                while (result.next()) {
-                    lan++;
-                    JsonObjectBuilder ob = Json.createObjectBuilder();
-                    //cek if it is submitted action
-                    int id = result.getInt(ActionCol.ID);
-                    for (int i = pointer; i < userActions.size(); i++) {
-                        if (userActions.get(i).id == id) {
-                            ob.add(JCode.ACTION_SUBMITTED, i);
-                            pointer = i + 1;
-                            id = -1;
-                        }
-                    }
-                    //if not a submitted action
-                    int code = result.getInt(ActionCol.CODE);
-                    if (id != -1) {
-                        String param = result.getString(ActionCol.PARAMETER);
-                        ob.add(JCode.ACTION_PARAM, param);
-                        ob.add(JCode.ACTION_CODE, code);
-                        id = -1;
-                    }
-                    int objectID = result.getInt(ActionCol.OBJECT_ID);
-
-                    //search object in object pool
-                    for (int i = 0; i < objectPool.size(); i++) {
-                        if (objectPool.get(i).globalId == objectID) {
-                            id = i;
-                            break;
-                        }
-                    }
-                    if (id != -1) {//object is found in list
-                        ob.add(JCode.ACTION_OBJ_LISTED, id);
-                    } else if (code == ActionCode.DRAW_ACTION) {//object is not found but new
-                        ob.add(JCode.ACTION_OBJ_LISTED, objectPool.size());
-                        objectPool.add(new CanvasObject(objectID));
-                    } else//object user has known the object
-                        ob.add(JCode.ACTION_OBJ_KNOWN, objectID);
-                    ajab.add(ob);
-                }
-                reply.add(JCode.ACTION_LIST, ajab);
-
-                // ----- get object data
-                JsonArrayBuilder ojab = Json.createArrayBuilder();
-                size = objectPool.size();
-                for (int i = 0; i < size; i++) {
-                    CanvasObject co = objectPool.get(i);
-                    if (co.id == -1) {
-                        fetchDetail(co);
-                        ojab.add(Json.createObjectBuilder().
-                                add(JCode.OBJECT_GLOBAL_ID, co.globalId).
-                                add(JCode.OBJECT_CODE, co.code).
-                                add(JCode.OBJECT_SHAPE, co.shape).
-                                add(JCode.OBJECT_STYLE, co.style).
-                                add(JCode.OBJECT_TRANSFORM, co.transform));
-                    } else {
-                        ojab.add(Json.createObjectBuilder().
-                                add(JCode.OBJECT_ID, co.id).
-                                add(JCode.OBJECT_GLOBAL_ID, co.globalId));
-                    }
-                }
-                reply.add(JCode.OBJECT_LIST, ojab);
-
-                reply.add(JCode.LAST_ACTION_NUM, lan);
-                out.println(reply.build());
-
-                System.out.println("reply:" + reply.build());
-            }
-        } catch (IOException | SQLException ex) {
-            StackTraceElement[] ste = ex.getStackTrace();
-            PrintWriter out = response.getWriter();
-            out.println("error:" + ex.toString() + ":" + ex.getCause());
-            out.print("<pre>");
-            for (StackTraceElement ste1 : ste) {
-                out.println(ste1.toString());
-            }
-            out.print("</pre>");
-            Logger.getLogger(Action.class.getName()).log(Level.SEVERE, null, ex);
+            out.println(reply.build());
         }
     }
 
-    void insertObjects(ArrayList<CanvasObject> objects, PrintWriter out) throws SQLException {
+    /**
+     * Parse object list.
+     *
+     * @param request
+     * @param objectPool
+     */
+    void processObject(JsonObject request, ArrayList<CanvasObject> objectPool) throws NullPointerException, ClassCastException {
+        if (!request.containsKey(JCode.OBJECT_LIST))
+            return;
+        JsonArray objs = request.getJsonArray(JCode.OBJECT_LIST);
+        int size = objs.size();
+        for (int i = 0; i < size; i++) {
+            JsonObject obj = objs.getJsonObject(i);
+            int id = obj.getInt(JCode.OBJECT_ID);
+            int gid = (obj.containsKey(JCode.OBJECT_GLOBAL_ID)) ? obj.
+                    getInt(JCode.OBJECT_GLOBAL_ID) : -1;
+            int code = obj.getInt(JCode.OBJECT_CODE);
+            String shape = obj.getString(JCode.OBJECT_SHAPE);
+            String style = obj.getString(JCode.OBJECT_STYLE);
+            String transform = obj.getString(JCode.OBJECT_TRANSFORM);
+            CanvasObject co = new CanvasObject(id, gid, code, shape, style,
+                    transform);
+            objectPool.add(co);
+        }
+    }
+
+    /**
+     * Parse action list
+     *
+     * @param request
+     * @param canvasId
+     * @param userActions
+     * @param objectPool
+     */
+    void processActions(JsonObject request, int canvasId, ArrayList<ActionObject> userActions, ArrayList<CanvasObject> objectPool) {
+        if (!request.containsKey(JCode.ACTION_LIST))
+            return;
+        JsonArray acts = request.getJsonArray(JCode.ACTION_LIST);
+        int size = acts.size();
+        for (int i = 0; i < size; i++) {
+            JsonObject obj = acts.getJsonObject(i);
+            int oid = (obj.containsKey(JCode.ACTION_OBJ_KNOWN))
+                    ? obj.getInt(JCode.ACTION_OBJ_KNOWN)
+                    : objectPool.
+                    get(obj.getInt(JCode.ACTION_OBJ_LISTED)).globalId;
+            //TODO error
+            int code = obj.getInt(JCode.ACTION_CODE);
+            String param = obj.getString(JCode.ACTION_PARAM, "");
+            ActionObject ao = new ActionObject(oid, code, param);
+            userActions.add(ao);
+        }
+    }
+
+    /**
+     * Process reply message
+     *
+     * @param request
+     * @param canvasId
+     * @param userActions
+     * @param objectPool
+     * @param reply
+     * @throws SQLException
+     */
+    void processReply(JsonObject request, int canvasId, ArrayList<ActionObject> userActions, ArrayList<CanvasObject> objectPool, JsonObjectBuilder reply) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+
+            // ----- get latest action list
+            int lan = request.getInt(JCode.LAST_ACTION_NUM);
+            JsonArrayBuilder ajab = Json.createArrayBuilder();
+            StringBuilder sb = new StringBuilder();
+            sb.append("select * from action where canvas_id='").
+                    append(canvasId).
+                    append("' limit ").append(lan).append(",256");
+
+            ResultSet result = statement.executeQuery(sb.toString());
+            int pointer = 0;
+            while (result.next()) {
+                lan++;
+                JsonObjectBuilder ob = Json.createObjectBuilder();
+                //cek if it is submitted action
+                int id = result.getInt(ActionCol.ID);
+                for (int i = pointer; i < userActions.size(); i++) {
+                    if (userActions.get(i).id == id) {
+                        ob.add(JCode.ACTION_SUBMITTED, i);
+                        pointer = i + 1;
+                        id = -1;
+                    }
+                }
+                //if not a submitted action
+                int code = result.getInt(ActionCol.CODE);
+                if (id != -1) {
+                    String param = result.getString(ActionCol.PARAMETER);
+                    ob.add(JCode.ACTION_PARAM, param);
+                    ob.add(JCode.ACTION_CODE, code);
+                    id = -1;
+                }
+                int objectID = result.getInt(ActionCol.OBJECT_ID);
+
+                //search object in object pool
+                for (int i = 0; i < objectPool.size(); i++) {
+                    if (objectPool.get(i).globalId == objectID) {
+                        id = i;
+                        break;
+                    }
+                }
+                if (id != -1) {//object is found in list
+                    ob.add(JCode.ACTION_OBJ_LISTED, id);
+                } else if (code == ActionCode.DRAW_ACTION) {//object is not found but new
+                    ob.add(JCode.ACTION_OBJ_LISTED, objectPool.size());
+                    objectPool.add(new CanvasObject(objectID));
+                } else//object user has known the object
+                    ob.add(JCode.ACTION_OBJ_KNOWN, objectID);
+                ajab.add(ob);
+            }
+            reply.add(JCode.ACTION_LIST, ajab);
+
+            // ----- get object data
+            JsonArrayBuilder ojab = Json.createArrayBuilder();
+            int size = objectPool.size();
+            for (int i = 0; i < size; i++) {
+                CanvasObject co = objectPool.get(i);
+                if (co.id == -1) {
+                    fetchDetail(co);
+                    ojab.add(Json.createObjectBuilder().
+                            add(JCode.OBJECT_GLOBAL_ID, co.globalId).
+                            add(JCode.OBJECT_CODE, co.code).
+                            add(JCode.OBJECT_SHAPE, co.shape).
+                            add(JCode.OBJECT_STYLE, co.style).
+                            add(JCode.OBJECT_TRANSFORM, co.transform));
+                } else {
+                    ojab.add(Json.createObjectBuilder().
+                            add(JCode.OBJECT_ID, co.id).
+                            add(JCode.OBJECT_GLOBAL_ID, co.globalId));
+                }
+            }
+            reply.add(JCode.OBJECT_LIST, ojab);
+            reply.add(JCode.LAST_ACTION_NUM, lan);
+        }
+    }
+
+    /**
+     * Insert objects to database.
+     *
+     * @param objects
+     * @throws SQLException
+     */
+    void insertObjects(ArrayList<CanvasObject> objects) throws SQLException {
         int size = objects.size();
         if (size == 0)
             return;
@@ -324,6 +366,13 @@ public class Action extends HttpServlet {
         }
     }
 
+    /**
+     * Insert actions to database
+     *
+     * @param canvasID
+     * @param actions
+     * @throws SQLException
+     */
     void insertActions(int canvasID, ArrayList<ActionObject> actions) throws SQLException {
         int size = actions.size();
         if (size == 0)
@@ -351,6 +400,12 @@ public class Action extends HttpServlet {
         }
     }
 
+    /**
+     * Get details of object.
+     *
+     * @param obj
+     * @throws SQLException
+     */
     void fetchDetail(CanvasObject obj) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             StringBuilder sb = new StringBuilder();
@@ -378,8 +433,8 @@ public class Action extends HttpServlet {
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new StringInputStream(request.
-//                getParameter("json")), response);
+        processRequest(new com.sun.xml.bind.StringInputStream(request.
+                getParameter("json")), response);
     }
 
     /**

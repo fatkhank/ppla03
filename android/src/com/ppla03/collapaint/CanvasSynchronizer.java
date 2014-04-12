@@ -58,17 +58,25 @@ public class CanvasSynchronizer implements SyncEventListener,
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage("There is a connection problem. Change to Hide Mode?");
 		builder.setPositiveButton("YES", this);
-		builder.setNegativeButton("BACK", this);
+		builder.setNegativeButton("NO", this);
 		hideModeDialog = builder.create();
 	}
 
 	public void loadCanvas(CanvasModel model) {
+		Log.d("POS", "loadCanvas");
 		lastActNum = 0;
 		actionBuffer.clear();
 		playbackList.clear();
 		sentList.clear();
 		mode = LOADING;
 		updater.run();
+	}
+	
+	public void closeCanvas(CanvasModel model){
+		stop();
+		if(mode == IDLE){
+			canvas.onCanvasClosed(ServerConnector.SUCCESS);
+		}
 	}
 
 	public void start() {
@@ -162,15 +170,17 @@ public class CanvasSynchronizer implements SyncEventListener,
 		lastActNum = newId;
 		sentList.clear();
 
-		mode &= ~SYNCING;
-		if ((mode & LOADING) == LOADING) {
-			mode &= ~LOADING;
+		if (mode == LOADING) {
+			Log.d("POS", "canvasLoaded");
+			mode = IDLE;
 			canvas.onCanvasLoaded(ServerConnector.SUCCESS);
 		} else if ((mode & FORCED) == FORCED) {
 			mode &= ~FORCED;
 			updater.run();
-		} else if ((mode & STOP) != STOP)
+		} else if ((mode & STOP) != STOP) {
+			mode = IDLE;
 			handler.postDelayed(updater, sync_time);
+		}
 	}
 
 	@Override
@@ -189,7 +199,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			canvas.setHideMode(true);
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
-			// TODO back to canvas list
+			handler.postDelayed(updater, sync_time);
 		}
 	}
 }

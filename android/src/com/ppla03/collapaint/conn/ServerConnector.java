@@ -46,16 +46,33 @@ public class ServerConnector {
 	public static final int SERVER_PROBLEM = 8192;
 
 	/**
-	 * Jawaban dari server tidak dapat diterjemahkan atau formatnya tidak diketahui.
+	 * Jawaban dari server tidak dapat diterjemahkan atau formatnya tidak
+	 * diketahui.
 	 */
 	public static final int UNKNOWN_REPLY = 16384;
-	
+
 	/**
 	 * Waktu tunggu jawaban dari server.
 	 */
 	private static final int TIMEOUT = 10000;
 
+	/**
+	 * Listener saat jawaban dari server diterima.
+	 * @author hamba v7
+	 * 
+	 */
 	protected interface ReplyListener {
+		/**
+		 * Jawaban telah diterima
+		 * @param status status jawaban
+		 * @param reply jawaban dari server, atau null jika {@code status} !=
+		 *            {@link ServerConnector#SUCCESS}.
+		 * @see {@link ServerConnector#SUCCESS},
+		 *      {@link ServerConnector#INTERNAL_PROBLEM},
+		 *      {@link ServerConnector#SERVER_PROBLEM},
+		 *      {@link ServerConnector#UNKNOWN_REPLY},
+		 *      {@link ServerConnector#CONNECTION_PROBLEM}
+		 */
 		void process(int status, JSONObject reply);
 	}
 
@@ -108,7 +125,7 @@ public class ServerConnector {
 				return CONNECTION_PROBLEM;
 			} catch (JSONException e) {
 				return UNKNOWN_REPLY;
-			}catch (Exception e) {
+			} catch (Exception e) {
 				return INTERNAL_PROBLEM;
 			}
 		}

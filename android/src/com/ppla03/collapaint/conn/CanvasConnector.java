@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Bitmap;
@@ -31,6 +32,9 @@ public class CanvasConnector extends ServerConnector {
 		static final String OBJECT_SHAPE = "sh";
 		static final String OBJECT_STYLE = "st";
 		static final String OBJECT_TRANSFORM = "tx";
+		static final String ERROR = "error";
+		static final int SERVER_ERROR = 5;
+		static final int BAD_REQUEST = 9;
 	}
 
 	public static final class ActionCode {
@@ -90,10 +94,6 @@ public class CanvasConnector extends ServerConnector {
 	}
 
 	public void kickUser(UserModel user) {
-		// TODO
-	}
-
-	public void closeCanvas() {
 		// TODO
 	}
 
@@ -196,17 +196,13 @@ public class CanvasConnector extends ServerConnector {
 			// TODO debug ccon
 			Log.d("POS", "send:" + msg.toString());
 
-			new Client(COMMIT_URL, updateListener).execute(msg);
-		} catch (Exception e) {
-			StackTraceElement[] ste = e.getStackTrace();
-			for (int k = 0; k < ste.length; k++)
-				Log.d("POS", "ce:" + ste[k].toString());
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			new Client(COMMIT_URL, replyUpdate).execute(msg);
+		} catch (JSONException ex) {
+			replyUpdate.process(INTERNAL_PROBLEM, null);
 		}
 	}
 
-	private final ServerConnector.ReplyListener updateListener = new ReplyListener() {
+	private final ServerConnector.ReplyListener replyUpdate = new ReplyListener() {
 
 		@Override
 		public void process(int status, JSONObject reply) {
@@ -215,6 +211,15 @@ public class CanvasConnector extends ServerConnector {
 					syncListener.onActionUpdatedFailed(status);
 					return;
 				}
+				if (reply.has(JCode.ERROR)) {
+					int code = reply.getInt(JCode.ERROR);
+					if (code == JCode.SERVER_ERROR)
+						syncListener.onActionUpdatedFailed(SERVER_PROBLEM);
+					else if (code == JCode.BAD_REQUEST)
+						syncListener.onActionUpdatedFailed(INTERNAL_PROBLEM);
+				}
+				// TODO debug
+				Log.d("POS", "rep:" + reply.toString());
 
 				// parse objects
 				replyObjects.clear();
@@ -242,6 +247,7 @@ public class CanvasConnector extends ServerConnector {
 								.getString(JCode.OBJECT_TRANSFORM);
 						co = createObject(code, shape, style, transform);
 						objectMap.put(gid, co);
+						co.setGlobaID(gid);
 					}
 					replyObjects.add(co);
 				}
@@ -270,16 +276,21 @@ public class CanvasConnector extends ServerConnector {
 							// objectMap using global id
 							co = objectMap.get(joAct
 									.getInt(JCode.ACTION_OBJ_KNOWN));
-						replyActions.add(createAction(code, co, param));
+						if (co != null)
+							replyActions.add(createAction(code, co, param));
 					}
 
 				}
 				int lan = reply.getInt(JCode.LAST_ACTION_NUM);
 
 				syncListener.onActionUpdated(lan, replyActions);
-
-				Log.d("POS", "ccon: to sinczer:" + lan);
 			} catch (Exception e) {
+				StackTraceElement[] ste = e.getStackTrace();
+				Log.d("POS", "internal error");
+				for (int i = 0; i < ste.length; i++) {
+					Log.d("POS", i + ":" + ste[i]);
+				}
+
 				syncListener.onActionUpdatedFailed(INTERNAL_PROBLEM);
 			}
 		}
