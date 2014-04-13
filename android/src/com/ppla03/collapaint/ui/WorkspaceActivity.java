@@ -5,24 +5,25 @@ import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.model.CanvasModel;
-import com.ppla03.collapaint.model.object.FontManager;
 import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener, CanvasListener, ColorChangeListener {
 
 	private ToggleButton select, draw, hand, color, stroke, image;
-	private Button approve, cancel;
-	private Button cut, copy, move, delete;
-	private Button rect, oval, poly, line, free, text;
-	private Button strokeStyle, strokeWidth;
+	private ImageButton approve, cancel;
+	private ImageButton cut, copy, move, delete;
+	private ImageButton rect, oval, poly, line, free, text;
+	private ImageButton strokeStyle, strokeWidth;
+	private SeekBar strokeWd;
 	
 	private CanvasView canvas;
 	
@@ -38,20 +39,24 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
 		image = (ToggleButton) findViewById(R.id.w_main_image);
 		
-		approve = (Button) findViewById(R.id.w_app);
-		cancel = (Button) findViewById(R.id.w_ccl);
+		approve = (ImageButton) findViewById(R.id.w_app);
+		cancel = (ImageButton) findViewById(R.id.w_ccl);
 		
-		cut = (Button) findViewById(R.id.w_sel_cut);
-		copy = (Button) findViewById(R.id.w_sel_copy);
-		move = (Button) findViewById(R.id.w_sel_move);
-		delete = (Button) findViewById(R.id.w_sel_del);
+		cut = (ImageButton) findViewById(R.id.w_sel_cut);
+		copy = (ImageButton) findViewById(R.id.w_sel_copy);
+		move = (ImageButton) findViewById(R.id.w_sel_move);
+		delete = (ImageButton) findViewById(R.id.w_sel_del);
 		
-		rect = (Button) findViewById(R.id.w_draw_rect);
-		oval = (Button) findViewById(R.id.w_draw_oval);
-		poly = (Button) findViewById(R.id.w_draw_polygon);
-		line = (Button) findViewById(R.id.w_draw_line);
-		free = (Button) findViewById(R.id.w_draw_free);
-		text = (Button) findViewById(R.id.w_draw_text);
+		rect = (ImageButton) findViewById(R.id.w_draw_rect);
+		oval = (ImageButton) findViewById(R.id.w_draw_oval);
+		poly = (ImageButton) findViewById(R.id.w_draw_polygon);
+		line = (ImageButton) findViewById(R.id.w_draw_line);
+		free = (ImageButton) findViewById(R.id.w_draw_free);
+		text = (ImageButton) findViewById(R.id.w_draw_text);
+		
+		strokeStyle = (ImageButton) findViewById(R.id.w_stroke_style);
+		strokeWidth = (ImageButton) findViewById(R.id.w_stroke_width);
+		strokeWd = (SeekBar)findViewById(R.id.w_stroke_seekbar);
 		
 	}
 
