@@ -13,19 +13,22 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener, CanvasListener, ColorChangeListener {
-
+	
+	private ToggleButton currentMain;
 	private ToggleButton select, draw, hand, color, stroke, image;
 	private ImageButton approve, cancel;
 	private ImageButton cut, copy, move, delete;
 	private ImageButton rect, oval, poly, line, free, text;
-	private ImageButton strokeStyle, strokeWidth;
-	private SeekBar strokeWd;
+	private SeekBar strokeWidth;
+	private Spinner strokeStyle;
 	
 	private CanvasView canvas;
+	private ColorDialog colorDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		color = (ToggleButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
 		image = (ToggleButton) findViewById(R.id.w_main_image);
+		currentMain = select;
 		
 		approve = (ImageButton) findViewById(R.id.w_app);
 		cancel = (ImageButton) findViewById(R.id.w_ccl);
@@ -54,10 +58,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		free = (ImageButton) findViewById(R.id.w_draw_free);
 		text = (ImageButton) findViewById(R.id.w_draw_text);
 		
-		strokeStyle = (ImageButton) findViewById(R.id.w_stroke_style);
-		strokeWidth = (ImageButton) findViewById(R.id.w_stroke_width);
-		strokeWd = (SeekBar)findViewById(R.id.w_stroke_seekbar);
+		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
+		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
 		
+//		canvas = findViewById(R.id.ca)
 	}
 
 	@Override
@@ -92,19 +96,24 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 
 	@Override
 	public void onClick(View v) {
-
 		//main-toolbar
+		
 		if (v == select) {
+			currentMain.setChecked(false);
 			canvas.setMode(CanvasView.Mode.SELECT);
 		} else if (v == draw) {
 			//tampilkan button2 draw -> rect, oval, line, etc
 		} else if (v == hand) {
+			currentMain.setChecked(false);
 			canvas.setMode(CanvasView.Mode.HAND);
 		} else if (v == color) {
 			//tampilin color dialog
+			currentMain.setChecked(false);
 		} else if (v == stroke) {
 			//tampilkan button2 stroke -> style + width
-		} else if (v == image) {	
+			currentMain.setChecked(false);
+		} else if (v == image) {
+			currentMain.setChecked(false);
 			Toast.makeText(this, "not avaiable", Toast.LENGTH_SHORT).show();
 		}
 
@@ -146,6 +155,20 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 			//belum
 		} else if (v == strokeStyle) {
 			//belum
+		}
+	}
+	
+	/**
+	 * Atur visibility approve dan cancel
+	 * @param visible
+	 */
+	void setApproveBar(boolean visible){
+		if(visible){
+			approve.setVisibility(View.VISIBLE);
+			cancel.setVisibility(View.VISIBLE);
+		}else{
+			approve.setVisibility(View.GONE);
+			cancel.setVisibility(View.GONE);
 		}
 	}
 }
