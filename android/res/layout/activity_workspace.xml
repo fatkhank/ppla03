@@ -5,144 +5,206 @@
     android:gravity="start" >
 
     <ScrollView
-        android:id="@+id/scrollView1"
+        android:id="@+id/w_main_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true">
-        
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="33dp"
-        android:orientation="vertical" >
-        
-        <ToggleButton
-        android:id="@+id/toggleButton1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/button_blue"
-        android:button="@drawable/main_select"
-        android:textOff="@string/emptyString2"
-        android:textOn="@string/emptyString2" />
-        
-        <ToggleButton
-            android:id="@+id/toggleButton2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/button_purple"
-            android:button="@drawable/main_draw"
-            android:textOff="@string/emptyString2"
-            android:textOn="@string/emptyString2" />
-        
-        <ToggleButton
-            android:id="@+id/toggleButton3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/button_pink"
-            android:button="@drawable/main_hand"
-            android:textOff="@string/emptyString2"
-            android:textOn="@string/emptyString2" />
-
-    <ToggleButton
-        android:id="@+id/toggleButton4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/button_red"
-        android:button="@drawable/main_color"
-        android:textOff="@string/emptyString2"
-        android:textOn="@string/emptyString2" />
-
-    <ToggleButton
-        android:id="@+id/toggleButton5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/button_orange"
-        android:button="@drawable/main_stroke"
-        android:textOff="@string/emptyString2"
-        android:textOn="@string/emptyString2" />
-
-    <ToggleButton
-        android:id="@+id/toggleButton6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/button_green"
-        android:button="@drawable/main_image"
-        android:textOff="@string/emptyString2"
-        android:textOn="@string/emptyString2" />
-    
-    </LinearLayout>    
-    
-    </ScrollView>
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="96dp"
-            android:src="@drawable/rainbow_line" />
+        android:layout_alignParentTop="true" >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/scrollView1"
-            android:orientation="horizontal" >
+            android:layout_marginRight="33dp"
+            android:orientation="vertical" >
 
-            <ImageButton
-                android:id="@+id/imageButton1"
+            <ToggleButton
+                android:id="@+id/w_main_select"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/button_blue"
+                android:button="@drawable/main_select"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
+
+            <ToggleButton
+                android:id="@+id/w_main_draw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_white"
-                android:src="@drawable/approve" />
-
-            <ImageButton
-                android:id="@+id/imageButton2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_white"
-                android:src="@drawable/cancel" />
-
-            <ImageButton
-                android:id="@+id/imageButton3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="500dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/button_purple"
-                android:src="@drawable/sel_cut" />
-            
-            <ImageButton
-                android:id="@+id/imageButton4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:background="@drawable/button_red"
-                android:src="@drawable/sel_copy" />
-            
-            <ImageButton
-                android:id="@+id/imageButton5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:background="@drawable/button_orange"
-                android:src="@drawable/sel_move" />
-            
-            <ImageButton
-                android:id="@+id/imageButton6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:background="@drawable/button_green"
-                android:src="@drawable/sel_delete" />
+                android:button="@drawable/main_draw"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
 
+            <ToggleButton
+                android:id="@+id/w_main_hand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/button_pink"
+                android:button="@drawable/main_hand"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
+
+            <ToggleButton
+                android:id="@+id/w_main_color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/button_red"
+                android:button="@drawable/main_color"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
+
+            <ToggleButton
+                android:id="@+id/w_main_stroke"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/button_orange"
+                android:button="@drawable/main_stroke"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
+
+            <ToggleButton
+                android:id="@+id/w_main_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/button_green"
+                android:button="@drawable/main_image"
+                android:textOff="@string/emptyString2"
+                android:textOn="@string/emptyString2" />
         </LinearLayout>
-    
+    </ScrollView>
+
+    <ImageView
+        android:id="@+id/w_rainbow_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="96dp"
+        android:src="@drawable/rainbow_line" />
+
+   
+    <ScrollView
+        android:id="@+id/w_additional_toolbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/w_rainbow_line"
+        android:layout_marginLeft="30dp">
+
+         <LinearLayout
+             android:layout_width="1693dp"
+             android:layout_height="wrap_content"
+             android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/w_approve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_white"
+            android:src="@drawable/approve" />
+
+        <ImageButton
+            android:id="@+id/w_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_white"
+            android:src="@drawable/cancel" />
+
+        <ImageButton
+            android:id="@+id/w_sel_cut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_pink"
+            android:src="@drawable/sel_cut" />
+
+        <ImageButton
+            android:id="@+id/w_sel_copy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_red"
+            android:src="@drawable/sel_copy" />
+
+        <ImageButton
+            android:id="@+id/w_sel_move"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_orange"
+            android:src="@drawable/sel_move" />
+
+        <ImageButton
+            android:id="@+id/w_sel_del"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@drawable/button_green"
+            android:src="@drawable/sel_delete" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_blue"
+            android:src="@drawable/draw_rect" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_ellipse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_purple"
+            android:src="@drawable/draw_ellipse" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_polygon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_pink"
+            android:src="@drawable/draw_polygon" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_red"
+            android:src="@drawable/draw_line" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_orange"
+            android:src="@drawable/draw_free" />
+        
+        <ImageButton
+            android:id="@+id/w_draw_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_green"
+            android:src="@drawable/draw_text" />
+
+    </LinearLayout>
+
+    </ScrollView>
+
 </RelativeLayout>
