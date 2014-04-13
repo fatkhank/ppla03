@@ -20,12 +20,14 @@ import android.widget.ToggleButton;
 public class WorkspaceActivity extends Activity implements OnClickListener, CanvasListener, ColorChangeListener {
 	
 	private ToggleButton currentMain;
-	private ToggleButton select, draw, hand, color, stroke, image;
+	private ToggleButton select, draw, hand, stroke;
+	private ImageButton color, image;
+	
 	private ImageButton approve, cancel;
 	private ImageButton cut, copy, move, delete;
 	private ImageButton rect, oval, poly, line, free, text;
-	private SeekBar strokeWidth;
 	private Spinner strokeStyle;
+	private SeekBar strokeWidth;
 	
 	private CanvasView canvas;
 	private ColorDialog colorDialog;
@@ -38,28 +40,42 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		select = (ToggleButton) findViewById(R.id.w_main_select);
 		draw = (ToggleButton) findViewById(R.id.w_main_draw);
 		hand = (ToggleButton) findViewById(R.id.w_main_hand);
-		color = (ToggleButton) findViewById(R.id.w_main_color);
+		color = (ImageButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
-		image = (ToggleButton) findViewById(R.id.w_main_image);
+		image = (ImageButton) findViewById(R.id.w_main_image);
 		currentMain = select;
 		
 		approve = (ImageButton) findViewById(R.id.w_app);
+		approve.setVisibility(View.GONE);
 		cancel = (ImageButton) findViewById(R.id.w_ccl);
+		cancel.setVisibility(View.GONE);
 		
 		cut = (ImageButton) findViewById(R.id.w_sel_cut);
+		cut.setVisibility(View.GONE);
 		copy = (ImageButton) findViewById(R.id.w_sel_copy);
+		copy.setVisibility(View.GONE);
 		move = (ImageButton) findViewById(R.id.w_sel_move);
+		move.setVisibility(View.GONE);
 		delete = (ImageButton) findViewById(R.id.w_sel_del);
+		delete.setVisibility(View.GONE);
 		
 		rect = (ImageButton) findViewById(R.id.w_draw_rect);
+		rect.setVisibility(View.GONE);
 		oval = (ImageButton) findViewById(R.id.w_draw_oval);
+		oval.setVisibility(View.GONE);
 		poly = (ImageButton) findViewById(R.id.w_draw_polygon);
+		poly.setVisibility(View.GONE);
 		line = (ImageButton) findViewById(R.id.w_draw_line);
+		line.setVisibility(View.GONE);
 		free = (ImageButton) findViewById(R.id.w_draw_free);
+		free.setVisibility(View.GONE);
 		text = (ImageButton) findViewById(R.id.w_draw_text);
+		text.setVisibility(View.GONE);
 		
 		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
+		strokeStyle.setVisibility(View.GONE);
 		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
+		strokeWidth.setVisibility(View.GONE);
 		
 //		canvas = findViewById(R.id.ca)
 	}
@@ -101,8 +117,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		if (v == select) {
 			currentMain.setChecked(false);
 			canvas.setMode(CanvasView.Mode.SELECT);
+			
+			setSelectAdditionalBar(true);
+			setDrawAdditionalBar(false);
+			setStrokeAdditionalBar(false);
+		
 		} else if (v == draw) {
-			//tampilkan button2 draw -> rect, oval, line, etc
+			setSelectAdditionalBar(false);
+			setStrokeAdditionalBar(false);
+			setDrawAdditionalBar(true);
 		} else if (v == hand) {
 			currentMain.setChecked(false);
 			canvas.setMode(CanvasView.Mode.HAND);
@@ -110,8 +133,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 			//tampilin color dialog
 			currentMain.setChecked(false);
 		} else if (v == stroke) {
-			//tampilkan button2 stroke -> style + width
 			currentMain.setChecked(false);
+			setSelectAdditionalBar(false);
+			setDrawAdditionalBar(false);
+			setStrokeAdditionalBar(true);
 		} else if (v == image) {
 			currentMain.setChecked(false);
 			Toast.makeText(this, "not avaiable", Toast.LENGTH_SHORT).show();
@@ -169,6 +194,60 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		}else{
 			approve.setVisibility(View.GONE);
 			cancel.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * Atur visibility select-additional-toolbar
+	 * @param visible
+	 */
+	void setSelectAdditionalBar(boolean visible){
+		if(visible){
+			cut.setVisibility(View.VISIBLE);
+			copy.setVisibility(View.VISIBLE);
+			move.setVisibility(View.VISIBLE);
+			delete.setVisibility(View.VISIBLE);
+		}else{
+			cut.setVisibility(View.GONE);
+			copy.setVisibility(View.GONE);
+			move.setVisibility(View.GONE);
+			delete.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * Atur visibility draw-additional-toolbar
+	 * @param visible
+	 */
+	void setDrawAdditionalBar(boolean visible){
+		if(visible){
+			rect.setVisibility(View.VISIBLE);
+			oval.setVisibility(View.VISIBLE);
+			poly.setVisibility(View.VISIBLE);
+			line.setVisibility(View.VISIBLE);
+			free.setVisibility(View.VISIBLE);
+			text.setVisibility(View.VISIBLE);
+		}else{
+			rect.setVisibility(View.GONE);
+			oval.setVisibility(View.GONE);
+			poly.setVisibility(View.GONE);
+			line.setVisibility(View.GONE);
+			free.setVisibility(View.VISIBLE);
+			text.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	/**
+	 * Atur visibility stroke-additional-toolbar
+	 * @param visible
+	 */
+	void setStrokeAdditionalBar(boolean visible){
+		if(visible){
+			strokeStyle.setVisibility(View.VISIBLE);
+			strokeWidth.setVisibility(View.VISIBLE);
+		}else{
+			strokeStyle.setVisibility(View.GONE);
+			strokeWidth.setVisibility(View.GONE);
 		}
 	}
 }
