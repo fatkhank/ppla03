@@ -88,7 +88,7 @@
         android:src="@drawable/rainbow_line" />
 
    
-    <ScrollView
+    <HorizontalScrollView
         android:id="@+id/w_additional_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -96,19 +96,19 @@
         android:layout_marginLeft="30dp">
 
          <LinearLayout
-             android:layout_width="1693dp"
+             android:layout_width="1056dp"
              android:layout_height="wrap_content"
              android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/w_approve"
+            android:id="@+id/w_app"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_white"
             android:src="@drawable/approve" />
 
         <ImageButton
-            android:id="@+id/w_cancel"
+            android:id="@+id/w_ccl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_white"
@@ -159,13 +159,13 @@
             android:src="@drawable/draw_rect" />
         
         <ImageButton
-            android:id="@+id/w_draw_ellipse"
+            android:id="@+id/w_draw_oval"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_marginRight="20dp"
             android:background="@drawable/button_purple"
-            android:src="@drawable/draw_ellipse" />
+            android:src="@drawable/draw_oval" />
         
         <ImageButton
             android:id="@+id/w_draw_polygon"
@@ -193,18 +193,29 @@
             android:layout_marginRight="20dp"
             android:background="@drawable/button_orange"
             android:src="@drawable/draw_free" />
-        
+
         <ImageButton
             android:id="@+id/w_draw_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
             android:layout_marginRight="20dp"
             android:background="@drawable/button_green"
             android:src="@drawable/draw_text" />
 
+        <Button
+            android:id="@+id/w_stroke_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="stroke_STYLE" />
+
+        <Button
+            android:id="@+id/w_stroke_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="stroke_WIDTH" />
+
     </LinearLayout>
 
-    </ScrollView>
+    </HorizontalScrollView>
 
 </RelativeLayout>
