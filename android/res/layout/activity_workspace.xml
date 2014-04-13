@@ -97,7 +97,7 @@
 
          <LinearLayout
              android:layout_width="1056dp"
-             android:layout_height="wrap_content"
+             android:layout_height="104dp"
              android:orientation="horizontal" >
 
         <ImageButton
@@ -208,6 +208,28 @@
             android:layout_height="wrap_content"
             android:text="stroke_STYLE" />
 
+        <SeekBar
+            android:id="@+id/w_stroke_seekbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="72"
+            android:paddingLeft="20dp"
+            android:paddingRight="80dp"
+            android:progress="1" />
+
+        <EditText
+        android:id="@+id/w_stroke_wd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="3"
+        android:layout_below="@+id/w_stroke_seekbar"
+        android:inputType="number" >
+
+        <requestFocus />
+    	</EditText>
+    
+        <!-- sepertinya ga perlu button ini -->
         <Button
             android:id="@+id/w_stroke_width"
             android:layout_width="wrap_content"
