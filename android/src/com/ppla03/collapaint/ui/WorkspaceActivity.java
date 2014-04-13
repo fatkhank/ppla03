@@ -24,8 +24,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 	private ImageButton approve, cancel;
 	private ImageButton cut, copy, move, delete;
 	private ImageButton rect, oval, poly, line, free, text;
-	private SeekBar strokeWidth;
 	private Spinner strokeStyle;
+	private SeekBar strokeWidth;
 	
 	private CanvasView canvas;
 	private ColorDialog colorDialog;
@@ -169,6 +169,60 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		}else{
 			approve.setVisibility(View.GONE);
 			cancel.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * Atur visibility select-additional-toolbar
+	 * @param visible
+	 */
+	void setSelectAdditionalBar(boolean visible){
+		if(visible){
+			cut.setVisibility(View.VISIBLE);
+			copy.setVisibility(View.VISIBLE);
+			move.setVisibility(View.VISIBLE);
+			delete.setVisibility(View.VISIBLE);
+		}else{
+			cut.setVisibility(View.GONE);
+			copy.setVisibility(View.GONE);
+			move.setVisibility(View.GONE);
+			delete.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * Atur visibility draw-additional-toolbar
+	 * @param visible
+	 */
+	void setDrawAdditionalBar(boolean visible){
+		if(visible){
+			rect.setVisibility(View.VISIBLE);
+			oval.setVisibility(View.VISIBLE);
+			poly.setVisibility(View.VISIBLE);
+			line.setVisibility(View.VISIBLE);
+			free.setVisibility(View.VISIBLE);
+			text.setVisibility(View.VISIBLE);
+		}else{
+			rect.setVisibility(View.GONE);
+			oval.setVisibility(View.GONE);
+			poly.setVisibility(View.GONE);
+			line.setVisibility(View.GONE);
+			free.setVisibility(View.VISIBLE);
+			text.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	/**
+	 * Atur visibility stroke-additional-toolbar
+	 * @param visible
+	 */
+	void setStrokeAdditionalBar(boolean visible){
+		if(visible){
+			strokeStyle.setVisibility(View.VISIBLE);
+			strokeWidth.setVisibility(View.VISIBLE);
+		}else{
+			strokeStyle.setVisibility(View.GONE);
+			strokeWidth.setVisibility(View.GONE);
 		}
 	}
 }
