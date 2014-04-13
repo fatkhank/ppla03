@@ -11,12 +11,61 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * 
  */
 public class MoveMultiple extends UserAction {
-	private static final int OFFSET_X = 0, OFFSET_Y = 1;
+	/**
+	 * Aksi menggerakan kumpulan objek ke arah tertentu. Aksi ini hanya
+	 * menyimpan pergeseran yang terjadi, tanpa menyimpan posisi objek yang
+	 * sebenarnya.
+	 * @author hamba v7
+	 * 
+	 */
+	public static class MoveStepper extends UserAction {
+		MoveMultiple parent;
+		float ofx;
+		float ofy;
+
+		MoveStepper(MoveMultiple main, float dx, float dy) {
+			this.parent = main;
+			this.ofx = dx;
+			this.ofy = dy;
+		}
+
+		@Override
+		public UserAction getInverse() {
+			return inverse;
+		}
+
+		@Override
+		public boolean inverseOf(UserAction action) {
+			return false;
+		}
+
+		@Override
+		public boolean overwrites(UserAction action) {
+			return false;
+		}
+
+		/**
+		 * Memindah objek ke tempat yang seharusnya.
+		 */
+		public void execute() {
+			int size = parent.objects.size();
+			for (int i = 0; i < size; i++) {
+				parent.transX[i] += ofx;
+				parent.transY[i] += ofy;
+			}
+			parent.apply();
+		}
+	}
 
 	/**
-	 * Daftar parameter perpindahan, berisi offsetX dan offsetY.
+	 * Daftar parameter tranformasi objek pada sumbu x.
 	 */
-	private final int[] trans = new int[2];
+	private final float[] transX;
+
+	/**
+	 * Daftar parameter tranformasi objek pada sumbu y.
+	 */
+	private final float[] transY;
 
 	/**
 	 * Daftar objek yang dipindah.
@@ -42,13 +91,18 @@ public class MoveMultiple extends UserAction {
 
 	/**
 	 * Membuat aksi {@link MoveMultiple}. Penyimpanan daftar objek akan merujuk
-	 * ke parameter yang diberikan untuk menghemat memori.
+	 * ke parameter yang diberikan untuk menghemat memori. Akan otomatis
+	 * menyimpanan parameter ofset tiap objek.
 	 * @param objects daftar kumpulan objek kanvas yang dikenai aksi.
 	 * @param inverse inverse dari aksi ini.
 	 */
 	private MoveMultiple(ArrayList<CanvasObject> objects, MoveMultiple inverse) {
 		this.objects = objects;
 		this.inverse = inverse;
+		this.transX = new float[inverse.transX.length];
+		this.transY = new float[inverse.transY.length];
+		System.arraycopy(inverse.transX, 0, this.transX, 0, transX.length);
+		System.arraycopy(inverse.transY, 0, this.transY, 0, transY.length);
 	}
 
 	/**
@@ -62,20 +116,15 @@ public class MoveMultiple extends UserAction {
 	 */
 	public MoveMultiple(ArrayList<CanvasObject> objects, boolean reversible) {
 		this.objects = new ArrayList<CanvasObject>(objects);
-		if (reversible) {
-			MoveMultiple tm = new MoveMultiple(this.objects, this);
-			tm.trans[OFFSET_X] = -this.trans[OFFSET_X];
-			tm.trans[OFFSET_Y] = -this.trans[OFFSET_Y];
-			this.inverse = tm;
+		this.transX = new float[objects.size()];
+		this.transY = new float[objects.size()];
+		for (int i = 0; i < objects.size(); i++) {
+			CanvasObject co = objects.get(i);
+			transX[i] = co.offsetX();
+			transY[i] = co.offsetY();
 		}
-	}
-
-	/**
-	 * Mendapatkan parameter aksi perpindahan dalam bentuk {@link String}.
-	 * @return parameter
-	 */
-	public String getParameter() {
-		return MoveAction.encode(trans[OFFSET_X], trans[OFFSET_Y]);
+		if (reversible)
+			this.inverse = new MoveMultiple(this.objects, this);
 	}
 
 	/**
@@ -107,42 +156,33 @@ public class MoveMultiple extends UserAction {
 	 * perpindahan yang telah dilakukan sejak aksi ini dibuat.
 	 * @return aksi yang menyimpan pergeseran sejak anchorDown().
 	 */
-	public MoveMultiple anchorUp() {
+	public MoveStepper anchorUp() {
 		int dx = finalX - anchorX;
 		int dy = finalY - anchorY;
-		trans[OFFSET_X] += dx;
-		trans[OFFSET_Y] += dy;
-		MoveMultiple mi = (MoveMultiple) inverse;
-		mi.trans[OFFSET_X] = -trans[OFFSET_X];
-		mi.trans[OFFSET_Y] = -trans[OFFSET_Y];
 
-		MoveMultiple mm = new MoveMultiple(objects, null);
-		mm.trans[OFFSET_X] = dx;
-		mm.trans[OFFSET_Y] = dy;
-		MoveMultiple mmi = new MoveMultiple(objects, mm);
-		mmi.trans[OFFSET_X] = -dx;
-		mmi.trans[OFFSET_Y] = -dy;
-		mm.inverse = mmi;
-		return mm;
-	}
+		MoveStepper forward = new MoveStepper(this, dx, dy);
+		MoveStepper backward = new MoveStepper(this, -dx, -dy);
+		forward.inverse = backward;
+		backward.inverse = forward;
 
-	public int offsetX() {
-		return trans[OFFSET_X];
-	}
-
-	public int offsetY() {
-		return trans[OFFSET_Y];
+		return forward;
 	}
 
 	/**
 	 * Menjalankan aksi ini pada kumpulan objek yang terdaftar.
 	 */
 	public void apply() {
-		int dx = trans[OFFSET_X];
-		int dy = trans[OFFSET_Y];
 		int size = objects.size();
 		for (int i = 0; i < size; i++)
-			objects.get(i).offset(dx, dy);
+			objects.get(i).offsetTo(transX[i], transY[i]);
+	}
+
+	public int getMoveActions(ArrayList<UserAction> buffer) {
+		int size = objects.size();
+		for (int i = 0; i < size; i++)
+			buffer.add(new MoveAction(objects.get(i)).setParameter(transX[i],
+					transY[i]));
+		return size;
 	}
 
 	@Override
@@ -152,13 +192,7 @@ public class MoveMultiple extends UserAction {
 
 	@Override
 	public boolean inverseOf(UserAction action) {
-		if (action == null || !(action instanceof MoveMultiple))
-			return false;
-		MoveMultiple tm = (MoveMultiple) action;
-		if ((tm.trans[OFFSET_X] != -trans[OFFSET_X])
-				|| (tm.trans[OFFSET_Y] != -trans[OFFSET_Y]))
-			return false;
-		return tm.objects.equals(objects);
+		return this.inverse == action;
 	}
 
 	@Override
@@ -177,6 +211,6 @@ public class MoveMultiple extends UserAction {
 
 	@Override
 	public String toString() {
-		return "MM [" + trans[OFFSET_X] + "] [" + trans[OFFSET_Y] + "]";
+		return "MM";
 	}
 }

@@ -21,6 +21,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private CanvasView canvas;
 	private CanvasConnector connector;
 	private int lastActNum;
+	/**
+	 * Menyimpan lastactnum terakhir.  
+	 */
+	private int checkPoint;
 
 	/**
 	 * Menampung aksi yang akan dikirim ke server
@@ -93,10 +97,14 @@ public class CanvasSynchronizer implements SyncEventListener,
 		if ((mode & SYNCING) != SYNCING)
 			updater.run();
 	}
-
-	public void test() {
-		// TODO test
-		updater.run();
+	
+	public void markCheckpoint(){
+		checkPoint = lastActNum;
+	}
+	
+	public void revert(){
+		lastActNum = checkPoint;
+		forceUpdate();
 	}
 
 	private final Runnable updater = new Runnable() {
@@ -120,12 +128,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 					for (int j = 0; j < len; j++)
 						sentList.add(new DeleteAction(objs.get(j)));
 				} else if (act instanceof MoveMultiple) {
-					MoveMultiple tm = (MoveMultiple) act;
-					objs = tm.objects;
-					int len = objs.size();
-					for (int j = 0; j < len; j++)
-						sentList.add(new MoveAction(objs.get(j))
-								.setParameter(tm.getParameter()));
+					((MoveMultiple) act).getMoveActions(sentList);
 				} else
 					sentList.add(act);
 			}

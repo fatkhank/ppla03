@@ -6,9 +6,9 @@ import java.util.Stack;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
+import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -19,7 +19,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -49,12 +48,14 @@ public class CanvasView extends View {
 		/**
 		 * Mode di mana ada objek yang diseleksi (selectedObject tidak kosong)
 		 */
-		private static int SELECTION_MODE = 32;
+		private static final int SELECTION_MODE = 32;
 
 		/**
 		 * Mode saat ada objek yang dipindah.
 		 */
-		private static int MOVING = 128;
+		private static final int MOVING = 128;
+		
+		
 	}
 
 	private int mode;
@@ -269,7 +270,9 @@ public class CanvasView extends View {
 		pendingStyleActions.clear();
 		selectRect.setEmpty();
 		editRect.setEmpty();
-		synczer.loadCanvas(model);
+		// TODO debug
+		// synczer.loadCanvas(model);
+		onCanvasLoaded(1);
 	}
 
 	/**
@@ -286,8 +289,9 @@ public class CanvasView extends View {
 			cacheCanvas.setBitmap(cacheImage);
 
 			reloadCache();
-			synczer.start();
 
+			// TODO load canvas
+			// synczer.start();
 		}
 		listener.onCanvasModelLoaded(model, status);
 	}
@@ -320,8 +324,16 @@ public class CanvasView extends View {
 			canvas.drawRect(0, 0, model.width, model.height, canvasPaint);
 			if (cacheImage != null)
 				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
-			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
+				
 				canvas.drawBitmap(selectedObjectsCache, socX, socY, cachePaint);
+				if ((mode & Mode.MOVING) == Mode.MOVING) {
+					canvas.drawLine(editRect.left, editRect.top,
+							editRect.right, editRect.bottom, editPaint);
+					canvas.drawLine(editRect.left, editRect.bottom,
+							editRect.right, editRect.top, editPaint);
+				}
+			}
 			if (currentObject != null) {
 				currentObject.draw(canvas);
 				currentObject.getWorldBounds(editRect);
@@ -339,12 +351,13 @@ public class CanvasView extends View {
 						hideModeTextPaint);
 		}
 
-		/*
-		 * CHANGE TO LINE COMMENT TO DEBUG if (model != null) debug(canvas); //
-		 */
+		// ** CHANGE TO LINE COMMENT TO DEBUG
+		if (model != null)
+			debug(canvas);
+		// */
 	}
 
-/** CHANGE TO LINE COMMENT TO DEBUG
+	// ** CHANGE TO LINE COMMENT TO DEBUG
 	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
 		debugPaint.setColor(Color.RED);
@@ -356,7 +369,7 @@ public class CanvasView extends View {
 		canvas.translate(-scrollX, -scrollY);
 		canvas.drawText("U[" + userActions.size() + "]", 250, 20, debugPaint);
 		canvas.drawText("R[" + redoStack.size() + "]", 330, 20, debugPaint);
-		canvas.drawText("C[" + changeCounter + "]", 410, 20, debugPaint);
+		canvas.drawText("C[" + checkpoint + "]", 410, 20, debugPaint);
 		if (handler != null)
 			canvas.drawText("[hnd]", getWidth() - 370, 45, debugPaint);
 		if (grabbedCPoint != null)
@@ -571,9 +584,9 @@ public class CanvasView extends View {
 				socX = 0;
 				socY = 0;
 				redoStack.clear();
-				MoveMultiple mm = protaMove.anchorUp();
-				mm.apply();
-				pushToUAStack(mm, false);
+				MoveStepper ms = protaMove.anchorUp();
+				ms.execute();
+				pushToUAStack(ms, false);
 				reloadCache();
 			}
 		}
@@ -715,6 +728,8 @@ public class CanvasView extends View {
 		pendingReshapeActions.clear();
 		pendingMoveActions.clear();
 		pendingDeleteActions.clear();
+		redoStack.clear();
+		listener.onURStatusChange(!userActions.isEmpty(), false);
 		reloadCache();
 		postInvalidate();
 	}
@@ -928,7 +943,7 @@ public class CanvasView extends View {
 	 * @param loop
 	 */
 	public void setMakeLoop(boolean loop) {
-		this.makeLoop = loop;
+		makeLoop = loop;
 	}
 
 	private boolean selectArea(RectF area) {
@@ -1028,19 +1043,14 @@ public class CanvasView extends View {
 			if (checkpoint == userActions.size()
 					&& (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) || ((mode & Mode.DRAW) == Mode.DRAW))) {
 				cancelAction();
-				redoStack.clear();
-				listener.onURStatusChange(!userActions.isEmpty(), false);
-				mode = Mode.SELECT;
+				if ((mode & Mode.DRAW) == Mode.DRAW)
+					mode = Mode.SELECT;
 				return;
 			}
 			UserAction action = userActions.pop();
 			UserAction inverse = action.getInverse();
 			if (inverse == null)
 				return;
-			if (inverse instanceof MoveMultiple) {
-				socX = 0;
-				socY = 0;
-			}
 			execute(inverse, true);
 			if (!hidden_mode)
 				synczer.addToBuffer(inverse);
@@ -1071,7 +1081,8 @@ public class CanvasView extends View {
 	 * @param hidden
 	 */
 	public void setHideMode(boolean hidden) {
-		this.hidden_mode = hidden;
+		// TODO revert user chance
+		hidden_mode = hidden;
 		postInvalidate();
 	}
 
@@ -1142,6 +1153,9 @@ public class CanvasView extends View {
 		} else if (action instanceof DrawMultiple) {// undelete
 			DrawMultiple dm = (DrawMultiple) action;
 			model.objects.addAll(dm.objects);
+		} else if (action instanceof MoveStepper) {
+			MoveStepper ms = (MoveStepper) action;
+			ms.execute();
 		}
 	}
 
@@ -1151,10 +1165,5 @@ public class CanvasView extends View {
 
 	public void onCanvasClosed(int status) {
 		// TODO canvas close
-	}
-
-	public void test() {
-		// TODO test method
-		synczer.test();
 	}
 }

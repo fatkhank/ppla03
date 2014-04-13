@@ -20,7 +20,7 @@ public class ReshapeAction extends UserAction {
 	 * OFFSET_X, OFFSET_Y, dan ROTATION dari objek secara berurutan. Indeks
 	 * berikutnya diisi oleh parameter instrinsik dari bentuk objek.
 	 */
-	private float[] params;
+	protected float[] params;
 
 	private static final int TRANSFORM_LENGTH = 3;
 	private static final int OFSX_INDEX = 0, OFSY_INDEX = 1, ROT_INDEX = 2;
@@ -125,16 +125,33 @@ public class ReshapeAction extends UserAction {
 	 *         terakhir sebelum diCapture.
 	 */
 	public ReshapeAction capture() {
-		ReshapeAction rai = new ReshapeAction(object, false);
-		System.arraycopy(params, 0, rai.params, 0, params.length);
+		Stepper backward = new Stepper(this, object, false);
+
+		System.arraycopy(params, 0, backward.params, 0, params.length);
 		params[OFSX_INDEX] = object.offsetX();
 		params[OFSY_INDEX] = object.offsetY();
 		params[ROT_INDEX] = object.rotation();
 		object.extractShape(params, TRANSFORM_LENGTH);
-		ReshapeAction ra = new ReshapeAction(rai);
-		System.arraycopy(params, 0, ra.params, 0, params.length);
-		rai.inverse = ra;
-		return ra;
+		Stepper forward = new Stepper(backward);
+		System.arraycopy(params, 0, forward.params, 0, params.length);
+		backward.inverse = forward;
+		return forward;
+	}
+
+	public static class Stepper extends ReshapeAction {
+		ReshapeAction parent;
+
+		public Stepper(Stepper inverse) {
+			super(inverse);
+			parent = inverse.parent;
+		}
+
+		public Stepper(ReshapeAction parent, CanvasObject object,
+				boolean reversible) {
+			super(object, reversible);
+			this.parent = parent;
+		}
+
 	}
 
 	/**
