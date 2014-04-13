@@ -1,5 +1,6 @@
 package com.ppla03.collapaint.ui;
 
+import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
@@ -12,6 +13,7 @@ import com.ppla03.collapaint.model.object.StrokeStyle;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -80,12 +82,13 @@ public class TesterActivity extends Activity implements OnClickListener,
 		text.setOnClickListener(this);
 		image.setOnClickListener(this);
 		test.setOnClickListener(this);
-		
+
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setMode(Mode.SELECT);
 		canvas.setListener(this);
 		UserModel user = new UserModel();
 		CanvasModel cmod = new CanvasModel(user, "njajal", 1000, 400);
+		canvas.setHideMode(true);
 		canvas.open(cmod);
 	}
 
@@ -93,7 +96,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.workspace, menu);
+		// getMenuInflater().inflate(R.menu.workspace, menu);
 		return false;
 	}
 
@@ -149,14 +152,22 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == copy) {
 			canvas.copySelectedObjects();
 		} else if (v == paste) {
-			canvas.pasteFromClipboard();
+			canvas.invalidate();
+//			canvas.pasteFromClipboard();
 		} else if (v == delete) {
 			canvas.deleteSelectedObjects();
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == test) {
-			canvas.test();
-//			canvas.invalidate();
+			if (CanvasExporter.export(canvas.getModel(), CompressFormat.PNG,
+					true) == CanvasExporter.SUCCESS)
+				Toast.makeText(this,
+						"success:" + CanvasExporter.getResultFile(),
+						Toast.LENGTH_LONG).show();
+			else
+				Toast.makeText(this, "fail", Toast.LENGTH_LONG).show();
+			// canvas.test();
+			// canvas.invalidate();
 		}
 	}
 
@@ -183,12 +194,12 @@ public class TesterActivity extends Activity implements OnClickListener,
 	@Override
 	public void onHideModeChange(boolean hidden) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onCanvasModelLoaded(CanvasModel model, int status) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
