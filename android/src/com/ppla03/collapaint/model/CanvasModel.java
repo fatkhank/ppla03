@@ -1,9 +1,6 @@
 package com.ppla03.collapaint.model;
 
 import java.util.ArrayList;
-import java.util.Stack;
-
-import com.ppla03.collapaint.model.action.UserAction;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
@@ -46,7 +43,7 @@ public class CanvasModel {
 	 */
 	public CanvasModel(UserModel owner, String name, int width, int height) {
 		this.owner = owner;
-		this.name = name;
+		this.name = (name == null || name.isEmpty()) ? "untitled" : name;
 		this.width = width;
 		this.height = height;
 		objects = new ArrayList<CanvasObject>();
