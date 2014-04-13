@@ -14,10 +14,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener, CanvasListener, ColorChangeListener {
 
-	private Button select, draw, hand, color, stroke, image;
+	private ToggleButton select, draw, hand, color, stroke, image;
 	private Button approve, cancel;
 	private Button cut, copy, move, delete;
 	private Button rect, oval, poly, line, free, text;
@@ -30,12 +31,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener, Canv
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_workspace);
 		
-		select = (Button) findViewById(R.id.w_main_select);
-		draw = (Button) findViewById(R.id.w_main_draw);
-		hand = (Button) findViewById(R.id.w_main_hand);
-		color = (Button) findViewById(R.id.w_main_color);
-		stroke = (Button) findViewById(R.id.w_main_stroke);
-		image = (Button) findViewById(R.id.w_main_image);
+		select = (ToggleButton) findViewById(R.id.w_main_select);
+		draw = (ToggleButton) findViewById(R.id.w_main_draw);
+		hand = (ToggleButton) findViewById(R.id.w_main_hand);
+		color = (ToggleButton) findViewById(R.id.w_main_color);
+		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
+		image = (ToggleButton) findViewById(R.id.w_main_image);
 		
 		approve = (Button) findViewById(R.id.w_app);
 		cancel = (Button) findViewById(R.id.w_ccl);
