@@ -10,14 +10,19 @@ import com.ppla03.collapaint.model.object.StrokeStyle;
 import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -37,6 +42,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private Spinner strokeStyle;
 	private SeekBar strokeWidth;
+	private TextView strWidthText;
 
 	private CanvasView canvas;
 	private ColorDialog colorDialog;
@@ -66,9 +72,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		color.setOnClickListener(this);
 		stroke.setOnClickListener(this);
 		image.setOnClickListener(this);
-
-		select.setChecked(true);
-		canvas.setMode(CanvasView.Mode.SELECT);
 
 		// --- approve ---
 		approve = (ImageButton) findViewById(R.id.w_app);
@@ -106,6 +109,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// --- stroke ---
 		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
 		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
+		strWidthText = (TextView) findViewById(R.id.w_stroke_wd);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
 				android.R.layout.simple_list_item_1, STR_STYLES_NAMES);
 		strokeStyle.setAdapter(adapter);
@@ -114,10 +118,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		setStrokeAdditionalBar(false);
 
 		// --- prepare canvas ---
+		colorDialog = new ColorDialog(this, this);
+		colorDialog.setColor(Color.BLACK);
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
+		canvas.setListener(this);
 		UserModel user = new UserModel();
 		CanvasModel model = new CanvasModel(user, "untitle", 800, 500);
+		canvas.setMode(CanvasView.Mode.SELECT);
 		canvas.open(model);
+		select.setChecked(true);
 	}
 
 	@Override
@@ -151,18 +160,22 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
+	public void onWaitForApproval() {
+		setApproveBar(true);
+		setDrawAdditionalBar(false);
+	}
+
+	@Override
 	public void onClick(View v) {
 		// main-toolbar
-
 		if (v == select) {
 			currentMain.setChecked(false);
 			currentMain = select;
-			// canvas.setMode(CanvasView.Mode.SELECT);
-
-			setSelectAdditionalBar(true);
+			canvas.setMode(CanvasView.Mode.SELECT);
+			setSelectAdditionalBar(false);
+			setApproveBar(false);
 			setDrawAdditionalBar(false);
 			setStrokeAdditionalBar(false);
-
 		} else if (v == draw) {
 			currentMain.setChecked(false);
 			currentMain = draw;
@@ -172,7 +185,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == hand) {
 			currentMain.setChecked(false);
 			currentMain = hand;
-			// canvas.setMode(CanvasView.Mode.HAND);
+			canvas.setMode(CanvasView.Mode.HAND);
 		} else if (v == color) {
 			currentMain.setChecked(false);
 			colorDialog.show();
@@ -189,8 +202,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 		// approve + cancel action
 		else if (v == approve) {
+			setApproveBar(false);
 			canvas.approveAction();
 		} else if (v == cancel) {
+			setApproveBar(false);
 			canvas.cancelAction();
 		}
 
@@ -203,6 +218,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == delete) {
+			setSelectAdditionalBar(false);
 			canvas.deleteSelectedObjects();
 		}
 

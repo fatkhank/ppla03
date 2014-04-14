@@ -30,7 +30,7 @@
             android:name="com.ppla03.collapaint.ui.WorkspaceActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.ppla03.collapaint.ui.LoaderActivity"

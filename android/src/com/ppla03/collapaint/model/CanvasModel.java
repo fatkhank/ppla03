@@ -1,6 +1,10 @@
 package com.ppla03.collapaint.model;
 
 import java.util.ArrayList;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
@@ -8,7 +12,7 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * @author hamba v7
  * 
  */
-public class CanvasModel {
+public class CanvasModel implements Parcelable{
 	private int id;
 
 	public final UserModel owner;
@@ -55,5 +59,17 @@ public class CanvasModel {
 
 	public void setid(int id) {
 		this.id = id;
+	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		// TODO Auto-generated method stub
+		
 	}
 }

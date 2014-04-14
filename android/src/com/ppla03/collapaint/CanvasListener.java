@@ -40,4 +40,7 @@ public interface CanvasListener {
 	 * @param redoable apakah bisa melakukan redo atau tidak.
 	 */
 	void onURStatusChange(boolean undoable, boolean redoable);
+
+	
+	void onWaitForApproval();
 }

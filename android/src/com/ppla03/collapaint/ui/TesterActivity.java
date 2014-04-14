@@ -202,4 +202,10 @@ public class TesterActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void onWaitForApproval() {
+		// TODO Auto-generated method stub
+		
+	}
 }

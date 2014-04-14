@@ -54,8 +54,7 @@ public class CanvasView extends View {
 		 * Mode saat ada objek yang dipindah.
 		 */
 		private static final int MOVING = 128;
-		
-		
+
 	}
 
 	private int mode;
@@ -325,7 +324,7 @@ public class CanvasView extends View {
 			if (cacheImage != null)
 				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
 			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
-				
+
 				canvas.drawBitmap(selectedObjectsCache, socX, socY, cachePaint);
 				if ((mode & Mode.MOVING) == Mode.MOVING) {
 					canvas.drawLine(editRect.left, editRect.top,
@@ -352,12 +351,12 @@ public class CanvasView extends View {
 		}
 
 		// ** CHANGE TO LINE COMMENT TO DEBUG
-		if (model != null)
-			debug(canvas);
+		// if (model != null)
+		// debug(canvas);
 		// */
 	}
 
-	// ** CHANGE TO LINE COMMENT TO DEBUG
+	// /** CHANGE TO LINE COMMENT TO DEBUG
 	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
 		debugPaint.setColor(Color.RED);
@@ -633,6 +632,7 @@ public class CanvasView extends View {
 		}
 		checkpoint = userActions.size();
 		handler = co.getHandlers(filter);
+		listener.onWaitForApproval();
 		if ((mode & Mode.DRAW) != Mode.DRAW)
 			protaReshape = new ReshapeAction(co, true);
 		mode |= Mode.EDIT;

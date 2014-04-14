@@ -128,6 +128,7 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		aInput.setOnEditorActionListener(this);
 
 		preview = (Button) view.findViewById(R.id.cd_rgb_preview);
+		setColor(Color.BLACK);
 	}
 
 	/**
