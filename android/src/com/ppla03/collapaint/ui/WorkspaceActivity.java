@@ -1,5 +1,6 @@
 package com.ppla03.collapaint.ui;
 
+import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
@@ -11,6 +12,8 @@ import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Bitmap.CompressFormat;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -34,10 +37,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private ToggleButton currentMain;
 	private ToggleButton select, draw, hand, stroke;
-	private ImageButton color, image;
+	private ImageButton color, image, download;
 
 	private ImageButton approve, cancel;
-	private ImageButton cut, copy, move, delete;
+	private ImageButton cut, copy, move, delete, paste;
 	private ImageButton rect, oval, poly, line, free, text;
 
 	private Spinner strokeStyle;
@@ -64,6 +67,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		color = (ImageButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
 		image = (ImageButton) findViewById(R.id.w_main_image);
+		download = (ImageButton) findViewById(R.id.w_main_download);
 		currentMain = select;
 
 		select.setOnClickListener(this);
@@ -72,6 +76,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		color.setOnClickListener(this);
 		stroke.setOnClickListener(this);
 		image.setOnClickListener(this);
+		download.setOnClickListener(this);
 
 		// --- approve ---
 		approve = (ImageButton) findViewById(R.id.w_app);
@@ -85,10 +90,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		copy = (ImageButton) findViewById(R.id.w_sel_copy);
 		move = (ImageButton) findViewById(R.id.w_sel_move);
 		delete = (ImageButton) findViewById(R.id.w_sel_del);
+		paste = (ImageButton) findViewById(R.id.w_sel_paste);
 		cut.setOnClickListener(this);
 		copy.setOnClickListener(this);
 		move.setOnClickListener(this);
 		delete.setOnClickListener(this);
+		paste.setOnClickListener(this);
 		setSelectAdditionalBar(false);
 
 		// --- draw ---
@@ -198,6 +205,17 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == image) {
 			currentMain.setChecked(false);
 			Toast.makeText(this, "not avaiable", Toast.LENGTH_SHORT).show();
+		} else if (v == download) {
+			if (CanvasExporter.export(canvas.getModel(), CompressFormat.PNG,
+					false) == CanvasExporter.SUCCESS) {
+				// MediaScannerConnection.scanFile(this,
+				// new String[] { CanvasExporter.getResultFile()
+				// .toString() }, null, null);
+				Toast.makeText(this,
+						"success:" + CanvasExporter.getResultFile(),
+						Toast.LENGTH_LONG).show();
+			} else
+				Toast.makeText(this, "fail", Toast.LENGTH_LONG).show();
 		}
 
 		// approve + cancel action
@@ -220,6 +238,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == delete) {
 			setSelectAdditionalBar(false);
 			canvas.deleteSelectedObjects();
+		} else if (v == paste) {
+			canvas.pasteFromClipboard();
 		}
 
 		// draw-additional-toolbar
@@ -262,11 +282,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			copy.setVisibility(View.VISIBLE);
 			move.setVisibility(View.VISIBLE);
 			delete.setVisibility(View.VISIBLE);
+			paste.setVisibility(View.VISIBLE);
 		} else {
 			cut.setVisibility(View.GONE);
 			copy.setVisibility(View.GONE);
 			move.setVisibility(View.GONE);
 			delete.setVisibility(View.GONE);
+			paste.setVisibility(View.GONE);
 		}
 	}
 
