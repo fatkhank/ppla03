@@ -139,7 +139,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onColorChanged(int color) {
 		canvas.setStrokeColor(color);
-		onClick(select);
 	}
 
 	@Override
@@ -221,6 +220,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// approve + cancel action
 		else if (v == approve) {
 			setApproveBar(false);
+			onClick(select);
 			canvas.approveAction();
 		} else if (v == cancel) {
 			setApproveBar(false);
