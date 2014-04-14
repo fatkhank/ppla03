@@ -40,7 +40,7 @@ public class ImageChooser implements OnItemClickListener, OnClickListener {
 	private File selectedFile;
 	private File currentDir;
 	private ArrayAdapter<String> adapter;
-	private static final ArrayList<String> fileNames = new ArrayList<>();
+	private static final ArrayList<String> fileNames = new ArrayList<String>();
 
 	public ImageChooser(Activity activity, ImageChooserListener listener) {
 		this.listener = listener;

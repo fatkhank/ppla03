@@ -27,7 +27,7 @@ public class StyleAction extends UserAction {
 	/**
 	 * Parameter <i>style</i> objek.
 	 */
-	private final int[] styles = new int[4];
+	protected final int[] styles = new int[4];
 
 	/**
 	 * Konstruktor untuk membuat inverse dari styleAction
@@ -91,15 +91,35 @@ public class StyleAction extends UserAction {
 	 *         ada perubahan, maka null;
 	 */
 	public StyleAction capture() {
-		StyleAction sai = new StyleAction(object, false);
-		System.arraycopy(styles, 0, sai.styles, 0, styles.length);
+		Stepper backward = new Stepper(this, object, null);
+		System.arraycopy(styles, 0, backward.styles, 0, styles.length);
 		extractStyle(object, styles);
-		if (Arrays.equals(styles, sai.styles))
+		if (Arrays.equals(styles, backward.styles))
 			return null;
-		StyleAction sa = new StyleAction(object, sai);
-		System.arraycopy(styles, 0, sa.styles, 0, styles.length);
-		sai.inverse = sa;
-		return sa;
+		Stepper forward = new Stepper(this, object, backward);
+		System.arraycopy(styles, 0, forward.styles, 0, styles.length);
+		backward.inverse = forward;
+		return forward;
+	}
+	
+	/**
+	 * 
+	 * @author hamba v7
+	 *
+	 */
+	static class Stepper extends StyleAction{
+		private StyleAction parent;
+
+		public Stepper(StyleAction parent, CanvasObject object, Stepper inverse) {
+			super(object, inverse);
+			this.parent = parent;
+		}
+		
+		@Override
+		public void applyStyle() {
+			System.arraycopy(this.styles, 0, parent.styles, 0, this.styles.length);
+			super.applyStyle();
+		}
 	}
 
 	/**

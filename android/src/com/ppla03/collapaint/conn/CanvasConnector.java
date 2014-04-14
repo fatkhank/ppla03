@@ -66,11 +66,11 @@ public class CanvasConnector extends ServerConnector {
 	private HashMap<Integer, CanvasObject> objectMap;
 
 	private CanvasConnector() {
-		sentActions = new ArrayList<>();
-		replyActions = new ArrayList<>();
-		sentObjects = new ArrayList<>();
-		replyObjects = new ArrayList<>();
-		objectMap = new HashMap<>();
+		sentActions = new ArrayList<UserAction>();
+		replyActions = new ArrayList<UserAction>();
+		sentObjects = new ArrayList<CanvasObject>();
+		replyObjects = new ArrayList<CanvasObject>();
+		objectMap = new HashMap<Integer, CanvasObject>();
 	}
 
 	public static CanvasConnector getInstance() {
