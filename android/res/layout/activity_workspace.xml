@@ -102,6 +102,7 @@
 
         <ImageButton
             android:id="@+id/w_app"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_white"
             android:src="@drawable/approve" />
@@ -230,5 +231,14 @@
     </LinearLayout>
 
     </HorizontalScrollView>
+
+    <com.ppla03.collapaint.CanvasView
+        android:id="@+id/w_canvas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/w_additional_toolbar"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/w_additional_toolbar" />
 
 </RelativeLayout>

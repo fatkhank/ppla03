@@ -15,11 +15,10 @@ public class LoaderActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		try {
 			FontManager.readAsset(getAssets());
-			Intent intent = new Intent(this, TesterActivity.class);
+			Intent intent = new Intent(this, WorkspaceActivity.class);
 			startActivity(intent);
 		} catch (Exception e) {
 			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT).show();
 		}
 	}
-
 }
