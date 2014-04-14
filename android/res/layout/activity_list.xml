@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android1="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg2"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/button1"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView1"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:text="@string/sign_out" />
+
+    <TabHost
+        android1:id="@android:id/tabhost"
+        android1:layout_width="match_parent"
+        android1:layout_height="match_parent"
+        android1:layout_alignParentLeft="true"
+        android1:layout_alignParentTop="true" >
+
+        <RelativeLayout
+            android1:id="@+id/RelativeLayout1"
+            android1:layout_width="match_parent"
+            android1:layout_height="match_parent"
+            android1:orientation="vertical" >
+
+            <FrameLayout
+                android1:id="@android:id/tabcontent"
+                android1:layout_width="match_parent"
+                android1:layout_height="match_parent"
+                android1:layout_alignParentLeft="true"
+                android1:layout_below="@android:id/tabs" >
+
+                <RelativeLayout
+                    android1:id="@+id/New"
+                    android1:layout_width="match_parent"
+                    android1:layout_height="match_parent" >
+
+                    <Button
+                        android1:id="@+id/buttonCreate"
+                        android1:layout_width="wrap_content"
+                        android1:layout_height="wrap_content"
+                        android1:layout_below="@android:id/tabs"
+                        android1:layout_centerHorizontal="true"
+                        android1:layout_marginTop="50dp"
+                        android1:text="@string/create" />
+
+                    <TabWidget
+                        android1:id="@android:id/tabs"
+                        android1:layout_width="match_parent"
+                        android1:layout_height="wrap_content"
+                        android1:layout_alignParentLeft="true"
+                        android1:layout_alignParentTop="true"
+                        android1:layout_marginTop="49dp" >
+                    </TabWidget>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android1:id="@+id/Recent"
+                    android1:layout_width="match_parent"
+                    android1:layout_height="match_parent" >
+
+                    <ListView
+                        android1:id="@+id/listView1"
+                        android1:layout_width="match_parent"
+                        android1:layout_height="wrap_content"
+                        android1:layout_alignParentLeft="true"
+                        android1:layout_alignParentRight="true"
+                        android1:layout_alignParentTop="true"
+                        android1:layout_weight="1" >
+                    </ListView>
+                </RelativeLayout>
+            </FrameLayout>
+        </RelativeLayout>
+    </TabHost>
+
+</RelativeLayout>

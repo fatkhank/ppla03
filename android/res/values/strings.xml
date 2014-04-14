@@ -12,5 +12,7 @@
     <string name="title_activity_color_tester">ColorTesterActivity</string>
     <string name="emptyString">\"\"</string>
     <string name="emptyString2"></string>
+    <string name="sign_out">Sign Out</string>
+    <string name="create">Create Workspace</string>
 
 </resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg1"
+    android:orientation="vertical" >
+
+	<com.google.android.gms.common.SignInButton
+	    android:id="@+id/SignInButton01"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentBottom="true"
+	    android:layout_alignParentLeft="true"
+	    android:layout_marginBottom="68dp"
+	    android:layout_marginLeft="92dp"
+	    android:text="@string/common_signin_button_text_long" >
+	</com.google.android.gms.common.SignInButton>
+
+</RelativeLayout>

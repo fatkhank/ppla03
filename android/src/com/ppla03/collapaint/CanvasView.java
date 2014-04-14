@@ -118,11 +118,11 @@ public class CanvasView extends View {
 	private ReshapeAction protaReshape;
 
 	// Daftar objek yang diseleksi
-	private final ArrayList<CanvasObject> selectedObjects = new ArrayList<>();
+	private final ArrayList<CanvasObject> selectedObjects = new ArrayList<CanvasObject>();
 	// Daftar aksi terakhir, untuk undo
-	private final Stack<UserAction> userActions = new Stack<>();
+	private final Stack<UserAction> userActions = new Stack<UserAction>();
 	// Daftar aksi untuk redo
-	private final Stack<UserAction> redoStack = new Stack<>();
+	private final Stack<UserAction> redoStack = new Stack<UserAction>();
 	// Banyak perubahan yang terjadi terhadap objek sejak diseleksi.
 	private int checkpoint;
 
@@ -135,10 +135,10 @@ public class CanvasView extends View {
 	 * menyetujui aksinya, maka aksi dalam penampungan diabaikan karena ditimpa
 	 * oleh aksi pengguna.
 	 */
-	private final ArrayList<UserAction> pendingStyleActions = new ArrayList<>();
-	private final ArrayList<UserAction> pendingReshapeActions = new ArrayList<>();
-	private final ArrayList<UserAction> pendingMoveActions = new ArrayList<>();
-	private final ArrayList<UserAction> pendingDeleteActions = new ArrayList<>();
+	private final ArrayList<UserAction> pendingStyleActions = new ArrayList<UserAction>();
+	private final ArrayList<UserAction> pendingReshapeActions = new ArrayList<UserAction>();
+	private final ArrayList<UserAction> pendingMoveActions = new ArrayList<UserAction>();
+	private final ArrayList<UserAction> pendingDeleteActions = new ArrayList<UserAction>();
 
 	private CanvasListener listener;
 	private CanvasSynchronizer synczer;

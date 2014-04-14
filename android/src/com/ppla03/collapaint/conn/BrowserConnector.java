@@ -152,9 +152,9 @@ public class BrowserConnector extends ServerConnector {
 		}
 	}
 
-	private final ArrayList<CanvasModel> ownList = new ArrayList<>();
-	private final ArrayList<CanvasModel> oldList = new ArrayList<>();
-	private final ArrayList<CanvasModel> newList = new ArrayList<>();
+	private final ArrayList<CanvasModel> ownList = new ArrayList<CanvasModel>();
+	private final ArrayList<CanvasModel> oldList = new ArrayList<CanvasModel>();
+	private final ArrayList<CanvasModel> newList = new ArrayList<CanvasModel>();
 
 	private final ReplyListener listReply = new ReplyListener() {
 
