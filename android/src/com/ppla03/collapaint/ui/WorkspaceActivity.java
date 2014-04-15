@@ -21,6 +21,7 @@ import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
@@ -224,6 +225,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				this);
 
 		onClick(select);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(this, BrowserActivity.class);
+		startActivity(intent);
 	}
 
 	@Override
