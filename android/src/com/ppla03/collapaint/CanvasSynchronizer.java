@@ -88,9 +88,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 		playbackList.clear();
 		sentList.clear();
 		// TODO debug load canvas
-		// mode = LOADING;
-		// updater.run();
-		listener.onCanvasLoaded(currentModel, 1);
+		mode = LOADING;
+		updater.run();
+		// listener.onCanvasLoaded(currentModel, 1);
 	}
 
 	public void setCanvasView(CanvasView canvas) {

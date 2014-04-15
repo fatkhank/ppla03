@@ -1022,7 +1022,7 @@ public class CanvasView extends View {
 			selectedObjects.add(objs.get(i).cloneObject());
 		DrawMultiple dm = new DrawMultiple(selectedObjects);
 		pushToUAStack(dm, !hidden_mode);
-		mode |= Mode.SELECTION_MODE;
+//		mode |= Mode.SELECTION_MODE;
 		socX = 0;
 		socY = 0;
 		reloadCache();

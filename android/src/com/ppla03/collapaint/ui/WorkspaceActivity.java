@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -39,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -70,6 +72,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private AlertDialog polyDialog;
 	private EditText polyInput;
+
+	private ProgressBar progress;
+	private View cover;
 
 	// --- list participants ---
 	private AlertDialog participantsDialog;
@@ -205,6 +210,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		pdb.setNegativeButton("Cancel", this);
 		polyDialog = pdb.create();
 
+		// --- progress ---
+		progress = (ProgressBar) findViewById(R.id.w_progress);
+		progress.setVisibility(View.GONE);
+		cover = findViewById(R.id.w_cover);
+		cover.setVisibility(View.GONE);
+
 		// --- prepare canvas ---
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setListener(this);
@@ -253,6 +264,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			downloadDialog.show();
 			break;
 		case R.id.wm_participant:
+			progress.setVisibility(View.VISIBLE);
+			cover.setVisibility(View.VISIBLE);
 			connector.getParticipants(canvas.getModel());
 			break;
 		}
@@ -519,6 +532,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		participantAdapter.add(owner.username);
 		for (int i = 0; i < participants.size(); i++)
 			participantAdapter.add(participants.get(i).username);
+		progress.setVisibility(View.GONE);
+		cover.setVisibility(View.GONE);
 		participantsDialog.show();
 	}
 

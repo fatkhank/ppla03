@@ -189,13 +189,12 @@
             android:layout_toRightOf="@+id/w_draw_free"
             android:background="@drawable/button_green48"
             android:src="@drawable/draw_text48" />
-        
+
         <Spinner
             android:id="@+id/w_font_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            />
+            android:layout_alignParentLeft="true" />
 
         <TextView
             android:id="@+id/w_stroke_style_label"
@@ -263,5 +262,19 @@
         android:layout_toLeftOf="@+id/w_ccl"
         android:background="@drawable/button_white48"
         android:src="@drawable/approve48" />
+
+    <View
+        android:id="@+id/w_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/workspace_blocker" />
+
+    <ProgressBar
+        android:id="@+id/w_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

@@ -256,4 +256,18 @@
         android:background="@drawable/button_white"
         android:src="@drawable/approve" />
 
+    <View
+        android:id="@+id/w_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/workspace_blocker" />
+
+    <ProgressBar
+        android:id="@+id/w_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
 </RelativeLayout>
