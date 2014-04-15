@@ -73,6 +73,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private AlertDialog polyDialog;
 	private EditText polyInput;
+	
 
 	private ProgressBar progress;
 	private View cover;

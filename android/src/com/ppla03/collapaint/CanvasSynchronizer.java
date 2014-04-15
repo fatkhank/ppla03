@@ -82,15 +82,21 @@ public class CanvasSynchronizer implements SyncEventListener,
 		Log.d("POS", "loadCanvas");
 		if (connector == null)
 			connector = CanvasConnector.getInstance().setSyncListener(this);
-		this.listener = listener;
-		lastActNum = 0;
-		actionBuffer.clear();
-		playbackList.clear();
-		sentList.clear();
-		// TODO debug load canvas
-		mode = LOADING;
-		updater.run();
-		// listener.onCanvasLoaded(currentModel, 1);
+		if (currentModel.getId() != -1) {
+			this.listener = listener;
+			lastActNum = 0;
+			actionBuffer.clear();
+			playbackList.clear();
+			sentList.clear();
+			// TODO debug load canvas
+			mode = LOADING;
+			updater.run();
+		} else
+			listener.onCanvasLoaded(currentModel, 1);
+	}
+
+	public CanvasModel getcurrent() {
+		return currentModel;
 	}
 
 	public void setCanvasView(CanvasView canvas) {

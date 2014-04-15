@@ -50,6 +50,7 @@ public class CanvasModel implements Parcelable {
 		this.name = (name == null || name.isEmpty()) ? "untitled" : name;
 		this.width = width;
 		this.height = height;
+		globalId = -1;
 		objects = new ArrayList<CanvasObject>();
 	}
 

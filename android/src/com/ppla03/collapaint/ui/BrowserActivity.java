@@ -64,7 +64,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		case R.id.buttonCreate:
 			UserModel user = new UserModel();
 			CanvasModel model = new CanvasModel(user, "untitle", 800, 500);
-			model.setid(++counter);
 			CanvasSynchronizer.getInstance().setCanvas(model);
 			Intent intent = new Intent(this, LoaderActivity.class);
 			startActivity(intent);
