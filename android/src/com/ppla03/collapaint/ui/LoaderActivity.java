@@ -11,11 +11,14 @@ import com.ppla03.collapaint.model.object.FontManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class LoaderActivity extends Activity implements CanvasLoadListener {
 	private ProgressBar progress;
+
+	Handler handler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,9 +28,10 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 		try {
 			FontManager.readAsset(getAssets());
 			UserModel user = new UserModel();
-			
+
 			CanvasModel model = new CanvasModel(user, "untitle", 800, 500);
 			CanvasSynchronizer.getInstance().setCanvas(model).loadCanvas(this);
+			handler = new Handler();
 		} catch (Exception e) {
 			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT)
 					.show();
@@ -42,7 +46,14 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 		} else {
 			Toast.makeText(this, "Cannot load canvas", Toast.LENGTH_SHORT)
 					.show();
-			// TODO failed load canvas
+			final Intent intent = new Intent(this, BrowserActivity.class);
+			handler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					startActivity(intent);
+				}
+			}, 3000);
 		}
 	}
 }
