@@ -5,13 +5,13 @@
     android:layout_height="match_parent" >
 
     <HorizontalScrollView
-        android:id="@+id/w_bar_top"
+        android:id="@+id/wp_bar_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/w_leftpane"
+        android:layout_toRightOf="@+id/wp_leftpane"
         android:fillViewport="true" >
 
         <LinearLayout
@@ -20,50 +20,50 @@
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/w_draw_rect"
+                android:id="@+id/wp_draw_rect"
                 style="@android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="rect" />
 
             <Button
-                android:id="@+id/w_draw_oval"
+                android:id="@+id/wp_draw_oval"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="oval" />
 
             <Button
-                android:id="@+id/w_draw_poly"
+                android:id="@+id/wp_draw_poly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="poly" />
 
             <Button
-                android:id="@+id/w_draw_lines"
+                android:id="@+id/wp_draw_lines"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="lines" />
 
             <Button
-                android:id="@+id/w_draw_path"
+                android:id="@+id/wp_draw_path"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="free" />
 
             <Button
-                android:id="@+id/w_draw_text"
+                android:id="@+id/wp_draw_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="text" />
 
             <Button
-                android:id="@+id/w_draw_image"
+                android:id="@+id/wp_draw_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="img" />
 
             <Button
-                android:id="@+id/w_test"
+                android:id="@+id/wp_test"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="inv" />
@@ -71,15 +71,15 @@
     </HorizontalScrollView>
 
     <com.ppla03.collapaint.CanvasView
-        android:id="@+id/w_canvas"
+        android:id="@+id/wp_canvas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/w_leftpane"
+        android:layout_above="@id/wp_leftpane"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/w_bar_top" />
+        android:layout_below="@+id/wp_bar_top" />
 
     <HorizontalScrollView
-        android:id="@+id/w_leftpane"
+        android:id="@+id/wp_leftpane"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
@@ -93,91 +93,91 @@
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/w_select"
+                android:id="@+id/wp_select"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="sel" />
 
             <Button
-                android:id="@+id/w_hand"
+                android:id="@+id/wp_hand"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="hand" />
 
             <Button
-                android:id="@+id/w_approve"
+                android:id="@+id/wp_approve"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="appr" />
 
             <Button
-                android:id="@+id/w_cancel"
+                android:id="@+id/wp_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="canc" />
 
             <Button
-                android:id="@+id/w_undo"
+                android:id="@+id/wp_undo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="undo" />
 
             <Button
-                android:id="@+id/w_redo"
+                android:id="@+id/wp_redo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="redo" />
 
             <Button
-                android:id="@+id/w_fill"
+                android:id="@+id/wp_fill"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="fill" />
 
             <Button
-                android:id="@+id/w_stroke_width"
+                android:id="@+id/wp_stroke_width"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="sWid" />
 
             <Button
-                android:id="@+id/w_stroke_style"
+                android:id="@+id/wp_stroke_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="sSty" />
 
             <Button
-                android:id="@+id/w_text_size"
+                android:id="@+id/wp_text_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="tSize" />
 
             <Button
-                android:id="@+id/w_text_font"
+                android:id="@+id/wp_text_font"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="tFont" />
 
             <Button
-                android:id="@+id/w_select_move"
+                android:id="@+id/wp_select_move"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="move" />
 
             <Button
-                android:id="@+id/w_select_copy"
+                android:id="@+id/wp_select_copy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="copy" />
 
             <Button
-                android:id="@+id/w_paste"
+                android:id="@+id/wp_paste"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="paste" />
 
             <Button
-                android:id="@+id/w_select_del"
+                android:id="@+id/wp_select_del"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="del" />

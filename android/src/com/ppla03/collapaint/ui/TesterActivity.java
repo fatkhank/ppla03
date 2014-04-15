@@ -33,30 +33,30 @@ public class TesterActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_tester);
 
-		select = (Button) findViewById(R.id.w_select);
-		hand = (Button) findViewById(R.id.w_hand);
-		fill = (Button) findViewById(R.id.w_fill);
-		strokeWidth = (Button) findViewById(R.id.w_stroke_width);
-		strokeStyle = (Button) findViewById(R.id.w_stroke_style);
-		textSize = (Button) findViewById(R.id.w_text_size);
-		textFont = (Button) findViewById(R.id.w_text_font);
-		approve = (Button) findViewById(R.id.w_approve);
-		cancel = (Button) findViewById(R.id.w_cancel);
-		undo = (Button) findViewById(R.id.w_undo);
-		redo = (Button) findViewById(R.id.w_redo);
-		move = (Button) findViewById(R.id.w_select_move);
-		copy = (Button) findViewById(R.id.w_select_copy);
-		paste = (Button) findViewById(R.id.w_paste);
-		delete = (Button) findViewById(R.id.w_select_del);
+		select = (Button) findViewById(R.id.wp_select);
+		hand = (Button) findViewById(R.id.wp_hand);
+		fill = (Button) findViewById(R.id.wp_fill);
+		strokeWidth = (Button) findViewById(R.id.wp_stroke_width);
+		strokeStyle = (Button) findViewById(R.id.wp_stroke_style);
+		textSize = (Button) findViewById(R.id.wp_text_size);
+		textFont = (Button) findViewById(R.id.wp_text_font);
+		approve = (Button) findViewById(R.id.wp_approve);
+		cancel = (Button) findViewById(R.id.wp_cancel);
+		undo = (Button) findViewById(R.id.wp_undo);
+		redo = (Button) findViewById(R.id.wp_redo);
+		move = (Button) findViewById(R.id.wp_select_move);
+		copy = (Button) findViewById(R.id.wp_select_copy);
+		paste = (Button) findViewById(R.id.wp_paste);
+		delete = (Button) findViewById(R.id.wp_select_del);
 
-		rect = (Button) findViewById(R.id.w_draw_rect);
-		oval = (Button) findViewById(R.id.w_draw_oval);
-		path = (Button) findViewById(R.id.w_draw_path);
-		poly = (Button) findViewById(R.id.w_draw_poly);
-		lines = (Button) findViewById(R.id.w_draw_lines);
-		text = (Button) findViewById(R.id.w_draw_text);
-		image = (Button) findViewById(R.id.w_draw_image);
-		test = (Button) findViewById(R.id.w_test);
+		rect = (Button) findViewById(R.id.wp_draw_rect);
+		oval = (Button) findViewById(R.id.wp_draw_oval);
+		path = (Button) findViewById(R.id.wp_draw_path);
+		poly = (Button) findViewById(R.id.wp_draw_poly);
+		lines = (Button) findViewById(R.id.wp_draw_lines);
+		text = (Button) findViewById(R.id.wp_draw_text);
+		image = (Button) findViewById(R.id.wp_draw_image);
+		test = (Button) findViewById(R.id.wp_test);
 
 		select.setOnClickListener(this);
 		hand.setOnClickListener(this);
@@ -83,7 +83,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		image.setOnClickListener(this);
 		test.setOnClickListener(this);
 
-		canvas = (CanvasView) findViewById(R.id.w_canvas);
+		canvas = (CanvasView) findViewById(R.id.wp_canvas);
 		canvas.setMode(Mode.SELECT);
 		canvas.setListener(this);
 		UserModel user = new UserModel();
@@ -198,13 +198,13 @@ public class TesterActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onCanvasModelLoaded(CanvasModel model, int status) {
+	public void onWaitForApproval() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	public void onWaitForApproval() {
+	public void onBeginDraw() {
 		// TODO Auto-generated method stub
 		
 	}

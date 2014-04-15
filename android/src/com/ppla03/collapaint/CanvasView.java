@@ -78,7 +78,7 @@ public class CanvasView extends View {
 	static final int CANVAS_SHADOW_DY = 0;
 
 	// Jarak kertas kanvas ke View.
-	static final int CANVAS_MARGIN = 50;
+	static final int CANVAS_MARGIN = 150;
 	// Warna untuk memisahkan objek yang tidak diseleksi dan diseleksi. Objek2
 	// yang tidak diseleksi akan terkaburkan dengan warna ini, sedangkan objek
 	// yang diseleksi tidak akan terpengaruh terhadap warna ini.
@@ -235,10 +235,10 @@ public class CanvasView extends View {
 		textFont = 0;
 		imageAlpha = 255;
 
-		scrollX = CANVAS_MARGIN;
-		scrollY = CANVAS_MARGIN;
+		scrollX = 20;
+		scrollY = 20;
 
-		synczer = new CanvasSynchronizer(this, context);
+		synczer = CanvasSynchronizer.getInstance();
 
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
 		setLongClickable(true);
@@ -269,30 +269,14 @@ public class CanvasView extends View {
 		pendingStyleActions.clear();
 		selectRect.setEmpty();
 		editRect.setEmpty();
-		// TODO debug
-		// synczer.loadCanvas(model);
-		onCanvasLoaded(1);
-	}
+		// ---- reset ----
+		cacheImage = Bitmap.createBitmap(model.width, model.height,
+				Config.ARGB_8888);
+		selectedObjectsCache = Bitmap.createBitmap(model.width, model.height,
+				Config.ARGB_8888);
+		cacheCanvas.setBitmap(cacheImage);
 
-	/**
-	 * Proses muat kanvas selesai.
-	 * @param status
-	 */
-	public void onCanvasLoaded(int status) {
-		if (status == ServerConnector.SUCCESS) {
-			// ---- reset ----
-			cacheImage = Bitmap.createBitmap(model.width, model.height,
-					Config.ARGB_8888);
-			selectedObjectsCache = Bitmap.createBitmap(model.width,
-					model.height, Config.ARGB_8888);
-			cacheCanvas.setBitmap(cacheImage);
-
-			reloadCache();
-
-			// TODO load canvas
-			// synczer.start();
-		}
-		listener.onCanvasModelLoaded(model, status);
+		reloadCache();
 	}
 
 	/**
@@ -346,8 +330,8 @@ public class CanvasView extends View {
 			} else if (mode == Mode.SELECT)
 				canvas.drawRect(selectRect, selectPaint);
 			if (hidden_mode)
-				canvas.drawText(HIDDEN_MODE_TEXT, 10 - scrollX, 30 - scrollY,
-						hideModeTextPaint);
+				canvas.drawText(HIDDEN_MODE_TEXT, 10 - scrollX, getHeight() - 5
+						- scrollY, hideModeTextPaint);
 		}
 
 		// ** CHANGE TO LINE COMMENT TO DEBUG
@@ -525,8 +509,10 @@ public class CanvasView extends View {
 					} else if (mode == Mode.DRAW) {
 						if (objectType == ObjectType.FREE) {
 							protoFree.penTo(x, y);
+							listener.onBeginDraw();
 						} else if (objectType == ObjectType.LINE) {
 							protoLine.penTo(x, y);
+							listener.onBeginDraw();
 						}
 					} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 						if (grabbedCPoint != null)
@@ -578,6 +564,7 @@ public class CanvasView extends View {
 						redoStack.clear();
 						pushToUAStack(protaReshape.capture(), false);
 					}
+					listener.onWaitForApproval();
 				}
 			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
 				socX = 0;
@@ -610,6 +597,14 @@ public class CanvasView extends View {
 				cancelAction();
 			this.mode = mode;
 		}
+	}
+
+	public boolean isInDrawingMode() {
+		return (mode & Mode.DRAW) == Mode.DRAW;
+	}
+
+	public boolean hasSelecedObjects() {
+		return !selectedObjects.isEmpty();
 	}
 
 	/**
@@ -750,6 +745,7 @@ public class CanvasView extends View {
 				protoLine.setColor(color);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -770,6 +766,7 @@ public class CanvasView extends View {
 				protoLine.setWidth(width);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -790,6 +787,7 @@ public class CanvasView extends View {
 				protoLine.setStrokeStyle(style);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -807,6 +805,7 @@ public class CanvasView extends View {
 		imageAlpha = alpha;
 		if (protoImage != null)
 			protoImage.setTransparency(alpha);
+		listener.onWaitForApproval();
 	}
 
 	/**
@@ -838,6 +837,7 @@ public class CanvasView extends View {
 			protoText.setColor(color);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -855,6 +855,7 @@ public class CanvasView extends View {
 			protoText.setSize(size);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -872,6 +873,7 @@ public class CanvasView extends View {
 			protoText.setFontStyle(font);
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
+			listener.onWaitForApproval();
 			postInvalidate();
 		}
 	}
@@ -931,6 +933,7 @@ public class CanvasView extends View {
 				protaStyle = new StyleAction(currentObject, true);
 			protoBasic = (BasicObject) currentObject;
 			protoBasic.setFillMode(filled, color);
+			listener.onWaitForApproval();
 			if ((mode & Mode.DRAW) != Mode.DRAW)
 				pushToUAStack(protaStyle.capture(), false);
 		}
@@ -1007,6 +1010,7 @@ public class CanvasView extends View {
 			selectedObjects.get(i).deselect();
 		if ((mode & Mode.DRAW) == Mode.DRAW)
 			cancelAction();
+		selectedObjects.clear();
 		reloadCache();
 		postInvalidate();
 	}
@@ -1086,6 +1090,14 @@ public class CanvasView extends View {
 		postInvalidate();
 	}
 
+	/**
+	 * Mengembalikan apakah sedang hide mode atau tidak.
+	 * @return
+	 */
+	public boolean isInHideMode() {
+		return hidden_mode;
+	}
+
 	public void execute(ArrayList<UserAction> actions) {
 		int size = actions.size();
 		for (int i = 0; i < size; i++)
@@ -1160,7 +1172,7 @@ public class CanvasView extends View {
 	}
 
 	public void closeCanvas() {
-		synczer.closeCanvas(model);
+		// TODO close canvas
 	}
 
 	public void onCanvasClosed(int status) {

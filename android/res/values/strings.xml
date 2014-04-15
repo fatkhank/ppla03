@@ -14,5 +14,13 @@
     <string name="emptyString2"></string>
     <string name="sign_out">Sign Out</string>
     <string name="create">Create Workspace</string>
+    <string name="w_insert_text">Insert Text</string>
+    <string name="wm_hide">Hide</string>
+    <string name="wm_unhide">Unhide</string>
+    <string name="wm_participant">Participants</string>
+    <string name="wm_download">Download</string>
+    <string name="wm_undo">Undo</string>
+    <string name="wm_redo">Redo</string>
+    <string name="wm_paste">Paste</string>
 
 </resources>

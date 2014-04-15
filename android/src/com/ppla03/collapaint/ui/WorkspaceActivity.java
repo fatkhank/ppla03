@@ -2,27 +2,35 @@ package com.ppla03.collapaint.ui;
 
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
+import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.ObjectType;
+import com.ppla03.collapaint.R.id;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
+import com.ppla03.collapaint.model.object.ObjectClipboard;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -33,22 +41,33 @@ import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		CanvasListener, ColorChangeListener, OnSeekBarChangeListener,
-		OnItemSelectedListener {
+		OnItemSelectedListener, DialogInterface.OnClickListener {
 
 	private ToggleButton currentMain;
 	private ToggleButton select, draw, hand, stroke;
-	private ImageButton color, image, download;
+	private ImageButton color, image;
 
 	private ImageButton approve, cancel;
-	private ImageButton cut, copy, move, delete, paste;
+	private ImageButton cut, copy, move, delete;
 	private ImageButton rect, oval, poly, line, free, text;
 
 	private Spinner strokeStyle;
 	private SeekBar strokeWidth;
-	private TextView strWidthText;
+	private TextView strokeStyleLabel, strokeWidthLabel, strokeWidthText;
 
 	private CanvasView canvas;
 	private ColorDialog colorDialog;
+	private AlertDialog insertTextDialog;
+	private EditText insertTextInput;
+
+	// --- export
+	private AlertDialog downloadDialog;
+	private Spinner edFormat;
+	private CheckBox edCropped;
+	private static final CompressFormat[] EXPORT_FORMATS = new CompressFormat[] {
+			CompressFormat.PNG, CompressFormat.JPEG };
+	private static final String[] EXPORT_FORMAT_TEXT = new String[] { "PNG",
+			"JPG" };
 
 	private static final int[] STROKE_STYLES = new int[] { StrokeStyle.SOLID,
 			StrokeStyle.DASHED, StrokeStyle.DOTTED };
@@ -67,7 +86,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		color = (ImageButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
 		image = (ImageButton) findViewById(R.id.w_main_image);
-		download = (ImageButton) findViewById(R.id.w_main_download);
 		currentMain = select;
 
 		select.setOnClickListener(this);
@@ -76,27 +94,24 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		color.setOnClickListener(this);
 		stroke.setOnClickListener(this);
 		image.setOnClickListener(this);
-		download.setOnClickListener(this);
 
 		// --- approve ---
 		approve = (ImageButton) findViewById(R.id.w_app);
 		cancel = (ImageButton) findViewById(R.id.w_ccl);
 		approve.setOnClickListener(this);
 		cancel.setOnClickListener(this);
-		setApproveBar(false);
+		showApproveBar(false);
 
 		// --- select ---
 		cut = (ImageButton) findViewById(R.id.w_sel_cut);
 		copy = (ImageButton) findViewById(R.id.w_sel_copy);
 		move = (ImageButton) findViewById(R.id.w_sel_move);
 		delete = (ImageButton) findViewById(R.id.w_sel_del);
-		paste = (ImageButton) findViewById(R.id.w_sel_paste);
 		cut.setOnClickListener(this);
 		copy.setOnClickListener(this);
 		move.setOnClickListener(this);
 		delete.setOnClickListener(this);
-		paste.setOnClickListener(this);
-		setSelectAdditionalBar(false);
+		showSelectAdditionalBar(false);
 
 		// --- draw ---
 		rect = (ImageButton) findViewById(R.id.w_draw_rect);
@@ -111,64 +126,125 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		line.setOnClickListener(this);
 		free.setOnClickListener(this);
 		rect.setOnClickListener(this);
-		setDrawAdditionalBar(false);
+		showDrawAdditionalBar(false);
 
 		// --- stroke ---
+		strokeStyleLabel = (TextView) findViewById(R.id.w_stroke_style_label);
 		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
 		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
-		strWidthText = (TextView) findViewById(R.id.w_stroke_wd);
+		strokeWidthText = (TextView) findViewById(R.id.w_stroke_width_text);
+		strokeWidthLabel = (TextView) findViewById(R.id.w_stroke_width_label);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
 				android.R.layout.simple_list_item_1, STR_STYLES_NAMES);
 		strokeStyle.setAdapter(adapter);
 		strokeStyle.setOnItemSelectedListener(this);
 		strokeWidth.setOnSeekBarChangeListener(this);
-		setStrokeAdditionalBar(false);
+		showStrokeAdditionalBar(false);
 
-		// --- prepare canvas ---
+		// --- prepare dialog ---
 		colorDialog = new ColorDialog(this, this);
 		colorDialog.setColor(Color.BLACK);
+
+		// --- insert text dialog ---
+		AlertDialog.Builder textADB = new AlertDialog.Builder(this);
+		textADB.setPositiveButton("OK", this);
+		textADB.setNegativeButton("Cancel", this);
+		textADB.setMessage(getResources().getText(R.string.w_insert_text));
+		insertTextInput = new EditText(this);
+		textADB.setView(insertTextInput);
+		insertTextDialog = textADB.create();
+
+		// --- download image dialog ---
+		AlertDialog.Builder exportDB = new AlertDialog.Builder(this);
+		exportDB.setPositiveButton("Download", this);
+		exportDB.setNegativeButton("Cancel", this);
+		View exportDV = getLayoutInflater().inflate(R.layout.dialog_export,
+				null);
+		exportDB.setView(exportDV);
+		edCropped = (CheckBox) exportDV.findViewById(R.id.ed_cropped);
+		edFormat = (Spinner) exportDV.findViewById(R.id.ed_format);
+		ArrayAdapter<String> exportFmtAdapter = new ArrayAdapter<>(this,
+				android.R.layout.simple_list_item_1, EXPORT_FORMAT_TEXT);
+		edFormat.setAdapter(exportFmtAdapter);
+		downloadDialog = exportDB.create();
+
+		// --- prepare canvas ---
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setListener(this);
-		UserModel user = new UserModel();
-		CanvasModel model = new CanvasModel(user, "untitle", 800, 500);
-		canvas.setMode(CanvasView.Mode.SELECT);
-		canvas.open(model);
-		select.setChecked(true);
+		CanvasSynchronizer.getInstance().setCanvasView(canvas);
+
+		onClick(select);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.workspace, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.findItem(R.id.wm_hide).setVisible(!canvas.isInHideMode());
+		menu.findItem(R.id.wm_unhide).setVisible(canvas.isInHideMode());
+		menu.findItem(R.id.wm_paste).setVisible(ObjectClipboard.hasObject());
+		menu.findItem(R.id.wm_redo).setVisible(canvas.isRedoable());
+		menu.findItem(R.id.wm_undo).setVisible(canvas.isUndoable());
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.wm_hide:
+			canvas.setHideMode(true);
+			break;
+		case R.id.wm_unhide:
+			canvas.setHideMode(false);
+			break;
+		case R.id.wm_undo:
+			canvas.undo();
+			break;
+		case R.id.wm_redo:
+			canvas.redo();
+			break;
+		case R.id.wm_paste:
+			canvas.pasteFromClipboard();
+			break;
+		case R.id.wm_download:
+			downloadDialog.show();
+			break;
+		}
+		return true;
 	}
 
 	@Override
 	public void onColorChanged(int color) {
 		canvas.setStrokeColor(color);
+		canvas.setTextColor(color);
 	}
 
 	@Override
-	public void onCanvasModelLoaded(CanvasModel model, int status) {
-		// TODO after canvas loaded
-	}
-
-	@Override
-	public void onHideModeChange(boolean hidden) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onHideModeChange(boolean hidden) {}
 
 	@Override
 	public void onSelectionEvent(boolean success) {
-		// TODO Auto-generated method stub
 		if (success)
-			setSelectAdditionalBar(true);
+			showSelectAdditionalBar(true);
 	}
 
 	@Override
-	public void onURStatusChange(boolean undoable, boolean redoable) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onURStatusChange(boolean undoable, boolean redoable) {}
 
 	@Override
 	public void onWaitForApproval() {
-		setApproveBar(true);
-		setDrawAdditionalBar(false);
+		showApproveBar(true);
+		showDrawAdditionalBar(false);
+	}
+
+	@Override
+	public void onBeginDraw() {
+		showApproveBar(true);
+		showDrawAdditionalBar(false);
 	}
 
 	@Override
@@ -178,16 +254,16 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			currentMain.setChecked(false);
 			currentMain = select;
 			canvas.setMode(CanvasView.Mode.SELECT);
-			setSelectAdditionalBar(false);
-			setApproveBar(false);
-			setDrawAdditionalBar(false);
-			setStrokeAdditionalBar(false);
+			showSelectAdditionalBar(false);
+			showApproveBar(false);
+			showDrawAdditionalBar(false);
+			showStrokeAdditionalBar(false);
 		} else if (v == draw) {
 			currentMain.setChecked(false);
 			currentMain = draw;
-			setSelectAdditionalBar(false);
-			setStrokeAdditionalBar(false);
-			setDrawAdditionalBar(true);
+			showSelectAdditionalBar(false);
+			showStrokeAdditionalBar(false);
+			showDrawAdditionalBar(true);
 		} else if (v == hand) {
 			currentMain.setChecked(false);
 			currentMain = hand;
@@ -198,33 +274,24 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == stroke) {
 			currentMain.setChecked(false);
 			currentMain = stroke;
-			setSelectAdditionalBar(false);
-			setDrawAdditionalBar(false);
-			setStrokeAdditionalBar(true);
+			showSelectAdditionalBar(false);
+			showDrawAdditionalBar(false);
+			showStrokeAdditionalBar(true);
 		} else if (v == image) {
 			currentMain.setChecked(false);
 			Toast.makeText(this, "not avaiable", Toast.LENGTH_SHORT).show();
-		} else if (v == download) {
-			if (CanvasExporter.export(canvas.getModel(), CompressFormat.PNG,
-					false) == CanvasExporter.SUCCESS) {
-				// MediaScannerConnection.scanFile(this,
-				// new String[] { CanvasExporter.getResultFile()
-				// .toString() }, null, null);
-				Toast.makeText(this,
-						"success:" + CanvasExporter.getResultFile(),
-						Toast.LENGTH_LONG).show();
-			} else
-				Toast.makeText(this, "fail", Toast.LENGTH_LONG).show();
 		}
 
 		// approve + cancel action
 		else if (v == approve) {
-			setApproveBar(false);
-			onClick(select);
+			showApproveBar(false);
 			canvas.approveAction();
+			onClick(select);
 		} else if (v == cancel) {
-			setApproveBar(false);
+			showApproveBar(false);
 			canvas.cancelAction();
+			if (canvas.isInDrawingMode())
+				showDrawAdditionalBar(true);
 		}
 
 		// select-additional-toolbar
@@ -236,10 +303,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == delete) {
-			setSelectAdditionalBar(false);
+			showSelectAdditionalBar(false);
 			canvas.deleteSelectedObjects();
-		} else if (v == paste) {
-			canvas.pasteFromClipboard();
 		}
 
 		// draw-additional-toolbar
@@ -250,11 +315,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == poly) {
 			canvas.insertPolygon(6);
 		} else if (v == line) {
+			Toast.makeText(this, "Drag to make line.", Toast.LENGTH_SHORT)
+					.show();
 			canvas.insertPrimitive(ObjectType.LINE);
 		} else if (v == free) {
+			Toast.makeText(this, "Drag to make path.", Toast.LENGTH_SHORT)
+					.show();
 			canvas.insertPrimitive(CanvasView.ObjectType.FREE);
 		} else if (v == text) {
-			canvas.insertText("Sample Text");
+			insertTextDialog.show();
 		}
 	}
 
@@ -262,7 +331,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Atur visibility approve dan cancel
 	 * @param visible
 	 */
-	void setApproveBar(boolean visible) {
+	void showApproveBar(boolean visible) {
 		if (visible) {
 			approve.setVisibility(View.VISIBLE);
 			cancel.setVisibility(View.VISIBLE);
@@ -276,19 +345,17 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Atur visibility select-additional-toolbar
 	 * @param visible
 	 */
-	void setSelectAdditionalBar(boolean visible) {
+	void showSelectAdditionalBar(boolean visible) {
 		if (visible) {
 			cut.setVisibility(View.VISIBLE);
 			copy.setVisibility(View.VISIBLE);
 			move.setVisibility(View.VISIBLE);
 			delete.setVisibility(View.VISIBLE);
-			paste.setVisibility(View.VISIBLE);
 		} else {
 			cut.setVisibility(View.GONE);
 			copy.setVisibility(View.GONE);
 			move.setVisibility(View.GONE);
 			delete.setVisibility(View.GONE);
-			paste.setVisibility(View.GONE);
 		}
 	}
 
@@ -296,7 +363,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Atur visibility draw-additional-toolbar
 	 * @param visible
 	 */
-	void setDrawAdditionalBar(boolean visible) {
+	void showDrawAdditionalBar(boolean visible) {
 		if (visible) {
 			rect.setVisibility(View.VISIBLE);
 			oval.setVisibility(View.VISIBLE);
@@ -318,13 +385,19 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Atur visibility stroke-additional-toolbar
 	 * @param visible
 	 */
-	void setStrokeAdditionalBar(boolean visible) {
+	void showStrokeAdditionalBar(boolean visible) {
 		if (visible) {
+			strokeStyleLabel.setVisibility(View.VISIBLE);
 			strokeStyle.setVisibility(View.VISIBLE);
 			strokeWidth.setVisibility(View.VISIBLE);
+			strokeWidthLabel.setVisibility(View.VISIBLE);
+			strokeWidthText.setVisibility(View.VISIBLE);
 		} else {
+			strokeStyleLabel.setVisibility(View.GONE);
 			strokeStyle.setVisibility(View.GONE);
 			strokeWidth.setVisibility(View.GONE);
+			strokeWidthLabel.setVisibility(View.GONE);
+			strokeWidthText.setVisibility(View.GONE);
 		}
 	}
 
@@ -338,6 +411,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					seekBar.setProgress(1);
 					progress = 1;
 				}
+				strokeWidthText.setText(String.valueOf(progress));
 				canvas.setStrokeWidth(progress);
 			}
 		}
@@ -352,15 +426,38 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
-		// TODO Auto-generated method stub
 		if (view == strokeStyle) {
 			canvas.setStrokeStyle(STROKE_STYLES[position]);
 		}
 	}
 
 	@Override
-	public void onNothingSelected(AdapterView<?> parent) {
-		// TODO Auto-generated method stub
+	public void onNothingSelected(AdapterView<?> parent) {}
 
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		if (dialog == insertTextDialog) {
+			if (which == DialogInterface.BUTTON_POSITIVE) {
+				String text = insertTextInput.getText().toString();
+				if (!text.isEmpty())
+					canvas.insertText(text);
+			}
+		} else if (dialog == downloadDialog) {
+			if (which == DialogInterface.BUTTON_POSITIVE) {
+				boolean cropped = edCropped.isChecked();
+				CompressFormat format = EXPORT_FORMATS[edFormat
+						.getSelectedItemPosition()];
+				if (CanvasExporter.export(canvas.getModel(), format, cropped) == CanvasExporter.SUCCESS) {
+					MediaScannerConnection.scanFile(this,
+							new String[] { CanvasExporter.getResultFile()
+									.toString() }, null, null);
+					Toast.makeText(this,
+							"Downloaded to " + CanvasExporter.getResultFile(),
+							Toast.LENGTH_LONG).show();
+				} else
+					Toast.makeText(this, "Download fail ", Toast.LENGTH_LONG)
+							.show();
+			}
+		}
 	}
 }

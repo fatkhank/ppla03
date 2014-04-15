@@ -8,19 +8,18 @@
         android:id="@+id/w_main_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" >
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="33dp"
             android:orientation="vertical" >
 
             <ToggleButton
                 android:id="@+id/w_main_select"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/button_blue"
                 android:button="@drawable/main_select"
                 android:textOff="@string/emptyString2"
@@ -30,7 +29,6 @@
                 android:id="@+id/w_main_draw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/button_purple"
                 android:button="@drawable/main_draw"
                 android:textOff="@string/emptyString2"
@@ -50,9 +48,7 @@
                 android:id="@+id/w_main_color"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/button_red"
-                android:button="@drawable/main_color"
                 android:src="@drawable/main_color"
                 android:textOff="@string/emptyString2"
                 android:textOn="@string/emptyString2" />
@@ -61,7 +57,6 @@
                 android:id="@+id/w_main_stroke"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/button_orange"
                 android:button="@drawable/main_stroke"
                 android:textOff="@string/emptyString2"
@@ -71,18 +66,7 @@
                 android:id="@+id/w_main_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/button_green"
-                android:button="@drawable/main_image"
-                android:src="@drawable/main_image"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
-            <ImageButton
-                android:id="@+id/w_main_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_white"
-                android:button="@drawable/main_image"
                 android:src="@drawable/main_image"
                 android:textOff="@string/emptyString2"
                 android:textOn="@string/emptyString2" />
@@ -93,41 +77,45 @@
         android:id="@+id/w_rainbow_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="96dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/w_main_toolbar"
         android:src="@drawable/rainbow_line" />
 
     <HorizontalScrollView
         android:id="@+id/w_additional_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/w_rainbow_line"
-        android:layout_marginLeft="30dp" >
+        android:layout_toRightOf="@+id/w_rainbow_line" >
 
-        <LinearLayout
-            android:layout_width="1056dp"
-            android:layout_height="104dp"
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="horizontal" >
-
-            <ImageButton
-                android:id="@+id/w_app"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_white"
-                android:src="@drawable/approve" />
 
             <ImageButton
                 android:id="@+id/w_ccl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
                 android:background="@drawable/button_white"
                 android:src="@drawable/cancel" />
+
+            <ImageButton
+                android:id="@+id/w_app"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/w_ccl"
+                android:background="@drawable/button_white"
+                android:src="@drawable/approve" />
 
             <ImageButton
                 android:id="@+id/w_sel_cut"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
                 android:background="@drawable/button_pink"
@@ -139,17 +127,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_sel_cut"
                 android:background="@drawable/button_red"
                 android:src="@drawable/sel_copy" />
-
-            <ImageButton
-                android:id="@+id/w_sel_paste"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/button_green"
-                android:src="@drawable/sel_paste" />
 
             <ImageButton
                 android:id="@+id/w_sel_move"
@@ -157,6 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_sel_copy"
                 android:background="@drawable/button_orange"
                 android:src="@drawable/sel_move" />
 
@@ -165,6 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
+                android:layout_toRightOf="@+id/w_sel_move"
                 android:background="@drawable/button_green"
                 android:src="@drawable/sel_delete" />
 
@@ -172,6 +154,7 @@
                 android:id="@+id/w_draw_rect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
                 android:background="@drawable/button_blue"
@@ -183,6 +166,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_draw_rect"
                 android:background="@drawable/button_purple"
                 android:src="@drawable/draw_oval" />
 
@@ -192,6 +176,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_draw_oval"
                 android:background="@drawable/button_pink"
                 android:src="@drawable/draw_polygon" />
 
@@ -201,6 +186,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_draw_polygon"
                 android:background="@drawable/button_red"
                 android:src="@drawable/draw_line" />
 
@@ -210,6 +196,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_draw_line"
                 android:background="@drawable/button_orange"
                 android:src="@drawable/draw_free" />
 
@@ -218,41 +205,65 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/w_draw_free"
                 android:background="@drawable/button_green"
                 android:src="@drawable/draw_text" />
 
+            <TextView
+                android:id="@+id/w_stroke_style_label"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:text="Style"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
             <Spinner
                 android:id="@+id/w_stroke_style"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_style_label" />
+
+            <TextView
+                android:id="@+id/w_stroke_width_label"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/w_stroke_style"
+                android:gravity="center_vertical"
+                android:text="Width"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <SeekBar
                 android:id="@+id/w_stroke_width"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_width_label"
                 android:max="72"
-                android:paddingLeft="20dp"
-                android:paddingRight="80dp"
                 android:progress="1" />
 
             <TextView
-                android:id="@+id/w_stroke_wd"
+                android:id="@+id/w_stroke_width_text"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/w_stroke_seekbar"
-                android:ems="3" >
-            </TextView>
-        </LinearLayout>
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_width"
+                android:ems="3"
+                android:gravity="center_vertical" />
+        </RelativeLayout>
     </HorizontalScrollView>
 
     <com.ppla03.collapaint.CanvasView
         android:id="@+id/w_canvas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/w_additional_toolbar"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/w_additional_toolbar" />
+        android:layout_below="@+id/w_additional_toolbar"
+        android:layout_toRightOf="@+id/w_rainbow_line" />
 
 </RelativeLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/wm_undo"
+        android:title="@string/wm_undo"/>
+    <item
+        android:id="@+id/wm_redo"
+        android:title="@string/wm_redo"/>
+    <item
+        android:id="@+id/wm_paste"
+        android:title="@string/wm_paste"/>
+    <item
+        android:id="@+id/wm_hide"
+        android:title="@string/wm_hide"/>
+    <item
+        android:id="@+id/wm_unhide"
+        android:title="@string/wm_unhide"/>
+    
+    <item
+        android:id="@+id/wm_download"
+        android:title="@string/wm_download"/>
+
+</menu>

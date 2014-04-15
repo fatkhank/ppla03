@@ -2,6 +2,8 @@ package com.ppla03.collapaint;
 
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
+import com.ppla03.collapaint.model.object.FreeObject;
+import com.ppla03.collapaint.model.object.LineObject;
 
 /**
  * Listener untuk event-event dari {@link CanvasView}
@@ -9,18 +11,6 @@ import com.ppla03.collapaint.model.CanvasModel;
  * 
  */
 public interface CanvasListener {
-
-	/**
-	 * Dipicu saat proses memuat kanvas selesai.
-	 * @param model Model kanvas yang dimuat
-	 * @param status berhasil atau tidak. <br/>
-	 *            {@link ServerConnector#SUCCESS} berarti berhasil.<br/>
-	 *            Status berikut berarti gagal:
-	 *            {@link ServerConnector#CONNECTION_PROBLEM},
-	 *            {@link ServerConnector#SERVER_PROBLEM},
-	 *            {@link ServerConnector#INTERNAL_PROBLEM}.
-	 */
-	void onCanvasModelLoaded(CanvasModel model, int status);
 
 	/**
 	 * Dipicu saat hidden mode berubah.
@@ -41,6 +31,10 @@ public interface CanvasListener {
 	 */
 	void onURStatusChange(boolean undoable, boolean redoable);
 
-	
 	void onWaitForApproval();
+
+	/**
+	 * Saat user mulai menggambar {@link LineObject} atau {@link FreeObject}
+	 */
+	void onBeginDraw();
 }
