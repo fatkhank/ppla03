@@ -12,8 +12,8 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * @author hamba v7
  * 
  */
-public class CanvasModel implements Parcelable{
-	private int id;
+public class CanvasModel implements Parcelable {
+	private int globalId;
 
 	public final UserModel owner;
 
@@ -54,11 +54,11 @@ public class CanvasModel implements Parcelable{
 	}
 
 	public int getId() {
-		return id;
+		return globalId;
 	}
 
 	public void setid(int id) {
-		this.id = id;
+		this.globalId = id;
 	}
 
 	@Override
@@ -70,6 +70,6 @@ public class CanvasModel implements Parcelable{
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

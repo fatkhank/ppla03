@@ -26,11 +26,7 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 		setContentView(R.layout.acivity_loader);
 		progress = (ProgressBar) findViewById(R.id.l_progress);
 		try {
-			FontManager.readAsset(getAssets());
-			UserModel user = new UserModel();
-
-			CanvasModel model = new CanvasModel(user, "untitle", 800, 500);
-			CanvasSynchronizer.getInstance().setCanvas(model).loadCanvas(this);
+			CanvasSynchronizer.getInstance().loadCanvas(this);
 			handler = new Handler();
 		} catch (Exception e) {
 			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT)
@@ -44,7 +40,7 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 			Intent intent = new Intent(this, WorkspaceActivity.class);
 			startActivity(intent);
 		} else {
-			Toast.makeText(this, "Cannot load canvas", Toast.LENGTH_SHORT)
+			Toast.makeText(this, "Cannot load canvas", Toast.LENGTH_LONG)
 					.show();
 			final Intent intent = new Intent(this, BrowserActivity.class);
 			handler.postDelayed(new Runnable() {
