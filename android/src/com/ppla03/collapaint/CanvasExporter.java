@@ -51,7 +51,8 @@ public class CanvasExporter {
 	 * ekstensi.
 	 * 
 	 * @param canvas model kanvas yang akan diekspor
-	 * @param format format file, hanya yang {@link CompressFormat#PNG} atau {@link CompressFormat#JPEG}
+	 * @param format format file, hanya yang {@link CompressFormat#PNG} atau
+	 *            {@link CompressFormat#JPEG}
 	 * @param cropped dipotong atau tidak. Jika true, maka keseluruhan kanvas
 	 *            akan diekspor. Jika false, maka hanya bagian yang ada objeknya
 	 *            yang akan diekspor.
@@ -107,6 +108,9 @@ public class CanvasExporter {
 		// gambar dan hitung bound
 		if (format.equals(CompressFormat.JPEG))
 			canvas.drawColor(Color.WHITE);
+		else
+			canvas.drawColor(Color.TRANSPARENT,
+					android.graphics.PorterDuff.Mode.CLEAR);
 		RectF bound = new RectF(model.width, model.height, 0, 0);
 		RectF r = new RectF();
 		for (int i = 0; i < model.objects.size(); i++) {

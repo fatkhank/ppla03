@@ -20,5 +20,8 @@
     <item
         android:id="@+id/wm_download"
         android:title="@string/wm_download"/>
+    <item
+        android:id="@+id/wm_participant"
+        android:title="@string/wm_participant"/>
 
 </menu>

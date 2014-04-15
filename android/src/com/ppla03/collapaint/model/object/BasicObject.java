@@ -14,12 +14,12 @@ public abstract class BasicObject extends CanvasObject {
 	 * {@link Paint} pinggiran objek.
 	 */
 	protected Paint strokePaint;
-	
+
 	/**
 	 * {@link Paint} isian objek.
 	 */
 	protected Paint fillPaint;
-	
+
 	/**
 	 * Jenis dekorasi garis pinggiran. Lihat {@link StrokeStyle}.
 	 */
@@ -69,6 +69,7 @@ public abstract class BasicObject extends CanvasObject {
 	 */
 	public void setStrokeWidth(int width) {
 		strokePaint.setStrokeWidth(width);
+		StrokeStyle.applyEffect(strokeStyle, strokePaint);
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class StrokeStyle {
 		} else if (strokeStyle == DOTTED) {
 			paint.setStrokeCap(Cap.ROUND);
 			paint.setPathEffect(new DashPathEffect(
-					new float[] { strokeWidth, 0 }, strokeWidth * 2));
+					new float[] { strokeWidth, strokeWidth }, strokeWidth));
 		}
 	}
 }

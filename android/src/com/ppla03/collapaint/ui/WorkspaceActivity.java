@@ -1,5 +1,7 @@
 package com.ppla03.collapaint.ui;
 
+import java.util.ArrayList;
+
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
@@ -7,6 +9,9 @@ import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.R.id;
+import com.ppla03.collapaint.conn.CanvasConnector;
+import com.ppla03.collapaint.conn.ManageParticipantListener;
+import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.object.ObjectClipboard;
@@ -26,6 +31,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -41,7 +48,8 @@ import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		CanvasListener, ColorChangeListener, OnSeekBarChangeListener,
-		OnItemSelectedListener, DialogInterface.OnClickListener {
+		OnItemSelectedListener, DialogInterface.OnClickListener,
+		ManageParticipantListener {
 
 	private ToggleButton currentMain;
 	private ToggleButton select, draw, hand, stroke;
@@ -60,6 +68,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private AlertDialog insertTextDialog;
 	private EditText insertTextInput;
 
+	private AlertDialog polyDialog;
+	private EditText polyInput;
+
+	// --- list participants ---
+	private AlertDialog participantsDialog;
+	private ArrayAdapter<String> participantAdapter;
+
 	// --- export
 	private AlertDialog downloadDialog;
 	private Spinner edFormat;
@@ -73,6 +88,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			StrokeStyle.DASHED, StrokeStyle.DOTTED };
 	private static final String[] STR_STYLES_NAMES = new String[] { "Solid",
 			"Dashed", "Dotted" };
+
+	private CanvasConnector connector;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +142,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		poly.setOnClickListener(this);
 		line.setOnClickListener(this);
 		free.setOnClickListener(this);
-		rect.setOnClickListener(this);
+		text.setOnClickListener(this);
 		showDrawAdditionalBar(false);
 
 		// --- stroke ---
@@ -151,6 +168,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		textADB.setNegativeButton("Cancel", this);
 		textADB.setMessage(getResources().getText(R.string.w_insert_text));
 		insertTextInput = new EditText(this);
+		insertTextInput.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN);
 		textADB.setView(insertTextInput);
 		insertTextDialog = textADB.create();
 
@@ -168,10 +186,31 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		edFormat.setAdapter(exportFmtAdapter);
 		downloadDialog = exportDB.create();
 
+		// --- list participants dialog ---
+		AlertDialog.Builder lisParDB = new AlertDialog.Builder(this);
+		lisParDB.setTitle("Participant List");
+		lisParDB.setPositiveButton("OK", this);
+		participantAdapter = new ArrayAdapter<>(this,
+				android.R.layout.simple_list_item_1);
+		lisParDB.setAdapter(participantAdapter, this);
+		participantsDialog = lisParDB.create();
+
+		// --- polygon dialog ---
+		AlertDialog.Builder pdb = new AlertDialog.Builder(this);
+		polyInput = new EditText(this);
+		polyInput.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+		polyInput.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN);
+		pdb.setView(polyInput);
+		pdb.setPositiveButton("Insert", this);
+		pdb.setNegativeButton("Cancel", this);
+		polyDialog = pdb.create();
+
 		// --- prepare canvas ---
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setListener(this);
 		CanvasSynchronizer.getInstance().setCanvasView(canvas);
+		connector = CanvasConnector.getInstance().setManageParticipantListener(
+				this);
 
 		onClick(select);
 	}
@@ -212,6 +251,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			break;
 		case R.id.wm_download:
 			downloadDialog.show();
+			break;
+		case R.id.wm_participant:
+			connector.getParticipants(canvas.getModel());
 			break;
 		}
 		return true;
@@ -289,6 +331,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			onClick(select);
 		} else if (v == cancel) {
 			showApproveBar(false);
+			showStrokeAdditionalBar(false);
 			canvas.cancelAction();
 			if (canvas.isInDrawingMode())
 				showDrawAdditionalBar(true);
@@ -313,7 +356,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == oval) {
 			canvas.insertPrimitive(CanvasView.ObjectType.OVAL);
 		} else if (v == poly) {
-			canvas.insertPolygon(6);
+			polyDialog.show();
 		} else if (v == line) {
 			Toast.makeText(this, "Drag to make line.", Toast.LENGTH_SHORT)
 					.show();
@@ -323,6 +366,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					.show();
 			canvas.insertPrimitive(CanvasView.ObjectType.FREE);
 		} else if (v == text) {
+			android.util.Log.d("POS", "text");
 			insertTextDialog.show();
 		}
 	}
@@ -426,7 +470,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
-		if (view == strokeStyle) {
+		if (parent == strokeStyle) {
 			canvas.setStrokeStyle(STROKE_STYLES[position]);
 		}
 	}
@@ -458,6 +502,31 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					Toast.makeText(this, "Download fail ", Toast.LENGTH_LONG)
 							.show();
 			}
+		} else if (dialog == polyDialog) {
+			if (which == DialogInterface.BUTTON_POSITIVE) {
+				int corner = Integer.parseInt(polyInput.getText().toString());
+				if (corner < 3)
+					corner = 3;
+				canvas.insertPolygon(corner);
+			}
+		}
+	}
+
+	@Override
+	public void onParticipantFetched(CanvasModel canvas, UserModel owner,
+			ArrayList<UserModel> participants) {
+		participantAdapter.clear();
+		participantAdapter.add(owner.username);
+		for (int i = 0; i < participants.size(); i++)
+			participantAdapter.add(participants.get(i).username);
+		participantsDialog.show();
+	}
+
+	@Override
+	public void onParticipationFetchedFailed(CanvasModel model, int status) {
+		if (status == ServerConnector.CONNECTION_PROBLEM) {
+			Toast.makeText(this, "Failed to fetch list. Connection problem.",
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 }

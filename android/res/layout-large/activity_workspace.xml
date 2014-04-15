@@ -84,178 +84,150 @@
         android:layout_toRightOf="@+id/w_main_toolbar"
         android:src="@drawable/rainbow_line" />
 
-    <HorizontalScrollView
+    <RelativeLayout
         android:id="@+id/w_additional_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/w_rainbow_line" >
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/w_rainbow_line"
+        android:orientation="horizontal" >
 
-        <RelativeLayout
+        <ImageButton
+            android:id="@+id/w_sel_cut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="right"
+            android:background="@drawable/button_pink"
+            android:src="@drawable/sel_cut" />
 
-            <ImageButton
-                android:id="@+id/w_ccl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:background="@drawable/button_white"
-                android:src="@drawable/cancel" />
+        <ImageButton
+            android:id="@+id/w_sel_copy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_sel_cut"
+            android:background="@drawable/button_red"
+            android:src="@drawable/sel_copy" />
 
-            <ImageButton
-                android:id="@+id/w_app"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/w_ccl"
-                android:background="@drawable/button_white"
-                android:src="@drawable/approve" />
+        <ImageButton
+            android:id="@+id/w_sel_move"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_sel_copy"
+            android:background="@drawable/button_orange"
+            android:src="@drawable/sel_move" />
 
-            <ImageButton
-                android:id="@+id/w_sel_cut"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/button_pink"
-                android:src="@drawable/sel_cut" />
+        <ImageButton
+            android:id="@+id/w_sel_del"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_sel_move"
+            android:background="@drawable/button_green"
+            android:src="@drawable/sel_delete" />
 
-            <ImageButton
-                android:id="@+id/w_sel_copy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_sel_cut"
-                android:background="@drawable/button_red"
-                android:src="@drawable/sel_copy" />
+        <ImageButton
+            android:id="@+id/w_draw_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="right"
+            android:background="@drawable/button_blue"
+            android:src="@drawable/draw_rect" />
 
-            <ImageButton
-                android:id="@+id/w_sel_move"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_sel_copy"
-                android:background="@drawable/button_orange"
-                android:src="@drawable/sel_move" />
+        <ImageButton
+            android:id="@+id/w_draw_oval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_draw_rect"
+            android:background="@drawable/button_purple"
+            android:src="@drawable/draw_oval" />
 
-            <ImageButton
-                android:id="@+id/w_sel_del"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_toRightOf="@+id/w_sel_move"
-                android:background="@drawable/button_green"
-                android:src="@drawable/sel_delete" />
+        <ImageButton
+            android:id="@+id/w_draw_polygon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_draw_oval"
+            android:background="@drawable/button_pink"
+            android:src="@drawable/draw_polygon" />
 
-            <ImageButton
-                android:id="@+id/w_draw_rect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/button_blue"
-                android:src="@drawable/draw_rect" />
+        <ImageButton
+            android:id="@+id/w_draw_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_draw_polygon"
+            android:background="@drawable/button_red"
+            android:src="@drawable/draw_line" />
 
-            <ImageButton
-                android:id="@+id/w_draw_oval"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_draw_rect"
-                android:background="@drawable/button_purple"
-                android:src="@drawable/draw_oval" />
+        <ImageButton
+            android:id="@+id/w_draw_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_toRightOf="@+id/w_draw_line"
+            android:background="@drawable/button_orange"
+            android:src="@drawable/draw_free" />
 
-            <ImageButton
-                android:id="@+id/w_draw_polygon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_draw_oval"
-                android:background="@drawable/button_pink"
-                android:src="@drawable/draw_polygon" />
+        <ImageButton
+            android:id="@+id/w_draw_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/w_draw_free"
+            android:background="@drawable/button_green"
+            android:src="@drawable/draw_text" />
 
-            <ImageButton
-                android:id="@+id/w_draw_line"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_draw_polygon"
-                android:background="@drawable/button_red"
-                android:src="@drawable/draw_line" />
+        <TextView
+            android:id="@+id/w_stroke_style_label"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical"
+            android:text="Style"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <ImageButton
-                android:id="@+id/w_draw_free"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_draw_line"
-                android:background="@drawable/button_orange"
-                android:src="@drawable/draw_free" />
+        <Spinner
+            android:id="@+id/w_stroke_style"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/w_stroke_style_label" />
 
-            <ImageButton
-                android:id="@+id/w_draw_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_toRightOf="@+id/w_draw_free"
-                android:background="@drawable/button_green"
-                android:src="@drawable/draw_text" />
+        <TextView
+            android:id="@+id/w_stroke_width_label"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@+id/w_stroke_style"
+            android:gravity="center_vertical"
+            android:text="Width"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <TextView
-                android:id="@+id/w_stroke_style_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:text="Style"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+        <SeekBar
+            android:id="@+id/w_stroke_width"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/w_stroke_width_label"
+            android:max="72"
+            android:progress="1" />
 
-            <Spinner
-                android:id="@+id/w_stroke_style"
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/w_stroke_style_label" />
-
-            <TextView
-                android:id="@+id/w_stroke_width_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="20dp"
-                android:layout_toRightOf="@+id/w_stroke_style"
-                android:gravity="center_vertical"
-                android:text="Width"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            <SeekBar
-                android:id="@+id/w_stroke_width"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/w_stroke_width_label"
-                android:max="72"
-                android:progress="1" />
-
-            <TextView
-                android:id="@+id/w_stroke_width_text"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/w_stroke_width"
-                android:ems="3"
-                android:gravity="center_vertical" />
-        </RelativeLayout>
-    </HorizontalScrollView>
+        <TextView
+            android:id="@+id/w_stroke_width_text"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/w_stroke_width"
+            android:ems="3"
+            android:gravity="center_vertical" />
+    </RelativeLayout>
 
     <com.ppla03.collapaint.CanvasView
         android:id="@+id/w_canvas"
@@ -265,5 +237,23 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/w_additional_toolbar"
         android:layout_toRightOf="@+id/w_rainbow_line" />
+
+    <ImageButton
+        android:id="@+id/w_ccl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/button_white"
+        android:src="@drawable/cancel" />
+
+    <ImageButton
+        android:id="@+id/w_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/w_ccl"
+        android:background="@drawable/button_white"
+        android:src="@drawable/approve" />
 
 </RelativeLayout>
