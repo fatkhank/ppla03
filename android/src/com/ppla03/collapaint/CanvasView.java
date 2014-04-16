@@ -407,7 +407,8 @@ public class CanvasView extends View {
 				if (!obj.isSelected())
 					obj.draw(cacheCanvas);
 			}
-			cacheCanvas.drawColor(SELECTION_COVER_COLOR);
+			if ((mode & Mode.EDIT) != Mode.EDIT)
+				cacheCanvas.drawColor(SELECTION_COVER_COLOR);
 			cacheCanvas.setBitmap(selectedObjectsCache);
 			cacheCanvas.drawColor(Color.TRANSPARENT,
 					android.graphics.PorterDuff.Mode.CLEAR);

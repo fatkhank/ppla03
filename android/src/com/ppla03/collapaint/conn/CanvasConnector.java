@@ -141,8 +141,9 @@ public class CanvasConnector extends ServerConnector {
 
 					partListener.onParticipantFetched(askPartModel, owner,
 							participants);
-				} catch (JSONException je) {
-
+				} catch (Exception e) {
+					partListener.onParticipationFetchedFailed(askPartModel,
+							ServerConnector.UNKNOWN_REPLY);
 				}
 			} else
 				partListener.onParticipationFetchedFailed(askPartModel, status);

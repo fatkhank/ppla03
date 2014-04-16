@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.TextView;
@@ -27,7 +28,7 @@ import android.widget.TextView;
  * 
  */
 public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
-		OnEditorActionListener {
+		OnEditorActionListener, OnTabChangeListener {
 	/**
 	 * Listener saat ada warna yang dipilih.
 	 * @author hamba v7
@@ -55,6 +56,11 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 	private SeekBar rSlider, gSlider, bSlider, aSlider;
 	private EditText rInput, gInput, bInput, aInput;
 	private Button preview;
+	private ColorView colorView;
+
+	static final int PALLETE = 0, RGB = 1;
+	static final String PALLETE_STRING = "Palletes", RGB_STRING = "RGB";
+	private int mode = PALLETE;
 
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
@@ -86,14 +92,16 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		tab.setup();
 
 		TabSpec tab1 = tab.newTabSpec("pallete");
-		tab1.setIndicator("Palletes");
+		tab1.setIndicator(PALLETE_STRING);
 		tab1.setContent(R.id.cd_tab_pallete);
 		tab.addTab(tab1);
 
 		TabSpec tab2 = tab.newTabSpec("rgb");
-		tab2.setIndicator("RGB");
+		tab2.setIndicator(RGB_STRING);
 		tab2.setContent(R.id.cd_tab_rgb);
 		tab.addTab(tab2);
+
+		tab.setOnTabChangedListener(this);
 
 		// --- setup rgb chooser ---
 		rSlider = (SeekBar) view.findViewById(R.id.cd_r_slider);
@@ -129,6 +137,9 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 
 		preview = (Button) view.findViewById(R.id.cd_rgb_preview);
 		setColor(Color.BLACK);
+
+		// ---setup pallete ---
+		colorView = (ColorView) view.findViewById(R.id.cd_tab_pallete);
 	}
 
 	/**
@@ -166,8 +177,12 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 
 	@Override
 	public void onClick(DialogInterface arg0, int arg1) {
-		selectedColor = Color.argb(alpha, red, green, blue);
-		listener.onColorChanged(selectedColor);
+		if (mode == PALLETE) {
+			listener.onColorChanged(colorView.currentColor);
+		} else {
+			selectedColor = Color.argb(alpha, red, green, blue);
+			listener.onColorChanged(selectedColor);
+		}
 	}
 
 	@Override
@@ -231,5 +246,13 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		}
 		preview.setBackgroundColor(Color.argb(alpha, red, green, blue));
 		return true;
+	}
+
+	@Override
+	public void onTabChanged(String tabId) {
+		if (tabId.equals(PALLETE_STRING))
+			mode = PALLETE;
+		else
+			mode = RGB;
 	}
 }

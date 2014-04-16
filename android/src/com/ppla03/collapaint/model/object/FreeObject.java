@@ -217,7 +217,7 @@ public class FreeObject extends BasicObject {
 		if (bounds.contains(x, y)) {
 			if (fillPaint.getColor() == Color.TRANSPARENT) {
 				// jika tidak punya isian cek jarak titik ke titik-titik di path
-				int inc = (int) (radius * 0.5f);
+				int inc = 3;// (int) (radius * 0.5f);
 				float tol = strokePaint.getStrokeWidth() + radius;
 				for (int i = 0; i < xLocs.length; i += inc) {
 					if (Math.abs(xLocs[i] - x) < tol

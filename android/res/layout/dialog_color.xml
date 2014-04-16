@@ -21,6 +21,11 @@
             android:layout_height="match_parent"
             android:paddingTop="20dp" >
 
+            <com.ppla03.collapaint.ui.ColorView
+                android:id="@+id/cd_tab_pallete"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
             <ScrollView
                 android:id="@+id/cd_tab_rgb"
                 android:layout_width="match_parent"
@@ -162,114 +167,6 @@
                         android:progress="1" />
                 </RelativeLayout>
             </ScrollView>
-
-            <TableLayout
-                android:id="@+id/cd_tab_pallete"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal" >
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <Button
-                        android:id="@+id/Button01"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:background="@android:color/darker_gray" />
-
-                    <Button
-                        android:id="@+id/Button02"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_toRightOf="@+id/Button01"
-                        android:background="@android:color/holo_blue_dark" />
-
-                    <Button
-                        android:id="@+id/Button03"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_toRightOf="@+id/Button02"
-                        android:background="@android:color/holo_blue_light" />
-
-                    <Button
-                        android:id="@+id/Button04"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_blue_bright" />
-
-                    <Button
-                        android:id="@+id/Button05"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_green_dark" />
-
-                    <Button
-                        android:id="@+id/Button06"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_green_light" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <Button
-                        android:id="@+id/Button07"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_orange_dark" />
-
-                    <Button
-                        android:id="@+id/Button08"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_orange_light" />
-
-                    <Button
-                        android:id="@+id/Button09"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_red_dark" />
-
-                    <Button
-                        android:id="@+id/Button10"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_red_light" />
-
-                    <Button
-                        android:id="@+id/Button11"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/holo_purple" />
-
-                    <Button
-                        android:id="@+id/Button12"
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/white" />
-                </TableRow>
-            </TableLayout>
         </FrameLayout>
     </LinearLayout>
 
