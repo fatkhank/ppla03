@@ -200,7 +200,7 @@ public class ReshapeAction extends UserAction {
 			int p = Float.floatToIntBits(points[i]);
 			encByte[c++] = (byte) (p >> 24);
 			encByte[c++] = (byte) (p >> 16);
-			encByte[c++] = (byte) (p >> 16);
+			encByte[c++] = (byte) (p >> 8);
 			encByte[c++] = (byte) (p);
 		}
 		return Base64.encodeToString(encByte, 0, c, Base64.URL_SAFE);

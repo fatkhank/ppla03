@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:android1="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg2"
-    android:orientation="horizontal" >
+    android:background="@drawable/bg2" >
 
     <TextView
         android:id="@+id/textView1"
@@ -25,68 +23,112 @@
         android:layout_marginRight="15dp"
         android:text="@string/sign_out" />
 
-    <TabHost
-        android1:id="@android:id/tabhost"
-        android1:layout_width="match_parent"
-        android1:layout_height="match_parent"
-        android1:layout_alignParentLeft="true"
-        android1:layout_alignParentTop="true" >
+    <Button
+        android:id="@+id/b_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/create" />
 
-        <RelativeLayout
-            android1:id="@+id/RelativeLayout1"
-            android1:layout_width="match_parent"
-            android1:layout_height="match_parent"
-            android1:orientation="vertical" >
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/b_create"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp" >
 
-            <FrameLayout
-                android1:id="@android:id/tabcontent"
-                android1:layout_width="match_parent"
-                android1:layout_height="match_parent"
-                android1:layout_alignParentLeft="true"
-                android1:layout_below="@android:id/tabs" >
+        <TextView
+            android:id="@+id/b_title_canvas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="20dp"
+            android:gravity="center_horizontal"
+            android:text="Canvas Name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                <RelativeLayout
-                    android1:id="@+id/New"
-                    android1:layout_width="match_parent"
-                    android1:layout_height="match_parent" >
+        <TextView
+            android:id="@+id/b_title_owner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="20dp"
+            android:gravity="center_horizontal"
+            android:text="Owner"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                    <Button
-                        android1:id="@+id/buttonCreate"
-                        android1:layout_width="wrap_content"
-                        android1:layout_height="wrap_content"
-                        android1:layout_below="@android:id/tabs"
-                        android1:layout_centerHorizontal="true"
-                        android1:layout_marginTop="50dp"
-                        android1:text="@string/create" />
+        <ListView
+            android:id="@+id/b_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/b_title_canvas" />
 
-                    <TabWidget
-                        android1:id="@android:id/tabs"
-                        android1:layout_width="match_parent"
-                        android1:layout_height="wrap_content"
-                        android1:layout_alignParentLeft="true"
-                        android1:layout_alignParentTop="true"
-                        android1:layout_marginTop="49dp" >
-                    </TabWidget>
+        <TextView
+            android:id="@+id/b_list_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/bcl_loading"
+            android:textAppearance="@android:style/TextAppearance.Large" />
 
-                </RelativeLayout>
+        <ProgressBar
+            android:id="@+id/b_list_progress"
+            style="@android:attr/progressBarStyleInverse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
 
-                <RelativeLayout
-                    android1:id="@+id/Recent"
-                    android1:layout_width="match_parent"
-                    android1:layout_height="match_parent" >
+        <Button
+            android:id="@+id/b_list_reload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Reload" />
+    </RelativeLayout>
 
-                    <ListView
-                        android1:id="@+id/listView1"
-                        android1:layout_width="match_parent"
-                        android1:layout_height="wrap_content"
-                        android1:layout_alignParentLeft="true"
-                        android1:layout_alignParentRight="true"
-                        android1:layout_alignParentTop="true"
-                        android1:layout_weight="1" >
-                    </ListView>
-                </RelativeLayout>
-            </FrameLayout>
-        </RelativeLayout>
-    </TabHost>
+    <RelativeLayout
+        android:id="@+id/b_loader_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/loader_cover"
+        android:visibility="invisible" >
+
+        <ProgressBar
+            android:id="@+id/b_loader_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
+        <TextView
+            android:id="@+id/b_loader_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/b_loader_progress"
+            android:layout_centerHorizontal="true"
+            android:text="Creating canvas"
+            android:textAppearance="@android:style/TextAppearance.Inverse" />
+
+        <Button
+            android:id="@+id/b_loader_cancel"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/b_loader_progress"
+            android:layout_centerHorizontal="true"
+            android:text="cancel" />
+    </RelativeLayout>
 
 </RelativeLayout>

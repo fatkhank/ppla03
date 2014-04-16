@@ -33,7 +33,7 @@ public class ServerConnector {
 	/**
 	 * Terjadi masalah pada modul koneksi ke server.
 	 */
-	public static final int INTERNAL_PROBLEM = 2048;
+	public static final int INTERNAL_PROBLEM = 32768;
 
 	/**
 	 * Terjadi masalah koneksi.

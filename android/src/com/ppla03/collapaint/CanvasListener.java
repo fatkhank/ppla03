@@ -21,8 +21,9 @@ public interface CanvasListener {
 	/**
 	 * Dipicu saat ada operasi seleksi terjadi di kanvas.
 	 * @param success kalau ada seleksi yang terjadi di kanvas.
+	 * @param selected jumlah objek yang diseleksi
 	 */
-	void onSelectionEvent(boolean success);
+	void onSelectionEvent(boolean success, int selected);
 
 	/**
 	 * Dipicu saat ada perubahan status undo dan redo.

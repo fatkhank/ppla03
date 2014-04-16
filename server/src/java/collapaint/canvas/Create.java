@@ -2,7 +2,6 @@ package collapaint.canvas;
 
 import collapaint.DB;
 import collapaint.transact.Action;
-import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -43,6 +42,7 @@ public class Create extends HttpServlet {
         static final String CANVAS_ID = "id";
         static final String RESULT_ERROR = "error";
         static final int DUPLICATE_NAME = 2;
+        static final int USER_UNKNOWN = 8;
     }
 
     Connection connection;
@@ -87,24 +87,32 @@ public class Create extends HttpServlet {
             JsonObject request = Json.createReader(is).readObject();
             JsonObjectBuilder reply = Json.createObjectBuilder();
 
-            int ownerID = request.getInt(CreateJCode.OWNER_ID);
-            String name = request.getString(CreateJCode.CANVAS_NAME);
-            int width = request.getInt(CreateJCode.CANVAS_WIDTH);
-            int height = request.getInt(CreateJCode.CANVAS_HEIGHT);
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("insert into canvas(owner,name,width,height) values ");
-            sb.append("('").append(ownerID).append("','").append(name).
-                    append("','").append(width).append("','").append(height).
-                    append("');");
-
             try (Statement statement = connection.createStatement()) {
-                statement.
-                        execute(sb.toString(), Statement.RETURN_GENERATED_KEYS);
-                ResultSet keys = statement.getGeneratedKeys();
-                if (keys.next())
-                    reply.add(CreateJCode.CANVAS_ID, keys.getInt(1));
-                reply.add(CreateJCode.CANVAS_NAME, name);
+                int ownerID = request.getInt(CreateJCode.OWNER_ID);
+                String name = request.getString(CreateJCode.CANVAS_NAME);
+                int width = request.getInt(CreateJCode.CANVAS_WIDTH);
+                int height = request.getInt(CreateJCode.CANVAS_HEIGHT);
+
+                String userQuery = "select * from user where id='" + ownerID + "'";
+                ResultSet result = statement.executeQuery(userQuery);
+                if (!result.next()) {
+                    reply.
+                            add(CreateJCode.RESULT_ERROR, CreateJCode.USER_UNKNOWN);
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    sb.
+                            append("insert into canvas(owner,name,width,height) values ");
+                    sb.append("('").append(ownerID).append("','").append(name).
+                            append("','").append(width).append("','").
+                            append(height).
+                            append("');");
+                    statement.
+                            execute(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+                    ResultSet keys = statement.getGeneratedKeys();
+                    if (keys.next())
+                        reply.add(CreateJCode.CANVAS_ID, keys.getInt(1));
+                    reply.add(CreateJCode.CANVAS_NAME, name);
+                }
             } catch (SQLIntegrityConstraintViolationException ex) {
                 reply.add(CreateJCode.RESULT_ERROR, CreateJCode.DUPLICATE_NAME);
             } catch (Exception ex) {
@@ -127,7 +135,7 @@ public class Create extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new StringInputStream(request.
+//        processRequest(new com.sun.xml.bind.StringInputStream(request.
 //                getParameter("json")), response);
 
     }

@@ -12,7 +12,7 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * @author hamba v7
  * 
  */
-public class CanvasModel implements Parcelable {
+public class CanvasModel {
 	private int globalId;
 
 	public final UserModel owner;
@@ -63,14 +63,7 @@ public class CanvasModel implements Parcelable {
 	}
 
 	@Override
-	public int describeContents() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		// TODO Auto-generated method stub
-
+	public String toString() {
+		return name + " by " + owner.username;
 	}
 }

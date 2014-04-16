@@ -4,74 +4,72 @@
     android:layout_height="match_parent"
     android:gravity="start" >
 
-    <ScrollView
+    <LinearLayout
         android:id="@+id/w_main_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <ToggleButton
+            android:id="@+id/w_main_select"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_blue"
+            android:button="@drawable/main_select"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2" />
+
+        <ToggleButton
+            android:id="@+id/w_main_draw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_weight="1"
+            android:background="@drawable/button_purple"
+            android:button="@drawable/main_draw"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2" />
 
-            <ToggleButton
-                android:id="@+id/w_main_select"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_blue"
-                android:button="@drawable/main_select"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
+        <ToggleButton
+            android:id="@+id/w_main_hand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_pink"
+            android:button="@drawable/main_hand"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2" />
 
-            <ToggleButton
-                android:id="@+id/w_main_draw"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_purple"
-                android:button="@drawable/main_draw"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
+        <ToggleButton
+            android:id="@+id/w_main_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_red"
+            android:button="@drawable/main_color"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2" />
 
-            <ToggleButton
-                android:id="@+id/w_main_hand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/button_pink"
-                android:button="@drawable/main_hand"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
+        <ToggleButton
+            android:id="@+id/w_main_stroke"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_orange"
+            android:button="@drawable/main_stroke"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2" />
 
-            <ImageButton
-                android:id="@+id/w_main_color"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_red"
-                android:src="@drawable/main_color"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
-
-            <ToggleButton
-                android:id="@+id/w_main_stroke"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_orange"
-                android:button="@drawable/main_stroke"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
-
-            <ImageButton
-                android:id="@+id/w_main_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_green"
-                android:src="@drawable/main_image"
-                android:textOff="@string/emptyString2"
-                android:textOn="@string/emptyString2" />
-        </LinearLayout>
-    </ScrollView>
+        <ImageButton
+            android:id="@+id/w_main_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_green"
+            android:src="@drawable/main_image" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/w_rainbow_line"
@@ -83,6 +81,15 @@
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/w_main_toolbar"
         android:src="@drawable/rainbow_line" />
+
+    <com.ppla03.collapaint.CanvasView
+        android:id="@+id/w_canvas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/w_rainbow_line" />
 
     <RelativeLayout
         android:id="@+id/w_additional_toolbar"
@@ -182,85 +189,99 @@
             android:background="@drawable/button_green"
             android:src="@drawable/draw_text" />
 
-        <TextView
-            android:id="@+id/w_stroke_style_label"
+        <RelativeLayout
+            android:id="@+id/w_stroke_bar"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:gravity="center_vertical"
-            android:text="Style"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <Spinner
-            android:id="@+id/w_stroke_style"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/w_stroke_style_label" />
-
-        <TextView
-            android:id="@+id/w_stroke_width_label"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@+id/w_stroke_style"
-            android:gravity="center_vertical"
-            android:text="Width"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <SeekBar
-            android:id="@+id/w_stroke_width"
-            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/w_stroke_width_label"
-            android:max="72"
-            android:progress="1" />
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            android:padding="5dp" >
 
-        <TextView
-            android:id="@+id/w_stroke_width_text"
+            <Spinner
+                android:id="@+id/w_font_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true" />
+
+            <SeekBar
+                android:id="@+id/w_font_size"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/w_font_style"
+                android:max="50" />
+
+            <TextView
+                android:id="@+id/w_stroke_style_label"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:text="Style"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <Spinner
+                android:id="@+id/w_stroke_style"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_style_label" />
+
+            <TextView
+                android:id="@+id/w_stroke_width_label"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/w_stroke_style"
+                android:gravity="center_vertical"
+                android:text="Width"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <SeekBar
+                android:id="@+id/w_stroke_width"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_width_label"
+                android:max="72"
+                android:progress="1" />
+
+            <TextView
+                android:id="@+id/w_stroke_width_text"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/w_stroke_width"
+                android:ems="3"
+                android:gravity="center_vertical"
+                android:text="1" />
+        </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/w_ccl"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/w_stroke_width"
-            android:ems="3"
-            android:gravity="center_vertical" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/button_white"
+            android:src="@drawable/cancel" />
+
+        <ImageButton
+            android:id="@+id/w_app"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/w_ccl"
+            android:background="@drawable/button_white"
+            android:src="@drawable/approve" />
     </RelativeLayout>
-
-    <com.ppla03.collapaint.CanvasView
-        android:id="@+id/w_canvas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/w_additional_toolbar"
-        android:layout_toRightOf="@+id/w_rainbow_line" />
-
-    <ImageButton
-        android:id="@+id/w_ccl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/button_white"
-        android:src="@drawable/cancel" />
-
-    <ImageButton
-        android:id="@+id/w_app"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/w_ccl"
-        android:background="@drawable/button_white"
-        android:src="@drawable/approve" />
 
     <View
         android:id="@+id/w_cover"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/workspace_blocker" />
+        android:background="@color/loader_cover" />
 
     <ProgressBar
         android:id="@+id/w_progress"
@@ -269,5 +290,14 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true" />
+
+    <TextView
+        android:id="@+id/w_progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/w_progress"
+        android:layout_centerHorizontal="true"
+        android:text="@string/w_progress_participant"
+        android:textAppearance="@android:style/TextAppearance.Large.Inverse" />
 
 </RelativeLayout>

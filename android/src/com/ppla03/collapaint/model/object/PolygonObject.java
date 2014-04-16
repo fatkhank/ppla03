@@ -16,6 +16,8 @@ import android.graphics.Region;
  * 
  */
 public class PolygonObject extends BasicObject {
+
+	public static final int MIN_CORNER_COUNT = 3;
 	/**
 	 * Minimal radius awal poigon.
 	 */
@@ -75,8 +77,8 @@ public class PolygonObject extends BasicObject {
 	public PolygonObject(int corner, int radius, int worldX, int worldY,
 			int fillColor, int strokeColor, int strokeWidth, int strokeStyle) {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
-		if (corner < 3)
-			corner = 3;
+		if (corner < MIN_CORNER_COUNT)
+			corner = MIN_CORNER_COUNT;
 		offsetX = worldX;
 		offsetY = worldY;
 		xLocs = new float[corner];

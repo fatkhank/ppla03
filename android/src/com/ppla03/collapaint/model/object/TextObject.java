@@ -12,6 +12,8 @@ import android.graphics.RectF;
  * 
  */
 public class TextObject extends CanvasObject {
+	public static final int MAX_TEXT_LENGTH = 50;
+	
 	/**
 	 * Batas-batas objek.
 	 */

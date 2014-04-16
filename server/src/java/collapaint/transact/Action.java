@@ -265,7 +265,7 @@ public class Action extends HttpServlet {
             StringBuilder sb = new StringBuilder();
             sb.append("select * from action where canvas_id='").
                     append(canvasId).
-                    append("' limit ").append(lan).append(",256");
+                    append("' order by id limit ").append(lan).append(",256");
 
             ResultSet result = statement.executeQuery(sb.toString());
             int pointer = 0;

@@ -12,6 +12,7 @@ import com.ppla03.collapaint.conn.CanvasConnector;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.conn.SyncEventListener;
 import com.ppla03.collapaint.model.CanvasModel;
+import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.object.*;
 
@@ -79,24 +80,25 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	public void loadCanvas(CanvasLoadListener listener) {
-		Log.d("POS", "loadCanvas");
 		if (connector == null)
 			connector = CanvasConnector.getInstance().setSyncListener(this);
-		if (currentModel.getId() != -1) {
+		if (currentModel == null) {
+			// TODO dummy canvas
+			UserModel owner = new UserModel();
+			owner.id = 1;
+			owner.username = "debugger";
+			currentModel = new CanvasModel(owner, "test canvas", 800, 400);
+			currentModel.setid(1);
+			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
+		} else {
 			this.listener = listener;
 			lastActNum = 0;
 			actionBuffer.clear();
 			playbackList.clear();
 			sentList.clear();
-			// TODO debug load canvas
 			mode = LOADING;
 			updater.run();
-		} else
-			listener.onCanvasLoaded(currentModel, 1);
-	}
-
-	public CanvasModel getcurrent() {
-		return currentModel;
+		}
 	}
 
 	public void setCanvasView(CanvasView canvas) {

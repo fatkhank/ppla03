@@ -7,16 +7,13 @@ package collapaint.canvas;
 
 import collapaint.DB;
 import collapaint.transact.Action;
-import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -166,7 +163,6 @@ public class List extends HttpServlet {
             } catch (Exception ex) {
                 reply.add(ListJCode.ERROR, ex.getMessage());
             }
-
             out.println(reply.build().toString());
         }
     }

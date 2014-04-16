@@ -8,14 +8,16 @@ import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.ObjectType;
-import com.ppla03.collapaint.R.id;
 import com.ppla03.collapaint.conn.CanvasConnector;
 import com.ppla03.collapaint.conn.ManageParticipantListener;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
+import com.ppla03.collapaint.model.object.FontManager;
 import com.ppla03.collapaint.model.object.ObjectClipboard;
+import com.ppla03.collapaint.model.object.PolygonObject;
 import com.ppla03.collapaint.model.object.StrokeStyle;
+import com.ppla03.collapaint.model.object.TextObject;
 import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
 
 import android.app.Activity;
@@ -25,16 +27,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
-import android.opengl.Visibility;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -42,6 +40,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -55,28 +54,40 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		ManageParticipantListener {
 
 	private ToggleButton currentMain;
-	private ToggleButton select, draw, hand, stroke;
-	private ImageButton color, image;
+	private ToggleButton select, draw, hand, stroke, color;
+	private ImageButton image;
 
 	private ImageButton approve, cancel;
 	private ImageButton cut, copy, move, delete;
 	private ImageButton rect, oval, poly, line, free, text;
 
+	// --- stroke bar ---
+	private RelativeLayout strokeBar;
 	private Spinner strokeStyle;
 	private SeekBar strokeWidth;
 	private TextView strokeStyleLabel, strokeWidthLabel, strokeWidthText;
 
+	// --- font bar---
+	private Spinner fontStyles;
+	private SeekBar fontSize;
+	private TextView fontSizeText;
+
+	// ------
 	private CanvasView canvas;
 	private ColorDialog colorDialog;
 	private AlertDialog insertTextDialog;
 	private EditText insertTextInput;
+	private AlertDialog confirmDialog;
 
+	// --- polygon ---
 	private AlertDialog polyDialog;
-	private EditText polyInput;
-	
+	private TextView polyText;
+	private SeekBar polySeek;
 
+	// --- progress cover ---
 	private ProgressBar progress;
 	private View cover;
+	private TextView progressText;
 
 	// --- list participants ---
 	private AlertDialog participantsDialog;
@@ -107,7 +118,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		select = (ToggleButton) findViewById(R.id.w_main_select);
 		draw = (ToggleButton) findViewById(R.id.w_main_draw);
 		hand = (ToggleButton) findViewById(R.id.w_main_hand);
-		color = (ImageButton) findViewById(R.id.w_main_color);
+		color = (ToggleButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
 		image = (ImageButton) findViewById(R.id.w_main_image);
 		currentMain = select;
@@ -153,6 +164,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		showDrawAdditionalBar(false);
 
 		// --- stroke ---
+		strokeBar = (RelativeLayout) findViewById(R.id.w_stroke_bar);
 		strokeStyleLabel = (TextView) findViewById(R.id.w_stroke_style_label);
 		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
 		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
@@ -165,6 +177,18 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		strokeWidth.setOnSeekBarChangeListener(this);
 		showStrokeAdditionalBar(false);
 
+		// --- font setting ---
+		fontSize = (SeekBar) findViewById(R.id.w_font_size);
+		fontStyles = (Spinner) findViewById(R.id.w_font_style);
+		fontSizeText = (TextView) findViewById(R.id.w_font_size_text);
+		fontSize.setOnSeekBarChangeListener(this);
+		ArrayAdapter<FontManager.Font> fontAdapter = new ArrayAdapter<>(this,
+				android.R.layout.simple_list_item_1);
+		fontAdapter.addAll(FontManager.getFontList());
+		fontStyles.setAdapter(fontAdapter);
+		fontStyles.setOnItemSelectedListener(this);
+		showFontAdditionalBar(false);
+
 		// --- prepare dialog ---
 		colorDialog = new ColorDialog(this, this);
 		colorDialog.setColor(Color.BLACK);
@@ -175,7 +199,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		textADB.setNegativeButton("Cancel", this);
 		textADB.setMessage(getResources().getText(R.string.w_insert_text));
 		insertTextInput = new EditText(this);
-		insertTextInput.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN);
+		insertTextInput.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN
+				| EditorInfo.IME_ACTION_DONE);
+		insertTextInput.setSingleLine();
+		insertTextInput.setSelectAllOnFocus(true);
 		textADB.setView(insertTextInput);
 		insertTextDialog = textADB.create();
 
@@ -204,19 +231,32 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 		// --- polygon dialog ---
 		AlertDialog.Builder pdb = new AlertDialog.Builder(this);
-		polyInput = new EditText(this);
-		polyInput.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		polyInput.setImeOptions(EditorInfo.IME_FLAG_NO_FULLSCREEN);
-		pdb.setView(polyInput);
+		View polyView = getLayoutInflater().inflate(R.layout.dialog_polygon,
+				null);
+		polyText = (TextView) polyView.findViewById(R.id.wpd_input);
+		polySeek = (SeekBar) polyView.findViewById(R.id.wpd_seek);
+		polySeek.setOnSeekBarChangeListener(this);
+		pdb.setTitle("Insert corner count");
+		pdb.setView(polyView);
 		pdb.setPositiveButton("Insert", this);
 		pdb.setNegativeButton("Cancel", this);
 		polyDialog = pdb.create();
+
+		// --- confirm dialog ---
+		AlertDialog.Builder confirmDB = new AlertDialog.Builder(this);
+		confirmDB.setMessage("Ignore unapproved change?");
+		confirmDB.setPositiveButton("Yes", this);
+		confirmDB.setNegativeButton("No", this);
+		confirmDB.setNeutralButton("Cancel", this);
+		confirmDialog = confirmDB.create();
 
 		// --- progress ---
 		progress = (ProgressBar) findViewById(R.id.w_progress);
 		progress.setVisibility(View.GONE);
 		cover = findViewById(R.id.w_cover);
 		cover.setVisibility(View.GONE);
+		progressText = (TextView) findViewById(R.id.w_progress_text);
+		progressText.setVisibility(View.GONE);
 
 		// --- prepare canvas ---
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
@@ -227,7 +267,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 		onClick(select);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		Intent intent = new Intent(this, BrowserActivity.class);
@@ -266,7 +306,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.redo();
 			break;
 		case R.id.wm_paste:
-			canvas.pasteFromClipboard();
+			if (canvas.hasSelecedObjects())
+				confirmDialog.show();
+			else {
+				int count = canvas.pasteFromClipboard();
+				Toast.makeText(this, count + " objects pasted",
+						Toast.LENGTH_SHORT).show();
+			}
 			break;
 		case R.id.wm_download:
 			downloadDialog.show();
@@ -274,6 +320,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		case R.id.wm_participant:
 			progress.setVisibility(View.VISIBLE);
 			cover.setVisibility(View.VISIBLE);
+			progressText.setVisibility(View.VISIBLE);
 			connector.getParticipants(canvas.getModel());
 			break;
 		}
@@ -284,15 +331,22 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onColorChanged(int color) {
 		canvas.setStrokeColor(color);
 		canvas.setTextColor(color);
+		if (canvas.isInDrawingMode())
+			onClick(draw);
+		else if (!canvas.hasSelecedObjects())
+			onClick(select);
 	}
 
 	@Override
 	public void onHideModeChange(boolean hidden) {}
 
 	@Override
-	public void onSelectionEvent(boolean success) {
-		if (success)
+	public void onSelectionEvent(boolean success, int selected) {
+		if (success) {
 			showSelectAdditionalBar(true);
+			if (selected <= 1)
+				move.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -316,33 +370,45 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (v == select) {
 			currentMain.setChecked(false);
 			currentMain = select;
+			currentMain.setChecked(true);
 			canvas.setMode(CanvasView.Mode.SELECT);
 			showSelectAdditionalBar(false);
 			showApproveBar(false);
 			showDrawAdditionalBar(false);
 			showStrokeAdditionalBar(false);
+			showFontAdditionalBar(false);
 		} else if (v == draw) {
 			currentMain.setChecked(false);
 			currentMain = draw;
+			currentMain.setChecked(true);
 			showSelectAdditionalBar(false);
 			showStrokeAdditionalBar(false);
 			showDrawAdditionalBar(true);
+			showFontAdditionalBar(false);
 		} else if (v == hand) {
 			currentMain.setChecked(false);
 			currentMain = hand;
+			currentMain.setChecked(true);
 			canvas.setMode(CanvasView.Mode.HAND);
 		} else if (v == color) {
 			currentMain.setChecked(false);
+			currentMain = color;
+			currentMain.setChecked(true);
 			colorDialog.show();
 		} else if (v == stroke) {
 			currentMain.setChecked(false);
 			currentMain = stroke;
+			currentMain.setChecked(true);
 			showSelectAdditionalBar(false);
 			showDrawAdditionalBar(false);
-			showStrokeAdditionalBar(true);
+			if (canvas.isEditingTextObject())
+				showFontAdditionalBar(true);
+			else
+				showStrokeAdditionalBar(true);
 		} else if (v == image) {
 			currentMain.setChecked(false);
 			Toast.makeText(this, "not avaiable", Toast.LENGTH_SHORT).show();
+			insertImage();
 		}
 
 		// approve + cancel action
@@ -352,6 +418,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			onClick(select);
 		} else if (v == cancel) {
 			showApproveBar(false);
+			showSelectAdditionalBar(false);
 			showStrokeAdditionalBar(false);
 			canvas.cancelAction();
 			if (canvas.isInDrawingMode())
@@ -360,14 +427,21 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 		// select-additional-toolbar
 		else if (v == cut) {
-			canvas.copySelectedObjects();
+			int count = canvas.copySelectedObjects();
 			canvas.deleteSelectedObjects();
+			Toast.makeText(this, count + " objects cut", Toast.LENGTH_SHORT)
+					.show();
 		} else if (v == copy) {
-			canvas.copySelectedObjects();
+			int count = canvas.copySelectedObjects();
+			Toast.makeText(this, count + " objects copied", Toast.LENGTH_SHORT)
+					.show();
 		} else if (v == move) {
 			canvas.moveSelectedObject();
+			showSelectAdditionalBar(false);
+			showApproveBar(true);
 		} else if (v == delete) {
 			showSelectAdditionalBar(false);
+			showApproveBar(false);
 			canvas.deleteSelectedObjects();
 		}
 
@@ -390,6 +464,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			android.util.Log.d("POS", "text");
 			insertTextDialog.show();
 		}
+	}
+
+	void insertImage() {
+
 	}
 
 	/**
@@ -452,17 +530,35 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 */
 	void showStrokeAdditionalBar(boolean visible) {
 		if (visible) {
+			showFontAdditionalBar(false);
 			strokeStyleLabel.setVisibility(View.VISIBLE);
 			strokeStyle.setVisibility(View.VISIBLE);
 			strokeWidth.setVisibility(View.VISIBLE);
 			strokeWidthLabel.setVisibility(View.VISIBLE);
 			strokeWidthText.setVisibility(View.VISIBLE);
+			strokeBar.setVisibility(View.VISIBLE);
 		} else {
 			strokeStyleLabel.setVisibility(View.GONE);
 			strokeStyle.setVisibility(View.GONE);
 			strokeWidth.setVisibility(View.GONE);
 			strokeWidthLabel.setVisibility(View.GONE);
 			strokeWidthText.setVisibility(View.GONE);
+			strokeBar.setVisibility(View.GONE);
+		}
+	}
+
+	void showFontAdditionalBar(boolean visible) {
+		if (visible) {
+			showStrokeAdditionalBar(false);
+			strokeBar.setVisibility(View.VISIBLE);
+			fontStyles.setVisibility(View.VISIBLE);
+			fontSize.setVisibility(View.VISIBLE);
+			fontSizeText.setVisibility(View.VISIBLE);
+		} else {
+			strokeBar.setVisibility(View.GONE);
+			fontStyles.setVisibility(View.GONE);
+			fontSize.setVisibility(View.GONE);
+			fontSizeText.setVisibility(View.GONE);
 		}
 	}
 
@@ -478,6 +574,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				}
 				strokeWidthText.setText(String.valueOf(progress));
 				canvas.setStrokeWidth(progress);
+			} else if (seekBar == polySeek) {
+				polyText.setText(String.valueOf(progress
+						+ PolygonObject.MIN_CORNER_COUNT));
+			} else if (seekBar == fontSize) {
+				int size = progress + FontManager.MIN_FONT_SIZE;
+				canvas.setFontSize(size);
+				fontSizeText.setText(String.valueOf(size));
 			}
 		}
 	}
@@ -493,6 +596,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			long id) {
 		if (parent == strokeStyle) {
 			canvas.setStrokeStyle(STROKE_STYLES[position]);
+		} else if (parent == fontStyles) {
+			canvas.setFontStyle(position);
 		}
 	}
 
@@ -504,7 +609,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (dialog == insertTextDialog) {
 			if (which == DialogInterface.BUTTON_POSITIVE) {
 				String text = insertTextInput.getText().toString();
-				if (!text.isEmpty())
+				if (text.isEmpty())
+					Toast.makeText(this, "Cannot insert empty string",
+							Toast.LENGTH_SHORT).show();
+				else if (text.length() > TextObject.MAX_TEXT_LENGTH)
+					Toast.makeText(this, "Text is too long", Toast.LENGTH_SHORT)
+							.show();
+				else
 					canvas.insertText(text);
 			}
 		} else if (dialog == downloadDialog) {
@@ -525,10 +636,17 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			}
 		} else if (dialog == polyDialog) {
 			if (which == DialogInterface.BUTTON_POSITIVE) {
-				int corner = Integer.parseInt(polyInput.getText().toString());
-				if (corner < 3)
-					corner = 3;
-				canvas.insertPolygon(corner);
+				canvas.insertPolygon(polySeek.getProgress()
+						+ PolygonObject.MIN_CORNER_COUNT);
+			}
+		} else if (dialog == confirmDialog) {
+			// TODO confirm cancel unsaved change
+			if (which == DialogInterface.BUTTON_POSITIVE) {
+				canvas.approveAction();
+				canvas.pasteFromClipboard();
+			} else if (which == DialogInterface.BUTTON_NEGATIVE) {
+				canvas.cancelAction();
+				canvas.pasteFromClipboard();
 			}
 		}
 	}
@@ -541,6 +659,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		for (int i = 0; i < participants.size(); i++)
 			participantAdapter.add(participants.get(i).username);
 		progress.setVisibility(View.GONE);
+		progressText.setVisibility(View.GONE);
 		cover.setVisibility(View.GONE);
 		participantsDialog.show();
 	}

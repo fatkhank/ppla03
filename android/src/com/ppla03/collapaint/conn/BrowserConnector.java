@@ -2,6 +2,7 @@ package com.ppla03.collapaint.conn;
 
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ public class BrowserConnector extends ServerConnector {
 	private static String LIST_URL = HOST + "list";
 
 	private static BrowserConnector instance;
-	private CanvasCreateListener createListener;
+	private OnCanvasCreateListener createListener;
 	private OnFetchListListener listFetchListener;
 	private CanvasModel proposedModel;
 
@@ -42,7 +43,7 @@ public class BrowserConnector extends ServerConnector {
 	 * @param listener
 	 * @return this.
 	 */
-	public BrowserConnector setCreateListener(CanvasCreateListener listener) {
+	public BrowserConnector setCreateListener(OnCanvasCreateListener listener) {
 		this.createListener = listener;
 		return this;
 	}
@@ -63,11 +64,12 @@ public class BrowserConnector extends ServerConnector {
 		static final String CANVAS_ID = "id";
 		static final String RESULT_ERROR = "error";
 		static final int DUPLICATE_NAME = 2;
+		static final int USER_UNKNOWN = 8;
 	}
 
 	/**
 	 * Membuat sebuah kanvas. Jika proses telah dibuat, akan memanggil
-	 * {@link CanvasCreateListener#onCreated(CanvasModel, int)} dari listener
+	 * {@link OnCanvasCreateListener#onCreated(CanvasModel, int)} dari listener
 	 * yang didaftarkan.
 	 * @param owner pemilik kanvas.
 	 * @param name nama kanvas.
@@ -97,20 +99,22 @@ public class BrowserConnector extends ServerConnector {
 		@Override
 		public void process(int status, JSONObject reply) {
 			if (status == SUCCESS) {
-				if (reply.has(CreateJCode.RESULT_ERROR))
-					createListener.onCreated(proposedModel,
-							CanvasCreateListener.DUPLICATE_NAME);
-				else {
-					try {
-						if (reply.getString(CreateJCode.CANVAS_NAME).equals(
-								proposedModel)) {
-							proposedModel.setid(reply
-									.getInt(CreateJCode.CANVAS_ID));
-							createListener.onCreated(proposedModel, SUCCESS);
-						}
-					} catch (JSONException e) {
-						createListener.onCreated(proposedModel, UNKNOWN_REPLY);
+				try {
+					if (reply.has(CreateJCode.RESULT_ERROR)) {
+						int error = reply.getInt(CreateJCode.RESULT_ERROR);
+						if (error == CreateJCode.DUPLICATE_NAME)
+							createListener.onCreated(proposedModel,
+									OnCanvasCreateListener.DUPLICATE_NAME);
+						else if (error == CreateJCode.USER_UNKNOWN)
+							createListener.onCreated(proposedModel,
+									OnCanvasCreateListener.USER_UNKNOWN);
+					} else {
+						proposedModel
+								.setid(reply.getInt(CreateJCode.CANVAS_ID));
+						createListener.onCreated(proposedModel, SUCCESS);
 					}
+				} catch (JSONException e) {
+					createListener.onCreated(proposedModel, UNKNOWN_REPLY);
 				}
 			} else
 				createListener.onCreated(proposedModel, status);
@@ -160,6 +164,7 @@ public class BrowserConnector extends ServerConnector {
 
 		@Override
 		public void process(int status, JSONObject reply) {
+			// TODO json browser
 			if (status == SUCCESS) {
 				try {
 					// -------- process owned -----
@@ -176,7 +181,7 @@ public class BrowserConnector extends ServerConnector {
 						ownList.add(model);
 					}
 					// -------- process old list -----
-					JSONArray olds = reply.getJSONArray(ListJCode.CANVAS_OWNED);
+					JSONArray olds = reply.getJSONArray(ListJCode.CANVAS_OLD);
 					oldList.clear();
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = olds.getJSONObject(i);
@@ -191,7 +196,7 @@ public class BrowserConnector extends ServerConnector {
 						oldList.add(model);
 					}
 					// -------- process invited -----
-					JSONArray news = reply.getJSONArray(ListJCode.CANVAS_OWNED);
+					JSONArray news = reply.getJSONArray(ListJCode.CANVAS_NEW);
 					newList.clear();
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = news.getJSONObject(i);
@@ -207,14 +212,14 @@ public class BrowserConnector extends ServerConnector {
 						newList.add(model);
 					}
 
-					listFetchListener.onListFethed(asker, SUCCESS, oldList,
+					listFetchListener.onListFethed(asker, SUCCESS, ownList,
 							oldList, newList);
 				} catch (JSONException e) {
 					listFetchListener.onListFethed(asker, UNKNOWN_REPLY,
 							oldList, oldList, newList);
 				}
 			} else
-				listFetchListener.onListFethed(asker, status, oldList, oldList,
+				listFetchListener.onListFethed(asker, status, ownList, oldList,
 						newList);
 		}
 	};

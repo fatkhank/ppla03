@@ -138,9 +138,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 				fontSizeTurn = 15;
 			canvas.setFontSize(fontSizeTurn);
 		} else if (v == textFont) {
-			if (++fontTypeTurn >= FontManager.size())
-				fontTypeTurn = 0;
-			canvas.setFontStyle(fontTypeTurn);
+			
 		} else if (v == approve) {
 			canvas.approveAction();
 		} else if (v == cancel) {
@@ -179,7 +177,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 			StrokeStyle.DOTTED };
 
 	@Override
-	public void onSelectionEvent(boolean success) {
+	public void onSelectionEvent(boolean success, int selected) {
 		if (!success)
 			Toast.makeText(this, "No object selected", Toast.LENGTH_SHORT)
 					.show();

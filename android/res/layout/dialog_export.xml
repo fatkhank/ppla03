@@ -9,7 +9,9 @@
         android:id="@+id/ed_format"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/textView1" />
+        android:layout_toRightOf="@+id/textView1"
+        android:layout_alignParentRight="true" 
+        />
 
     <CheckBox
         android:id="@+id/ed_cropped"

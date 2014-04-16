@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp" >
+
+    <TextView
+        android:id="@+id/bcd_name_label"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/bcd_name"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/bcd_name_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/bcd_name_label"
+        android:ems="10"
+        android:imeOptions="flagNoFullscreen|actionDone"
+        android:inputType="textUri" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/bcd_width_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/bcd_name_label"
+        android:layout_marginTop="20dp"
+        android:text="@string/bcd_width"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/bcd_width_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bcd_name_input"
+        android:layout_alignRight="@+id/bcd_name_input"
+        android:layout_alignTop="@+id/bcd_width_label"
+        android:ems="10"
+        android:imeOptions="flagNoFullscreen"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/bcd_height_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/bcd_width_label"
+        android:layout_marginTop="20dp"
+        android:text="@string/bcd_height"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/bcd_height_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bcd_width_input"
+        android:layout_alignRight="@+id/bcd_width_input"
+        android:layout_alignTop="@+id/bcd_height_label"
+        android:ems="10"
+        android:imeOptions="flagNoFullscreen"
+        android:inputType="number" />
+
+</RelativeLayout>

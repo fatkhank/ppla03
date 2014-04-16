@@ -123,11 +123,11 @@ public class MoveAction extends UserAction {
 		int ofY = Float.floatToIntBits(ofsY);
 		encByte[0] = (byte) (ofX >> 24);
 		encByte[1] = (byte) (ofX >> 16);
-		encByte[2] = (byte) (ofX >> 16);
+		encByte[2] = (byte) (ofX >> 8);
 		encByte[3] = (byte) (ofX);
 		encByte[4] = (byte) (ofY >> 24);
 		encByte[5] = (byte) (ofX >> 16);
-		encByte[6] = (byte) (ofX >> 16);
+		encByte[6] = (byte) (ofX >> 8);
 		encByte[7] = (byte) (ofX);
 
 		return Base64.encodeToString(encByte, Base64.URL_SAFE);
