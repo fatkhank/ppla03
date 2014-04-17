@@ -5,29 +5,31 @@ import com.ppla03.collapaint.CanvasSynchronizer.CanvasLoadListener;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
-import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.object.FontManager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class LoaderActivity extends Activity implements CanvasLoadListener {
-	private ProgressBar progress;
 
+	ProgressBar progress;
 	Handler handler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.acivity_loader);
-		progress = (ProgressBar) findViewById(R.id.l_progress);
 		if (FontManager.readAsset(getAssets())) {
 			CanvasSynchronizer.getInstance().loadCanvas(this);
 			handler = new Handler();
+			progress = (ProgressBar) findViewById(R.id.l_progress);
 		} else {
 			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT)
 					.show();

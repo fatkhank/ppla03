@@ -1,20 +1,18 @@
 package com.ppla03.collapaint.ui;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,13 +26,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
-import com.ppla03.collapaint.conn.CanvasConnector;
+import com.ppla03.collapaint.conn.CollaUserManager;
 import com.ppla03.collapaint.conn.OnCanvasCreateListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
 import com.ppla03.collapaint.conn.ServerConnector;
@@ -67,12 +63,11 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 	static final String DEFAULT_NAME = "New canvas";
 	Handler reloader;
 
-	UserModel currentUser;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list);
+
 		// Get the message from the intent
 		Intent intent = getIntent();
 		String message = intent
@@ -90,6 +85,8 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 		// --- setup ---
 		BrowserConnector.getInstance().setCreateListener(this);
+		android.util.Log.d("POS", "instance");
+
 		AlertDialog.Builder createDB = new AlertDialog.Builder(this);
 		View createView = getLayoutInflater().inflate(
 				R.layout.dialog_create_canvas, null);
@@ -124,11 +121,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		listTitleOwner = (TextView) findViewById(R.id.b_title_owner);
 		listProgress = (ProgressBar) findViewById(R.id.b_list_progress);
 
-		// TODO dummy user
-		currentUser = new UserModel();
-		currentUser.id = 3;
-		currentUser.username = "currentUser";
-
 		loadCanvasList();
 	}
 
@@ -143,7 +135,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 	void loadCanvasList() {
 		BrowserConnector.getInstance().setListFetchListener(this)
-				.getCanvasList(currentUser);
+				.getCanvasList(CollaUserManager.getCurrentUser());
 		listReload.setVisibility(View.GONE);
 		listTitleCanvas.setVisibility(View.GONE);
 		listTitleOwner.setVisibility(View.GONE);
@@ -233,8 +225,9 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 					Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 					reloader.postDelayed(showCreateDialog, 500);
 				} else {
-					BrowserConnector.getInstance().createCanvas(currentUser,
-							name, width, height);
+					BrowserConnector.getInstance().createCanvas(
+							CollaUserManager.getCurrentUser(), name, width,
+							height);
 					loaderCover.setVisibility(View.VISIBLE);
 				}
 			}
@@ -269,6 +262,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			canvasAdapter.addAll(invited);
 			canvasAdapter.addAll(owned);
 			canvasAdapter.addAll(oldList);
+			listProgress.setVisibility(View.GONE);
 			if (canvasAdapter.isEmpty())
 				listText.setText("You have no canvas.");
 			else {
@@ -281,12 +275,13 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		} else {
 			listProgress.setVisibility(View.GONE);
 			listReload.setVisibility(View.VISIBLE);
+			listText.setText(getResources().getString(R.string.bcl_failed));
 			String msg;
 			if (status == ServerConnector.CONNECTION_PROBLEM) {
 				msg = "Connection problem.";
-				listText.setText(getResources().getString(R.string.bcl_failed));
 			} else
 				msg = "System error.";
+			Log.d("POS", "fetch:" + status);
 			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -329,10 +324,10 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			ViewHolder holder = (ViewHolder) view.getTag();
 			CanvasModel model = models.get(position);
 			holder.canvasName.setText(model.name);
-			if (activity.currentUser == model.owner)
+			if (model.owner.equals(CollaUserManager.getCurrentUser()))
 				holder.userName.setText("You");
 			else
-				holder.userName.setText(model.owner.username);
+				holder.userName.setText(model.owner.nickname);
 			return view;
 		}
 

@@ -8,7 +8,6 @@ import com.ppla03.collapaint.CanvasView.Mode;
 import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
-import com.ppla03.collapaint.model.object.FontManager;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 
 import android.app.Activity;
@@ -123,22 +122,22 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == fill) {
 			if (++fillTurn >= fillColors.length)
 				fillTurn = 0;
-			canvas.setFillParameter(true, fillColors[fillTurn]);
+			canvas.setFillParameter(true, fillColors[fillTurn], true);
 		} else if (v == strokeWidth) {
 			if (++strWidthTurn > 12)
 				strWidthTurn = 1;
-			canvas.setStrokeWidth(strWidthTurn);
+			canvas.setStrokeWidth(strWidthTurn, true);
 		} else if (v == strokeStyle) {
 			if (++strStyleTurn >= strokeStyles.length)
 				strStyleTurn = 0;
-			canvas.setStrokeStyle(strokeStyles[strStyleTurn]);
+			canvas.setStrokeStyle(strokeStyles[strStyleTurn], true);
 		} else if (v == textSize) {
 			fontSizeTurn += 5;
 			if (fontSizeTurn > 60)
 				fontSizeTurn = 15;
-			canvas.setFontSize(fontSizeTurn);
+			canvas.setFontSize(fontSizeTurn, true);
 		} else if (v == textFont) {
-			
+
 		} else if (v == approve) {
 			canvas.approveAction();
 		} else if (v == cancel) {
@@ -151,7 +150,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 			canvas.copySelectedObjects();
 		} else if (v == paste) {
 			canvas.invalidate();
-//			canvas.pasteFromClipboard();
+			// canvas.pasteFromClipboard();
 		} else if (v == delete) {
 			canvas.deleteSelectedObjects();
 		} else if (v == move) {
@@ -198,12 +197,12 @@ public class TesterActivity extends Activity implements OnClickListener,
 	@Override
 	public void onWaitForApproval() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onBeginDraw() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

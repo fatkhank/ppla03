@@ -1,7 +1,11 @@
-package collapaint.canvas;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package collapaint.auth;
 
 import collapaint.DB;
-import collapaint.Debugger;
 import collapaint.transact.Action;
 import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
@@ -16,7 +20,6 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletConfig;
@@ -27,25 +30,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Mendapatkan daftar User yang berpartisipasi pada suatu kanvas.
  *
  * @author hamba v7
  */
-@WebServlet(name = "member", urlPatterns = {"/member"})
-public class Participants extends HttpServlet {
+@WebServlet(name = "user", urlPatterns = {"/user"})
+public class User extends HttpServlet {
 
-    static class ParJCode {
+    static class UserJCode {
 
-        //request
-        static final String CANVAS_ID = "cid";
-        //reply
-        static final String USER_ID = "id";
-        static final String USER_NAME = "name";
-        static final String USER_LIST = "pars";
-        static final String OWNER_ID = "oid";
-        static final String OWNER_NAME = "oname";
-        static final String ERROR = "Error";
-        static final int CANVAS_UNKNOWN = 3;
+        static final String COLLA_ID = "id";
+        static final String ACCOUNT_ID = "acid";
+        static final String NAME = "name";
+        //--- reply ---
+        static final String ERROR = "error";
+        static final String STATUS = "status";
+        static final int NEW = 3;
+        static final int EXIST = 9;
     }
 
     Connection connection;
@@ -72,11 +72,12 @@ public class Participants extends HttpServlet {
         }
     }
 
-    static final String OWN_QUERY1 = "select u." + DB.USER.COL_ID + ", u." + DB.USER.COL_NAME + " from " + DB.TABLE_USER + " u, " + DB.TABLE_CANVAS + " c where c." + DB.CANVAS.COL_ID + " = '";
-    static final String OWN_QUERY2 = "' and u." + DB.USER.COL_ID + " = c." + DB.CANVAS.COL_OWNER;
+    static final String SELECT_QUERY1 = "select " + DB.USER.COL_ID + " from " + DB.TABLE_USER + " where " + DB.USER.COL_ID + "='";
+    static final String SELECT_QUERY2 = "';";
 
-    static final String OTHER_QUERY1 = "select u." + DB.USER.COL_ID + ", u." + DB.USER.COL_NAME + " from " + DB.TABLE_USER + " u, " + DB.TABLE_PARTICIPATION + " p where p." + DB.PARTICIPATION.COL_CANVAS + " = '";
-    static final String OTHER_QUERY2 = "' and u." + DB.USER.COL_ID + " = p." + DB.PARTICIPATION.COL_USER + ";";
+    static final String INSERT_QUERY1 = "insert into " + DB.TABLE_USER + "(" + DB.USER.COL_ACCOUNT_ID + "," + DB.USER.COL_NAME + ") values('";
+    static final String INSERT_QUERY2 = "','";
+    static final String INSERT_QUERY3 = "');";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -91,35 +92,40 @@ public class Participants extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
-        JsonObjectBuilder reply = Json.createObjectBuilder();
         try (PrintWriter out = response.getWriter()) {
+
+            JsonObjectBuilder reply = Json.createObjectBuilder();
+
             try (Statement statement = connection.createStatement()) {
                 JsonObject request = Json.createReader(is).readObject();
-                int canvas_id = request.getInt(ParJCode.CANVAS_ID);
-                //---------------- CANVAS OWNER --------------------
-                String ownQuery = OWN_QUERY1 + canvas_id + OWN_QUERY2;
-                ResultSet result = statement.executeQuery(ownQuery);
-                if (result.next()) {
-                    reply.add(ParJCode.OWNER_ID, result.getInt(1));
-                    reply.add(ParJCode.OWNER_NAME, result.getString(2));
+                String accID = request.getString(UserJCode.ACCOUNT_ID);
+                String name = request.getString(UserJCode.NAME);
+                String selectQu = SELECT_QUERY1 + accID + SELECT_QUERY2;
+                ResultSet selectResult = statement.executeQuery(selectQu);
+                if (selectResult.next()) {
+                    reply.add(UserJCode.STATUS, UserJCode.EXIST);
+                    reply.add(UserJCode.COLLA_ID, selectResult.getInt(1));
+                } else {
+                    String insertQuery = INSERT_QUERY1 + accID + INSERT_QUERY2 + name + INSERT_QUERY3;
+                    statement.
+                            execute(insertQuery, Statement.RETURN_GENERATED_KEYS);
+                    ResultSet keys = statement.getGeneratedKeys();
+                    if (keys.next())
+                        reply.add(UserJCode.COLLA_ID, keys.getInt(1));
+                    reply.add(UserJCode.STATUS, UserJCode.NEW);
+                }
 
-                    String otherQuery = OTHER_QUERY1 + canvas_id + OTHER_QUERY2;
-                    result = statement.executeQuery(otherQuery);
-                    JsonArrayBuilder jab = Json.createArrayBuilder();
-                    while (result.next()) {
-                        JsonObjectBuilder user = Json.createObjectBuilder();
-                        user.add(ParJCode.USER_ID, result.getInt(1));
-                        user.add(ParJCode.USER_NAME, result.getString(2));
-                        jab.add(user);
-                    }
-                    reply.add(ParJCode.USER_LIST, jab);
-                } else
-                    reply.add(ParJCode.ERROR, ParJCode.CANVAS_UNKNOWN);
+                reply.add(UserJCode.NAME, name);
             } catch (Exception ex) {
-                reply.add(ParJCode.ERROR, 0);
+                reply.add(UserJCode.ERROR, "error");
             }
-            out.print(reply.build().toString());
+
+            out.println(reply.build().toString());
         }
+    }
+
+    public static void check(String id, String nickname) {
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

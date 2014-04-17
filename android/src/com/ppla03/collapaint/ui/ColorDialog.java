@@ -60,6 +60,7 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 
 	static final int PALLETE = 0, RGB = 1;
 	static final String PALLETE_STRING = "Palletes", RGB_STRING = "RGB";
+	static final String PALLETE_TAG = "pallete", RGB_TAG = "rgb";
 	private int mode = PALLETE;
 
 	private ColorChangeListener listener;
@@ -78,10 +79,11 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		builder.setView(view);
 
 		// set title
-		TextView title = new TextView(activity);
-		title.setText("Choose color");
-		title.setTextSize(15);
-		builder.setCustomTitle(title);
+		// TextView title = new TextView(activity);
+		// title.setText("Choose color");
+		// title.setTextSize(15);
+		// builder.setCustomTitle(title);
+		builder.setTitle("Choose color");
 
 		builder.setPositiveButton("OK", this);
 
@@ -91,12 +93,12 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		tab = (TabHost) view.findViewById(R.id.cd_tabhost);
 		tab.setup();
 
-		TabSpec tab1 = tab.newTabSpec("pallete");
+		TabSpec tab1 = tab.newTabSpec(PALLETE_TAG);
 		tab1.setIndicator(PALLETE_STRING);
 		tab1.setContent(R.id.cd_tab_pallete);
 		tab.addTab(tab1);
 
-		TabSpec tab2 = tab.newTabSpec("rgb");
+		TabSpec tab2 = tab.newTabSpec(RGB_TAG);
 		tab2.setIndicator(RGB_STRING);
 		tab2.setContent(R.id.cd_tab_rgb);
 		tab.addTab(tab2);
@@ -250,7 +252,7 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 
 	@Override
 	public void onTabChanged(String tabId) {
-		if (tabId.equals(PALLETE_STRING))
+		if (tabId.equals(PALLETE_TAG))
 			mode = PALLETE;
 		else
 			mode = RGB;

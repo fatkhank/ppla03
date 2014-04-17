@@ -1,7 +1,5 @@
 package com.ppla03.collapaint;
 
-import com.ppla03.collapaint.conn.ServerConnector;
-import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.object.FreeObject;
 import com.ppla03.collapaint.model.object.LineObject;
 

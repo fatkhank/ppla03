@@ -3,7 +3,6 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.util.Log;
@@ -85,8 +84,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 		if (currentModel == null) {
 			// TODO dummy canvas
 			UserModel owner = new UserModel();
-			owner.id = 1;
-			owner.username = "debugger";
+			owner.collaID = 1;
+			owner.accountID = "accountofdebugger";
+			owner.nickname = "debugger";
 			currentModel = new CanvasModel(owner, "test canvas", 800, 400);
 			currentModel.setid(1);
 			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
@@ -111,8 +111,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 		canvas.open(currentModel);
 		canvas.execute(actionBuffer);
 		actionBuffer.clear();
-		Log.d("POS", "----- synchronizer started ------");
-		handler.postDelayed(updater, sync_time);
+		if (!canvas.isInHideMode()) {
+			Log.d("POS", "----- synchronizer started ------");
+			handler.postDelayed(updater, sync_time);
+		}
 	}
 
 	public void stop() {
@@ -222,7 +224,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 			listener.onCanvasLoaded(currentModel, status);
 		} else if (status == ServerConnector.CONNECTION_PROBLEM
 				|| status == ServerConnector.SERVER_PROBLEM) {
-			hideModeDialog.show();
+			if (!view.isInHideMode())
+				hideModeDialog.show();
 		}
 	}
 

@@ -2,12 +2,9 @@ package com.ppla03.collapaint.conn;
 
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.content.pm.FeatureInfo;
 
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
@@ -81,7 +78,7 @@ public class BrowserConnector extends ServerConnector {
 		try {
 			proposedModel = new CanvasModel(owner, name, width, height);
 
-			msg.put(CreateJCode.OWNER_ID, owner.id);
+			msg.put(CreateJCode.OWNER_ID, owner.collaID);
 			msg.put(CreateJCode.CANVAS_NAME, name);
 			msg.put(CreateJCode.CANVAS_WIDTH, width);
 			msg.put(CreateJCode.CANVAS_HEIGHT, height);
@@ -129,7 +126,7 @@ public class BrowserConnector extends ServerConnector {
 		static final String CANVAS_OWNED = "own";
 		static final String CANVAS_OLD = "old";
 		static final String CANVAS_NEW = "new";
-		static final String ID = "i";
+		static final String CANVAS_ID = "i";
 		static final String NAME = "n";
 		static final String WIDTH = "w";
 		static final String HEIGHT = "h";
@@ -149,7 +146,7 @@ public class BrowserConnector extends ServerConnector {
 		JSONObject request = new JSONObject();
 		try {
 			asker = user;
-			request.put(ListJCode.USER_ID, user.id);
+			request.put(ListJCode.USER_ID, user.collaID);
 			new Client(LIST_URL, listReply).execute(request);
 		} catch (JSONException e) {
 			listReply.process(INTERNAL_PROBLEM, null);
@@ -177,7 +174,7 @@ public class BrowserConnector extends ServerConnector {
 						int height = canvas.getInt(ListJCode.HEIGHT);
 						CanvasModel model = new CanvasModel(asker, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.ID));
+						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
 						ownList.add(model);
 					}
 					// -------- process old list -----
@@ -186,13 +183,13 @@ public class BrowserConnector extends ServerConnector {
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = olds.getJSONObject(i);
 						UserModel owner = new UserModel();
-						owner.id = canvas.getInt(ListJCode.OWNER_ID);
+						owner.collaID = canvas.getInt(ListJCode.OWNER_ID);
 						String name = canvas.getString(ListJCode.NAME);
 						int width = canvas.getInt(ListJCode.WIDTH);
 						int height = canvas.getInt(ListJCode.HEIGHT);
 						CanvasModel model = new CanvasModel(owner, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.ID));
+						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
 						oldList.add(model);
 					}
 					// -------- process invited -----
@@ -201,14 +198,14 @@ public class BrowserConnector extends ServerConnector {
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = news.getJSONObject(i);
 						UserModel owner = new UserModel();
-						owner.id = canvas.getInt(ListJCode.OWNER_ID);
-						owner.username = canvas.getString(ListJCode.OWNER_NAME);
+						owner.collaID = canvas.getInt(ListJCode.OWNER_ID);
+						owner.nickname = canvas.getString(ListJCode.OWNER_NAME);
 						String name = canvas.getString(ListJCode.NAME);
 						int width = canvas.getInt(ListJCode.WIDTH);
 						int height = canvas.getInt(ListJCode.HEIGHT);
 						CanvasModel model = new CanvasModel(owner, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.ID));
+						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
 						newList.add(model);
 					}
 

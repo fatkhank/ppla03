@@ -7,6 +7,7 @@ package collapaint.canvas;
 
 import collapaint.DB;
 import collapaint.transact.Action;
+import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -52,25 +53,6 @@ public class List extends HttpServlet {
         static final String ERROR = "error";
     }
 
-    static class PartiQu {
-
-        static final int CANVAS_ID = 1;
-        static final int STATUS = 2;
-        static final int CANVAS_NAME = 3;
-        static final int CANVAS_WIDTH = 4;
-        static final int CANVAS_HEIGHT = 5;
-        static final int OWNER_ID = 6;
-        static final int OWNER_NAME = 7;
-    }
-
-    static class OwnedQu {
-
-        static final int CANVAS_ID = 1;
-        static final int CANVAS_NAME = 2;
-        static final int CANVAS_WIDTH = 3;
-        static final int CANVAS_HEIGHT = 4;
-    }
-
     Connection connection;
 
     @Override
@@ -95,6 +77,31 @@ public class List extends HttpServlet {
         }
     }
 
+    static final String OWN_QUERY1 = "select * from " + DB.TABLE_CANVAS + " where " + DB.CANVAS.COL_OWNER + " = '";
+    static final String OWN_QUERY2 = "';";
+
+    static class OwnedQu {
+
+        static final int CANVAS_ID = 1;
+        static final int CANVAS_NAME = 2;
+        static final int CANVAS_WIDTH = 3;
+        static final int CANVAS_HEIGHT = 4;
+    }
+
+    static final String PAR_QUERY1 = "select p." + DB.PARTICIPATION.COL_CANVAS + ", p." + DB.PARTICIPATION.COL_STATUS + ", c." + DB.CANVAS.COL_NAME + ", c." + DB.CANVAS.COL_WIDTH + ", c." + DB.CANVAS.COL_HEIGHT + ", c." + DB.CANVAS.COL_OWNER + ", u." + DB.USER.COL_NAME + " from " + DB.TABLE_PARTICIPATION + " p, " + DB.TABLE_CANVAS + " c, " + DB.TABLE_USER + " u where p." + DB.PARTICIPATION.COL_USER + " = '";
+    static final String PAR_QUERY2 = "' and c." + DB.CANVAS.COL_ID + " = p." + DB.PARTICIPATION.COL_CANVAS + " and u." + DB.USER.COL_ID + " = c." + DB.CANVAS.COL_OWNER + ";";
+
+    static class PartiQu {
+
+        static final int CANVAS_ID = 1;
+        static final int STATUS = 2;
+        static final int CANVAS_NAME = 3;
+        static final int CANVAS_WIDTH = 4;
+        static final int CANVAS_HEIGHT = 5;
+        static final int OWNER_ID = 6;
+        static final int OWNER_NAME = 7;
+    }
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -109,14 +116,13 @@ public class List extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            JsonObject request = Json.createReader(is).readObject();
             JsonObjectBuilder reply = Json.createObjectBuilder();
-
+            JsonObject request = Json.createReader(is).readObject();
             int userID = request.getInt(ListJCode.USER_ID);
 
             try (Statement statement = connection.createStatement()) {
                 //---------------- CANVAS OWNED --------------------
-                String ownQuery = "select * from canvas where owner = '" + userID + "';";
+                String ownQuery = OWN_QUERY1 + userID + OWN_QUERY2;
                 ResultSet result = statement.executeQuery(ownQuery);
                 JsonArrayBuilder ownList = Json.createArrayBuilder();
                 while (result.next()) {
@@ -133,7 +139,7 @@ public class List extends HttpServlet {
                 }
                 reply.add(ListJCode.CANVAS_OWNED, ownList);
 
-                String parQuery = "select p.canvas_id, p.status, c.name, c.width, c.height, c.owner, u.username from participation p, canvas c, user u where p.user_id = '" + userID + "' and c.id = p.canvas_id and u.id = c.owner;";
+                String parQuery = PAR_QUERY1 + userID + PAR_QUERY2;
                 result = statement.executeQuery(parQuery);
 
                 JsonArrayBuilder oldList = Json.createArrayBuilder();
@@ -151,7 +157,7 @@ public class List extends HttpServlet {
                     canvas.add(ListJCode.OWNER_ID, result.
                             getInt(PartiQu.OWNER_ID));
                     canvas.add(ListJCode.OWNER_NAME, result.
-                            getInt(PartiQu.OWNER_NAME));
+                            getString(PartiQu.OWNER_NAME));
                     if (result.getString(PartiQu.STATUS).equals("n"))
                         newList.add(canvas);
                     else
@@ -179,8 +185,8 @@ public class List extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new StringInputStream(request.
-//                getParameter("json")), response);
+        processRequest(new StringInputStream(request.
+                getParameter("json")), response);
     }
 
     /**

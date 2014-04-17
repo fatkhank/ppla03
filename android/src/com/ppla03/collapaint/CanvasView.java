@@ -3,7 +3,6 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
@@ -18,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -87,6 +87,12 @@ public class CanvasView extends View {
 	// daerah ini, maka seleksi yang dilakukan adalah seleksi titik. Objek yang
 	// terseleksi adalah objek yang paling atas tersentuh oleh titik seleksi.
 	static final int SELECTION_MIN_SIZE = 10;
+
+	// Batas agar objek tidak keluar dari kanvas. Asalkan ada bagian objek yang
+	// masuk dalam kanvas sejauh batas ini.
+	static final int OBJECT_LIMIT = 30;
+	// Menampung bound objek untuk melakukan pembatasan gerakkan objek
+	static final RectF limiter = new RectF();
 
 	// Posisi scroll kanvas, berisi posisi relatif pojok kiri atas kertas kanvas
 	// terhadap pojok kiri atas CanvasView.
@@ -186,7 +192,7 @@ public class CanvasView extends View {
 		editPaint = new Paint();
 		editPaint.setStyle(Style.STROKE);
 		editPaint.setColor(Color.BLACK);
-		editPaint.setStrokeWidth(1);
+		editPaint.setStrokeWidth(3);
 		StrokeStyle.applyEffect(StrokeStyle.DASHED, editPaint);
 	}
 
@@ -241,7 +247,6 @@ public class CanvasView extends View {
 		synczer = CanvasSynchronizer.getInstance();
 
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
-		setLongClickable(true);
 	}
 
 	/**
@@ -326,10 +331,9 @@ public class CanvasView extends View {
 						- scrollY, hideModeTextPaint);
 		}
 
-		// ** CHANGE TO LINE COMMENT TO DEBUG
-		// if (model != null)
-		// debug(canvas);
-		// */
+		/*
+		 * CHANGE TO LINE COMMENT TO DEBUG if (model != null) debug(canvas); //
+		 */
 	}
 
 	// /** CHANGE TO LINE COMMENT TO DEBUG
@@ -342,9 +346,27 @@ public class CanvasView extends View {
 
 	void debug(Canvas canvas) {
 		canvas.translate(-scrollX, -scrollY);
-		canvas.drawText("U[" + userActions.size() + "]", 250, 20, debugPaint);
-		canvas.drawText("R[" + redoStack.size() + "]", 330, 20, debugPaint);
-		canvas.drawText("C[" + checkpoint + "]", 410, 20, debugPaint);
+		canvas.drawText("U:" + userActions.size(), getWidth() - 460,
+				getHeight(), debugPaint);
+		canvas.drawText("R:" + redoStack.size(), getWidth() - 380, getHeight(),
+				debugPaint);
+		canvas.drawText("C:" + checkpoint, getWidth() - 300, getHeight(),
+				debugPaint);
+
+		canvas.drawText("D[" + pendingDeleteActions.size() + "]",
+				getWidth() - 240, getHeight(), debugPaint);
+		canvas.drawText("M[" + pendingMoveActions.size() + "]",
+				getWidth() - 180, getHeight(), debugPaint);
+		canvas.drawText("S[" + pendingStyleActions.size() + "]",
+				getWidth() - 120, getHeight(), debugPaint);
+		canvas.drawText("R[" + pendingReshapeActions.size() + "]",
+				getWidth() - 60, getHeight(), debugPaint);
+		if (currentObject != null) {
+			canvas.drawText("current:" + currentObject.privateID + ", "
+					+ currentObject.getGlobalID(), getWidth() - 200,
+					getHeight() - 25, debugPaint);
+		}
+
 		if (handler != null)
 			canvas.drawText("[hnd]", getWidth() - 370, 45, debugPaint);
 		if (grabbedCPoint != null)
@@ -557,6 +579,12 @@ public class CanvasView extends View {
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (grabbedCPoint != null) {
+					currentObject.getWorldBounds(limiter);
+					if ((limiter.right < OBJECT_LIMIT)
+							|| (limiter.left > model.width - OBJECT_LIMIT)
+							|| (limiter.bottom < OBJECT_LIMIT)
+							|| (limiter.top > model.height - OBJECT_LIMIT))
+						handler.dragPoint(grabbedCPoint, anchorX, anchorY);
 					grabbedCPoint.release();
 					grabbedCPoint = null;
 					if (protaReshape != null) {
@@ -570,9 +598,11 @@ public class CanvasView extends View {
 				socY = 0;
 				redoStack.clear();
 				MoveStepper ms = protaMove.anchorUp();
-				ms.execute();
-				pushToUAStack(ms, false);
-				reloadCache();
+				if (ms != null) {
+					ms.execute();
+					pushToUAStack(ms, false);
+					reloadCache();
+				}
 			}
 		}
 		invalidate();
@@ -598,8 +628,16 @@ public class CanvasView extends View {
 		}
 	}
 
+	public boolean isInSelectionMode() {
+		return (mode & Mode.SELECT) == Mode.SELECT;
+	}
+
 	public boolean isInDrawingMode() {
 		return (mode & Mode.DRAW) == Mode.DRAW;
+	}
+
+	public boolean isInHandMode() {
+		return (mode & Mode.HAND) == Mode.HAND;
 	}
 
 	public boolean isEditingTextObject() {
@@ -608,7 +646,11 @@ public class CanvasView extends View {
 	}
 
 	public boolean hasSelecedObjects() {
-		return !selectedObjects.isEmpty();
+		return (mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE;
+	}
+
+	public boolean hasUnsavedChanges() {
+		return protaReshape != null || protaStyle != null || protaMove != null;
 	}
 
 	/**
@@ -652,7 +694,6 @@ public class CanvasView extends View {
 		while (userActions.size() > checkpoint)
 			userActions.pop();
 		if ((mode & Mode.DRAW) == Mode.DRAW) {
-			currentObject.draw(cacheCanvas);
 			model.objects.add(currentObject);
 			UserAction action = new DrawAction(currentObject);
 			pushToUAStack(action, !hidden_mode);
@@ -745,8 +786,10 @@ public class CanvasView extends View {
 	 * Mengganti warna pinggiran objek yang sedang aktif atau yang akan
 	 * digambar. Berlaku untuk {@link LineObject} dan {@link BasicObject}.
 	 * @param color. Lihat {@link Color}.
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah tampilan objek.
 	 */
-	public void setStrokeColor(int color) {
+	public void setStrokeColor(int color, boolean save) {
 		strokeColor = color;
 		if (currentObject != null) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
@@ -755,9 +798,11 @@ public class CanvasView extends View {
 				protoBasic.setStrokeColor(color);
 			else if (currentObject instanceof LineObject)
 				protoLine.setColor(color);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -766,8 +811,10 @@ public class CanvasView extends View {
 	 * Mengganti tebal garis yang sedang aktif atau akan digambar. Berlaku untuk
 	 * {@link LineObject} dan {@link BasicObject}
 	 * @param width
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah tampilan objek.
 	 */
-	public void setStrokeWidth(int width) {
+	public void setStrokeWidth(int width, boolean save) {
 		strokeWidth = width;
 		if (currentObject != null) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
@@ -776,9 +823,11 @@ public class CanvasView extends View {
 				protoBasic.setStrokeWidth(width);
 			else if (currentObject instanceof LineObject)
 				protoLine.setWidth(width);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -787,8 +836,10 @@ public class CanvasView extends View {
 	 * Mengganti jenis dekorasi pinggiran objek yang sedang aktif atau akan
 	 * digambar. Berlaku untuk {@link LineObject} dan {@link BasicObject}.
 	 * @param style jenis dekorasi. Lihat {@link StrokeStyle}.
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah tampilan objek.
 	 */
-	public void setStrokeStyle(int style) {
+	public void setStrokeStyle(int style, boolean save) {
 		strokeStyle = style;
 		if (currentObject != null) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
@@ -797,9 +848,11 @@ public class CanvasView extends View {
 				protoBasic.setStrokeStyle(strokeStyle);
 			else if (currentObject instanceof LineObject)
 				protoLine.setStrokeStyle(style);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -812,7 +865,7 @@ public class CanvasView extends View {
 		listener.onURStatusChange(!userActions.empty(), false);
 	}
 
-	public void setImageTransparency(int alpha) {
+	public void setImageTransparency(int alpha, boolean save) {
 		// TODO image transparency
 		imageAlpha = alpha;
 		if (protoImage != null)
@@ -841,17 +894,21 @@ public class CanvasView extends View {
 	/**
 	 * Mengatur warna teks.
 	 * @param color warna, lihat {@link Color}
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah tampilan objek.
 	 */
-	public void setTextColor(int color) {
+	public void setTextColor(int color, boolean save) {
 		strokeColor = color;
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setColor(color);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -859,17 +916,21 @@ public class CanvasView extends View {
 	/**
 	 * Mengubah ukuran huruf.
 	 * @param size ukuran
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah ukuran teks.
 	 */
-	public void setFontSize(int size) {
+	public void setFontSize(int size, boolean save) {
 		textSize = size;
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setSize(size);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -877,17 +938,21 @@ public class CanvasView extends View {
 	/**
 	 * Mengubah jenis huruf.
 	 * @param font indeks huruf di {@link FontManager}
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
+	 *            hanya merubah tampilan objek.
 	 */
-	public void setFontStyle(int font) {
+	public void setFontStyle(int font, boolean save) {
 		textFont = font;
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
 			protoText.setFontStyle(font);
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
-			listener.onWaitForApproval();
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 			postInvalidate();
 		}
 	}
@@ -940,17 +1005,21 @@ public class CanvasView extends View {
 	 * @param filled jika true berarti memiliki isian, jika false maka tidak
 	 *            memiliki isian dan nilai {@code color} diabaikan.
 	 * @param color warna isian, lihat {@link Color}
+	 * @param save jika true, aksi langsung disimpan ke stack, jika false, aksi
+	 *            hanya merubah parameter objek saja.
 	 */
-	public void setFillParameter(boolean filled, int color) {
+	public void setFillParameter(boolean filled, int color, boolean save) {
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		if (currentObject != null && currentObject instanceof BasicObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			protoBasic = (BasicObject) currentObject;
 			protoBasic.setFillMode(filled, color);
-			listener.onWaitForApproval();
-			if ((mode & Mode.DRAW) != Mode.DRAW)
-				pushToUAStack(protaStyle.capture(), false);
+			if (save) {
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaStyle.capture(), false);
+				listener.onWaitForApproval();
+			}
 		}
 		postInvalidate();
 	}
@@ -987,6 +1056,25 @@ public class CanvasView extends View {
 				return co;
 		}
 		return null;
+	}
+
+	/**
+	 * Menyeleksi semua objek.
+	 * @return jumlah objek yang diseleksi, jika 0 maka kanvas tidak masuk mode
+	 *         seleksi
+	 */
+	public int selectAllObject() {
+		if (model.objects.isEmpty())
+			return 0;
+		selectedObjects.clear();
+		selectedObjects.addAll(model.objects);
+		for (int i = 0; i < selectedObjects.size(); i++)
+			selectedObjects.get(i).select();
+		mode |= Mode.SELECTION_MODE;
+		reloadCache();
+		listener.onSelectionEvent(true, selectedObjects.size());
+		postInvalidate();
+		return selectedObjects.size();
 	}
 
 	public void moveSelectedObject() {
@@ -1029,25 +1117,42 @@ public class CanvasView extends View {
 		if ((mode & Mode.DRAW) == Mode.DRAW)
 			cancelAction();
 		selectedObjects.clear();
+		handler = null;
 		reloadCache();
 		postInvalidate();
 	}
 
+	/**
+	 * Menyalin objek dari clipboard ke kanvas. Kanvas otomatis menyeleksi objek
+	 * yang telah terseleksi, kecuali kalau tidak ada objek yang disalin.
+	 * @return jumlah objek yang disalin
+	 */
 	public int pasteFromClipboard() {
+		if (!ObjectClipboard.hasObject())
+			return 0;
 		selectedObjects.clear();
 		ArrayList<CanvasObject> objs = ObjectClipboard.retrieve();
 		for (int i = 0; i < objs.size(); i++) {
 			CanvasObject clone = objs.get(i).cloneObject();
+			clone.select();
 			selectedObjects.add(clone);
 			model.objects.add(clone);
 		}
-		DrawMultiple dm = new DrawMultiple(selectedObjects);
-		pushToUAStack(dm, !hidden_mode);
-		// mode |= Mode.SELECTION_MODE;
+		mode |= Mode.SELECTION_MODE;
+		if (objs.size() > 1) {
+			DrawMultiple dm = new DrawMultiple(selectedObjects);
+			pushToUAStack(dm, !hidden_mode);
+		} else {
+			CanvasObject co = selectedObjects.get(0);
+			DrawAction da = new DrawAction(co);
+			pushToUAStack(da, !hidden_mode);
+			editObject(co, ShapeHandler.ALL);
+		}
 		socX = 0;
 		socY = 0;
 		reloadCache();
 		postInvalidate();
+		listener.onSelectionEvent(true, selectedObjects.size());
 		return selectedObjects.size();
 	}
 
@@ -1138,7 +1243,6 @@ public class CanvasView extends View {
 	private void execute(UserAction action, boolean forced) {
 		if (action instanceof DrawAction) {
 			DrawAction da = (DrawAction) action;
-			da.object.draw(cacheCanvas);
 			model.objects.add(da.object);
 		} else if (action instanceof MoveAction) {
 			MoveAction ma = (MoveAction) action;
@@ -1157,7 +1261,7 @@ public class CanvasView extends View {
 						grabbedCPoint.release();
 						grabbedCPoint = null;
 					}
-					handler = currentObject.getHandlers(ShapeHandler.SHAPE);
+					handler = currentObject.getHandlers(ShapeHandler.ALL);
 				}
 			}
 		} else if (action instanceof StyleAction) {

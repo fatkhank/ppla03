@@ -8,7 +8,7 @@
     <string name="cd_r">R</string>
     <string name="cd_g">G</string>
     <string name="cd_b">B</string>
-    <string name="cd_a">A</string>
+    <string name="cd_a">Opacity</string>
     <string name="title_activity_color_tester">ColorTesterActivity</string>
     <string name="emptyString">\"\"</string>
     <string name="emptyString2"></string>

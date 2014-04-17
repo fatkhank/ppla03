@@ -21,28 +21,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ppla03.collapaint.ui.TesterActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
-        </activity>
-        <activity
-            android:name="com.ppla03.collapaint.ui.WorkspaceActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
-        </activity>
-        <activity
-            android:name="com.ppla03.collapaint.ui.LoaderActivity"
-            android:label="@string/title_activity_loader"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
-        </activity>
-        <activity
-            android:name="com.ppla03.collapaint.ui.ColorTesterActivity"
-            android:label="@string/title_activity_color_tester" >
-        </activity>
-        <activity
             android:name="com.ppla03.collapaint.ui.AuthenticationActivity"
             android:label="@string/app_name" >
         </activity>
@@ -57,14 +35,26 @@
             android:parentActivityName="com.ppla03.collapaint.ui.AuthenticationActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.collapaint.LoginActivity" />
+        </activity>
+        <activity
+            android:name="com.ppla03.collapaint.ui.LoaderActivity"
+            android:label="@string/title_activity_loader"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.collapaint.LoginActivity" />
+        </activity>
+        <activity
+            android:name="com.ppla03.collapaint.ui.WorkspaceActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
     </application>
 
