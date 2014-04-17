@@ -1,11 +1,11 @@
 package com.ppla03.collapaint.ui;
 
 import com.ppla03.collapaint.CanvasSynchronizer;
+import com.ppla03.collapaint.FontManager;
 import com.ppla03.collapaint.CanvasSynchronizer.CanvasLoadListener;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
-import com.ppla03.collapaint.model.object.FontManager;
 
 import android.app.Activity;
 import android.content.Intent;

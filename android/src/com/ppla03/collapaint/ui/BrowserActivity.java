@@ -8,7 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputFilter;
+import android.text.LoginFilter;
+import android.text.Spanned;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,6 +24,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -63,6 +68,9 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 	static final String DEFAULT_NAME = "New canvas";
 	Handler reloader;
 
+	static final InputFilter[] canvasDimFilter = new InputFilter[] { new InputFilter.LengthFilter(
+			4) };
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,6 +95,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		BrowserConnector.getInstance().setCreateListener(this);
 		android.util.Log.d("POS", "instance");
 
+		// --- dialog create canvas ---
 		AlertDialog.Builder createDB = new AlertDialog.Builder(this);
 		View createView = getLayoutInflater().inflate(
 				R.layout.dialog_create_canvas, null);
@@ -94,6 +103,8 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		nameInput = (EditText) createView.findViewById(R.id.bcd_name_input);
 		widthInput = (EditText) createView.findViewById(R.id.bcd_width_input);
 		heightInput = (EditText) createView.findViewById(R.id.bcd_height_input);
+		widthInput.setFilters(canvasDimFilter);
+		heightInput.setFilters(canvasDimFilter);
 		widthInput.setText(String.valueOf(DEFAULT_WIDTH));
 		heightInput.setText(String.valueOf(DEFAULT_HEIGHT));
 		createDB.setView(createView);
@@ -105,6 +116,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		loaderCover.setVisibility(View.GONE);
 		loaderCancel = (Button) findViewById(R.id.b_loader_cancel);
 		loaderCancel.setOnClickListener(this);
+		loaderCancel.setVisibility(View.GONE);
 		reloader = new Handler();
 
 		// ---- canvas list ---

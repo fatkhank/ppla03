@@ -189,105 +189,157 @@
             android:layout_toRightOf="@+id/w_draw_free"
             android:background="@drawable/button_green48"
             android:src="@drawable/draw_text48" />
+    </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/w_stroke_bar"
+    <RelativeLayout
+        android:id="@+id/w_top_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/w_app"
+        android:layout_toRightOf="@+id/w_rainbow_line"
+        android:background="@drawable/top_bar"
+        android:paddingBottom="5dp"
+        android:paddingRight="10dp" >
+
+        <TextView
+            android:id="@+id/w_font_style_label"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:text="Font"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Spinner
+            android:id="@+id/w_font_style"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_toLeftOf="@+id/w_font_bold"
+            android:layout_toRightOf="@+id/w_font_style_label" />
+
+        <ToggleButton
+            android:id="@+id/w_font_bold"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentTop="true"
-            android:background="@drawable/top_bar"
-            android:paddingBottom="5dp" >
+            android:layout_marginRight="2dp"
+            android:layout_marginTop="5dp"
+            android:layout_toLeftOf="@+id/w_font_italic"
+            android:background="@drawable/top_bar_toggle"
+            android:button="@drawable/bold"
+            android:checked="false"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/w_font_style_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:text="@string/emptyString2"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+        <ToggleButton
+            android:id="@+id/w_font_italic"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="2dp"
+            android:layout_marginTop="5dp"
+            android:layout_toLeftOf="@+id/w_font_underline"
+            android:background="@drawable/top_bar_toggle"
+            android:button="@drawable/italic"
+            android:checked="true"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2"
+            android:textSize="20sp" />
 
-            <Spinner
-                android:id="@+id/w_font_style"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/w_font_style_label" />
+        <ToggleButton
+            android:id="@+id/w_font_underline"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/top_bar_toggle"
+            android:button="@drawable/underline"
+            android:textOff="@string/emptyString2"
+            android:textOn="@string/emptyString2"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/w_font_size_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="20dp"
-                android:layout_toRightOf="@+id/w_font_style"
-                android:gravity="center_vertical"
-                android:text="@string/emptyString2"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/w_font_size_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/w_font_size"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:text="Size"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <SeekBar
-                android:id="@+id/w_font_size"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/w_font_size_label"
-                android:max="50" />
+        <SeekBar
+            android:id="@+id/w_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/w_font_style"
+            android:layout_marginTop="5dp"
+            android:layout_toLeftOf="@+id/w_font_size_text"
+            android:layout_toRightOf="@+id/w_font_size_label"
+            android:max="50" />
 
-            <TextView
-                android:id="@+id/w_font_size_text"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/w_font_size"
-                android:gravity="center_vertical"
-                android:text="@string/emptyString2"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TextView
+            android:id="@+id/w_font_size_text"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/w_font_size"
+            android:gravity="center_vertical"
+            android:text="100"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <TextView
-                android:id="@+id/w_stroke_style_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:text="@string/emptyString2"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/w_stroke_style_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:gravity="center_vertical"
+            android:text="@string/emptyString2"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <Spinner
-                android:id="@+id/w_stroke_style"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/w_stroke_style_label" />
+        <Spinner
+            android:id="@+id/w_stroke_style"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_toRightOf="@+id/w_stroke_style_label" />
 
-            <TextView
-                android:id="@+id/w_stroke_width_label"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@+id/w_stroke_style"
-                android:gravity="center_vertical"
-                android:text="@string/emptyString2"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/w_stroke_width_label"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/w_stroke_style"
+            android:gravity="center_vertical"
+            android:text="@string/emptyString2"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <SeekBar
-                android:id="@+id/w_stroke_width"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="false"
-                android:layout_toRightOf="@+id/w_stroke_width_label"
-                android:max="72"
-                android:progress="1" />
+        <SeekBar
+            android:id="@+id/w_stroke_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="false"
+            android:layout_toLeftOf="@+id/w_stroke_width_text"
+            android:layout_toRightOf="@+id/w_stroke_width_label"
+            android:max="72"
+            android:progress="1" />
 
-            <TextView
-                android:id="@+id/w_stroke_width_text"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/w_stroke_width"
-                android:ems="3"
-                android:gravity="center_vertical"
-                android:text="1" />
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/w_stroke_width_text"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:ems="3"
+            android:gravity="center_vertical"
+            android:text="99" />
     </RelativeLayout>
 
     <ImageButton

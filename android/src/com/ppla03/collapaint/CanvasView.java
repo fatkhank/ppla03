@@ -48,7 +48,7 @@ public class CanvasView extends View {
 		/**
 		 * Mode di mana ada objek yang diseleksi (selectedObject tidak kosong)
 		 */
-		private static final int SELECTION_MODE = 32;
+		private static final int HAS_SELECTION = 32;
 
 		/**
 		 * Mode saat ada objek yang dipindah.
@@ -98,7 +98,7 @@ public class CanvasView extends View {
 	// terhadap pojok kiri atas CanvasView.
 	private int scrollX, scrollY;
 	// Batasan scroll, dihitung berdasarkan ukuran kanvas dan ukuran CanvasView.
-	private int limitScrollX, limitScrollY;
+	private int minScrollX, minScrollY, maxScrollX, maxScrollY;
 	// Posisi di kanvas yang berada di tengah-tengah CanvasView.
 	private int centerX, centerY;
 	// Menyimpan koordinat saat touchdown.
@@ -157,6 +157,9 @@ public class CanvasView extends View {
 	private static int strokeStyle;
 	private static int textSize;
 	private static int textFont;
+	private static boolean textUnderline;
+	private static boolean fontBold;
+	private static boolean fontItalic;
 	private static int imageAlpha;
 	private static boolean makeLoop;
 	private static boolean hidden_mode;
@@ -298,8 +301,20 @@ public class CanvasView extends View {
 		if (model != null) {
 			centerX = (w >> 1) - scrollX;
 			centerY = (h >> 1) - scrollY;
-			limitScrollX = w - CANVAS_MARGIN - model.width;
-			limitScrollY = h - CANVAS_MARGIN - model.height;
+			if (model.width >= w) {
+				minScrollX = w - CANVAS_MARGIN - model.width;
+				maxScrollX = CANVAS_MARGIN;
+			} else {
+				minScrollX = 0;
+				maxScrollX = w - model.width;
+			}
+			if (model.height >= w) {
+				minScrollY = h - CANVAS_MARGIN - model.height;
+				maxScrollY = CANVAS_MARGIN;
+			} else {
+				minScrollY = 0;
+				maxScrollY = h - model.height;
+			}
 		}
 	}
 
@@ -312,7 +327,7 @@ public class CanvasView extends View {
 			canvas.drawRect(0, 0, model.width, model.height, canvasPaint);
 			if (cacheImage != null)
 				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
-			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+			if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 				canvas.drawBitmap(selectedObjectsCache, socX, socY, cachePaint);
 			if (currentObject != null) {
 				currentObject.draw(canvas);
@@ -331,9 +346,10 @@ public class CanvasView extends View {
 						- scrollY, hideModeTextPaint);
 		}
 
-		/*
-		 * CHANGE TO LINE COMMENT TO DEBUG if (model != null) debug(canvas); //
-		 */
+		// CHANGE TO LINE COMMENT TO DEBUG
+		if (model != null)
+			debug(canvas);
+
 	}
 
 	// /** CHANGE TO LINE COMMENT TO DEBUG
@@ -386,7 +402,7 @@ public class CanvasView extends View {
 			res += "DW|";
 		if ((mode & Mode.EDIT) == Mode.EDIT)
 			res += "ED|";
-		if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+		if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 			res += "SM|";
 		if ((mode & Mode.HAND) == Mode.HAND)
 			res += "HD|";
@@ -423,7 +439,7 @@ public class CanvasView extends View {
 		int size = model.objects.size();
 		cacheCanvas.drawColor(Color.WHITE,
 				android.graphics.PorterDuff.Mode.CLEAR);
-		if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) {
+		if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION) {
 			for (int i = 0; i < size; i++) {
 				CanvasObject obj = model.objects.get(i);
 				if (!obj.isSelected())
@@ -503,15 +519,15 @@ public class CanvasView extends View {
 			int y = (int) event.getY();
 			if ((mode & Mode.HAND) == Mode.HAND) {
 				scrollX = x + anchorX;
-				if (scrollX > CANVAS_MARGIN)
-					scrollX = CANVAS_MARGIN;
-				else if (scrollX < limitScrollX)
-					scrollX = limitScrollX;
+				if (scrollX > maxScrollX)
+					scrollX = maxScrollX;
+				else if (scrollX < minScrollX)
+					scrollX = minScrollX;
 				scrollY = y + anchorY;
-				if (scrollY > CANVAS_MARGIN)
-					scrollY = CANVAS_MARGIN;
-				else if (scrollY < limitScrollY)
-					scrollY = limitScrollY;
+				if (scrollY > maxScrollY)
+					scrollY = maxScrollY;
+				else if (scrollY < minScrollY)
+					scrollY = minScrollY;
 			} else {
 				x -= scrollX;
 				y -= scrollY;
@@ -563,7 +579,7 @@ public class CanvasView extends View {
 						editObject(selectedObjects.get(0), ShapeHandler.SHAPE);
 				}
 				if (selected) {
-					mode |= Mode.SELECTION_MODE;
+					mode |= Mode.HAS_SELECTION;
 					reloadCache();
 				}
 				selectRect.setEmpty();
@@ -587,10 +603,10 @@ public class CanvasView extends View {
 						handler.dragPoint(grabbedCPoint, anchorX, anchorY);
 					grabbedCPoint.release();
 					grabbedCPoint = null;
-					if (protaReshape != null) {
-						redoStack.clear();
-						pushToUAStack(protaReshape.capture(), false);
-					}
+					if (protaReshape == null)
+						protaReshape = new ReshapeAction(currentObject, true);
+					redoStack.clear();
+					pushToUAStack(protaReshape.capture(), false);
 					listener.onWaitForApproval();
 				}
 			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
@@ -620,7 +636,7 @@ public class CanvasView extends View {
 			this.mode ^= Mode.HAND;
 		else {
 			if (mode == Mode.SELECT
-					&& (this.mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+					&& (this.mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 				cancelSelect();
 			if ((this.mode & Mode.EDIT) == Mode.EDIT)
 				cancelAction();
@@ -645,8 +661,8 @@ public class CanvasView extends View {
 				&& protoText == currentObject;
 	}
 
-	public boolean hasSelecedObjects() {
-		return (mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE;
+	public boolean hasSelectedObjects() {
+		return (mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION;
 	}
 
 	public boolean hasUnsavedChanges() {
@@ -680,8 +696,6 @@ public class CanvasView extends View {
 		checkpoint = userActions.size();
 		handler = co.getHandlers(ShapeHandler.ALL);
 		listener.onWaitForApproval();
-		if ((mode & Mode.DRAW) != Mode.DRAW)
-			protaReshape = new ReshapeAction(co, true);
 		mode |= Mode.EDIT;
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.empty(), false);
@@ -707,18 +721,15 @@ public class CanvasView extends View {
 				if (protaMove != null) {
 					protaMove.apply();
 					pushToUAStack(protaMove, !hidden_mode);
-					protaMove = null;
 					pendingMoveActions.clear();
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (protaReshape != null) {
 					pushToUAStack(protaReshape, !hidden_mode);
-					protaReshape = null;
 					pendingReshapeActions.clear();
 				}
 				if (protaStyle != null) {
 					pushToUAStack(protaStyle, !hidden_mode);
-					protaStyle = null;
 					pendingStyleActions.clear();
 				}
 			}
@@ -727,6 +738,9 @@ public class CanvasView extends View {
 		checkpoint = userActions.size();
 		currentObject = null;
 		handler = null;
+		protaMove = null;
+		protaStyle = null;
+		protaReshape = null;
 		mode = Mode.SELECT;
 		postInvalidate();
 		redoStack.clear();
@@ -746,24 +760,21 @@ public class CanvasView extends View {
 			userActions.pop();
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			mode &= ~Mode.EDIT;
-			if (protaStyle != null) {
+			if (protaStyle != null)
 				execute(protaStyle.getInverse(), true);
-				protaStyle = null;
-			}
-			if (protaReshape != null) {
+			if (protaReshape != null)
 				execute(protaReshape.getInverse(), true);
-				protaReshape = null;
-			}
-			if ((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+			if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 				cancelSelect();
 		} else if ((mode & Mode.MOVING) == Mode.MOVING) {
 			mode &= ~Mode.MOVING;
-			if (protaMove != null) {
+			if (protaMove != null)
 				execute(protaMove.getInverse(), true);
-				protaMove = null;
-			}
 		} else
 			return;
+		protaMove = null;
+		protaStyle = null;
+		protaReshape = null;
 		for (int i = 0; i < pendingStyleActions.size(); i++)
 			execute(pendingStyleActions.get(i), true);
 		for (int i = 0; i < pendingReshapeActions.size(); i++)
@@ -936,18 +947,24 @@ public class CanvasView extends View {
 	}
 
 	/**
-	 * Mengubah jenis huruf.
+	 * Mengubah dekorasi teks.
 	 * @param font indeks huruf di {@link FontManager}
+	 * @param bold teks tebal atau tidak
+	 * @param italic teks miring atau tidak
 	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
-	public void setFontStyle(int font, boolean save) {
+	public void setFontStyle(int font, boolean bold, boolean italic,
+			boolean underline, boolean save) {
 		textFont = font;
+		fontBold = bold;
+		fontItalic = italic;
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			protoText = (TextObject) currentObject;
-			protoText.setFontStyle(font);
+			protoText.setFontCode(FontManager.getFontCode(font, bold, italic,
+					underline));
 			if (save) {
 				if ((mode & Mode.DRAW) != Mode.DRAW)
 					pushToUAStack(protaStyle.capture(), false);
@@ -955,6 +972,42 @@ public class CanvasView extends View {
 			}
 			postInvalidate();
 		}
+	}
+
+	/**
+	 * Mengubah jenis huruf
+	 * @param font
+	 * @param save
+	 */
+	public void setFont(int font, boolean save) {
+		setFontStyle(font, fontBold, fontItalic, textUnderline, save);
+	}
+
+	/**
+	 * Mengubah ketebalan teks.
+	 * @param bold tebal atau tidak
+	 * @param save
+	 */
+	public void setFontBold(boolean bold, boolean save) {
+		setFontStyle(textFont, bold, fontItalic, textUnderline, save);
+	}
+
+	/**
+	 * Mengubah kemiringan teks
+	 * @param italic teks miring atau tidak
+	 * @param save
+	 */
+	public void setFontItalic(boolean italic, boolean save) {
+		setFontStyle(textFont, fontBold, italic, textUnderline, save);
+	}
+
+	/**
+	 * memberi garis bawah pada teks
+	 * @param underline
+	 * @param save
+	 */
+	public void setTextUnderline(boolean underline, boolean save) {
+		setFontStyle(textFont, fontBold, fontItalic, underline, save);
 	}
 
 	/**
@@ -1070,7 +1123,7 @@ public class CanvasView extends View {
 		selectedObjects.addAll(model.objects);
 		for (int i = 0; i < selectedObjects.size(); i++)
 			selectedObjects.get(i).select();
-		mode |= Mode.SELECTION_MODE;
+		mode |= Mode.HAS_SELECTION;
 		reloadCache();
 		listener.onSelectionEvent(true, selectedObjects.size());
 		postInvalidate();
@@ -1078,7 +1131,7 @@ public class CanvasView extends View {
 	}
 
 	public void moveSelectedObject() {
-		if (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE)
+		if (((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 				&& ((mode & Mode.DRAW) != Mode.DRAW)) {
 			if (protaMove == null) {
 				protaMove = new MoveMultiple(selectedObjects, true);
@@ -1110,11 +1163,11 @@ public class CanvasView extends View {
 	public void cancelSelect() {
 		currentObject = null;
 		selectRect.setEmpty();
-		mode &= ~Mode.SELECTION_MODE;
+		mode &= ~Mode.HAS_SELECTION;
 		int size = selectedObjects.size();
 		for (int i = 0; i < size; i++)
 			selectedObjects.get(i).deselect();
-		if ((mode & Mode.DRAW) == Mode.DRAW)
+		if ((mode & Mode.EDIT) == Mode.EDIT)
 			cancelAction();
 		selectedObjects.clear();
 		handler = null;
@@ -1138,7 +1191,7 @@ public class CanvasView extends View {
 			selectedObjects.add(clone);
 			model.objects.add(clone);
 		}
-		mode |= Mode.SELECTION_MODE;
+		mode |= Mode.HAS_SELECTION;
 		if (objs.size() > 1) {
 			DrawMultiple dm = new DrawMultiple(selectedObjects);
 			pushToUAStack(dm, !hidden_mode);
@@ -1172,7 +1225,7 @@ public class CanvasView extends View {
 	public void undo() {
 		if (!userActions.isEmpty()) {
 			if (checkpoint == userActions.size()
-					&& (((mode & Mode.SELECTION_MODE) == Mode.SELECTION_MODE) || ((mode & Mode.DRAW) == Mode.DRAW))) {
+					&& (((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION) || ((mode & Mode.DRAW) == Mode.DRAW))) {
 				cancelAction();
 				if ((mode & Mode.DRAW) == Mode.DRAW)
 					mode = Mode.SELECT;
@@ -1275,10 +1328,8 @@ public class CanvasView extends View {
 			if (!forced && currentObject != null
 					&& da.object.equals(currentObject))
 				pendingDeleteActions.add(da);
-			else {
-				int idx = model.objects.lastIndexOf(da.object);
-				model.objects.remove(idx);
-			}
+			else
+				model.objects.remove(da.object);
 		} else if (action instanceof MoveMultiple) {
 			((MoveMultiple) action).apply();
 		} else if (action instanceof DeleteMultiple) {
