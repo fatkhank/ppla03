@@ -378,23 +378,33 @@ public class CanvasView extends View {
 		canvas.drawText("R[" + pendingReshapeActions.size() + "]",
 				getWidth() - 60, getHeight(), debugPaint);
 		if (currentObject != null) {
-			canvas.drawText("current:" + currentObject.privateID + ", "
-					+ currentObject.getGlobalID(), getWidth() - 200,
-					getHeight() - 25, debugPaint);
+			canvas.drawText(
+					"current:(" + currentObject.privateID + ", "
+							+ currentObject.getGlobalID() + "), ("
+							+ currentObject.offsetX() + ","
+							+ currentObject.offsetY() + ","
+							+ currentObject.rotation() + ")", getWidth() - 200,
+					getHeight() - 50, debugPaint);
 		}
 
 		if (handler != null)
-			canvas.drawText("[hnd]", getWidth() - 370, 45, debugPaint);
+			canvas.drawText("[hnd]", getWidth() - 370, getHeight() - 25,
+					debugPaint);
 		if (grabbedCPoint != null)
-			canvas.drawText("[gcb]", getWidth() - 310, 45, debugPaint);
+			canvas.drawText("[gcb]", getWidth() - 310, getHeight() - 25,
+					debugPaint);
 		if (protaStyle != null)
-			canvas.drawText("[sty]", getWidth() - 250, 45, debugPaint);
+			canvas.drawText("[sty]", getWidth() - 250, getHeight() - 25,
+					debugPaint);
 		if (protaReshape != null)
-			canvas.drawText("[shp]", getWidth() - 190, 45, debugPaint);
+			canvas.drawText("[shp]", getWidth() - 190, getHeight() - 25,
+					debugPaint);
 		if (protaMove != null)
-			canvas.drawText("[mov]", getWidth() - 130, 45, debugPaint);
+			canvas.drawText("[mov]", getWidth() - 130, getHeight() - 25,
+					debugPaint);
 		if (currentObject != null)
-			canvas.drawText("[cob]", getWidth() - 70, 45, debugPaint);
+			canvas.drawText("[cob]", getWidth() - 70, getHeight() - 25,
+					debugPaint);
 		String res = "|";
 		if ((mode & Mode.SELECT) == Mode.SELECT)
 			res += "SE|";
@@ -408,7 +418,7 @@ public class CanvasView extends View {
 			res += "HD|";
 		if ((mode & Mode.MOVING) == Mode.MOVING)
 			res += "MV|";
-		canvas.drawText(res, getWidth() - 300, 20, debugPaint);
+		canvas.drawText(res, getWidth() - 460, getHeight() - 25, debugPaint);
 		for (int i = (userActions.size() > 5 ? userActions.size() - 5 : 0); i < userActions
 				.size(); i++) {
 			UserAction ua = userActions.get(i);
@@ -724,17 +734,21 @@ public class CanvasView extends View {
 				execute(pendingDeleteActions.get(i), false);
 			pendingDeleteActions.clear();
 			if ((mode & Mode.MOVING) == Mode.MOVING) {
+				mode &= Mode.MOVING;
 				if (protaMove != null) {
 					protaMove.apply();
 					pushToUAStack(protaMove, !hidden_mode);
 					pendingMoveActions.clear();
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
+				mode &= ~Mode.EDIT;
 				if (protaReshape != null) {
+					protaReshape.apply();
 					pushToUAStack(protaReshape, !hidden_mode);
 					pendingReshapeActions.clear();
 				}
 				if (protaStyle != null) {
+					protaStyle.applyStyle();
 					pushToUAStack(protaStyle, !hidden_mode);
 					pendingStyleActions.clear();
 				}

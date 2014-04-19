@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.Paint.Join;
 
 /**
  * Objek dialam kanvas yang berbentuk poligon, memiliki sisi minimal tiga
@@ -65,6 +66,7 @@ public class PolygonObject extends BasicObject {
 		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
 		path = new Path();
 		bounds = new RectF();
+		strokePaint.setStrokeJoin(Join.ROUND);
 	}
 
 	/**
@@ -86,6 +88,7 @@ public class PolygonObject extends BasicObject {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
 		if (corner < MIN_CORNER_COUNT)
 			corner = MIN_CORNER_COUNT;
+		strokePaint.setStrokeJoin(Join.ROUND);
 		offsetX = worldX;
 		offsetY = worldY;
 		xLocs = new float[corner];

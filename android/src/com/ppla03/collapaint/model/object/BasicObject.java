@@ -2,6 +2,8 @@ package com.ppla03.collapaint.model.object;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Join;
+import android.graphics.RectF;
 import android.graphics.Paint.Style;
 
 /**

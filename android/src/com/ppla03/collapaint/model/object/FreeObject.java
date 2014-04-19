@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.Paint.Join;
 
 /**
  * Objek dalam kanvas yang berbentuk tidak tentu. Objek dibentuk dengan
@@ -63,6 +64,7 @@ public class FreeObject extends BasicObject {
 	 */
 	public FreeObject() {
 		super(Color.TRANSPARENT, Color.BLACK, 1, StrokeStyle.SOLID);
+		strokePaint.setStrokeJoin(Join.ROUND);
 		path = new Path();
 		state = EDITABLE | OPEN;
 		bounds = new RectF();
@@ -86,6 +88,7 @@ public class FreeObject extends BasicObject {
 	public FreeObject(boolean closed, int fillColor, int strokeColor,
 			int strokeWidth, int strokeStyle) {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
+		strokePaint.setStrokeJoin(Join.ROUND);
 		if (closed)
 			state = EDITABLE | CLOSED;
 		else {

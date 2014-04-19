@@ -460,7 +460,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			showApproveBar(false);
 			if (!canvas.hasSelectedObjects())
 				showSelectAdditionalBar(false);
-			onClick(select);
 		} else if (v == cancel) {
 			canvas.cancelAction();
 			showApproveBar(false);
