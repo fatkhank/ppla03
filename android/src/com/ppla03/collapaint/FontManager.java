@@ -68,7 +68,6 @@ public class FontManager {
 				// hilangkan ekstensi, menghasilkan nama font+code
 				String fontName = fileName.substring(0, fileName.length() - 4)
 						.replace('_', ' ');
-				;
 				// nama font
 				String family = fontName.substring(0, fontName.length() - 2);
 				Font f = mapper.get(family);
@@ -78,7 +77,7 @@ public class FontManager {
 					fonts.add(f);
 				}
 				// pisahkan berdasarkan kodenya
-				char code = family.charAt(family.length() - 1);
+				char code = fontName.charAt(fontName.length() - 1);
 				switch (code) {
 				case 'b':
 					f.bold = tp;
