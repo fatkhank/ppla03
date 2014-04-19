@@ -70,21 +70,6 @@ public abstract class CanvasObject {
 	}
 
 	/**
-	 * Mengecek apakah objek sedang diseleksi atau tidak.
-	 * @return hasil
-	 */
-	public final boolean isSelected() {
-		return selected;
-	}
-
-	/**
-	 * Melepaskan seleksi objek.
-	 */
-	public final void deselect() {
-		selected = false;
-	}
-
-	/**
 	 * Menggambar objek pada suatu kanvas.
 	 * @param canvas kanvas tempat objek digambar.
 	 */
@@ -105,6 +90,10 @@ public abstract class CanvasObject {
 
 	private static final Matrix transMat = new Matrix();
 	private static final RectF tempRect = new RectF();
+
+	public static final int MAX_STROKE_WIDTH = 100;
+
+	public static final int MIN_STROKE_WIDTH = 1;
 
 	/**
 	 * Mencoba menyeleksi objek berdasarkan suatu kotak area tertentu. Bila
@@ -149,6 +138,28 @@ public abstract class CanvasObject {
 	 * @return hasil apakah terseleksi atau tidak.
 	 */
 	protected abstract boolean selectedBy(float x, float y, float radius);
+
+	/**
+	 * Membuat flag seleksi objek true.
+	 */
+	public void select() {
+		this.selected = true;
+	}
+
+	/**
+	 * Mengecek apakah objek sedang diseleksi atau tidak.
+	 * @return hasil
+	 */
+	public final boolean isSelected() {
+		return selected;
+	}
+
+	/**
+	 * Melepaskan seleksi objek.
+	 */
+	public final void deselect() {
+		selected = false;
+	}
 
 	/**
 	 * Mengatur <i>shape parameter</i> dari objek. Informasi dari param akan di

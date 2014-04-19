@@ -1,5 +1,7 @@
 package com.ppla03.collapaint.model.object;
 
+import com.ppla03.collapaint.FontManager;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -27,7 +29,7 @@ public class TextObject extends CanvasObject {
 	/**
 	 * Jenis font yang digunakan.
 	 */
-	private int fontStyle;
+	private int fontCode;
 
 	/**
 	 * Paint yang dibutuhkan untuk proses menggambar objek ini.
@@ -59,10 +61,10 @@ public class TextObject extends CanvasObject {
 	public TextObject(String text, int worldX, int worldY, int color, int font,
 			int size) {
 		this.text = text;
-		this.fontStyle = font;
+		this.fontCode = font;
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(color);
-		paint.setTypeface(FontManager.getFont(font));
+		FontManager.apply(fontCode, paint);
 		paint.setTextSize(size);
 		paint.getTextBounds(text, 0, text.length(), bounds);
 		offsetX = worldX;
@@ -81,14 +83,14 @@ public class TextObject extends CanvasObject {
 	/**
 	 * Mengatur parameter objek.
 	 * @param color warna teks. Lihat {@link Color}.
-	 * @param fontStyle jenis huruf. Lihat {@link FontManager}.
+	 * @param fontCode jenis huruf. Lihat {@link FontManager}.
 	 * @param size ukuran huruf
 	 */
-	public void setParameter(int color, int fontStyle, int size) {
+	public void setParameter(int color, int fontCode, int size) {
 		paint.setColor(color);
 		paint.setTextSize(size);
-		this.fontStyle = fontStyle;
-		paint.setTypeface(FontManager.getFont(fontStyle));
+		this.fontCode = fontCode;
+		FontManager.apply(fontCode, paint);
 		calculateBounds();
 	}
 
@@ -111,11 +113,11 @@ public class TextObject extends CanvasObject {
 
 	/**
 	 * Mengubah jenis huruf.
-	 * @param fontStyle jenis huruf. Lihat {@link FontManager}.
+	 * @param fontCode jenis huruf. Lihat {@link FontManager}.
 	 */
-	public void setFontStyle(int fontStyle) {
-		this.fontStyle = fontStyle;
-		paint.setTypeface(FontManager.getFont(fontStyle));
+	public void setFontCode(int fontCode) {
+		this.fontCode = fontCode;
+		FontManager.apply(fontCode, paint);
 		calculateBounds();
 	}
 
@@ -140,7 +142,7 @@ public class TextObject extends CanvasObject {
 	 * @return jenis huruf. Lihat {@link FontManager}.
 	 */
 	public int getFontStyle() {
-		return fontStyle;
+		return fontCode;
 	}
 
 	/*
@@ -242,7 +244,7 @@ public class TextObject extends CanvasObject {
 		to.bounds.set(this.bounds);
 		copyTransformData(to);
 		to.paint.set(this.paint);
-		to.fontStyle = this.fontStyle;
+		to.fontCode = this.fontCode;
 		return to;
 	}
 }

@@ -17,7 +17,14 @@ import android.graphics.Region;
  */
 public class PolygonObject extends BasicObject {
 
+	/**
+	 * Jumlah sudut minimal poligon
+	 */
 	public static final int MIN_CORNER_COUNT = 3;
+	/**
+	 * Jumlah sudut maksimal poligon
+	 */
+	public static final int MAX_CORNER_COUNT = 30;
 	/**
 	 * Minimal radius awal poigon.
 	 */

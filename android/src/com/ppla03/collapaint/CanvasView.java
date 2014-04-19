@@ -510,8 +510,14 @@ public class CanvasView extends View {
 						currentObject = protoBasic;
 					}
 				} else if ((mode & Mode.EDIT) == Mode.EDIT) {
-					if (handler != null)
+					if (handler != null) {
 						grabbedCPoint = handler.grab(anchorX, anchorY);
+						if (grabbedCPoint != null
+								&& ((mode & Mode.DRAW) != Mode.DRAW)
+								&& protaReshape == null)
+							protaReshape = new ReshapeAction(currentObject,
+									true);
+					}
 				}
 			}
 		} else if (act == MotionEvent.ACTION_MOVE) {
@@ -603,11 +609,11 @@ public class CanvasView extends View {
 						handler.dragPoint(grabbedCPoint, anchorX, anchorY);
 					grabbedCPoint.release();
 					grabbedCPoint = null;
-					if (protaReshape == null)
-						protaReshape = new ReshapeAction(currentObject, true);
-					redoStack.clear();
-					pushToUAStack(protaReshape.capture(), false);
-					listener.onWaitForApproval();
+					if (protaReshape != null) {
+						redoStack.clear();
+						pushToUAStack(protaReshape.capture(), false);
+						listener.onWaitForApproval();
+					}
 				}
 			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
 				socX = 0;

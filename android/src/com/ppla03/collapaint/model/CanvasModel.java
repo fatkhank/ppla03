@@ -64,6 +64,6 @@ public class CanvasModel {
 
 	@Override
 	public String toString() {
-		return name + " by " + owner.username;
+		return name + " by " + owner.nickname;
 	}
 }
