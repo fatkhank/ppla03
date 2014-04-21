@@ -7,11 +7,9 @@ package collapaint.auth;
 
 import collapaint.DB;
 import collapaint.transact.Action;
-import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -72,7 +70,7 @@ public class User extends HttpServlet {
         }
     }
 
-    static final String SELECT_QUERY1 = "select " + DB.USER.COL_ID + " from " + DB.TABLE_USER + " where " + DB.USER.COL_ID + "='";
+    static final String SELECT_QUERY1 = "select " + DB.USER.COL_ID + " from " + DB.TABLE_USER + " where " + DB.USER.COL_ACCOUNT_ID + "='";
     static final String SELECT_QUERY2 = "';";
 
     static final String INSERT_QUERY1 = "insert into " + DB.TABLE_USER + "(" + DB.USER.COL_ACCOUNT_ID + "," + DB.USER.COL_NAME + ") values('";
@@ -140,8 +138,8 @@ public class User extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(new StringInputStream(request.
-                getParameter("json")), response);
+//        processRequest(new com.sun.xml.bind.StringInputStream(request.
+//                getParameter("json")), response);
     }
 
     /**

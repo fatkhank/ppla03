@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.os.UserManager;
 
+import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 

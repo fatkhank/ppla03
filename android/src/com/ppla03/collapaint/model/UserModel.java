@@ -1,8 +1,22 @@
 package com.ppla03.collapaint.model;
 
+/**
+ * Merepresentasikan akun bayangan collapaint.
+ * @author hamba v7
+ * 
+ */
 public class UserModel {
+	/**
+	 * id collapaint
+	 */
 	public int collaID;
+	/**
+	 * Alamat email.
+	 */
 	public String accountID;
+	/**
+	 * Nama akun.
+	 */
 	public String nickname;
 
 	public UserModel() {

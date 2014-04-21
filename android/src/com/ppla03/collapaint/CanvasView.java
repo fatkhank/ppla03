@@ -378,12 +378,10 @@ public class CanvasView extends View {
 		canvas.drawText("R[" + pendingReshapeActions.size() + "]",
 				getWidth() - 60, getHeight(), debugPaint);
 		if (currentObject != null) {
-			canvas.drawText(
-					"current:(" + currentObject.privateID + ", "
-							+ currentObject.getGlobalID() + "), ("
-							+ currentObject.offsetX() + ","
-							+ currentObject.offsetY() + ","
-							+ currentObject.rotation() + ")", getWidth() - 200,
+			canvas.drawText(String.format("(%d, %d)->(%4.0f, %4.0f, %3.1f)",
+					currentObject.privateID, currentObject.getGlobalID(),
+					currentObject.offsetX(), currentObject.offsetY(),
+					currentObject.rotation()), getWidth() - 460,
 					getHeight() - 50, debugPaint);
 		}
 
