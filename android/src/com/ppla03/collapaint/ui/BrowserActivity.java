@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.InputFilter;
 import android.text.LoginFilter;
@@ -33,9 +34,9 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.plus.Plus;
 import com.ppla03.collapaint.CanvasSynchronizer;
+import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
-import com.ppla03.collapaint.conn.CollaUserManager;
 import com.ppla03.collapaint.conn.OnCanvasCreateListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
 import com.ppla03.collapaint.conn.ServerConnector;
@@ -48,7 +49,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		OnFetchListListener {
 	private Button mSignOutButton;
 	private Button mCreateButton;
-	private TextView textView;
+	private TextView username;
 	private GoogleApiClient mGoogleApiClient;
 
 	// --- create dialog ---
@@ -87,8 +88,8 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		mCreateButton.setOnClickListener(this);
 
 		// Create the text view
-		textView = (TextView) findViewById(R.id.textView1);
-		textView.setText("Hello, " + message);
+		username = (TextView) findViewById(R.id.textView1);
+		username.setText("Hello, " + message);
 		mGoogleApiClient = buildGoogleApiClient();
 
 		// --- setup ---
@@ -154,10 +155,17 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		listText.setText(getResources().getString(R.string.bcl_loading));
 		listProgress.setVisibility(View.VISIBLE);
 	}
+	
+	@Override
+	public void onBackPressed() {
+		//TODO close
+		finish();
+	}
 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.button1:
+			//TODO warning signout
 			AuthenticationActivity.TERM = true;
 			finish();
 			break;

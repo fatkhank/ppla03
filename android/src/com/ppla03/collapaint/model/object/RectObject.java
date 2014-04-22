@@ -37,6 +37,8 @@ public class RectObject extends BasicObject {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
 		this.offsetX = worldX;
 		this.offsetY = worldY;
+		//TODO
+		rotation = 30;
 		int half = size >> 1;
 		this.rect = new RectF(-half, -half, half, half);
 	}

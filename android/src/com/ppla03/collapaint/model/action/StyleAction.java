@@ -6,7 +6,6 @@ import android.util.Base64;
 
 import com.ppla03.collapaint.model.object.BasicObject;
 import com.ppla03.collapaint.model.object.CanvasObject;
-import com.ppla03.collapaint.model.object.ImageObject;
 import com.ppla03.collapaint.model.object.LineObject;
 import com.ppla03.collapaint.model.object.TextObject;
 
@@ -178,8 +177,6 @@ public class StyleAction extends UserAction {
 			style[TEXT_COLOR] = to.getTextColor();
 			style[TEXT_SIZE] = to.getFontSize();
 			style[TEXT_STYLE] = to.getFontStyle();
-		} else if (object instanceof ImageObject) {
-			style[FILL_COLOR] = ((ImageObject) object).getTransparency();
 		}
 	}
 
@@ -198,8 +195,6 @@ public class StyleAction extends UserAction {
 		} else if (co instanceof TextObject) {
 			((TextObject) co).setParameter(style[TEXT_COLOR],
 					style[TEXT_STYLE], style[TEXT_SIZE]);
-		} else if (co instanceof ImageObject) {
-			((ImageObject) co).setTransparency(style[FILL_COLOR]);
 		}
 	}
 

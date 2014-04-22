@@ -15,7 +15,7 @@ import android.graphics.RectF;
  */
 public class TextObject extends CanvasObject {
 	public static final int MAX_TEXT_LENGTH = 50;
-	
+
 	/**
 	 * Batas-batas objek.
 	 */
@@ -36,10 +36,10 @@ public class TextObject extends CanvasObject {
 	 */
 	protected final Paint paint;
 
-	private static final ControlPoint mover = new ControlPoint(
-			ControlPoint.Type.MOVE, 0, 0, 0);
+	private static final Mover mover = new Mover(0, 0, 1);
+	private static final Rotator rotator = new Rotator(0, 0, 150, 0, 0);
 	private static final ShapeHandler handler = new ShapeHandler(null,
-			new ControlPoint[] { mover });
+			new ControlPoint[] { rotator, mover });
 
 	/**
 	 * Membuat {@link TextObject} kosong.
@@ -218,18 +218,23 @@ public class TextObject extends CanvasObject {
 		mover.x = 0;
 		mover.y = 0;
 		mover.enable = (filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE;
+
+		rotator.setCenter(0, 0);
+		rotator.setRotation(rotation);
+		rotator.enable = ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE);
+
 		return handler;
 	}
 
 	@Override
 	public void onHandlerMoved(ShapeHandler handler, ControlPoint point,
 			float oldX, float oldY) {
-		float dx = point.x - oldX;
-		float dy = point.y - oldY;
-		offsetX += dx;
-		offsetY += dy;
-		mover.x = 0;
-		mover.y = 0;
+		if (point == mover) {
+			offsetX += point.x - oldX;
+			offsetY += point.y - oldY;
+			mover.setPosition(0, 0);
+		} else if (point == rotator)
+			rotation = rotator.getRotation();
 	}
 
 	@Override

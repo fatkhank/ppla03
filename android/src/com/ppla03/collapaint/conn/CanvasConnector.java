@@ -50,7 +50,6 @@ public class CanvasConnector extends ServerConnector {
 		public static final int POLYGON = 4;
 		public static final int PATH = 5;
 		public static final int TEXT = 6;
-		public static final int IMAGE = 7;
 	}
 
 	public static String COMMIT_URL = HOST + "action";
@@ -163,10 +162,6 @@ public class CanvasConnector extends ServerConnector {
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.PATH);
 				else if (co instanceof TextObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.TEXT);
-				else if (co instanceof ImageObject) {
-					joObj.put(JCode.OBJECT_CODE, ObjectCode.IMAGE);
-					// TODO upload image
-				}
 				joObj.put(JCode.OBJECT_ID, co.privateID);
 				joObj.put(JCode.OBJECT_TRANSFORM, MoveAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
@@ -297,8 +292,6 @@ public class CanvasConnector extends ServerConnector {
 			co = new FreeObject();
 		else if (code == ObjectCode.TEXT)
 			co = new TextObject();
-		else if (code == ObjectCode.IMAGE)
-			co = new ImageObject();
 		ReshapeAction.apply(shape, co);
 		MoveAction.applyTransform(transform, co);
 		StyleAction.applyStyle(style, co);
@@ -321,13 +314,5 @@ public class CanvasConnector extends ServerConnector {
 		} else if (code == ActionCode.TRANSFORM_ACTION)
 			return new MoveAction(object).setParameter(param);
 		return null;
-	}
-
-	public void downloadImage(ImageObject image) {
-		// TODO download image
-	}
-
-	public void uploadImage(Bitmap bitmap, String id) {
-		// TODO upload image implementation
 	}
 }

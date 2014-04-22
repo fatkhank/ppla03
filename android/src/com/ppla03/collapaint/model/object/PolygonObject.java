@@ -1,7 +1,5 @@
 package com.ppla03.collapaint.model.object;
 
-import com.ppla03.collapaint.model.object.ControlPoint.Type;
-
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -53,6 +51,9 @@ public class PolygonObject extends BasicObject {
 	 */
 	private final RectF bounds;
 
+	private static final Rotator rotator = new Rotator(0, 0, 150, 0, -1);
+	private static final Mover mover = new Mover(0, 0, -2);
+
 	/**
 	 * Default handler untuk poligon
 	 */
@@ -96,7 +97,7 @@ public class PolygonObject extends BasicObject {
 		if (radius <= MINIMAL_RADIUS)
 			radius = MINIMAL_RADIUS;
 		double inc = (Math.PI + Math.PI) / corner;
-		double deg = 0;
+		double deg = -Math.PI/2;
 		for (int i = 0; i < corner; i++) {
 			xLocs[i] = (float) (radius * Math.cos(deg));
 			yLocs[i] = (float) (radius * Math.sin(deg));
@@ -192,14 +193,14 @@ public class PolygonObject extends BasicObject {
 		handler.object = this;
 
 		// pastikan jumlah ControlPoint pada handler mencukupi
-		handler.size = xLocs.length + 1;
-		if (xLocs.length >= handler.points.length) {
+		handler.size = xLocs.length + 2;
+		if (handler.size > handler.points.length) {
 			handler.points = new ControlPoint[handler.size];
-			for (int i = 0; i < xLocs.length; i++)
-				handler.points[i] = new ControlPoint(ControlPoint.Type.JOINT,
-						xLocs[i], yLocs[i], i);
-			handler.points[xLocs.length] = new ControlPoint(
-					ControlPoint.Type.MOVE, 0, 0, xLocs.length);
+			int i = 0;
+			for (; i < xLocs.length; i++)
+				handler.points[i] = new Shaper(xLocs[i], yLocs[i], i);
+			handler.points[i] = rotator;
+			handler.points[++i] = mover;
 		}
 		handler.setEnableAllPoint(false);
 
@@ -213,11 +214,15 @@ public class PolygonObject extends BasicObject {
 			}
 		}
 
+		// jika menampilkan pengatur rotasi
+		if ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE) {
+			rotator.enable = true;
+		}
+
 		// jika menampilkan pengatur translasi
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
-			ControlPoint cp = handler.points[handler.points.length - 1];
-			cp.setPosition(0, 0);
-			cp.enable = true;
+			mover.setPosition(0, 0);
+			mover.enable = true;
 		}
 		return handler;
 	}
@@ -225,11 +230,13 @@ public class PolygonObject extends BasicObject {
 	@Override
 	public void onHandlerMoved(ShapeHandler handler, ControlPoint point,
 			float oldX, float oldY) {
-		if (point.type == Type.MOVE) {
+		if (point instanceof Mover) {
 			// jika yang berpindah adalah pengatur translasi
 			offsetX += point.x - oldX;
 			offsetY += point.y - oldY;
 			point.setPosition(0, 0);
+		} else if (point instanceof Rotator) {
+			rotation = rotator.getRotation();
 		} else {
 			// jika yang berpindah adalah pengatur sudut
 			int prev = (point.id == 0) ? xLocs.length - 1 : point.id - 1;
@@ -263,9 +270,9 @@ public class PolygonObject extends BasicObject {
 					yLocs[i] += cy;
 					handler.points[i].setPosition(xLocs[i], yLocs[i]);
 				}
-				offsetX -= cx;
-				offsetY -= cy;
-				handler.points[handler.points.length - 1].setPosition(0, 0);
+
+				offsetRelative(-cx, -cy);
+				mover.setPosition(0, 0);
 			}
 		}
 	}

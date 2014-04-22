@@ -12,19 +12,18 @@ import android.view.animation.BounceInterpolator;
 class BoxHandler extends ShapeHandler {
 	private static final RectF rect = new RectF();
 	private static final int LEFT_TOP = 0, RIGHT_TOP = 1, LEFT_BOTTOM = 2,
-			RIGHT_BOTTOM = 3, MOVER = 4;
-	private static final ControlPoint[] points = new ControlPoint[] {
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, LEFT_TOP),
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, RIGHT_TOP),
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, LEFT_BOTTOM),
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, RIGHT_BOTTOM),
-			new ControlPoint(ControlPoint.Type.MOVE, 0, 0, MOVER) };
+			RIGHT_BOTTOM = 3, ROTATOR = 4, MOVER = 5;
+	private static final Rotator rotator = new Rotator(0, 0, 200, 0, ROTATOR);
+	private static final Mover mover = new Mover(0, 0, MOVER);
+	private static final ControlPoint[] points = { new Shaper(0, 0, LEFT_TOP),
+			new Shaper(0, 0, RIGHT_TOP), new Shaper(0, 0, LEFT_BOTTOM),
+			new Shaper(0, 0, RIGHT_BOTTOM), rotator, mover };
 
 	private static final BoxHandler instance = new BoxHandler();
 
 	private BoxHandler() {
 		super(null, points);
-		size = 5;
+		size = 6;
 	}
 
 	/**
@@ -44,8 +43,11 @@ class BoxHandler extends ShapeHandler {
 			points[LEFT_BOTTOM].enable = true;
 			points[RIGHT_BOTTOM].enable = true;
 		}
+		if ((filter & ROTATE) == ROTATE) {
+			rotator.enable = true;
+		}
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
-			points[MOVER].enable = true;
+			mover.enable = true;
 		}
 		return instance;
 	}
@@ -56,6 +58,8 @@ class BoxHandler extends ShapeHandler {
 			instance.object.offsetX += point.x;
 			instance.object.offsetY += point.y;
 			point.setPosition(0, 0);
+		} else if (point.id == ROTATOR) {
+			instance.object.rotation = rotator.getRotation();
 		} else {
 			if (point.id == LEFT_TOP) {
 				if (rect.right - point.x < MIN_RECT_SIZE)
@@ -86,11 +90,10 @@ class BoxHandler extends ShapeHandler {
 				rect.right = point.x;
 				rect.bottom = point.y;
 			}
-			// TODO offset incorrect
+
 			float cx = rect.centerX();
 			float cy = rect.centerY();
-			instance.object.offsetX += cx;
-			instance.object.offsetY += cy;
+			instance.object.offsetRelative(cx, cy);
 			rect.offset(-cx, -cy);
 			points[LEFT_TOP].x = rect.left;
 			points[LEFT_TOP].y = rect.top;
@@ -121,7 +124,10 @@ class BoxHandler extends ShapeHandler {
 		points[LEFT_BOTTOM].setPosition(rect.left, rect.bottom);
 		points[RIGHT_TOP].setPosition(rect.right, rect.top);
 		points[RIGHT_BOTTOM].setPosition(rect.right, rect.bottom);
-		points[MOVER].setPosition(r.centerX(), r.centerY());
+		cx = r.centerX();
+		cy = r.centerY();
+		mover.setPosition(cx, cy);
+		rotator.setCenter(cx, cy).setRotation(object.rotation);
 	}
 
 	/**

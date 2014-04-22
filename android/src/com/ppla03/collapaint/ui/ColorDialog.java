@@ -78,11 +78,6 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setView(view);
 
-		// set title
-		// TextView title = new TextView(activity);
-		// title.setText("Choose color");
-		// title.setTextSize(15);
-		// builder.setCustomTitle(title);
 		builder.setTitle("Choose color");
 
 		builder.setPositiveButton("OK", this);

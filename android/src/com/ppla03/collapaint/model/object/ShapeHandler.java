@@ -1,7 +1,5 @@
 package com.ppla03.collapaint.model.object;
 
-import com.ppla03.collapaint.model.object.ControlPoint.Type;
-
 import android.graphics.Canvas;
 
 /**
@@ -57,6 +55,8 @@ public class ShapeHandler {
 		canvas.restore();
 	}
 
+	protected static final float[] grabPoints = new float[6];
+
 	/**
 	 * Mencoba menangkap titik kontrol yang ada di posisi tertentu.
 	 * @param worldX koordinat x
@@ -65,16 +65,20 @@ public class ShapeHandler {
 	 *         jika tidak ada titik kontrol pada posisi tersebut.
 	 */
 	public ControlPoint grab(int worldX, int worldY) {
+		grabPoints[ControlPoint.ORI_X] = worldX;
+		grabPoints[ControlPoint.ORI_Y] = worldY;
 		worldX -= object.offsetX;
 		worldY -= object.offsetY;
+		grabPoints[ControlPoint.TRANS_X] = worldX;
+		grabPoints[ControlPoint.TRANS_Y] = worldY;
 		double deg = Math.toRadians(-object.rotation);
 		double cos = Math.cos(deg);
 		double sin = Math.sin(deg);
-		worldX = (int) (worldX * cos + worldY * -sin);
-		worldY = (int) (worldX * sin + worldY * cos);
+		grabPoints[ControlPoint.OBJ_X] = (float) (worldX * cos + worldY * -sin);
+		grabPoints[ControlPoint.OBJ_Y] = (float) (worldX * sin + worldY * cos);
 		for (int i = 0; i < size; i++) {
 			ControlPoint cp = points[i];
-			if (cp.enable && cp.grabbed(worldX, worldY))
+			if (cp.enable && cp.grabbed(grabPoints))
 				return cp;
 		}
 		return null;
@@ -89,6 +93,8 @@ public class ShapeHandler {
 			points[i].enable = enable;
 	}
 
+	protected static final float[] movePoints = new float[6];
+
 	/**
 	 * Mencoba menggeser suatu titik kontrol ke arah tertentu.
 	 * @param cp titik kontrol yang digeser.
@@ -98,17 +104,23 @@ public class ShapeHandler {
 	public void dragPoint(ControlPoint cp, float worldX, float worldY) {
 		float ox = cp.x;
 		float oy = cp.y;
+		movePoints[ControlPoint.ORI_X] = worldX;
+		movePoints[ControlPoint.ORI_Y] = worldY;
 		worldX -= object.offsetX;
 		worldY -= object.offsetY;
+		movePoints[ControlPoint.TRANS_X] = worldX;
+		movePoints[ControlPoint.TRANS_Y] = worldY;
 		double deg = Math.toRadians(-object.rotation);
 		double cos = Math.cos(deg);
 		double sin = Math.sin(deg);
-		worldX = (float) (worldX * cos - worldY * sin);
-		worldY = (float) (worldX * sin + worldY * cos);
-		if (cp.type == Type.MOVE)
-			cp.moveTo(worldX, worldY);
-		else
-			cp.setPosition(worldX, worldY);
+		movePoints[ControlPoint.OBJ_X] = (float) (worldX * cos - worldY * sin);
+		movePoints[ControlPoint.OBJ_Y] = (float) (worldX * sin + worldY * cos);
+		cp.moveTo(movePoints);
 		object.onHandlerMoved(this, cp, ox, oy);
+	}
+
+	public void releasePoint(ControlPoint cp) {
+		object.onHandlerRelease(cp);
+		cp.release();
 	}
 }

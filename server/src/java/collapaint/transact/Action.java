@@ -56,7 +56,7 @@ public class Action extends HttpServlet {
         static final String OBJECT_SHAPE = "sh";
         static final String OBJECT_STYLE = "st";
         static final String OBJECT_TRANSFORM = "tx";
-        static final String ERROR = "error";
+        public static final String ERROR = "error";
         static final int SERVER_ERROR = 5;
         static final int BAD_REQUEST = 9;
     }

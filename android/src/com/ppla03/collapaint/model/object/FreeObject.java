@@ -52,11 +52,11 @@ public class FreeObject extends BasicObject {
 	 */
 	private int state;
 
-	private static final ControlPoint mover = new ControlPoint(
-			ControlPoint.Type.MOVE, 0, 0, 0);
+	private static final Mover mover = new Mover(0, 0, 1);
+	private static final Rotator rotator = new Rotator(0, 0, 200, 0, 0);
 
 	private static final ShapeHandler handler = new ShapeHandler(null,
-			new ControlPoint[] { mover });
+			new ControlPoint[] { rotator, mover });
 
 	/**
 	 * Membuat {@link FreeObject} kosong, namun objek tidak dapat dibentuk
@@ -241,21 +241,27 @@ public class FreeObject extends BasicObject {
 	@Override
 	public ShapeHandler getHandlers(int filter) {
 		handler.object = this;
-		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
-			mover.x = 0;
-			mover.y = 0;
-			mover.enable = true;
-		} else
-			handler.setEnableAllPoint(false);
+
+		mover.x = 0;
+		mover.y = 0;
+		mover.enable = ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE);
+
+		rotator.setCenter(0, 0);
+		rotator.setRotation(rotation);
+		rotator.enable = ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE);
+
 		return handler;
 	}
 
 	@Override
 	public void onHandlerMoved(ShapeHandler handler, ControlPoint point,
 			float oldX, float oldY) {
-		offsetX += point.x - oldX;
-		offsetY += point.y - oldY;
-		mover.setPosition(0, 0);
+		if (point == mover) {
+			offsetX += point.x - oldX;
+			offsetY += point.y - oldY;
+			mover.setPosition(0, 0);
+		} else if (point == rotator)
+			rotation = rotator.getRotation();
 	}
 
 	@Override

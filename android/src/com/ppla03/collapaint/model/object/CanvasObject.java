@@ -207,12 +207,12 @@ public abstract class CanvasObject {
 
 	/**
 	 * Mengatur translasi dari objek.
-	 * @param x koordinat x
-	 * @param y koordinat y
+	 * @param worldX koordinat x kanvas
+	 * @param worldY koordinat y kanvas.
 	 */
-	public final void offsetTo(float x, float y) {
-		offsetX = x;
-		offsetY = y;
+	public final void offsetTo(float worldX, float worldY) {
+		offsetX = worldX;
+		offsetY = worldY;
 	}
 
 	/**
@@ -224,6 +224,20 @@ public abstract class CanvasObject {
 	public final void offset(float dx, float dy) {
 		this.offsetX += dx;
 		this.offsetY += dy;
+	}
+
+	/**
+	 * Menggeser objek dengan jarak tertentu, dengan koordinat objek. Pergeseran
+	 * ini otomatis akan diterjemahkan ke offset koordinat kanvas.
+	 * @param objX pergeseran x pada koordinat objek
+	 * @param objY pergeseran y pada koordinat objek
+	 */
+	final void offsetRelative(float objX, float objY) {
+		double deg = Math.toRadians(rotation);
+		double cos = Math.cos(deg);
+		double sin = Math.sin(deg);
+		offsetX += (float) (objX * cos + objY * -sin);
+		offsetY += (float) (objX * sin + objY * cos);
 	}
 
 	/**
@@ -258,6 +272,12 @@ public abstract class CanvasObject {
 	 */
 	abstract void onHandlerMoved(ShapeHandler handler, ControlPoint point,
 			float oldX, float oldY);
+
+	/**
+	 * Memberitahu objek bahwa ada {@link ControlPoint} yang telah dilepaskan
+	 * @param point
+	 */
+	void onHandlerRelease(ControlPoint point) {}
 
 	/**
 	 * Mendapatkan batas-batas dari objek, kemudian memasukkannya ke dalam

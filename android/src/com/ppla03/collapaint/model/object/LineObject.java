@@ -13,10 +13,8 @@ import android.graphics.RectF;
  * @author hamba v7
  */
 public class LineObject extends CanvasObject {
-	private static ControlPoint[] cps = new ControlPoint[] {
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, 0),
-			new ControlPoint(ControlPoint.Type.JOINT, 0, 0, 1),
-			new ControlPoint(ControlPoint.Type.MOVE, 0, 0, 2) };
+	private static ControlPoint[] cps = { new Shaper(0, 0, 0),
+			new Shaper(0, 0, 1), new Mover(0, 0, 2) };
 	private static final ShapeHandler handler = new ShapeHandler(null, cps);
 	static {
 		handler.size = 2;
@@ -84,6 +82,7 @@ public class LineObject extends CanvasObject {
 	 */
 	public void setWidth(int width) {
 		paint.setStrokeWidth(width);
+		StrokeStyle.applyEffect(strokeStyle, paint);
 	}
 
 	/**

@@ -1,18 +1,19 @@
 package com.ppla03.collapaint.ui;
 
-import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasView;
+import com.ppla03.collapaint.CollaUserManager;
+import com.ppla03.collapaint.CollaUserManager.OnUserCheckListener;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.CanvasView.Mode;
 import com.ppla03.collapaint.CanvasView.ObjectType;
+import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -21,7 +22,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class TesterActivity extends Activity implements OnClickListener,
-		CanvasListener {
+		CanvasListener, OnUserCheckListener {
 	private Button select, hand, fill, strokeWidth, strokeStyle, textSize,
 			textFont, approve, cancel, undo, redo, move, copy, paste, delete;
 	private Button rect, oval, poly, lines, path, text, image, test;
@@ -156,15 +157,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == test) {
-			if (CanvasExporter.export(canvas.getModel(), CompressFormat.PNG,
-					true) == CanvasExporter.SUCCESS)
-				Toast.makeText(this,
-						"success:" + CanvasExporter.getResultFile(),
-						Toast.LENGTH_LONG).show();
-			else
-				Toast.makeText(this, "fail", Toast.LENGTH_LONG).show();
-			// canvas.test();
-			// canvas.invalidate();
+			CollaUserManager.check("akun_colla", "the tester", this);
 		}
 	}
 
@@ -204,5 +197,15 @@ public class TesterActivity extends Activity implements OnClickListener,
 	public void onBeginDraw() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void onAccountChecked(int status) {
+		// TODO Auto-generated method stub
+		if (status == ServerConnector.SUCCESS) {
+			Toast.makeText(this, "Account is checked", Toast.LENGTH_SHORT)
+					.show();
+		} else
+			Toast.makeText(this, "Gagal:" + status, Toast.LENGTH_SHORT).show();
 	}
 }

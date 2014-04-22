@@ -61,7 +61,7 @@ public class CanvasView extends View {
 
 	public static class ObjectType {
 		public static final int LINE = 1, RECT = 2, OVAL = 3, FREE = 4;
-		private static final int IMAGE = 5, TEXT = 6;
+		private static final int TEXT = 6;
 	}
 
 	// Warna latar di luar kertas kanvas
@@ -110,7 +110,6 @@ public class CanvasView extends View {
 	 */
 	private int objectType;
 	private CanvasObject currentObject;
-	private ImageObject protoImage;
 	private TextObject protoText;
 	private OvalObject protoOval;
 	private RectObject protoRect;
@@ -160,7 +159,6 @@ public class CanvasView extends View {
 	private static boolean textUnderline;
 	private static boolean fontBold;
 	private static boolean fontItalic;
-	private static int imageAlpha;
 	private static boolean makeLoop;
 	private static boolean hidden_mode;
 
@@ -242,7 +240,6 @@ public class CanvasView extends View {
 		strokeStyle = StrokeStyle.SOLID;
 		textSize = 30;
 		textFont = 0;
-		imageAlpha = 255;
 
 		scrollX = 20;
 		scrollY = 20;
@@ -614,14 +611,18 @@ public class CanvasView extends View {
 							|| (limiter.left > model.width - OBJECT_LIMIT)
 							|| (limiter.bottom < OBJECT_LIMIT)
 							|| (limiter.top > model.height - OBJECT_LIMIT))
+						// kalau keluar dari kanvas, kembalikan ke tempat semula
 						handler.dragPoint(grabbedCPoint, anchorX, anchorY);
-					grabbedCPoint.release();
-					grabbedCPoint = null;
-					if (protaReshape != null) {
+					else if (protaReshape != null) {
+						// kalau tidak keluar dari kanvas, baru disimpan
+						// perubahannya
 						redoStack.clear();
 						pushToUAStack(protaReshape.capture(), false);
 						listener.onWaitForApproval();
 					}
+					handler.releasePoint(grabbedCPoint);
+					grabbedCPoint = null;
+
 				}
 			} else if ((mode & Mode.MOVING) == Mode.MOVING) {
 				socX = 0;
@@ -704,8 +705,6 @@ public class CanvasView extends View {
 			protoLine = (LineObject) co;
 		} else if (co instanceof TextObject) {
 			protoText = (TextObject) co;
-		} else if (co instanceof ImageObject) {
-			protoImage = (ImageObject) co;
 		}
 		checkpoint = userActions.size();
 		handler = co.getHandlers(ShapeHandler.ALL);
@@ -886,22 +885,6 @@ public class CanvasView extends View {
 		}
 	}
 
-	public void insertImage(Bitmap bitmap) {
-		// TODO insert image
-		objectType = ObjectType.IMAGE;
-		setMode(Mode.DRAW);
-		redoStack.clear();
-		listener.onURStatusChange(!userActions.empty(), false);
-	}
-
-	public void setImageTransparency(int alpha, boolean save) {
-		// TODO image transparency
-		imageAlpha = alpha;
-		if (protoImage != null)
-			protoImage.setTransparency(alpha);
-		listener.onWaitForApproval();
-	}
-
 	/**
 	 * Memasukkan objek teks ke dalam kanvas.
 	 * @param text teks
@@ -977,6 +960,7 @@ public class CanvasView extends View {
 		textFont = font;
 		fontBold = bold;
 		fontItalic = italic;
+		textUnderline = underline;
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
