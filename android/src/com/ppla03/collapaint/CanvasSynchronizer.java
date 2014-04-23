@@ -46,7 +46,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	/**
 	 * Daftar aksi yang sedang dikirim ke server
 	 */
-	private final ArrayList<UserAction> sentList;
+	private final ArrayList<AtomicAction> sentList;
 
 	private Handler handler;
 
@@ -60,9 +60,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private final int STOP = 16;
 
 	private CanvasSynchronizer() {
-		actionBuffer = new ArrayList<UserAction>();
-		playbackList = new ArrayList<UserAction>();
-		sentList = new ArrayList<UserAction>();
+		actionBuffer = new ArrayList<>();
+		playbackList = new ArrayList<>();
+		sentList = new ArrayList<>();
 		handler = new Handler();
 		mode = IDLE;
 	}
@@ -112,6 +112,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 		canvas.execute(actionBuffer);
 		actionBuffer.clear();
 		if (!canvas.isInHideMode()) {
+			// TODO debug sync
 			Log.d("POS", "----- synchronizer started ------");
 			handler.postDelayed(updater, sync_time);
 		}
@@ -142,25 +143,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 		public void run() {
 			// add buffer to sentList
 			int size = actionBuffer.size();
-			for (int i = 0; i < size; i++) {
-				UserAction act = actionBuffer.get(i);
-				// ubah aksi berobjek jamak ke aksi berobjek tunggal
-				ArrayList<CanvasObject> objs = null;
-				if (act instanceof DrawMultiple) {
-					objs = ((DrawMultiple) act).objects;
-					int len = objs.size();
-					for (int j = 0; j < len; j++)
-						sentList.add(new DrawAction(objs.get(j)));
-				} else if (act instanceof DeleteMultiple) {
-					objs = ((DeleteMultiple) act).objects;
-					int len = objs.size();
-					for (int j = 0; j < len; j++)
-						sentList.add(new DeleteAction(objs.get(j)));
-				} else if (act instanceof MoveMultiple) {
-					((MoveMultiple) act).getMoveActions(sentList);
-				} else
-					sentList.add(act);
-			}
+			for (int i = 0; i < size; i++)
+				actionBuffer.get(i).insertInAtomic(sentList);
 			actionBuffer.clear();
 			mode |= SYNCING;
 			connector.updateActions(currentModel.getId(), lastActNum, sentList);
@@ -183,7 +167,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	@Override
-	public void onActionUpdated(int newId, ArrayList<UserAction> actions) {
+	public void onActionUpdated(int newId, ArrayList<AtomicAction> actions) {
 		if (mode == LOADING) {
 			Log.d("POS", "canvasLoaded");
 			mode = IDLE;

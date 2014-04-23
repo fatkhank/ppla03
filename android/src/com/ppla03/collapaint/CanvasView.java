@@ -3,6 +3,7 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import com.google.android.gms.internal.ac;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
@@ -291,6 +292,10 @@ public class CanvasView extends View {
 	public CanvasModel getModel() {
 		return model;
 	}
+	
+	public void changeCanvasDimension(int width, int height){
+		//TODO dimension
+	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -344,8 +349,8 @@ public class CanvasView extends View {
 		}
 
 		// CHANGE TO LINE COMMENT TO DEBUG
-		if (model != null)
-			debug(canvas);
+		// if (model != null)
+		// debug(canvas);
 
 	}
 
@@ -375,11 +380,12 @@ public class CanvasView extends View {
 		canvas.drawText("R[" + pendingReshapeActions.size() + "]",
 				getWidth() - 60, getHeight(), debugPaint);
 		if (currentObject != null) {
-			canvas.drawText(String.format("(%d, %d)->(%4.0f, %4.0f, %3.1f)",
+			canvas.drawText(String.format(
+					"(%d, %d)->(%d, %4.0f, %4.0f, %3.1f)",
 					currentObject.privateID, currentObject.getGlobalID(),
-					currentObject.offsetX(), currentObject.offsetY(),
-					currentObject.rotation()), getWidth() - 460,
-					getHeight() - 50, debugPaint);
+					currentObject.paramLength(), currentObject.offsetX(),
+					currentObject.offsetY(), currentObject.rotation()),
+					getWidth() - 460, getHeight() - 50, debugPaint);
 		}
 
 		if (handler != null)
@@ -1299,8 +1305,8 @@ public class CanvasView extends View {
 		if (action instanceof DrawAction) {
 			DrawAction da = (DrawAction) action;
 			model.objects.add(da.object);
-		} else if (action instanceof MoveAction) {
-			MoveAction ma = (MoveAction) action;
+		} else if (action instanceof TransformAction) {
+			TransformAction ma = (TransformAction) action;
 			if (!forced && (protaMove != null) && protaMove.overwrites(ma))
 				pendingMoveActions.add(ma);
 			else
@@ -1319,6 +1325,11 @@ public class CanvasView extends View {
 					handler = currentObject.getHandlers(ShapeHandler.ALL);
 				}
 			}
+		}else if(action instanceof GeomAction){
+			//TODO execute geom
+			GeomAction ga = (GeomAction) action;
+			
+			ga.apply();
 		} else if (action instanceof StyleAction) {
 			StyleAction sa = (StyleAction) action;
 			if (!forced && (protaStyle != null) && protaStyle.overwrites(sa))

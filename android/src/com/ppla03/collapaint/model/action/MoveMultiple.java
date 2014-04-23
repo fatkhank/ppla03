@@ -55,6 +55,12 @@ public class MoveMultiple extends UserAction {
 			}
 			parent.apply();
 		}
+
+		@Override
+		public int insertInAtomic(ArrayList<AtomicAction> list) {
+			// TODO tidak bisa dimasukkan ke list
+			return 0;
+		}
 	}
 
 	/**
@@ -177,14 +183,6 @@ public class MoveMultiple extends UserAction {
 			objects.get(i).offsetTo(transX[i], transY[i]);
 	}
 
-	public int getMoveActions(ArrayList<UserAction> buffer) {
-		int size = objects.size();
-		for (int i = 0; i < size; i++)
-			buffer.add(new MoveAction(objects.get(i)).setParameter(transX[i],
-					transY[i]));
-		return size;
-	}
-
 	@Override
 	public UserAction getInverse() {
 		return inverse;
@@ -201,12 +199,21 @@ public class MoveMultiple extends UserAction {
 			if (action instanceof MoveMultiple) {
 				MoveMultiple tm = (MoveMultiple) action;
 				return tm.objects.equals(objects);
-			} else if (action instanceof MoveAction) {
-				MoveAction ma = (MoveAction) action;
+			} else if (action instanceof TransformAction) {
+				TransformAction ma = (TransformAction) action;
 				return objects.contains(ma.object);
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public int insertInAtomic(ArrayList<AtomicAction> list) {
+		int size = objects.size();
+		for (int i = 0; i < size; i++)
+			list.add(new TransformAction(objects.get(i), false).setOffset(
+					transX[i], transY[i]));
+		return size;
 	}
 
 	@Override

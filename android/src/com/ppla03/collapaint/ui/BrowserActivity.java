@@ -65,7 +65,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 	private Button listReload;
 	private CanvasListAdapter canvasAdapter;
 
-	static final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 500;
+	static int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 500;
 	static final String DEFAULT_NAME = "New canvas";
 	Handler reloader;
 

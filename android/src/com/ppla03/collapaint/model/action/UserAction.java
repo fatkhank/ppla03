@@ -1,5 +1,7 @@
 package com.ppla03.collapaint.model.action;
 
+import java.util.ArrayList;
+
 /**
  * Aksi-aksi yang bisa dilakukan pengguna berkaitan dengan aksi di kanvas.
  * @author hamba v7
@@ -32,6 +34,13 @@ public abstract class UserAction {
 	 *         lain.
 	 */
 	public abstract boolean overwrites(UserAction action);
+
+	/**
+	 * Mengubah aksi ini ke dalam aksi atom dan memasukkannya ke dalam list.
+	 * @param list
+	 * @return jumlah aksi atom yang dihasilkan
+	 */
+	public abstract int insertInAtomic(ArrayList<AtomicAction> list);
 
 	@Override
 	public String toString() {

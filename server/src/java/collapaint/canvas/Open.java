@@ -60,6 +60,8 @@ public class Open extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
+    
+    static final String OPEN_QU1 = "update ";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -80,6 +82,7 @@ public class Open extends HttpServlet {
                 JsonObject request = Json.createReader(is).readObject();
                 int canvasID = request.getInt(OpenJCode.CANVAS_ID);
                 
+                String query = "";
             } catch (Exception ex) {
                 reply.add(Action.JCode.ERROR, ex.getMessage());
             }

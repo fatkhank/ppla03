@@ -14,7 +14,7 @@ import com.ppla03.collapaint.model.object.TextObject;
  * @author hamba v7
  * 
  */
-public class StyleAction extends UserAction {
+public class StyleAction extends AtomicAction {
 	/**
 	 * Objek kanvas yang dikenai aksi.
 	 */
@@ -139,9 +139,11 @@ public class StyleAction extends UserAction {
 	/**
 	 * Mengatur paramete raksi ini dalam bentuk String.
 	 * @param param
+	 * @return this
 	 */
-	public void setParameter(String param) {
+	public StyleAction setParameter(String param) {
 		decodeTo(param, styles);
+		return this;
 	}
 
 	private static final int[] getParamTemp = new int[4];

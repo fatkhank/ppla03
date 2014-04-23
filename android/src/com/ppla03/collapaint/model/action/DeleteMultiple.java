@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
- * Aksi menghapus kumpulan objek kanvas. Kebalikan dari aksi ini adalah {@link DrawMultiple}.
+ * Aksi menghapus kumpulan objek kanvas. Kebalikan dari aksi ini adalah
+ * {@link DrawMultiple}.
  * @author hamba v7
  * 
  */
@@ -55,6 +56,14 @@ public class DeleteMultiple extends UserAction {
 			return objects.contains(((DrawAction) action).object);
 		}
 		return false;
+	}
+
+	@Override
+	public int insertInAtomic(ArrayList<AtomicAction> list) {
+		int size = objects.size();
+		for (int i = 0; i < size; i++)
+			list.add(new DeleteAction(objects.get(i)));
+		return size;
 	}
 
 }

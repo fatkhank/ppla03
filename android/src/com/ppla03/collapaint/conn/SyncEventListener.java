@@ -2,6 +2,7 @@ package com.ppla03.collapaint.conn;
 
 import java.util.ArrayList;
 
+import com.ppla03.collapaint.model.action.AtomicAction;
 import com.ppla03.collapaint.model.action.UserAction;
 
 /**
@@ -24,6 +25,6 @@ public interface SyncEventListener {
 	 * @param replyActions
 	 */
 	void onActionUpdated(int lastActionNumber,
-			ArrayList<UserAction> replyActions);
+			ArrayList<AtomicAction> replyActions);
 
 }

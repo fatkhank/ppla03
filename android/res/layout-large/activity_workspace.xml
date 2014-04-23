@@ -62,13 +62,12 @@
             android:textOn="@string/emptyString2" />
 
         <ImageButton
-            android:id="@+id/w_main_image"
+            android:id="@+id/w_draw_text"
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:layout_below="@+id/w_main_stroke"
             android:background="@drawable/button_green"
-            android:minHeight="95dp"
-            android:src="@drawable/main_image" />
+            android:src="@drawable/draw_text" />
     </RelativeLayout>
 
     <View
@@ -177,14 +176,6 @@
             android:layout_toRightOf="@+id/w_draw_line"
             android:background="@drawable/button_orange"
             android:src="@drawable/draw_free" />
-
-        <ImageButton
-            android:id="@+id/w_draw_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/w_draw_free"
-            android:background="@drawable/button_green"
-            android:src="@drawable/draw_text" />
 
         <RelativeLayout
             android:id="@+id/w_top_bar"

@@ -156,7 +156,7 @@ public class TextObject extends CanvasObject {
 	@Override
 	public void setShape(float[] param, int start, int end) {
 		// hitung jumlah karakter yang dibaca dan pastikan ukuran buffer cukup
-		int charLength = (int) param[start++];
+		int charLength = Float.floatToIntBits(param[start++]);
 		int bufferLength = (charLength + 2) & 0xfffffffe;
 		if (setBuffer.length < bufferLength)
 			setBuffer = new char[bufferLength];
@@ -188,7 +188,7 @@ public class TextObject extends CanvasObject {
 			extractBuffer = new char[charLength];
 
 		// masukkan panjang karakter
-		data[start++] = charLength;
+		data[start++] = Float.intBitsToFloat(charLength);
 
 		// ekstrak karakter ke buffer, kemudian masukkan ke data
 		int dataLength = ((charLength + 1) >> 1) + 1;

@@ -51,4 +51,11 @@ public class DrawMultiple extends UserAction {
 		return false;
 	}
 
+	@Override
+	public int insertInAtomic(ArrayList<AtomicAction> list) {
+		int size = objects.size();
+		for (int i = 0; i < size; i++)
+			list.add(new DrawAction(objects.get(i)));
+		return size;
+	}
 }

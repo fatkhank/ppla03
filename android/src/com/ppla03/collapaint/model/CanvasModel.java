@@ -2,9 +2,6 @@ package com.ppla03.collapaint.model;
 
 import java.util.ArrayList;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
@@ -25,12 +22,12 @@ public class CanvasModel {
 	/**
 	 * Lebar kanvas
 	 */
-	public final int width;
+	public int width;
 
 	/**
 	 * Tinggi kanvas.
 	 */
-	public final int height;
+	public int height;
 
 	/**
 	 * Daftar objek yang ada di kanvas, terurut dari yang berada paling belakang

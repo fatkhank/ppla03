@@ -16,17 +16,18 @@
     <string name="create">Create canvas</string>
     <string name="w_insert_text">Insert Text</string>
     <string name="w_progress_participant">Get participants..</string>
-    <string name="wm_hide">Hide</string>
-    <string name="wm_unhide">Unhide</string>
+    <string name="wm_download">Download</string><string name="wm_hide">Hide</string>
+    
     <string name="wm_participant">Participants</string>
-    <string name="wm_download">Download</string>
-    <string name="wm_undo">Undo</string>
-    <string name="wm_redo">Redo</string>
-    <string name="wm_paste">Paste</string>
-    <string name="bcd_name">Name</string>
+    
+    
+    
+    <string name="wm_paste">Paste</string><string name="wm_redo">Redo</string>
+    <string name="wm_share">Share</string><string name="wm_undo">Undo</string><string name="wm_unhide">Unhide</string><string name="bcd_name">Name</string>
     <string name="bcd_width">Width</string>
     <string name="bcd_height">Height</string>
     <string name="bcl_loading">Get canvas list</string>
     <string name="bcl_failed">Cannot load canvas list</string>
+    
 
 </resources>

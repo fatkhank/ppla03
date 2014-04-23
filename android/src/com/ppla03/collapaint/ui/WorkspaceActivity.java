@@ -64,7 +64,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private ToggleButton currentMain;
 	private ToggleButton select, draw, hand, stroke, color;
-	private ImageButton image;
 
 	private ImageButton approve, cancel;
 	private ImageButton cut, copy, move, delete;
@@ -138,16 +137,16 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		hand = (ToggleButton) findViewById(R.id.w_main_hand);
 		color = (ToggleButton) findViewById(R.id.w_main_color);
 		stroke = (ToggleButton) findViewById(R.id.w_main_stroke);
-		image = (ImageButton) findViewById(R.id.w_main_image);
+		text = (ImageButton) findViewById(R.id.w_draw_text);
 		currentMain = select;
 
 		select.setOnClickListener(this);
+		select.setOnLongClickListener(this);
 		draw.setOnClickListener(this);
 		hand.setOnClickListener(this);
 		color.setOnClickListener(this);
 		stroke.setOnClickListener(this);
-		image.setOnClickListener(this);
-		select.setOnLongClickListener(this);
+		text.setOnClickListener(this);
 
 		// --- approve ---
 		approve = (ImageButton) findViewById(R.id.w_app);
@@ -173,13 +172,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		poly = (ImageButton) findViewById(R.id.w_draw_polygon);
 		line = (ImageButton) findViewById(R.id.w_draw_line);
 		free = (ImageButton) findViewById(R.id.w_draw_free);
-		text = (ImageButton) findViewById(R.id.w_draw_text);
+
 		rect.setOnClickListener(this);
 		oval.setOnClickListener(this);
 		poly.setOnClickListener(this);
 		line.setOnClickListener(this);
 		free.setOnClickListener(this);
-		text.setOnClickListener(this);
 		showDrawAdditionalBar(false);
 
 		// --- stroke ---
@@ -433,7 +431,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (!canvas.isInHandMode()) {
 				if (canvas.isInSelectionMode())
 					select.setChecked(true);
-			}
+				else if (canvas.isInDrawingMode())
+					onClick(draw);
+			} else
+				showDrawAdditionalBar(false);
 		} else if (v == color) {
 			currentMain.setChecked(false);
 			currentMain = color;
@@ -449,9 +450,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				showFontAdditionalBar(true);
 			else
 				showStrokeAdditionalBar(true);
-		} else if (v == image) {
-			currentMain.setChecked(false);
-			Toast.makeText(this, "not available", Toast.LENGTH_SHORT).show();
 		}
 
 		// approve + cancel action
@@ -599,14 +597,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			poly.setVisibility(View.VISIBLE);
 			line.setVisibility(View.VISIBLE);
 			free.setVisibility(View.VISIBLE);
-			text.setVisibility(View.VISIBLE);
 		} else {
 			rect.setVisibility(View.GONE);
 			oval.setVisibility(View.GONE);
 			poly.setVisibility(View.GONE);
 			line.setVisibility(View.GONE);
 			free.setVisibility(View.GONE);
-			text.setVisibility(View.GONE);
 		}
 	}
 
@@ -846,6 +842,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onParticipationFetchedFailed(CanvasModel model, int status) {
 		if (status == ServerConnector.CONNECTION_PROBLEM) {
+			cover.setVisibility(View.GONE);
 			Toast.makeText(this, "Failed to fetch list. Connection problem.",
 					Toast.LENGTH_SHORT).show();
 		}

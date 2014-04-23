@@ -67,11 +67,11 @@
                 android:textOn="@string/emptyString2" />
 
             <ImageButton
-                android:id="@+id/w_main_image"
+                android:id="@+id/w_draw_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/button_green48"
-                android:src="@drawable/main_image48" />
+                android:src="@drawable/draw_text48" />
         </LinearLayout>
     </ScrollView>
 
@@ -181,14 +181,6 @@
             android:layout_toRightOf="@+id/w_draw_line"
             android:background="@drawable/button_orange48"
             android:src="@drawable/draw_free48" />
-
-        <ImageButton
-            android:id="@+id/w_draw_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/w_draw_free"
-            android:background="@drawable/button_green48"
-            android:src="@drawable/draw_text48" />
     </RelativeLayout>
 
     <RelativeLayout

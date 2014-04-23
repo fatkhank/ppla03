@@ -1,5 +1,7 @@
 package com.ppla03.collapaint.model.action;
 
+import java.util.ArrayList;
+
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
@@ -7,7 +9,7 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * @author hamba v7
  * 
  */
-public class DrawAction extends UserAction {
+public class DrawAction extends AtomicAction {
 	/**
 	 * Objek kanvas yang digambar.
 	 */

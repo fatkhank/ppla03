@@ -91,8 +91,14 @@ public abstract class CanvasObject {
 	private static final Matrix transMat = new Matrix();
 	private static final RectF tempRect = new RectF();
 
+	/**
+	 * Tebal maksimal garis pinggiran
+	 */
 	public static final int MAX_STROKE_WIDTH = 100;
 
+	/**
+	 * Tebal minimal garis pinggiran
+	 */
 	public static final int MIN_STROKE_WIDTH = 1;
 
 	/**

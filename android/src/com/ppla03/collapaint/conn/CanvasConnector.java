@@ -27,9 +27,9 @@ public class CanvasConnector extends ServerConnector {
 		static final String OBJECT_ID = "id";
 		static final String OBJECT_GLOBAL_ID = "gid";
 		static final String OBJECT_CODE = "cd";
-		static final String OBJECT_SHAPE = "sh";
-		static final String OBJECT_STYLE = "st";
 		static final String OBJECT_TRANSFORM = "tx";
+		static final String OBJECT_GEOM = "ge";
+		static final String OBJECT_STYLE = "st";
 		static final String ERROR = "error";
 		static final int SERVER_ERROR = 5;
 		static final int BAD_REQUEST = 9;
@@ -38,9 +38,9 @@ public class CanvasConnector extends ServerConnector {
 	public static final class ActionCode {
 		public static final int DRAW_ACTION = 1;
 		public static final int DELETE_ACTION = 2;
-		public static final int RESHAPE_ACTION = 3;
-		public static final int STYLE_ACTION = 4;
-		public static final int TRANSFORM_ACTION = 5;
+		public static final int TRANSFORM_ACTION = 3;
+		public static final int GEOM_ACTION = 4;
+		public static final int STYLE_ACTION = 5;
 	}
 
 	public static final class ObjectCode {
@@ -56,17 +56,17 @@ public class CanvasConnector extends ServerConnector {
 
 	private static CanvasConnector instance;
 	private static SyncEventListener syncListener;
-	private ArrayList<UserAction> sentActions;
+	private ArrayList<AtomicAction> sentActions;
 	private ArrayList<CanvasObject> sentObjects;
-	private ArrayList<UserAction> replyActions;
+	private ArrayList<AtomicAction> replyActions;
 	private ArrayList<CanvasObject> replyObjects;
 	private HashMap<Integer, CanvasObject> objectMap;
 
 	private CanvasConnector() {
-		sentActions = new ArrayList<UserAction>();
-		replyActions = new ArrayList<UserAction>();
-		sentObjects = new ArrayList<CanvasObject>();
-		replyObjects = new ArrayList<CanvasObject>();
+		sentActions = new ArrayList<>();
+		replyActions = new ArrayList<>();
+		sentObjects = new ArrayList<>();
+		replyObjects = new ArrayList<>();
 		objectMap = new HashMap<Integer, CanvasObject>();
 	}
 
@@ -83,7 +83,7 @@ public class CanvasConnector extends ServerConnector {
 	}
 
 	public void updateActions(int canvasID, int lastActNum,
-			ArrayList<UserAction> actions) {
+			ArrayList<AtomicAction> actions) {
 		// encode action to json
 		JSONObject msg = new JSONObject();
 		try {
@@ -93,7 +93,7 @@ public class CanvasConnector extends ServerConnector {
 			JSONArray jarAct = new JSONArray();
 			int size = actions.size();
 			for (int i = 0; i < size; i++) {
-				UserAction ua = actions.get(i);
+				AtomicAction ua = actions.get(i);
 				JSONObject joAct = new JSONObject();
 				CanvasObject co = null;
 				if (ua instanceof DrawAction) {
@@ -104,21 +104,21 @@ public class CanvasConnector extends ServerConnector {
 					joAct.put(JCode.ACTION_CODE, ActionCode.DELETE_ACTION);
 					joAct.put(JCode.ACTION_PARAM, "");
 					co = ((DeleteAction) ua).object;
-				} else if (ua instanceof ReshapeAction) {
-					ReshapeAction ra = (ReshapeAction) ua;
-					joAct.put(JCode.ACTION_CODE, ActionCode.RESHAPE_ACTION);
-					joAct.put(JCode.ACTION_PARAM, ra.getParameter());
-					co = ra.object;
+				} else if (ua instanceof TransformAction) {
+					TransformAction ta = (TransformAction) ua;
+					joAct.put(JCode.ACTION_CODE, ActionCode.TRANSFORM_ACTION);
+					joAct.put(JCode.ACTION_PARAM, ta.getParameter());
+					co = ta.object;
+				} else if (ua instanceof GeomAction) {
+					GeomAction ga = (GeomAction) ua;
+					joAct.put(JCode.ACTION_CODE, ActionCode.GEOM_ACTION);
+					joAct.put(JCode.ACTION_PARAM, ga.getParameter());
+					co = ga.object;
 				} else if (ua instanceof StyleAction) {
 					StyleAction sa = (StyleAction) ua;
 					joAct.put(JCode.ACTION_CODE, ActionCode.STYLE_ACTION);
 					joAct.put(JCode.ACTION_PARAM, sa.getParameter());
 					co = sa.object;
-				} else if (ua instanceof MoveAction) {
-					MoveAction ta = (MoveAction) ua;
-					joAct.put(JCode.ACTION_CODE, ActionCode.TRANSFORM_ACTION);
-					joAct.put(JCode.ACTION_PARAM, ta.getParameter());
-					co = ta.object;
 				}
 
 				if (co.getGlobalID() == -1) {
@@ -163,9 +163,10 @@ public class CanvasConnector extends ServerConnector {
 				else if (co instanceof TextObject)
 					joObj.put(JCode.OBJECT_CODE, ObjectCode.TEXT);
 				joObj.put(JCode.OBJECT_ID, co.privateID);
-				joObj.put(JCode.OBJECT_TRANSFORM, MoveAction.getParameterOf(co));
+				joObj.put(JCode.OBJECT_TRANSFORM,
+						TransformAction.getParameterOf(co));
+				joObj.put(JCode.OBJECT_GEOM, GeomAction.getParameterOf(co));
 				joObj.put(JCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
-				joObj.put(JCode.OBJECT_SHAPE, ReshapeAction.getParameterOf(co));
 				jarObj.put(joObj);
 			}
 			msg.put(JCode.OBJECT_LIST, jarObj);
@@ -222,7 +223,7 @@ public class CanvasConnector extends ServerConnector {
 					} else {
 						// if object is new create object from reply
 						int code = joObj.getInt(JCode.OBJECT_CODE);
-						String shape = joObj.getString(JCode.OBJECT_SHAPE);
+						String shape = joObj.getString(JCode.OBJECT_GEOM);
 						String style = joObj.getString(JCode.OBJECT_STYLE);
 						String transform = joObj
 								.getString(JCode.OBJECT_TRANSFORM);
@@ -277,7 +278,15 @@ public class CanvasConnector extends ServerConnector {
 		}
 	};
 
-	CanvasObject createObject(int code, String shape, String style,
+	/**
+	 * Menyusun objek kanvas berdasarkan informasi dari server.
+	 * @param code kode aksi. {@link ObjectCode}
+	 * @param geom paameter geometri objek
+	 * @param style
+	 * @param transform
+	 * @return
+	 */
+	CanvasObject createObject(int code, String geom, String style,
 			String transform) {
 		CanvasObject co = null;
 		if (code == ObjectCode.RECT)
@@ -292,27 +301,31 @@ public class CanvasConnector extends ServerConnector {
 			co = new FreeObject();
 		else if (code == ObjectCode.TEXT)
 			co = new TextObject();
-		ReshapeAction.apply(shape, co);
-		MoveAction.applyTransform(transform, co);
+		GeomAction.apply(geom, co);
+		TransformAction.applyTransform(transform, co);
 		StyleAction.applyStyle(style, co);
 		return co;
 	}
 
-	UserAction createAction(int code, CanvasObject object, String param) {
-		if (code == ActionCode.DRAW_ACTION) {
+	/**
+	 * Menyusun aksi berdasarkan informasi dari server.
+	 * @param code kode aksi {@link ActionCode}
+	 * @param object objek yang diubah
+	 * @param param parameter aksi
+	 * @return aksi yang terbentuk
+	 */
+	private AtomicAction createAction(int code, CanvasObject object,
+			String param) {
+		if (code == ActionCode.DRAW_ACTION)
 			return new DrawAction(object);
-		} else if (code == ActionCode.DELETE_ACTION) {
+		else if (code == ActionCode.DELETE_ACTION)
 			return new DeleteAction(object);
-		} else if (code == ActionCode.RESHAPE_ACTION) {
-			ReshapeAction ra = new ReshapeAction(object, false);
-			ra.setParameter(param);
-			return ra;
-		} else if (code == ActionCode.STYLE_ACTION) {
-			StyleAction sa = new StyleAction(object, false);
-			sa.setParameter(param);
-			return sa;
-		} else if (code == ActionCode.TRANSFORM_ACTION)
-			return new MoveAction(object).setParameter(param);
+		else if (code == ActionCode.TRANSFORM_ACTION)
+			return new TransformAction(object, false).setParameter(param);
+		else if (code == ActionCode.GEOM_ACTION)
+			return new GeomAction(object, param);
+		else if (code == ActionCode.STYLE_ACTION)
+			return new StyleAction(object, false).setParameter(param);
 		return null;
 	}
 }

@@ -9,7 +9,6 @@ import collapaint.DB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,7 +23,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonParsingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -53,9 +51,9 @@ public class Action extends HttpServlet {
         static final String OBJECT_ID = "id";
         static final String OBJECT_GLOBAL_ID = "gid";
         static final String OBJECT_CODE = "cd";
-        static final String OBJECT_SHAPE = "sh";
-        static final String OBJECT_STYLE = "st";
         static final String OBJECT_TRANSFORM = "tx";
+        static final String OBJECT_GEOM = "ge";
+        static final String OBJECT_STYLE = "st";
         public static final String ERROR = "error";
         static final int SERVER_ERROR = 5;
         static final int BAD_REQUEST = 9;
@@ -65,9 +63,9 @@ public class Action extends HttpServlet {
 
         public static final int DRAW_ACTION = 1;
         public static final int DELETE_ACTION = 2;
-        public static final int RESHAPE_ACTION = 3;
-        public static final int STYLE_ACTION = 4;
-        public static final int TRANSFORM_ACTION = 5;
+        public static final int TRANSFORM_ACTION = 3;
+        public static final int GEOM_ACTION = 4;
+        public static final int STYLE_ACTION = 5;
     }
 
     static final class ActionCol {
@@ -107,16 +105,16 @@ public class Action extends HttpServlet {
         int id;
         int globalId;
         int code;
-        String shape;
+        String geom;
         String style;
         String transform;
 
-        public CanvasObject(int id, int globalId, int code, String shape,
+        public CanvasObject(int id, int globalId, int code, String geom,
                 String style, String transform) {
             this.id = id;
             this.globalId = globalId;
             this.code = code;
-            this.shape = shape;
+            this.geom = geom;
             this.style = style;
             this.transform = transform;
         }
@@ -174,12 +172,12 @@ public class Action extends HttpServlet {
                 ArrayList<ActionObject> userActions = new ArrayList<>();
 
                 //------------ process objects ------------
-                processObject(request, objectPool);
+                parseObjects(request, objectPool);
                 insertObjects(objectPool);
 
                 //------------ process actions ------------
                 int canvasId = request.getInt(JCode.CANVAS_ID);
-                processActions(request, canvasId, userActions, objectPool);
+                parseActions(request, canvasId, userActions, objectPool);
                 insertActions(canvasId, userActions);
 
                 //*************************** REPLY *************************
@@ -199,7 +197,7 @@ public class Action extends HttpServlet {
      * @param request
      * @param objectPool
      */
-    void processObject(JsonObject request, ArrayList<CanvasObject> objectPool) throws NullPointerException, ClassCastException {
+    void parseObjects(JsonObject request, ArrayList<CanvasObject> objectPool) throws NullPointerException, ClassCastException {
         if (!request.containsKey(JCode.OBJECT_LIST))
             return;
         JsonArray objs = request.getJsonArray(JCode.OBJECT_LIST);
@@ -210,10 +208,10 @@ public class Action extends HttpServlet {
             int gid = (obj.containsKey(JCode.OBJECT_GLOBAL_ID)) ? obj.
                     getInt(JCode.OBJECT_GLOBAL_ID) : -1;
             int code = obj.getInt(JCode.OBJECT_CODE);
-            String shape = obj.getString(JCode.OBJECT_SHAPE);
+            String geom = obj.getString(JCode.OBJECT_GEOM);
             String style = obj.getString(JCode.OBJECT_STYLE);
             String transform = obj.getString(JCode.OBJECT_TRANSFORM);
-            CanvasObject co = new CanvasObject(id, gid, code, shape, style,
+            CanvasObject co = new CanvasObject(id, gid, code, geom, style,
                     transform);
             objectPool.add(co);
         }
@@ -227,7 +225,7 @@ public class Action extends HttpServlet {
      * @param userActions
      * @param objectPool
      */
-    void processActions(JsonObject request, int canvasId, ArrayList<ActionObject> userActions, ArrayList<CanvasObject> objectPool) {
+    void parseActions(JsonObject request, int canvasId, ArrayList<ActionObject> userActions, ArrayList<CanvasObject> objectPool) {
         if (!request.containsKey(JCode.ACTION_LIST))
             return;
         JsonArray acts = request.getJsonArray(JCode.ACTION_LIST);
@@ -315,13 +313,14 @@ public class Action extends HttpServlet {
             for (int i = 0; i < size; i++) {
                 CanvasObject co = objectPool.get(i);
                 if (co.id == -1) {
-                    fetchDetail(co);
-                    ojab.add(Json.createObjectBuilder().
-                            add(JCode.OBJECT_GLOBAL_ID, co.globalId).
-                            add(JCode.OBJECT_CODE, co.code).
-                            add(JCode.OBJECT_SHAPE, co.shape).
-                            add(JCode.OBJECT_STYLE, co.style).
-                            add(JCode.OBJECT_TRANSFORM, co.transform));
+                    if (fetchDetail(co)) {
+                        ojab.add(Json.createObjectBuilder().
+                                add(JCode.OBJECT_GLOBAL_ID, co.globalId).
+                                add(JCode.OBJECT_CODE, co.code).
+                                add(JCode.OBJECT_GEOM, co.geom).
+                                add(JCode.OBJECT_STYLE, co.style).
+                                add(JCode.OBJECT_TRANSFORM, co.transform));
+                    }
                 } else {
                     ojab.add(Json.createObjectBuilder().
                             add(JCode.OBJECT_ID, co.id).
@@ -344,17 +343,18 @@ public class Action extends HttpServlet {
         if (size == 0)
             return;
         StringBuilder sb = new StringBuilder();
-        sb.append("insert into object(code,transform,style,shape) values ");
+        //TODO ganti geom
+        sb.append("insert into object(code,transform,style,geom) values ");
         CanvasObject obj = objects.get(0);
         sb.append("('").append(obj.code).append("','").append(obj.transform).
-                append("','").append(obj.style).append("','").append(obj.shape).
+                append("','").append(obj.style).append("','").append(obj.geom).
                 append("')");
         for (int i = 1; i < size; i++) {
             obj = objects.get(i);
             sb.append(",('").append(obj.code).append("','").
                     append(obj.transform).
                     append("','").append(obj.style).append("','").
-                    append(obj.shape).append("')");
+                    append(obj.geom).append("')");
         }
         try (Statement statement = connection.createStatement()) {
             statement.execute(sb.toString(), Statement.RETURN_GENERATED_KEYS);
@@ -367,7 +367,7 @@ public class Action extends HttpServlet {
     }
 
     /**
-     * Insert actions to database
+     * Memasukkan aksi-aksi ke database
      *
      * @param canvasID
      * @param actions
@@ -404,20 +404,23 @@ public class Action extends HttpServlet {
      * Get details of object.
      *
      * @param obj
+     * @return ada objeknya atau tidak
      * @throws SQLException
      */
-    void fetchDetail(CanvasObject obj) throws SQLException {
+    boolean fetchDetail(CanvasObject obj) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             StringBuilder sb = new StringBuilder();
             sb.append("select * from object where id='").append(obj.globalId).
                     append("'");
             ResultSet result = statement.executeQuery(sb.toString());
-            result.next();
+            if (!result.next())
+                return false;
             obj.code = result.getInt(ObjectCol.CODE);
             obj.transform = result.getString(ObjectCol.TRANSFORM);
             obj.style = result.getString(ObjectCol.STYLE);
-            obj.shape = result.getString(ObjectCol.SHAPE);
+            obj.geom = result.getString(ObjectCol.SHAPE);
         }
+        return true;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
