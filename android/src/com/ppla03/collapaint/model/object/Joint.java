@@ -7,6 +7,11 @@ import android.graphics.RadialGradient;
 import android.graphics.Paint.Style;
 import android.graphics.Shader.TileMode;
 
+/**
+ * Titik kontrol sambungan garis.
+ * @author hamba v7
+ * 
+ */
 public class Joint extends ControlPoint {
 
 	private static final int JOINT_COLOR1 = Color.argb(200, 255, 150, 150);

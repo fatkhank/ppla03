@@ -69,14 +69,13 @@ public class CollaUserManager extends ServerConnector {
 
 	/**
 	 * Mengecek status akun ke server.
-	 * @param name
 	 */
 	public static void check(String accountID, String nickname,
 			OnUserCheckListener list) {
 		listener = list;
 		checkUser = new UserModel();
 		checkUser.accountID = accountID;
-		checkUser.nickname = nickname;
+		checkUser.name = nickname;
 
 		JSONObject request = new JSONObject();
 		try {

@@ -86,7 +86,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 			UserModel owner = new UserModel();
 			owner.collaID = 1;
 			owner.accountID = "accountofdebugger";
-			owner.nickname = "debugger";
+			owner.name = "debugger";
 			currentModel = new CanvasModel(owner, "test canvas", 800, 400);
 			currentModel.setid(1);
 			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);

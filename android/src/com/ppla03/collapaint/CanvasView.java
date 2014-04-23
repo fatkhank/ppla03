@@ -276,9 +276,9 @@ public class CanvasView extends View {
 		selectRect.setEmpty();
 		editRect.setEmpty();
 		// ---- reset ----
-		cacheImage = Bitmap.createBitmap(model.width, model.height,
+		cacheImage = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
 				Config.ARGB_8888);
-		selectedObjectsCache = Bitmap.createBitmap(model.width, model.height,
+		selectedObjectsCache = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
 				Config.ARGB_8888);
 		cacheCanvas.setBitmap(cacheImage);
 
@@ -303,19 +303,19 @@ public class CanvasView extends View {
 		if (model != null) {
 			centerX = (w >> 1) - scrollX;
 			centerY = (h >> 1) - scrollY;
-			if (model.width >= w) {
-				minScrollX = w - CANVAS_MARGIN - model.width;
+			if (model.getWidth() >= w) {
+				minScrollX = w - CANVAS_MARGIN - model.getWidth();
 				maxScrollX = CANVAS_MARGIN;
 			} else {
 				minScrollX = 0;
-				maxScrollX = w - model.width;
+				maxScrollX = w - model.getWidth();
 			}
-			if (model.height >= w) {
-				minScrollY = h - CANVAS_MARGIN - model.height;
+			if (model.getHeight() >= w) {
+				minScrollY = h - CANVAS_MARGIN - model.getHeight();
 				maxScrollY = CANVAS_MARGIN;
 			} else {
 				minScrollY = 0;
-				maxScrollY = h - model.height;
+				maxScrollY = h - model.getHeight();
 			}
 		}
 	}
@@ -326,7 +326,7 @@ public class CanvasView extends View {
 		canvas.drawColor(CANVAS_BACKGROUND_COLOR);
 		if (model != null) {
 			canvas.translate(scrollX, scrollY);
-			canvas.drawRect(0, 0, model.width, model.height, canvasPaint);
+			canvas.drawRect(0, 0, model.getWidth(), model.getHeight(), canvasPaint);
 			if (cacheImage != null)
 				canvas.drawBitmap(cacheImage, 0, 0, cachePaint);
 			if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
@@ -553,7 +553,7 @@ public class CanvasView extends View {
 					socY = y - anchorY;
 					protaMove.moveTo(x, y);
 				} else {
-					if (x < 0 && x > model.width && y < 0 && y > model.height)
+					if (x < 0 && x > model.getWidth() && y < 0 && y > model.getHeight())
 						return true;
 					if (mode == Mode.SELECT) {
 						selectRect.left = Math.min(anchorX, x);
@@ -614,9 +614,9 @@ public class CanvasView extends View {
 				if (grabbedCPoint != null) {
 					currentObject.getWorldBounds(limiter);
 					if ((limiter.right < OBJECT_LIMIT)
-							|| (limiter.left > model.width - OBJECT_LIMIT)
+							|| (limiter.left > model.getWidth() - OBJECT_LIMIT)
 							|| (limiter.bottom < OBJECT_LIMIT)
-							|| (limiter.top > model.height - OBJECT_LIMIT))
+							|| (limiter.top > model.getHeight() - OBJECT_LIMIT))
 						// kalau keluar dari kanvas, kembalikan ke tempat semula
 						handler.dragPoint(grabbedCPoint, anchorX, anchorY);
 					else if (protaReshape != null) {
@@ -899,8 +899,8 @@ public class CanvasView extends View {
 		if (text == null || text.isEmpty())
 			return;
 		objectType = ObjectType.TEXT;
-		int x = Math.min(model.width, getWidth()) / 2 - scrollX;
-		int y = Math.min(model.height, getHeight()) / 2 - scrollY;
+		int x = Math.min(model.getWidth(), getWidth()) / 2 - scrollX;
+		int y = Math.min(model.getHeight(), getHeight()) / 2 - scrollY;
 		protoText = new TextObject(text, x, y, strokeColor, textFont, textSize);
 		setMode(Mode.DRAW);
 		editObject(protoText, ShapeHandler.ALL);

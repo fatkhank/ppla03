@@ -5,12 +5,15 @@ import android.util.Base64;
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
- * Aksi memindah sebuah objek kanvas ke posisi lain.
+ * Aksi mengubah parameter transformasi sebuah objek kanvas.
  * @author hamba v7
  * 
  */
 public class TransformAction extends AtomicAction {
 	static final int OFFSET_X = 0, OFFSET_Y = 1, ROTATION = 2;
+	/**
+	 * Parameter transformasi
+	 */
 	private final float[] trans = new float[3];
 
 	/**

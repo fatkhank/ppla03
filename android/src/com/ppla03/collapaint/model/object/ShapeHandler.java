@@ -15,17 +15,17 @@ public class ShapeHandler {
 	/**
 	 * Daftar {@link ControlPoint}.
 	 */
-	ControlPoint[] points;
+	protected ControlPoint[] points;
 
 	/**
 	 * Jumlah {@link ControlPoint} di daftar point yang bisa digunakan.
 	 */
-	int size;
+	protected int size;
 
 	/**
 	 * Objek kanvas yang sedang ditangani oleh handler ini.
 	 */
-	CanvasObject object;
+	protected CanvasObject object;
 
 	/**
 	 * Membuat objek handler baru.
@@ -64,7 +64,7 @@ public class ShapeHandler {
 	 * @return titik kontrol yang berhasil ditangkap, atau <code>null</code>
 	 *         jika tidak ada titik kontrol pada posisi tersebut.
 	 */
-	public ControlPoint grab(int worldX, int worldY) {
+	public ControlPoint grab(float worldX, float worldY) {
 		grabPoints[ControlPoint.ORI_X] = worldX;
 		grabPoints[ControlPoint.ORI_Y] = worldY;
 		worldX -= object.offsetX;
@@ -88,7 +88,7 @@ public class ShapeHandler {
 	 * Mengatur keaktifan dari semua titik kontrol.
 	 * @param enable
 	 */
-	void setEnableAllPoint(boolean enable) {
+	void setEnableAllPoints(boolean enable) {
 		for (int i = 0; i < points.length; i++)
 			points[i].enable = enable;
 	}
@@ -119,6 +119,10 @@ public class ShapeHandler {
 		object.onHandlerMoved(this, cp, ox, oy);
 	}
 
+	/**
+	 * Melepaskan titik kontrol yang dipegang.
+	 * @param cp
+	 */
 	public void releasePoint(ControlPoint cp) {
 		object.onHandlerRelease(cp);
 		cp.release();

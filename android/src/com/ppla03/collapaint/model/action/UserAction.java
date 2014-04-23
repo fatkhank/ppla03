@@ -9,6 +9,9 @@ import java.util.ArrayList;
  */
 public abstract class UserAction {
 
+	/**
+	 * Aksi yang bisa merupakan kebalikan dari aksi ini.
+	 */
 	protected UserAction inverse;
 
 	/**

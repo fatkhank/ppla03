@@ -93,7 +93,7 @@ public class OvalObject extends BasicObject {
 	@Override
 	public ShapeHandler getHandler(int filter) {
 		BoxHandler.handle(this, bounds);
-		return BoxHandler.getHandlers(filter);
+		return BoxHandler.getHandler(filter);
 	}
 
 	@Override

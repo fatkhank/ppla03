@@ -199,7 +199,7 @@ public class BrowserConnector extends ServerConnector {
 						JSONObject canvas = news.getJSONObject(i);
 						UserModel owner = new UserModel();
 						owner.collaID = canvas.getInt(ListJCode.OWNER_ID);
-						owner.nickname = canvas.getString(ListJCode.OWNER_NAME);
+						owner.name = canvas.getString(ListJCode.OWNER_NAME);
 						String name = canvas.getString(ListJCode.NAME);
 						int width = canvas.getInt(ListJCode.WIDTH);
 						int height = canvas.getInt(ListJCode.HEIGHT);

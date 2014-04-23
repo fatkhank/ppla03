@@ -5,6 +5,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 
+/**
+ * Titik untuk mengatur ofset objek kanvas. {@link Mover#grabbed(float[])}
+ * selalu memberikan nilai tue, sehingga titik ini selalu dipegang dari semua
+ * titik di kanvas.
+ * @author hamba v7
+ * 
+ */
 public class Mover extends ControlPoint {
 	private static final float MOVER_CROSS_SIZE = 10;
 	private static final Paint paint;

@@ -11,6 +11,9 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * 
  */
 public class DrawMultiple extends UserAction {
+	/**
+	 * Daftar objek yang digambar.
+	 */
 	public final ArrayList<CanvasObject> objects;
 
 	/**

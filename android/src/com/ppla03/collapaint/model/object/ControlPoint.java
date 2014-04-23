@@ -1,11 +1,6 @@
 package com.ppla03.collapaint.model.object;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RadialGradient;
-import android.graphics.Paint.Style;
-import android.graphics.Shader.TileMode;
 
 /**
  * Titik kontrol untuk memodifikasi bentuk objek suatu objek.

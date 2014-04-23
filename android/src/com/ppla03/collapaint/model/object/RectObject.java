@@ -83,7 +83,7 @@ public class RectObject extends BasicObject {
 	@Override
 	public ShapeHandler getHandler(int filter) {
 		BoxHandler.handle(this, rect);
-		return BoxHandler.getHandlers(filter);
+		return BoxHandler.getHandler(filter);
 	}
 
 	@Override

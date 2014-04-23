@@ -54,69 +54,39 @@ public class StyleAction extends AtomicAction {
 	}
 
 	/**
-	 * Mengubah parameter aksi ini
-	 * @param fillColor warna isian objek
-	 * @param strokeColor warna pinggiran objek
-	 * @param strokeWidth lebar garis pinggiran objek
-	 * @param strokeStyle dekorasi pinggiran objek
-	 * @return this
-	 */
-	public StyleAction setStyle(int fillColor, int strokeColor,
-			int strokeWidth, int strokeStyle) {
-		styles[FILL_COLOR] = fillColor;
-		styles[STROKE_COLOR] = strokeColor;
-		styles[STROKE_WIDTH] = strokeWidth;
-		styles[STROKE_STYLE] = strokeStyle;
-		return this;
-	}
-
-	/**
-	 * Mengubah parameter aksi untuk suatu teks
-	 * @param color warna teks
-	 * @param size ukuran font
-	 * @param fontType type font
-	 * @return this
-	 */
-	public StyleAction setTextStyle(int color, int size, int fontType) {
-		styles[TEXT_COLOR] = color;
-		styles[TEXT_SIZE] = size;
-		styles[TEXT_STYLE] = fontType;
-		return this;
-	}
-
-	/**
 	 * Menangkap perubahan yang sudah dilakukan terhadap style objek.
 	 * @return Aksi perubahan style dari semenjak capture terakhir. Jika tidak
 	 *         ada perubahan, maka null;
 	 */
 	public StyleAction capture() {
-		Stepper backward = new Stepper(this, object, null);
+		StyleStepper backward = new StyleStepper(this, object, null);
 		System.arraycopy(styles, 0, backward.styles, 0, styles.length);
 		extractStyle(object, styles);
 		if (Arrays.equals(styles, backward.styles))
 			return null;
-		Stepper forward = new Stepper(this, object, backward);
+		StyleStepper forward = new StyleStepper(this, object, backward);
 		System.arraycopy(styles, 0, forward.styles, 0, styles.length);
 		backward.inverse = forward;
 		return forward;
 	}
-	
+
 	/**
 	 * 
 	 * @author hamba v7
-	 *
+	 * 
 	 */
-	static class Stepper extends StyleAction{
+	static class StyleStepper extends StyleAction {
 		private StyleAction parent;
 
-		public Stepper(StyleAction parent, CanvasObject object, Stepper inverse) {
+		public StyleStepper(StyleAction parent, CanvasObject object, StyleStepper inverse) {
 			super(object, inverse);
 			this.parent = parent;
 		}
-		
+
 		@Override
 		public void applyStyle() {
-			System.arraycopy(this.styles, 0, parent.styles, 0, this.styles.length);
+			System.arraycopy(this.styles, 0, parent.styles, 0,
+					this.styles.length);
 			super.applyStyle();
 		}
 	}
@@ -137,7 +107,7 @@ public class StyleAction extends AtomicAction {
 	}
 
 	/**
-	 * Mengatur paramete raksi ini dalam bentuk String.
+	 * Mengatur parameter aksi ini dalam bentuk String.
 	 * @param param
 	 * @return this
 	 */
@@ -148,6 +118,12 @@ public class StyleAction extends AtomicAction {
 
 	private static final int[] getParamTemp = new int[4];
 
+	/**
+	 * Mengambil parameter style dari suatu objek dan mengubahnya ke dalam
+	 * bentuk String
+	 * @param object
+	 * @return
+	 */
 	public static String getParameterOf(CanvasObject object) {
 		extractStyle(object, getParamTemp);
 		return encode(getParamTemp);

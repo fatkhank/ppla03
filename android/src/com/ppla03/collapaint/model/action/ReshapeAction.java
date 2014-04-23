@@ -2,8 +2,6 @@ package com.ppla03.collapaint.model.action;
 
 import java.util.ArrayList;
 
-import android.util.Base64;
-
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**
@@ -72,31 +70,38 @@ public class ReshapeAction extends UserAction {
 	 *         terakhir sebelum diCapture.
 	 */
 	public ReshapeAction capture() {
-		Stepper backward = new Stepper(this, object, false);
-
+		ShapeStepper backward = new ShapeStepper(this, object, false);
 		System.arraycopy(params, 0, backward.params, 0, params.length);
+
 		params[OFSX_INDEX] = object.offsetX();
 		params[OFSY_INDEX] = object.offsetY();
 		params[ROT_INDEX] = object.rotation();
 		object.extractGeom(params, TRANSFORM_LENGTH);
-		Stepper forward = new Stepper(backward);
+
+		ShapeStepper forward = new ShapeStepper(backward);
 		System.arraycopy(params, 0, forward.params, 0, params.length);
 		backward.inverse = forward;
 		return forward;
 	}
 
-	public static class Stepper extends ReshapeAction {
-		ReshapeAction parent;
+	public static class ShapeStepper extends ReshapeAction {
+		private ReshapeAction parent;
 
-		public Stepper(Stepper inverse) {
+		public ShapeStepper(ShapeStepper inverse) {
 			super(inverse);
 			parent = inverse.parent;
 		}
 
-		public Stepper(ReshapeAction parent, CanvasObject object,
+		public ShapeStepper(ReshapeAction parent, CanvasObject object,
 				boolean reversible) {
 			super(object, reversible);
 			this.parent = parent;
+		}
+
+		@Override
+		public void apply() {
+			System.arraycopy(params, 0, parent.params, 0, params.length);
+			super.apply();
 		}
 
 	}

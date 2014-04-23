@@ -11,24 +11,24 @@ public class UserModel {
 	 */
 	public int collaID;
 	/**
-	 * Alamat email.
+	 * Id akun asli.
 	 */
 	public String accountID;
 	/**
 	 * Nama akun.
 	 */
-	public String nickname;
+	public String name;
 
 	public UserModel() {
 		collaID = -1;
 		accountID = "";
-		nickname = "";
+		name = "";
 	}
 
 	public UserModel(int collaID, String accountID, String nickname) {
 		this.collaID = collaID;
 		this.accountID = accountID;
-		this.nickname = nickname;
+		this.name = nickname;
 	}
 
 	@Override

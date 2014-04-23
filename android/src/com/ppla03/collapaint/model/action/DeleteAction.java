@@ -1,7 +1,5 @@
 package com.ppla03.collapaint.model.action;
 
-import java.util.ArrayList;
-
 import com.ppla03.collapaint.model.object.CanvasObject;
 
 /**

@@ -9,6 +9,9 @@ import java.util.List;
  * 
  */
 public class ObjectClipboard {
+	/**
+	 * Daftar objek yang disalin
+	 */
 	private static final ArrayList<CanvasObject> copiedObjects = new ArrayList<CanvasObject>();
 
 	/**

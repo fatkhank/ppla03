@@ -830,9 +830,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onParticipantFetched(CanvasModel canvas, UserModel owner,
 			ArrayList<UserModel> participants) {
 		participantAdapter.clear();
-		participantAdapter.add(owner.nickname + "  (owner)");
+		participantAdapter.add(owner.name + "  (owner)");
 		for (int i = 0; i < participants.size(); i++)
-			participantAdapter.add(participants.get(i).nickname);
+			participantAdapter.add(participants.get(i).name);
 		progress.setVisibility(View.GONE);
 		progressText.setVisibility(View.GONE);
 		cover.setVisibility(View.GONE);

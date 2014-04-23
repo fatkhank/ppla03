@@ -101,7 +101,7 @@ public class CanvasExporter {
 
 	private static boolean export(CanvasModel model, File file,
 			CompressFormat format, boolean cropped) {
-		Bitmap oriBitmap = Bitmap.createBitmap(model.width, model.height,
+		Bitmap oriBitmap = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
 				Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(oriBitmap);
 
@@ -111,7 +111,7 @@ public class CanvasExporter {
 		else
 			canvas.drawColor(Color.TRANSPARENT,
 					android.graphics.PorterDuff.Mode.CLEAR);
-		RectF bound = new RectF(model.width, model.height, 0, 0);
+		RectF bound = new RectF(model.getWidth(), model.getHeight(), 0, 0);
 		RectF r = new RectF();
 		for (int i = 0; i < model.objects.size(); i++) {
 			CanvasObject sp = model.objects.get(i);

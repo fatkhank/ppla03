@@ -202,7 +202,7 @@ public class PolygonObject extends BasicObject {
 			handler.points[i] = rotator;
 			handler.points[++i] = mover;
 		}
-		handler.setEnableAllPoint(false);
+		handler.setEnableAllPoints(false);
 
 		// jika menampilkan pengatur shape
 		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {

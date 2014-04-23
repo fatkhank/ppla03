@@ -10,8 +10,14 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * 
  */
 public class CanvasModel {
-	private int globalId;
+	/**
+	 * id global kanvas
+	 */
+	private int globalID;
 
+	/**
+	 * Pembuat kanvas.
+	 */
 	public final UserModel owner;
 
 	/**
@@ -22,12 +28,12 @@ public class CanvasModel {
 	/**
 	 * Lebar kanvas
 	 */
-	public int width;
+	private int width;
 
 	/**
-	 * Tinggi kanvas.
+	 * Tinggi kanvas
 	 */
-	public int height;
+	private int height;
 
 	/**
 	 * Daftar objek yang ada di kanvas, terurut dari yang berada paling belakang
@@ -47,20 +53,54 @@ public class CanvasModel {
 		this.name = (name == null || name.isEmpty()) ? "untitled" : name;
 		this.width = width;
 		this.height = height;
-		globalId = -1;
+		globalID = -1;
 		objects = new ArrayList<CanvasObject>();
 	}
 
+	/**
+	 * Mengambil id kanvas.
+	 * @return
+	 */
 	public int getId() {
-		return globalId;
+		return globalID;
 	}
 
+	/**
+	 * Mengatur id kanvas
+	 * @param id
+	 */
 	public void setid(int id) {
-		this.globalId = id;
+		this.globalID = id;
+	}
+
+	/**
+	 * Mengatur ukuran kanvas.
+	 * @param width
+	 * @param height
+	 */
+	public void setDimension(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
+
+	/**
+	 * Mengambil lebar kanvas.
+	 * @return
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * Mengambil tinggi kanvas.
+	 * @return
+	 */
+	public int getHeight() {
+		return height;
 	}
 
 	@Override
 	public String toString() {
-		return name + " by " + owner.nickname;
+		return name + " by " + owner.name;
 	}
 }

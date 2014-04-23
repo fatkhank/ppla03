@@ -347,7 +347,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			if (model.owner.equals(CollaUserManager.getCurrentUser()))
 				holder.userName.setText("You");
 			else
-				holder.userName.setText(model.owner.nickname);
+				holder.userName.setText(model.owner.name);
 			return view;
 		}
 

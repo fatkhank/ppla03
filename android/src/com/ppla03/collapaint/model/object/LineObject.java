@@ -139,7 +139,7 @@ public class LineObject extends CanvasObject {
 	@Override
 	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
-		handler.setEnableAllPoint(false);
+		handler.setEnableAllPoints(false);
 		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {
 			cps[0].setPosition(0, 0);
 			cps[0].enable = true;

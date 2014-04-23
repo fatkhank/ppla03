@@ -1,8 +1,6 @@
 package com.ppla03.collapaint.model.object;
 
 import android.graphics.RectF;
-import android.nfc.cardemulation.OffHostApduService;
-import android.view.animation.BounceInterpolator;
 
 /**
  * Handler yang bisa mengurusi objek yang memiliki bentuk kotak.
@@ -35,8 +33,8 @@ class BoxHandler extends ShapeHandler {
 	 * Mendapatkan handler dari objek kanvas yang sudah diatur di
 	 * {@code handle(CanvasObject, RectF)}.
 	 */
-	static ShapeHandler getHandlers(int filter) {
-		instance.setEnableAllPoint(false);
+	static BoxHandler getHandler(int filter) {
+		instance.setEnableAllPoints(false);
 		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {
 			points[LEFT_TOP].enable = true;
 			points[RIGHT_TOP].enable = true;
