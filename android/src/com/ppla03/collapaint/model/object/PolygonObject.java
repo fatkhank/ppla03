@@ -116,7 +116,7 @@ public class PolygonObject extends BasicObject {
 	 * parameter berisi array xLocs, diikuti array yLocs
 	 */
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		int corner = (end - start) >> 1;
 		if (xLocs == null) {
 			xLocs = new float[corner];
@@ -133,12 +133,12 @@ public class PolygonObject extends BasicObject {
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		return xLocs.length << 1;
 	}
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		System.arraycopy(xLocs, 0, data, start, xLocs.length);
 		System.arraycopy(yLocs, 0, data, start + xLocs.length, yLocs.length);
 		return xLocs.length << 1;
@@ -189,7 +189,7 @@ public class PolygonObject extends BasicObject {
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
 
 		// pastikan jumlah ControlPoint pada handler mencukupi
@@ -198,7 +198,7 @@ public class PolygonObject extends BasicObject {
 			handler.points = new ControlPoint[handler.size];
 			int i = 0;
 			for (; i < xLocs.length; i++)
-				handler.points[i] = new Shaper(xLocs[i], yLocs[i], i);
+				handler.points[i] = new Joint(xLocs[i], yLocs[i], i);
 			handler.points[i] = rotator;
 			handler.points[++i] = mover;
 		}
@@ -292,7 +292,7 @@ public class PolygonObject extends BasicObject {
 		System.arraycopy(this.yLocs, 0, po.yLocs, 0, this.yLocs.length);
 		po.bounds.set(this.bounds);
 		copyTransformData(po);
-		changeStyles(po);
+		modifyStyles(po);
 		return po;
 	}
 }

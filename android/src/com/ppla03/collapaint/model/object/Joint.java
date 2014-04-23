@@ -7,7 +7,7 @@ import android.graphics.RadialGradient;
 import android.graphics.Paint.Style;
 import android.graphics.Shader.TileMode;
 
-public class Shaper extends ControlPoint {
+public class Joint extends ControlPoint {
 
 	private static final int JOINT_COLOR1 = Color.argb(200, 255, 150, 150);
 	private static final int JOINT_COLOR2 = Color.argb(200, 250, 0, 0);
@@ -19,7 +19,7 @@ public class Shaper extends ControlPoint {
 				JOINT_COLOR2, TileMode.CLAMP));
 	}
 
-	public Shaper(float x, float y, int id) {
+	public Joint(float x, float y, int id) {
 		super(x, y, id);
 		paint.setAlpha(255);
 	}

@@ -141,7 +141,7 @@ public class TextObject extends CanvasObject {
 	 * Mengambil jenis huruf.
 	 * @return jenis huruf. Lihat {@link FontManager}.
 	 */
-	public int getFontStyle() {
+	public int getFontCode() {
 		return fontCode;
 	}
 
@@ -154,7 +154,7 @@ public class TextObject extends CanvasObject {
 	private static char[] setBuffer = new char[16];
 
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		// hitung jumlah karakter yang dibaca dan pastikan ukuran buffer cukup
 		int charLength = Float.floatToIntBits(param[start++]);
 		int bufferLength = (charLength + 2) & 0xfffffffe;
@@ -172,7 +172,7 @@ public class TextObject extends CanvasObject {
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		// indeks pertama adalah jumlah total karakter, ditambah setengah
 		// (panjang teks + 1)
 		return ((text.length() + 1) >> 1) + 1;
@@ -181,7 +181,7 @@ public class TextObject extends CanvasObject {
 	private static char[] extractBuffer = new char[16];
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		// pastikan ukuran buffer mencukupi
 		int charLength = text.length();
 		if (extractBuffer.length < charLength)
@@ -213,7 +213,7 @@ public class TextObject extends CanvasObject {
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
 		mover.x = 0;
 		mover.y = 0;

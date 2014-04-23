@@ -178,7 +178,7 @@ public class StyleAction extends AtomicAction {
 			TextObject to = (TextObject) object;
 			style[TEXT_COLOR] = to.getTextColor();
 			style[TEXT_SIZE] = to.getFontSize();
-			style[TEXT_STYLE] = to.getFontStyle();
+			style[TEXT_STYLE] = to.getFontCode();
 		}
 	}
 

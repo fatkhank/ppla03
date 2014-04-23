@@ -10,7 +10,7 @@ import android.graphics.RectF;
  * 
  */
 public class RectObject extends BasicObject {
-	private RectF rect;
+	private final RectF rect;
 
 	/**
 	 * Membuat kotak kosong.
@@ -50,7 +50,7 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		rect.right = param[start++];
 		rect.bottom = param[start];
 		rect.left = -rect.right;
@@ -58,12 +58,12 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		return 2;
 	}
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		data[start++] = rect.right;
 		data[start] = rect.bottom;
 		return 2;
@@ -81,7 +81,7 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		BoxHandler.handle(this, rect);
 		return BoxHandler.getHandlers(filter);
 	}
@@ -103,7 +103,7 @@ public class RectObject extends BasicObject {
 		RectObject ro = new RectObject();
 		ro.rect.set(this.rect);
 		copyTransformData(ro);
-		changeStyles(ro);
+		modifyStyles(ro);
 		return ro;
 	}
 }

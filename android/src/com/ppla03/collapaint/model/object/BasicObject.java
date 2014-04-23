@@ -2,8 +2,6 @@ package com.ppla03.collapaint.model.object;
 
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Join;
-import android.graphics.RectF;
 import android.graphics.Paint.Style;
 
 /**
@@ -15,12 +13,12 @@ public abstract class BasicObject extends CanvasObject {
 	/**
 	 * {@link Paint} pinggiran objek.
 	 */
-	protected Paint strokePaint;
+	protected final Paint strokePaint;
 
 	/**
 	 * {@link Paint} isian objek.
 	 */
-	protected Paint fillPaint;
+	protected final Paint fillPaint;
 
 	/**
 	 * Jenis dekorasi garis pinggiran. Lihat {@link StrokeStyle}.
@@ -53,7 +51,7 @@ public abstract class BasicObject extends CanvasObject {
 	 *            parameter color diabaikan.
 	 * @param color warna isian. Lihat {@link Color}.
 	 */
-	public void setFillMode(boolean filled, int color) {
+	public final void setFillMode(boolean filled, int color) {
 		fillPaint.setColor(filled ? color : Color.TRANSPARENT);
 	}
 
@@ -61,7 +59,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengubah warna pinggiran objek
 	 * @param color warna pinggiran. Lihat {@link Color}.
 	 */
-	public void setStrokeColor(int color) {
+	public final void setStrokeColor(int color) {
 		strokePaint.setColor(color);
 	}
 
@@ -69,7 +67,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengatur tebal garis pinggiran objek.
 	 * @param width tebal garis.
 	 */
-	public void setStrokeWidth(int width) {
+	public final void setStrokeWidth(int width) {
 		strokePaint.setStrokeWidth(width);
 		StrokeStyle.applyEffect(strokeStyle, strokePaint);
 	}
@@ -78,7 +76,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengubah jenis dekorasi garis pinggiran objek.
 	 * @param style jenis dekorasi. Lihat {@link StrokeStyle}.
 	 */
-	public void setStrokeStyle(int style) {
+	public final void setStrokeStyle(int style) {
 		strokeStyle = style;
 		StrokeStyle.applyEffect(style, strokePaint);
 	}
@@ -87,7 +85,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengambil warna isian objek.
 	 * @return warna isian. Lihat {@link Color}.
 	 */
-	public int getFillColor() {
+	public final int getFillColor() {
 		return fillPaint.getColor();
 	}
 
@@ -95,7 +93,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengambil jenis dekorasi garis pinggiran objek.
 	 * @return jenis dekorasi. Lihat {@link StrokeStyle}.
 	 */
-	public int getStrokeStyle() {
+	public final int getStrokeStyle() {
 		return this.strokeStyle;
 	}
 
@@ -103,7 +101,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengambil warna garis pinggiran objek.
 	 * @return warna garis. Lihat {@link Color}.
 	 */
-	public int getStrokeColor() {
+	public final int getStrokeColor() {
 		return strokePaint.getColor();
 	}
 
@@ -111,7 +109,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * Mengambil tebal garis pinggiran objek.
 	 * @return tebal garis.
 	 */
-	public int getStrokeWidth() {
+	public final int getStrokeWidth() {
 		return (int) strokePaint.getStrokeWidth();
 	}
 
@@ -120,7 +118,7 @@ public abstract class BasicObject extends CanvasObject {
 	 * lain.
 	 * @param other objek tujuan.
 	 */
-	protected void changeStyles(BasicObject other) {
+	protected final void modifyStyles(BasicObject other) {
 		other.fillPaint.set(this.fillPaint);
 		other.strokePaint.set(this.strokePaint);
 		other.strokeStyle = this.strokeStyle;

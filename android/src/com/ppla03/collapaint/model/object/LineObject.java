@@ -13,8 +13,8 @@ import android.graphics.RectF;
  * @author hamba v7
  */
 public class LineObject extends CanvasObject {
-	private static ControlPoint[] cps = { new Shaper(0, 0, 0),
-			new Shaper(0, 0, 1), new Mover(0, 0, 2) };
+	private static ControlPoint[] cps = { new Joint(0, 0, 0),
+			new Joint(0, 0, 1), new Mover(0, 0, 2) };
 	private static final ShapeHandler handler = new ShapeHandler(null, cps);
 	static {
 		handler.size = 2;
@@ -119,25 +119,25 @@ public class LineObject extends CanvasObject {
 	}
 
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		x2 = param[start++];
 		y2 = param[start];
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		return 2;
 	}
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		data[start++] = x2;
 		data[start] = y2;
 		return 2;
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
 		handler.setEnableAllPoint(false);
 		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {

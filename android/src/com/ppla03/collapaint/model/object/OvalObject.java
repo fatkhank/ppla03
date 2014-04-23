@@ -42,7 +42,7 @@ public class OvalObject extends BasicObject {
 	}
 
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		bounds.right = param[start++];
 		bounds.bottom = param[start];
 		bounds.left = -bounds.right;
@@ -50,12 +50,12 @@ public class OvalObject extends BasicObject {
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		return 2;
 	}
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		data[start++] = bounds.right;
 		data[start] = bounds.bottom;
 		return 2;
@@ -91,7 +91,7 @@ public class OvalObject extends BasicObject {
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		BoxHandler.handle(this, bounds);
 		return BoxHandler.getHandlers(filter);
 	}
@@ -113,7 +113,7 @@ public class OvalObject extends BasicObject {
 		OvalObject oo = new OvalObject();
 		oo.bounds.set(this.bounds);
 		copyTransformData(oo);
-		changeStyles(oo);
+		modifyStyles(oo);
 		return oo;
 	}
 

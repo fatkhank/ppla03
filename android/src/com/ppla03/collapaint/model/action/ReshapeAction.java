@@ -45,11 +45,11 @@ public class ReshapeAction extends UserAction {
 	 */
 	public ReshapeAction(CanvasObject object, boolean reversible) {
 		this.object = object;
-		params = new float[object.paramLength() + TRANSFORM_LENGTH];
+		params = new float[object.geomParamLength() + TRANSFORM_LENGTH];
 		params[OFSX_INDEX] = object.offsetX();
 		params[OFSY_INDEX] = object.offsetY();
 		params[ROT_INDEX] = object.rotation();
-		object.extractShape(params, TRANSFORM_LENGTH);
+		object.extractGeom(params, TRANSFORM_LENGTH);
 		if (reversible) {
 			ReshapeAction ra = new ReshapeAction(object, false);
 			ra.inverse = this;
@@ -63,7 +63,7 @@ public class ReshapeAction extends UserAction {
 	public void apply() {
 		object.offsetTo(params[OFSX_INDEX], params[OFSY_INDEX]);
 		object.rotateTo(params[ROT_INDEX]);
-		object.setShape(params, TRANSFORM_LENGTH, params.length);
+		object.setGeom(params, TRANSFORM_LENGTH, params.length);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class ReshapeAction extends UserAction {
 		params[OFSX_INDEX] = object.offsetX();
 		params[OFSY_INDEX] = object.offsetY();
 		params[ROT_INDEX] = object.rotation();
-		object.extractShape(params, TRANSFORM_LENGTH);
+		object.extractGeom(params, TRANSFORM_LENGTH);
 		Stepper forward = new Stepper(backward);
 		System.arraycopy(params, 0, forward.params, 0, params.length);
 		backward.inverse = forward;

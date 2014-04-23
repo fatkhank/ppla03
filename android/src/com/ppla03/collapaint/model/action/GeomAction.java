@@ -23,7 +23,7 @@ public class GeomAction extends AtomicAction {
 
 	GeomAction(CanvasObject object, float[] sourceParam, int start, int length) {
 		this.object = object;
-		params = new float[object.paramLength()];
+		params = new float[object.geomParamLength()];
 		System.arraycopy(sourceParam, start, params, 0, length);
 	}
 
@@ -34,7 +34,7 @@ public class GeomAction extends AtomicAction {
 	 */
 	public GeomAction(CanvasObject object, String parameter) {
 		this.object = object;
-		params = new float[object.paramLength()];
+		params = new float[object.geomParamLength()];
 		setParameter(parameter);
 	}
 
@@ -61,7 +61,7 @@ public class GeomAction extends AtomicAction {
 	 * Mengaplikasikan parameter geometri ke objek.
 	 */
 	public void apply() {
-		object.setShape(params, 0, params.length);
+		object.setGeom(params, 0, params.length);
 	}
 
 	private static float[] applyTemp = new float[5];
@@ -76,7 +76,7 @@ public class GeomAction extends AtomicAction {
 		if (applyTemp.length < length)
 			applyTemp = new float[length];
 		int size = decodeTo(param, applyTemp);
-		object.setShape(applyTemp, 0, size);
+		object.setGeom(applyTemp, 0, size);
 	}
 
 	private static float[] tempPoints = new float[5];
@@ -87,10 +87,10 @@ public class GeomAction extends AtomicAction {
 	 * @return parameter yang sudah terkodekan dalam {@link String}.
 	 */
 	public static String getParameterOf(CanvasObject object) {
-		int size = object.paramLength();
+		int size = object.geomParamLength();
 		if (tempPoints.length < size)
 			tempPoints = new float[size];
-		int n = object.extractShape(tempPoints, 0);
+		int n = object.extractGeom(tempPoints, 0);
 		return encode(tempPoints, n);
 	}
 

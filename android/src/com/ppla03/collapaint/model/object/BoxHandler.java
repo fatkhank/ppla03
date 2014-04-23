@@ -15,9 +15,9 @@ class BoxHandler extends ShapeHandler {
 			RIGHT_BOTTOM = 3, ROTATOR = 4, MOVER = 5;
 	private static final Rotator rotator = new Rotator(0, 0, 200, 0, ROTATOR);
 	private static final Mover mover = new Mover(0, 0, MOVER);
-	private static final ControlPoint[] points = { new Shaper(0, 0, LEFT_TOP),
-			new Shaper(0, 0, RIGHT_TOP), new Shaper(0, 0, LEFT_BOTTOM),
-			new Shaper(0, 0, RIGHT_BOTTOM), rotator, mover };
+	private static final ControlPoint[] points = { new Joint(0, 0, LEFT_TOP),
+			new Joint(0, 0, RIGHT_TOP), new Joint(0, 0, LEFT_BOTTOM),
+			new Joint(0, 0, RIGHT_BOTTOM), rotator, mover };
 
 	private static final BoxHandler instance = new BoxHandler();
 

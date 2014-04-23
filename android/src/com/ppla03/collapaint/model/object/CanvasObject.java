@@ -148,7 +148,7 @@ public abstract class CanvasObject {
 	/**
 	 * Membuat flag seleksi objek true.
 	 */
-	public void select() {
+	public final void select() {
 		this.selected = true;
 	}
 
@@ -174,14 +174,14 @@ public abstract class CanvasObject {
 	 * @param start indeks awal pembacaan informasi.
 	 * @param end indeks pemberhenti.
 	 */
-	public abstract void setShape(float[] param, int start, int end);
+	public abstract void setGeom(float[] param, int start, int end);
 
 	/**
 	 * Mengambil berapa panjang array yang dibutuhkan untuk menampung <i>shape
 	 * parameter</i> dari objek.
 	 * @return panjang array
 	 */
-	public abstract int paramLength();
+	public abstract int geomParamLength();
 
 	/**
 	 * Memasukkan informasi <i>shape parameter</i> dari objek ke dalam suatu
@@ -193,7 +193,7 @@ public abstract class CanvasObject {
 	 * @param start indeks awal informasi mulai dimasukkan ke array.
 	 * @return banyaknya informasi yang dimasukkan ke dalam array.
 	 */
-	public abstract int extractShape(float[] target, int start);
+	public abstract int extractGeom(float[] target, int start);
 
 	/**
 	 * Mengambil koordinat translasi objek pada sumbu x.
@@ -224,12 +224,12 @@ public abstract class CanvasObject {
 	/**
 	 * Menggeser objek dengan jarak tertentu. Hasilnya akan diakumulasi dengan
 	 * perpindahan objek yang sudah ada.
-	 * @param dx jarak pergeseran sumbu x.
-	 * @param dy jarak pergeseran sumbu y.
+	 * @param worldX jarak pergeseran sumbu x.
+	 * @param worldY jarak pergeseran sumbu y.
 	 */
-	public final void offset(float dx, float dy) {
-		this.offsetX += dx;
-		this.offsetY += dy;
+	public final void offset(float worldX, float worldY) {
+		this.offsetX += worldX;
+		this.offsetY += worldY;
 	}
 
 	/**
@@ -266,7 +266,7 @@ public abstract class CanvasObject {
 	 * @param filter jenis {@link ControlPoint} yang diperbolehkan
 	 * @return {@link ShapeHandler}
 	 */
-	public abstract ShapeHandler getHandlers(int filter);
+	public abstract ShapeHandler getHandler(int filter);
 
 	/**
 	 * Menginformasikan kepada objek bahwa ada {@link ControlPoint} dari

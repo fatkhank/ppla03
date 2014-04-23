@@ -383,7 +383,7 @@ public class CanvasView extends View {
 			canvas.drawText(String.format(
 					"(%d, %d)->(%d, %4.0f, %4.0f, %3.1f)",
 					currentObject.privateID, currentObject.getGlobalID(),
-					currentObject.paramLength(), currentObject.offsetX(),
+					currentObject.geomParamLength(), currentObject.offsetX(),
 					currentObject.offsetY(), currentObject.rotation()),
 					getWidth() - 460, getHeight() - 50, debugPaint);
 		}
@@ -713,7 +713,7 @@ public class CanvasView extends View {
 			protoText = (TextObject) co;
 		}
 		checkpoint = userActions.size();
-		handler = co.getHandlers(ShapeHandler.ALL);
+		handler = co.getHandler(ShapeHandler.ALL);
 		listener.onWaitForApproval();
 		mode |= Mode.EDIT;
 		redoStack.clear();
@@ -1322,7 +1322,7 @@ public class CanvasView extends View {
 						grabbedCPoint.release();
 						grabbedCPoint = null;
 					}
-					handler = currentObject.getHandlers(ShapeHandler.ALL);
+					handler = currentObject.getHandler(ShapeHandler.ALL);
 				}
 			}
 		}else if(action instanceof GeomAction){

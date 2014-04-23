@@ -180,7 +180,7 @@ public class FreeObject extends BasicObject {
 	 */
 
 	@Override
-	public void setShape(float[] param, int start, int end) {
+	public void setGeom(float[] param, int start, int end) {
 		// catat daftar titik-titik
 		state = (int) param[start++];
 		int size = (end - start) >> 1;
@@ -202,13 +202,13 @@ public class FreeObject extends BasicObject {
 	}
 
 	@Override
-	public int paramLength() {
+	public int geomParamLength() {
 		// 1 untuk state + panjang xLocs + panjang yLocs
 		return 1 + xLocs.length + yLocs.length;
 	}
 
 	@Override
-	public int extractShape(float[] data, int start) {
+	public int extractGeom(float[] data, int start) {
 		data[start++] = state;
 		System.arraycopy(xLocs, 0, data, start, xLocs.length);
 		System.arraycopy(yLocs, 0, data, start + xLocs.length, yLocs.length);
@@ -239,7 +239,7 @@ public class FreeObject extends BasicObject {
 	}
 
 	@Override
-	public ShapeHandler getHandlers(int filter) {
+	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
 
 		mover.x = 0;
@@ -280,7 +280,7 @@ public class FreeObject extends BasicObject {
 		System.arraycopy(this.yLocs, 0, fo.yLocs, 0, this.yLocs.length);
 		fo.state = this.state;
 		copyTransformData(fo);
-		changeStyles(fo);
+		modifyStyles(fo);
 		return fo;
 	}
 }
