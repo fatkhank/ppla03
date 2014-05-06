@@ -26,7 +26,7 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.acivity_loader);
-		if (FontManager.readAsset(getAssets())) {
+		if (FontManager.readFontAsset(getAssets())) {
 			CanvasSynchronizer.getInstance().loadCanvas(this);
 			handler = new Handler();
 			progress = (ProgressBar) findViewById(R.id.l_progress);

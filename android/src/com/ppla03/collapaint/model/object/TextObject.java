@@ -55,13 +55,13 @@ public class TextObject extends CanvasObject {
 	 * @param worldX koordinat x titik tengah objek. (koordinat kanvas)
 	 * @param worldY koordinat y titik tengah objek. (koordinat kanvas)
 	 * @param color warna teks. Lihat {@link Color}.
-	 * @param font jenis huruf. Lihat {@link FontManager}.
+	 * @param fontCode kode huruf. Lihat {@link FontManager}.
 	 * @param size ukuran huruf.
 	 */
-	public TextObject(String text, int worldX, int worldY, int color, int font,
-			int size) {
+	public TextObject(String text, int worldX, int worldY, int color,
+			int fontCode, int size) {
 		this.text = text;
-		this.fontCode = font;
+		this.fontCode = fontCode;
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(color);
 		FontManager.apply(fontCode, paint);
@@ -221,6 +221,7 @@ public class TextObject extends CanvasObject {
 
 		rotator.setCenter(0, 0);
 		rotator.setRotation(rotation);
+		rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 		rotator.enable = ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE);
 
 		return handler;
@@ -243,7 +244,7 @@ public class TextObject extends CanvasObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public TextObject cloneObject() {
 		TextObject to = new TextObject();
 		to.text = this.text;
 		to.bounds.set(this.bounds);

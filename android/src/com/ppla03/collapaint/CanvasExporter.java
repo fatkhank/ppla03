@@ -53,6 +53,7 @@ public class CanvasExporter {
 	 * @param canvas model kanvas yang akan diekspor
 	 * @param format format file, hanya yang {@link CompressFormat#PNG} atau
 	 *            {@link CompressFormat#JPEG}
+	 * @param transparent background transparan atau tidak
 	 * @param cropped dipotong atau tidak. Jika true, maka keseluruhan kanvas
 	 *            akan diekspor. Jika false, maka hanya bagian yang ada objeknya
 	 *            yang akan diekspor.
@@ -61,7 +62,7 @@ public class CanvasExporter {
 	 *         {@link #DISK_UNAVAILABLE}.
 	 */
 	public static int export(CanvasModel canvas, CompressFormat format,
-			boolean cropped) {
+			boolean transparent, boolean cropped) {
 		String filename = canvas.name;
 		String storageState = Environment.getExternalStorageState();
 		if (storageState.equals(Environment.MEDIA_MOUNTED)) {
@@ -77,7 +78,7 @@ public class CanvasExporter {
 			int i = 1;
 			while (recent.exists())
 				recent = new File(dir, filename + i++ + extension);
-			boolean result = export(canvas, recent, format, cropped);
+			boolean result = export(canvas, recent, format, transparent, cropped);
 			if (result)
 				return SUCCESS;
 			else
@@ -100,17 +101,17 @@ public class CanvasExporter {
 	public static final int CROP_PADDING = 10;
 
 	private static boolean export(CanvasModel model, File file,
-			CompressFormat format, boolean cropped) {
-		Bitmap oriBitmap = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
-				Bitmap.Config.ARGB_8888);
+			CompressFormat format, boolean transparent, boolean cropped) {
+		Bitmap oriBitmap = Bitmap.createBitmap(model.getWidth(),
+				model.getHeight(), Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(oriBitmap);
 
 		// gambar dan hitung bound
-		if (format.equals(CompressFormat.JPEG))
-			canvas.drawColor(Color.WHITE);
+		if (transparent)
+			canvas.drawColor(Color.TRANSPARENT,android.graphics.PorterDuff.Mode.CLEAR);
 		else
-			canvas.drawColor(Color.TRANSPARENT,
-					android.graphics.PorterDuff.Mode.CLEAR);
+			canvas.drawColor(Color.WHITE);
+		
 		RectF bound = new RectF(model.getWidth(), model.getHeight(), 0, 0);
 		RectF r = new RectF();
 		for (int i = 0; i < model.objects.size(); i++) {

@@ -1,7 +1,6 @@
 package com.ppla03.collapaint.ui;
 
 import java.util.ArrayList;
-import java.util.TooManyListenersException;
 
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
@@ -31,7 +30,6 @@ import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -365,7 +363,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		canvas.setTextColor(color, true);
 		if (canvas.isInDrawingMode())
 			onClick(draw);
-		else if (!canvas.hasSelectedObjects())
+		else if (!canvas.hasSelectedObject())
 			onClick(select);
 	}
 
@@ -456,12 +454,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		else if (v == approve) {
 			canvas.approveAction();
 			showApproveBar(false);
-			if (!canvas.hasSelectedObjects())
+			if (!canvas.hasSelectedObject())
 				showSelectAdditionalBar(false);
 		} else if (v == cancel) {
 			canvas.cancelAction();
 			showApproveBar(false);
-			if (!canvas.hasSelectedObjects())
+			if (!canvas.hasSelectedObject())
 				showSelectAdditionalBar(false);
 			showStrokeAdditionalBar(false);
 			if (canvas.isInDrawingMode())
@@ -756,7 +754,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				boolean cropped = edCropped.isChecked();
 				CompressFormat format = EXPORT_FORMATS[edFormat
 						.getSelectedItemPosition()];
-				if (CanvasExporter.export(canvas.getModel(), format, cropped) == CanvasExporter.SUCCESS) {
+				//TODO export add transparency
+				if (CanvasExporter.export(canvas.getModel(), format, true, cropped) == CanvasExporter.SUCCESS) {
 					MediaScannerConnection.scanFile(this,
 							new String[] { CanvasExporter.getResultFile()
 									.toString() }, null, null);
@@ -846,5 +845,17 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			Toast.makeText(this, "Failed to fetch list. Connection problem.",
 					Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	@Override
+	public void onInviteUser(String accountId, CanvasModel model, int status) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onKickUser(UserModel user, CanvasModel model, int status) {
+		// TODO Auto-generated method stub
+		
 	}
 }

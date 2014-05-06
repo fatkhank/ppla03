@@ -1,6 +1,8 @@
 package com.ppla03.collapaint.model.object;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 
 /**
  * Berfungsi untuk mengontrol bentuk dari objek, menggunakan titik-titik kontrol
@@ -37,16 +39,19 @@ public class ShapeHandler {
 		size = points.length;
 		this.object = object;
 	}
+	
+	protected static final RectF bounds = new RectF(); 
 
 	/**
 	 * Menggambar handler beserta titik-titik kontrol yang dimiliki ke dalam
 	 * suatu kanvas.
 	 * @param canvas kanvas tempat menggambar handler.
 	 */
-	public void draw(Canvas canvas) {
+	public void draw(Canvas canvas, Paint selector) {
 		canvas.save();
 		canvas.translate(object.offsetX, object.offsetY);
 		canvas.rotate(object.rotation);
+		canvas.drawRect(bounds, selector);
 		for (int i = 0; i < size; i++) {
 			ControlPoint cp = points[i];
 			if (cp.enable)
@@ -92,6 +97,13 @@ public class ShapeHandler {
 		for (int i = 0; i < points.length; i++)
 			points[i].enable = enable;
 	}
+	
+	/**
+	 * Menginisiasi handler.
+	 */
+	public void init(){
+		object.getBounds(bounds);
+	}
 
 	protected static final float[] movePoints = new float[6];
 
@@ -117,6 +129,7 @@ public class ShapeHandler {
 		movePoints[ControlPoint.OBJ_Y] = (float) (worldX * sin + worldY * cos);
 		cp.moveTo(movePoints);
 		object.onHandlerMoved(this, cp, ox, oy);
+		object.getBounds(bounds);
 	}
 
 	/**

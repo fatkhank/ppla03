@@ -19,7 +19,7 @@ public class BrowserConnector extends ServerConnector {
 	private static String LIST_URL = HOST + "list";
 
 	private static BrowserConnector instance;
-	private OnCanvasCreateListener createListener;
+	private CanvasCreationListener createListener;
 	private OnFetchListListener listFetchListener;
 	private CanvasModel proposedModel;
 
@@ -40,7 +40,7 @@ public class BrowserConnector extends ServerConnector {
 	 * @param listener
 	 * @return this.
 	 */
-	public BrowserConnector setCreateListener(OnCanvasCreateListener listener) {
+	public BrowserConnector setCreateListener(CanvasCreationListener listener) {
 		this.createListener = listener;
 		return this;
 	}
@@ -66,7 +66,7 @@ public class BrowserConnector extends ServerConnector {
 
 	/**
 	 * Membuat sebuah kanvas. Jika proses telah dibuat, akan memanggil
-	 * {@link OnCanvasCreateListener#onCreated(CanvasModel, int)} dari listener
+	 * {@link CanvasCreationListener#onCreated(CanvasModel, int)} dari listener
 	 * yang didaftarkan.
 	 * @param owner pemilik kanvas.
 	 * @param name nama kanvas.
@@ -77,6 +77,7 @@ public class BrowserConnector extends ServerConnector {
 		JSONObject msg = new JSONObject();
 		try {
 			proposedModel = new CanvasModel(owner, name, width, height);
+			//TODO create canvas top left =0
 
 			msg.put(CreateJCode.OWNER_ID, owner.collaID);
 			msg.put(CreateJCode.CANVAS_NAME, name);
@@ -101,10 +102,10 @@ public class BrowserConnector extends ServerConnector {
 						int error = reply.getInt(CreateJCode.RESULT_ERROR);
 						if (error == CreateJCode.DUPLICATE_NAME)
 							createListener.onCreated(proposedModel,
-									OnCanvasCreateListener.DUPLICATE_NAME);
+									CanvasCreationListener.DUPLICATE_NAME);
 						else if (error == CreateJCode.USER_UNKNOWN)
 							createListener.onCreated(proposedModel,
-									OnCanvasCreateListener.USER_UNKNOWN);
+									CanvasCreationListener.USER_UNKNOWN);
 					} else {
 						proposedModel
 								.setid(reply.getInt(CreateJCode.CANVAS_ID));
@@ -220,4 +221,13 @@ public class BrowserConnector extends ServerConnector {
 						newList);
 		}
 	};
+	
+	/**
+	 * Menghapus suatu kanvas
+	 * @param model
+	 */
+	public void deleteCanvas(UserModel user, CanvasModel model){
+		//TODO delete canvas
+		
+	}
 }

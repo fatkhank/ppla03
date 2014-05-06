@@ -130,9 +130,9 @@ public abstract class CanvasObject {
 		double deg = Math.toRadians(-rotation);
 		double cos = Math.cos(deg);
 		double sin = Math.sin(deg);
-		x = x * cos + y * -sin;
-		y = x * sin + y * cos;
-		selected = selectedBy((float) x, (float) y, radius);
+		double nx = x * cos + y * -sin;
+		double ny = x * sin + y * cos;
+		selected = selectedBy((float) nx, (float) ny, radius);
 		return selected;
 	}
 

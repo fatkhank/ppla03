@@ -37,7 +37,7 @@ import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
-import com.ppla03.collapaint.conn.OnCanvasCreateListener;
+import com.ppla03.collapaint.conn.CanvasCreationListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
@@ -45,7 +45,7 @@ import com.ppla03.collapaint.model.UserModel;
 
 public class BrowserActivity extends Activity implements View.OnClickListener,
 		OnItemClickListener, ConnectionCallbacks, OnConnectionFailedListener,
-		OnCanvasCreateListener, DialogInterface.OnClickListener,
+		CanvasCreationListener, DialogInterface.OnClickListener,
 		OnFetchListListener {
 	private Button mSignOutButton;
 	private Button mCreateButton;
@@ -212,10 +212,10 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			startActivity(intent);
 		} else {
 			String msg;
-			if (status == OnCanvasCreateListener.DUPLICATE_NAME) {
+			if (status == CanvasCreationListener.DUPLICATE_NAME) {
 				createDialog.show();
 				msg = "Canvas with same name is already exist. Try different name.";
-			} else if (status == OnCanvasCreateListener.USER_UNKNOWN) {
+			} else if (status == CanvasCreationListener.USER_UNKNOWN) {
 				msg = "User is unregistered.";
 			} else if (status == ServerConnector.CONNECTION_PROBLEM) {
 				msg = "Connection problem.";
@@ -366,5 +366,11 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			return position;
 		}
 
+	}
+
+	@Override
+	public void onDeleted(CanvasModel model, int status) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -111,4 +111,11 @@ public class CollaUserManager extends ServerConnector {
 				listener.onAccountChecked(status);
 		}
 	};
+	
+	/**
+	 * Melogout pengguna sekarang 
+	 */
+	public static void logout(){
+		
+	}
 }

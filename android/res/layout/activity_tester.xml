@@ -17,7 +17,8 @@
         <LinearLayout
             android:layout_width="684dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            android:visibility="gone" >
 
             <Button
                 android:id="@+id/wp_draw_rect"
@@ -85,7 +86,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:fillViewport="true" >
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="wrap_content"

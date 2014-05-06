@@ -51,7 +51,7 @@ public abstract class BasicObject extends CanvasObject {
 	 *            parameter color diabaikan.
 	 * @param color warna isian. Lihat {@link Color}.
 	 */
-	public final void setFillMode(boolean filled, int color) {
+	public void setFillMode(boolean filled, int color) {
 		fillPaint.setColor(filled ? color : Color.TRANSPARENT);
 	}
 

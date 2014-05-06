@@ -175,7 +175,7 @@ public class ColorDialog implements OnClickListener, OnSeekBarChangeListener,
 	@Override
 	public void onClick(DialogInterface arg0, int arg1) {
 		if (mode == PALLETE) {
-			listener.onColorChanged(colorView.currentColor);
+			listener.onColorChanged(ColorView.currentColor);
 		} else {
 			selectedColor = Color.argb(alpha, red, green, blue);
 			listener.onColorChanged(selectedColor);

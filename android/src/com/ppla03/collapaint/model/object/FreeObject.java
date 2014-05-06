@@ -46,6 +46,8 @@ public class FreeObject extends BasicObject {
 	private static final int EDIT_MASK = 1, EDITABLE = 1, PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;
 
+	private static final float MAKE_LOOP_DIST = 5;
+
 	/**
 	 * Status bentuk objek; NEW = masih dibentuk, OPEN = terbuka (tidak
 	 * membentuk loop), CLOSED = membentuk loop.
@@ -75,9 +77,6 @@ public class FreeObject extends BasicObject {
 	 * merupakan titik acuan awal yang digunakan untuk menggambar.
 	 * @param worldX koordinat x titik acuan awal (koordinat kanvas)
 	 * @param worldY koordinat y titik acuan awal (koordinat kanvas)
-	 * @param closed jika true maka ketika pena diangkat, akan ditambahkan garis
-	 *            yang menghubungkan titik akhir ke titik awal, sehingga objek
-	 *            membentuk loop.
 	 * @param fillColor warna isian objek. jika warna =
 	 *            {@code Color.TRANSPARENT} atau tidak membentuk loop, maka
 	 *            dianggap tidak memiliki isian.
@@ -85,17 +84,12 @@ public class FreeObject extends BasicObject {
 	 * @param strokeWidth tebal pinggiran objek.
 	 * @param strokeStyle jenis dekorasi pinggiran objek.
 	 */
-	public FreeObject(boolean closed, int fillColor, int strokeColor,
-			int strokeWidth, int strokeStyle) {
+	public FreeObject(int fillColor, int strokeColor, int strokeWidth,
+			int strokeStyle) {
 		super(fillColor, strokeColor, strokeWidth, strokeStyle);
 		strokePaint.setStrokeJoin(Join.ROUND);
-		if (closed)
-			state = EDITABLE | CLOSED;
-		else {
-			state = EDITABLE | OPEN;
-			fillPaint.setColor(Color.TRANSPARENT);
-		}
 		path = new Path();
+		state = EDITABLE | OPEN;
 		bounds = new RectF();
 	}
 
@@ -148,9 +142,16 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public FreeObject penUp() {
-		state &= ~EDIT_MASK;
-		if ((state & LOOP_MASK) == CLOSED)
+		// tentukan apakah membentuk loop atu tidak
+		state &= ~EDIT_MASK;// buat jadi permanen
+		PointF first = points.get(0);
+		PointF last = points.get(points.size() - 1);
+		float dx = Math.abs(first.x - last.x);
+		float dy = Math.abs(first.y - last.y);
+		if (dx < MAKE_LOOP_DIST && dy < MAKE_LOOP_DIST) {
+			state = CLOSED;
 			path.close();
+		}
 
 		// hitung titik tengah
 		path.computeBounds(bounds, true);
@@ -171,6 +172,12 @@ public class FreeObject extends BasicObject {
 			yLocs[i] = p.y - cy;
 		}
 		return this;
+	}
+
+	@Override
+	public void setFillMode(boolean filled, int color) {
+		if (state == CLOSED)
+			super.setFillMode(filled, color);
 	}
 
 	/*
@@ -248,6 +255,7 @@ public class FreeObject extends BasicObject {
 
 		rotator.setCenter(0, 0);
 		rotator.setRotation(rotation);
+		rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 		rotator.enable = ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE);
 
 		return handler;
@@ -270,7 +278,7 @@ public class FreeObject extends BasicObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public FreeObject cloneObject() {
 		FreeObject fo = new FreeObject();
 		fo.path.set(this.path);
 		fo.bounds.set(this.bounds);

@@ -13,6 +13,7 @@ import android.graphics.Shader.TileMode;
  * 
  */
 public class Rotator extends ControlPoint {
+	public static final float MIN_RADIUS = 50;
 	private static final int ROTATE_COLOR1 = Color.argb(200, 10, 255, 150);
 	private static final int ROTATE_COLOR2 = Color.argb(200, 0, 250, 20);
 
@@ -24,8 +25,9 @@ public class Rotator extends ControlPoint {
 				ROTATE_COLOR2, TileMode.CLAMP));
 		linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		linePaint.setStyle(Style.STROKE);
-		linePaint.setStrokeWidth(2);
-		StrokeStyle.applyEffect(StrokeStyle.SOLID, linePaint);
+		linePaint.setColor(Color.DKGRAY);
+		linePaint.setStrokeWidth(1);
+		StrokeStyle.applyEffect(StrokeStyle.DOTTED, linePaint);
 	}
 
 	/**

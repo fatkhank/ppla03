@@ -6,8 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.UserManager;
-
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
@@ -99,12 +97,12 @@ public class ParticipantManager extends ServerConnector {
 		}
 	};
 
-	public void inviteUser(String username) {
-		// TODO
+	public void inviteUser(String email, CanvasModel canvas) {
+		// TODO invite
 	}
 
-	public void kickUser(UserModel user) {
-		// TODO
+	public void kickUser(UserModel user, CanvasModel canvas) {
+		// TODO kick
 	}
 
 }

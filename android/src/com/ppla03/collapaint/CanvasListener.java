@@ -30,6 +30,9 @@ public interface CanvasListener {
 	 */
 	void onURStatusChange(boolean undoable, boolean redoable);
 
+	/**
+	 * Dipicu saat kanvas meminta persetujuan atas perubahan yang terjadi.
+	 */
 	void onWaitForApproval();
 
 	/**

@@ -13,8 +13,10 @@ import android.graphics.RectF;
  * @author hamba v7
  */
 public class LineObject extends CanvasObject {
+	private static Mover mover = new Mover(0, 0, 2);
+
 	private static ControlPoint[] cps = { new Joint(0, 0, 0),
-			new Joint(0, 0, 1), new Mover(0, 0, 2) };
+			new Joint(0, 0, 1), mover };
 	private static final ShapeHandler handler = new ShapeHandler(null, cps);
 	static {
 		handler.size = 2;
@@ -147,8 +149,12 @@ public class LineObject extends CanvasObject {
 			cps[1].enable = true;
 		}
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
-			cps[2].setPosition(0, 0);
-			cps[2].enable = true;
+			mover.setPosition(0, 0);
+			mover.enable = true;
+			float left = Math.min(0, x2);
+			float top = Math.min(0, y2);
+			float right = Math.max(0, x2);
+			float bottom = Math.max(0, y2);
 		}
 		return handler;
 	}
@@ -181,6 +187,10 @@ public class LineObject extends CanvasObject {
 			y2 = MIN_LENGTH;
 			cps[0].setPosition(x2, y2);
 		}
+		float left = Math.min(0, x2);
+		float top = Math.min(0, y2);
+		float right = Math.max(0, x2);
+		float bottom = Math.max(0, y2);
 	}
 
 	@Override
@@ -211,7 +221,7 @@ public class LineObject extends CanvasObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public LineObject cloneObject() {
 		LineObject lo = new LineObject();
 		lo.x2 = this.x2;
 		lo.y2 = this.y2;

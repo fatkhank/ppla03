@@ -7,7 +7,7 @@ import com.ppla03.collapaint.model.CanvasModel;
  * @author hamba v7
  * 
  */
-public interface OnCanvasCreateListener {
+public interface CanvasCreationListener {
 	/**
 	 * Kanvas gagal dibuat karena owner pernah membuat kanvas dengan nama yang
 	 * sama sudah pernah dibuat.
@@ -25,9 +25,9 @@ public interface OnCanvasCreateListener {
 	 * @param status hasil pembuatan.<br/>
 	 *            {@link ServerConnector#SUCCESS} berarti kanvas berhasil
 	 *            dibuat.<br/>
-	 *            {@link OnCanvasCreateListener#DUPLICATE_NAME} berarti kanvas
+	 *            {@link CanvasCreationListener#DUPLICATE_NAME} berarti kanvas
 	 *            dengan nama yang sama sudah pernah dibuat. <br/>
-	 *            {@link OnCanvasCreateListener#USER_UNKNOWN} berarti owner
+	 *            {@link CanvasCreationListener#USER_UNKNOWN} berarti owner
 	 *            belum terdaftar. <br/>
 	 *            Jika ada error lain, status akan berisi
 	 *            {@link ServerConnector#CONNECTION_PROBLEM},
@@ -36,4 +36,18 @@ public interface OnCanvasCreateListener {
 	 *            {@link ServerConnector#INTERNAL_PROBLEM}
 	 */
 	void onCreated(CanvasModel newCanvas, int status);
+
+	/**
+	 * Dipicu saat penghapusan sebuah kanvas mendapat jawaban dari server.
+	 * @param model kanvas yang dihapus
+	 * @param status hasil penghapusan<br/>
+	 *            {@link ServerConnector#SUCCESS} berarti kanvas berhasil
+	 *            dibuat.<br/>
+	 *            Jika ada error lain, status akan berisi
+	 *            {@link ServerConnector#CONNECTION_PROBLEM},
+	 *            {@link ServerConnector#SERVER_PROBLEM},
+	 *            {@link ServerConnector#UNKNOWN_REPLY}, atau
+	 *            {@link ServerConnector#INTERNAL_PROBLEM}
+	 */
+	void onDeleted(CanvasModel model, int status);
 }

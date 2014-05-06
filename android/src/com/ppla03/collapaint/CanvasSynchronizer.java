@@ -13,15 +13,43 @@ import com.ppla03.collapaint.conn.SyncEventListener;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.action.*;
-import com.ppla03.collapaint.model.object.*;
 
+/**
+ * Mengurusi proses pemuatan dan sinkronisasi kanvas.
+ * @author hamba v7
+ * 
+ */
 public class CanvasSynchronizer implements SyncEventListener,
 		DialogInterface.OnClickListener {
+	/**
+	 * Listener proses memuat kanvas.
+	 * @author hamba v7
+	 * 
+	 */
 	public static interface CanvasLoadListener {
+		/**
+		 * Dipicu saat proses memuat kanvas selesai
+		 * @param model kanvas yang dimuat
+		 * @param status status, bisa berisi {@link ServerConnector#SUCCESS},
+		 *            {@link ServerConnector#INTERNAL_PROBLEM},
+		 *            {@link ServerConnector#SERVER_PROBLEM},
+		 *            {@link ServerConnector#UNKNOWN_REPLY}, atau
+		 *            {@link ServerConnector#INTERNAL_PROBLEM}
+		 */
 		void onCanvasLoaded(CanvasModel model, int status);
 	}
 
-	private CanvasLoadListener listener;
+	/**
+	 * Listener proses menutup kanvas.
+	 * @author hamba v7
+	 * 
+	 */
+	public static interface CanvasCloseListener {
+		// TODO close listener
+		void onCanvasClosed(CanvasModel model, int status);
+	}
+
+	private CanvasLoadListener loadListener;
 	private CanvasModel currentModel;
 
 	private AlertDialog hideModeDialog;
@@ -73,11 +101,20 @@ public class CanvasSynchronizer implements SyncEventListener,
 		return instance;
 	}
 
+	/**
+	 * Mengatur model kanvas yang sedang disinkronisasi
+	 * @param model
+	 * @return
+	 */
 	public CanvasSynchronizer setCanvas(CanvasModel model) {
 		currentModel = model;
 		return this;
 	}
 
+	/**
+	 * Memulai proses muat kanvas
+	 * @param listener
+	 */
 	public void loadCanvas(CanvasLoadListener listener) {
 		if (connector == null)
 			connector = CanvasConnector.getInstance().setSyncListener(this);
@@ -91,17 +128,24 @@ public class CanvasSynchronizer implements SyncEventListener,
 			currentModel.setid(1);
 			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
 		} else {
-			this.listener = listener;
+			this.loadListener = listener;
 			lastActNum = 0;
 			actionBuffer.clear();
 			playbackList.clear();
 			sentList.clear();
 			mode = LOADING;
 			updater.run();
+			// TODO open canvas connect to connector from syncz
 		}
 	}
 
+	public void closeCanvas(CanvasCloseListener listener) {
+		// TODO close canvas
+
+	}
+
 	public void setCanvasView(CanvasView canvas) {
+		//TODO onset set view
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				canvas.getContext());
 		builder.setMessage("There is a connection problem. Change to Hide Mode?");
@@ -118,6 +162,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 		}
 	}
 
+	/**
+	 * Memberhentikan proses sinkronisasi
+	 */
 	public void stop() {
 		mode |= STOP;
 	}
@@ -128,10 +175,16 @@ public class CanvasSynchronizer implements SyncEventListener,
 			updater.run();
 	}
 
+	/**
+	 * Menandai checkpoin
+	 */
 	public void markCheckpoint() {
 		checkPoint = lastActNum;
 	}
 
+	/**
+	 * Mengembalikan aksi yang dilakukan pengguna
+	 */
 	public void revert() {
 		lastActNum = checkPoint;
 		forceUpdate();
@@ -151,6 +204,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 		}
 	};
 
+	/**
+	 * Menambahkan aksi ke penampung aksi
+	 * @param action
+	 */
 	public void addToBuffer(UserAction action) {
 		if (actionBuffer.isEmpty())
 			actionBuffer.add(action);
@@ -172,7 +229,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 			Log.d("POS", "canvasLoaded");
 			mode = IDLE;
 			actionBuffer.addAll(actions);
-			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
+			loadListener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
 		} else {
 			playbackList.clear();
 			// undo aksi yang dilakukan selama proses update
@@ -202,10 +259,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	@Override
-	public void onActionUpdatedFailed(int status) {
+	public void onActionUpdateFailed(int status) {
 		if ((mode & LOADING) == LOADING) {
 			mode &= ~LOADING;
-			listener.onCanvasLoaded(currentModel, status);
+			loadListener.onCanvasLoaded(currentModel, status);
 		} else if (status == ServerConnector.CONNECTION_PROBLEM
 				|| status == ServerConnector.SERVER_PROBLEM) {
 			if (!view.isInHideMode())
@@ -220,5 +277,11 @@ public class CanvasSynchronizer implements SyncEventListener,
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.postDelayed(updater, sync_time);
 		}
+	}
+
+	@Override
+	public void onCanvasClosed(CanvasModel model, int status) {
+		// TODO Auto-generated method stub
+
 	}
 }

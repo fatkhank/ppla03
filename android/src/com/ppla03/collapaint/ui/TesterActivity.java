@@ -170,9 +170,9 @@ public class TesterActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onSelectionEvent(boolean success, int selected) {
-		if (!success)
-			Toast.makeText(this, "No object selected", Toast.LENGTH_SHORT)
-					.show();
+//		if (!success)
+//			Toast.makeText(this, "No object selected", Toast.LENGTH_SHORT)
+//					.show();
 	}
 
 	@Override

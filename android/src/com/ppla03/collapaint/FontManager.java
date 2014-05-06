@@ -55,7 +55,7 @@ public class FontManager {
 	 * @param am sumber.
 	 * @throws IOException jika ada permasalahan dalam pembacaan berkas.
 	 */
-	public static boolean readAsset(AssetManager am) {
+	public static boolean readFontAsset(AssetManager am) {
 		try {
 			String[] fileNames = am.list("fonts");
 			mapper.clear();

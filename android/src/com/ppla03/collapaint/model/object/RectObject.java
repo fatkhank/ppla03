@@ -99,7 +99,7 @@ public class RectObject extends BasicObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public RectObject cloneObject() {
 		RectObject ro = new RectObject();
 		ro.rect.set(this.rect);
 		copyTransformData(ro);

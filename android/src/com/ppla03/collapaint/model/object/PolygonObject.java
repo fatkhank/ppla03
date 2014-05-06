@@ -97,7 +97,7 @@ public class PolygonObject extends BasicObject {
 		if (radius <= MINIMAL_RADIUS)
 			radius = MINIMAL_RADIUS;
 		double inc = (Math.PI + Math.PI) / corner;
-		double deg = -Math.PI/2;
+		double deg = -Math.PI / 2;
 		for (int i = 0; i < corner; i++) {
 			xLocs[i] = (float) (radius * Math.cos(deg));
 			yLocs[i] = (float) (radius * Math.sin(deg));
@@ -216,6 +216,7 @@ public class PolygonObject extends BasicObject {
 
 		// jika menampilkan pengatur rotasi
 		if ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE) {
+			rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 			rotator.enable = true;
 		}
 
@@ -273,6 +274,7 @@ public class PolygonObject extends BasicObject {
 
 				offsetRelative(-cx, -cy);
 				mover.setPosition(0, 0);
+				rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 			}
 		}
 	}
@@ -283,7 +285,7 @@ public class PolygonObject extends BasicObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public PolygonObject cloneObject() {
 		PolygonObject po = new PolygonObject();
 		po.path.set(this.path);
 		po.xLocs = new float[this.xLocs.length];

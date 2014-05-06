@@ -2,8 +2,8 @@ package com.ppla03.collapaint.conn;
 
 import java.util.ArrayList;
 
+import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.AtomicAction;
-import com.ppla03.collapaint.model.action.UserAction;
 
 /**
  * Listener event dari {@link CanvasConnector} yang berkaitan dengan kegiatan
@@ -17,7 +17,7 @@ public interface SyncEventListener {
 	 * Dipicu saat terjadi permasalahan pada saat update aksi dijalankan.
 	 * @param status
 	 */
-	void onActionUpdatedFailed(int status);
+	void onActionUpdateFailed(int status);
 
 	/**
 	 * Dipicu saat update aksi telah dijalankan.
@@ -27,4 +27,10 @@ public interface SyncEventListener {
 	void onActionUpdated(int lastActionNumber,
 			ArrayList<AtomicAction> replyActions);
 
+	/**
+	 * Dipicu saat proses penutupan kanvas berhasil
+	 * @param model
+	 * @param status
+	 */
+	void onCanvasClosed(CanvasModel model, int status);
 }

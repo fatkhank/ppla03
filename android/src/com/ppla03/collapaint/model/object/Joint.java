@@ -24,6 +24,12 @@ public class Joint extends ControlPoint {
 				JOINT_COLOR2, TileMode.CLAMP));
 	}
 
+	/**
+	 * Membuat titik sambungan dengan parameter tertentu.
+	 * @param x posisi x
+	 * @param y posisi y
+	 * @param id id titik
+	 */
 	public Joint(float x, float y, int id) {
 		super(x, y, id);
 		paint.setAlpha(255);

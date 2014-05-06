@@ -24,6 +24,16 @@ public class CanvasModel {
 	 * Nama kanvas.
 	 */
 	public final String name;
+	
+	/**
+	 * Koordinat y titik pojok kiri atas kanvas.
+	 */
+	private int top;
+	
+	/**
+	 * Koordinat x titik pojok kiri atas kanvas.
+	 */
+	private int left;
 
 	/**
 	 * Lebar kanvas
@@ -77,10 +87,14 @@ public class CanvasModel {
 	 * Mengatur ukuran kanvas.
 	 * @param width
 	 * @param height
+	 * @param top
+	 * @param left
 	 */
-	public void setDimension(int width, int height) {
+	public void setDimension(int width, int height, int top, int left) {
 		this.width = width;
 		this.height = height;
+		this.top = top;
+		this.left = left;
 	}
 
 	/**
@@ -97,6 +111,22 @@ public class CanvasModel {
 	 */
 	public int getHeight() {
 		return height;
+	}
+	
+	/**
+	 * Mengambil koordinat y pojok kiri atas kanvas.
+	 * @return
+	 */
+	public int getTop(){
+		return top;
+	}
+	
+	/**
+	 * Mengambil koordinat x pojok kiri atas kanvas.
+	 * @return
+	 */
+	public int getLeft(){
+		return left;
 	}
 
 	@Override

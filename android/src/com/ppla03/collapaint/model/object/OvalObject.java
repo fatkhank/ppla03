@@ -109,7 +109,7 @@ public class OvalObject extends BasicObject {
 	}
 
 	@Override
-	public CanvasObject cloneObject() {
+	public OvalObject cloneObject() {
 		OvalObject oo = new OvalObject();
 		oo.bounds.set(this.bounds);
 		copyTransformData(oo);
