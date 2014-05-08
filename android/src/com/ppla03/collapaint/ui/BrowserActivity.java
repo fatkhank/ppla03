@@ -88,7 +88,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		mCreateButton.setOnClickListener(this);
 
 		// Create the text view
-		username = (TextView) findViewById(R.id.textView1);
+		username = (TextView) findViewById(R.id.w_stroke_label);
 		username.setText("Hello, " + message);
 		mGoogleApiClient = buildGoogleApiClient();
 
@@ -215,7 +215,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			if (status == CanvasCreationListener.DUPLICATE_NAME) {
 				createDialog.show();
 				msg = "Canvas with same name is already exist. Try different name.";
-			} else if (status == CanvasCreationListener.USER_UNKNOWN) {
+			} else if (status == CanvasCreationListener.NOT_AUTHORIZED) {
 				msg = "User is unregistered.";
 			} else if (status == ServerConnector.CONNECTION_PROBLEM) {
 				msg = "Connection problem.";

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.ppla03.collapaint.conn.CanvasConnector;
+import com.ppla03.collapaint.conn.CanvasConnector.OnCanvasOpenListener;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.conn.SyncEventListener;
 import com.ppla03.collapaint.model.CanvasModel;
@@ -20,7 +21,7 @@ import com.ppla03.collapaint.model.action.*;
  * 
  */
 public class CanvasSynchronizer implements SyncEventListener,
-		DialogInterface.OnClickListener {
+		DialogInterface.OnClickListener, OnCanvasOpenListener {
 	/**
 	 * Listener proses memuat kanvas.
 	 * @author hamba v7
@@ -135,7 +136,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 			sentList.clear();
 			mode = LOADING;
 			updater.run();
-			// TODO open canvas connect to connector from syncz
+			connector.openCanvas(CollaUserManager.getCurrentUser().collaID,
+					currentModel, this);
 		}
 	}
 
@@ -145,7 +147,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	public void setCanvasView(CanvasView canvas) {
-		//TODO onset set view
+		// TODO onset set view
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				canvas.getContext());
 		builder.setMessage("There is a connection problem. Change to Hide Mode?");
@@ -283,5 +285,12 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void onCanvasClosed(CanvasModel model, int status) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void onCanvasOpened(int status, int lan) {
+		if (status == ServerConnector.SUCCESS)
+			this.lastActNum = lan;
+		loadListener.onCanvasLoaded(currentModel, status);
 	}
 }

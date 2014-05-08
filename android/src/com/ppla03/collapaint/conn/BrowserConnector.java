@@ -6,6 +6,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import collapaint.code.CanvasJCode;
+import collapaint.code.CanvasJCode.Reply;
+import collapaint.code.CanvasJCode.Request;
+
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 
@@ -15,8 +19,11 @@ import com.ppla03.collapaint.model.UserModel;
  * 
  */
 public class BrowserConnector extends ServerConnector {
-	private static String CREATE_URL = HOST + "create";
-	private static String LIST_URL = HOST + "list";
+	private static String CANVAS_URL = HOST + "canvas";
+
+	protected void onHostAddressChange(String host) {
+		CANVAS_URL = host + "action";
+	}
 
 	private static BrowserConnector instance;
 	private CanvasCreationListener createListener;
@@ -50,20 +57,6 @@ public class BrowserConnector extends ServerConnector {
 		return this;
 	}
 
-	static class CreateJCode {
-
-		// --- request ---
-		static final String OWNER_ID = "oid";
-		static final String CANVAS_NAME = "name";
-		static final String CANVAS_WIDTH = "width";
-		static final String CANVAS_HEIGHT = "height";
-		// --- reply ---
-		static final String CANVAS_ID = "id";
-		static final String RESULT_ERROR = "error";
-		static final int DUPLICATE_NAME = 2;
-		static final int USER_UNKNOWN = 8;
-	}
-
 	/**
 	 * Membuat sebuah kanvas. Jika proses telah dibuat, akan memanggil
 	 * {@link CanvasCreationListener#onCreated(CanvasModel, int)} dari listener
@@ -77,14 +70,13 @@ public class BrowserConnector extends ServerConnector {
 		JSONObject msg = new JSONObject();
 		try {
 			proposedModel = new CanvasModel(owner, name, width, height);
-			//TODO create canvas top left =0
+			msg.put(Request.USER_ID, owner.collaID);
+			msg.put(Request.CANVAS_NAME, name);
+			msg.put(Request.CANVAS_WIDTH, width);
+			msg.put(Request.CANVAS_HEIGHT, height);
+			msg.put(Request.ACTION, Request.Action.CREATE);
 
-			msg.put(CreateJCode.OWNER_ID, owner.collaID);
-			msg.put(CreateJCode.CANVAS_NAME, name);
-			msg.put(CreateJCode.CANVAS_WIDTH, width);
-			msg.put(CreateJCode.CANVAS_HEIGHT, height);
-
-			new Client(CREATE_URL, createReply).execute(msg);
+			new Client(CANVAS_URL, createReply).execute(msg);
 		} catch (JSONException e) {
 			createReply.process(INTERNAL_PROBLEM, null);
 		}
@@ -98,17 +90,16 @@ public class BrowserConnector extends ServerConnector {
 		public void process(int status, JSONObject reply) {
 			if (status == SUCCESS) {
 				try {
-					if (reply.has(CreateJCode.RESULT_ERROR)) {
-						int error = reply.getInt(CreateJCode.RESULT_ERROR);
-						if (error == CreateJCode.DUPLICATE_NAME)
+					if (reply.has(CanvasJCode.ERROR)) {
+						String error = reply.getString(CanvasJCode.ERROR);
+						if (error.equals(CanvasJCode.Error.DUPLICATE_NAME))
 							createListener.onCreated(proposedModel,
 									CanvasCreationListener.DUPLICATE_NAME);
-						else if (error == CreateJCode.USER_UNKNOWN)
+						else if (error.equals(CanvasJCode.Error.NOT_AUTHORIZED))
 							createListener.onCreated(proposedModel,
-									CanvasCreationListener.USER_UNKNOWN);
+									CanvasCreationListener.NOT_AUTHORIZED);
 					} else {
-						proposedModel
-								.setid(reply.getInt(CreateJCode.CANVAS_ID));
+						proposedModel.setid(reply.getInt(Reply.CANVAS_ID));
 						createListener.onCreated(proposedModel, SUCCESS);
 					}
 				} catch (JSONException e) {
@@ -118,23 +109,6 @@ public class BrowserConnector extends ServerConnector {
 				createListener.onCreated(proposedModel, status);
 		}
 	};
-
-	static class ListJCode {
-
-		// --- request ---
-		static final String USER_ID = "uid";
-		// --- reply ---
-		static final String CANVAS_OWNED = "own";
-		static final String CANVAS_OLD = "old";
-		static final String CANVAS_NEW = "new";
-		static final String CANVAS_ID = "i";
-		static final String NAME = "n";
-		static final String WIDTH = "w";
-		static final String HEIGHT = "h";
-		static final String OWNER_ID = "o";
-		static final String OWNER_NAME = "on";
-		static final String ERROR = "error";
-	}
 
 	private UserModel asker;
 
@@ -147,8 +121,9 @@ public class BrowserConnector extends ServerConnector {
 		JSONObject request = new JSONObject();
 		try {
 			asker = user;
-			request.put(ListJCode.USER_ID, user.collaID);
-			new Client(LIST_URL, listReply).execute(request);
+			request.put(Request.USER_ID, user.collaID);
+			request.put(Request.ACTION, Request.Action.LIST);
+			new Client(CANVAS_URL, listReply).execute(request);
 		} catch (JSONException e) {
 			listReply.process(INTERNAL_PROBLEM, null);
 		}
@@ -166,47 +141,51 @@ public class BrowserConnector extends ServerConnector {
 			if (status == SUCCESS) {
 				try {
 					// -------- process owned -----
-					JSONArray owns = reply.getJSONArray(ListJCode.CANVAS_OWNED);
+					JSONArray owns = reply.getJSONArray(Reply.OWNED_LIST);
 					ownList.clear();
 					for (int i = 0; i < owns.length(); i++) {
 						JSONObject canvas = owns.getJSONObject(i);
-						String name = canvas.getString(ListJCode.NAME);
-						int width = canvas.getInt(ListJCode.WIDTH);
-						int height = canvas.getInt(ListJCode.HEIGHT);
+						String name = canvas.getString(Reply.CANVAS_NAME);
+						int width = canvas.getInt(Reply.CANVAS_WIDTH);
+						int height = canvas.getInt(Reply.CANVAS_HEIGHT);
+
 						CanvasModel model = new CanvasModel(asker, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
+
+						model.setid(canvas.getInt(Reply.CANVAS_ID));
 						ownList.add(model);
 					}
+
 					// -------- process old list -----
-					JSONArray olds = reply.getJSONArray(ListJCode.CANVAS_OLD);
+					JSONArray olds = reply.getJSONArray(Reply.OLD_LIST);
 					oldList.clear();
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = olds.getJSONObject(i);
 						UserModel owner = new UserModel();
-						owner.collaID = canvas.getInt(ListJCode.OWNER_ID);
-						String name = canvas.getString(ListJCode.NAME);
-						int width = canvas.getInt(ListJCode.WIDTH);
-						int height = canvas.getInt(ListJCode.HEIGHT);
+						owner.collaID = canvas.getInt(Reply.OWNER_ID);
+						owner.name = canvas.getString(Reply.OWNER_NAME);
+						String name = canvas.getString(Reply.CANVAS_NAME);
+						int width = canvas.getInt(Reply.CANVAS_WIDTH);
+						int height = canvas.getInt(Reply.CANVAS_HEIGHT);
 						CanvasModel model = new CanvasModel(owner, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
+						model.setid(canvas.getInt(Reply.CANVAS_ID));
 						oldList.add(model);
 					}
 					// -------- process invited -----
-					JSONArray news = reply.getJSONArray(ListJCode.CANVAS_NEW);
+					JSONArray news = reply.getJSONArray(Reply.INVITATION_LIST);
 					newList.clear();
 					for (int i = 0; i < olds.length(); i++) {
 						JSONObject canvas = news.getJSONObject(i);
 						UserModel owner = new UserModel();
-						owner.collaID = canvas.getInt(ListJCode.OWNER_ID);
-						owner.name = canvas.getString(ListJCode.OWNER_NAME);
-						String name = canvas.getString(ListJCode.NAME);
-						int width = canvas.getInt(ListJCode.WIDTH);
-						int height = canvas.getInt(ListJCode.HEIGHT);
+						owner.collaID = canvas.getInt(Reply.OWNER_ID);
+						owner.name = canvas.getString(Reply.OWNER_NAME);
+						String name = canvas.getString(Reply.CANVAS_NAME);
+						int width = canvas.getInt(Reply.CANVAS_WIDTH);
+						int height = canvas.getInt(Reply.CANVAS_HEIGHT);
 						CanvasModel model = new CanvasModel(owner, name, width,
 								height);
-						model.setid(canvas.getInt(ListJCode.CANVAS_ID));
+						model.setid(canvas.getInt(Reply.CANVAS_ID));
 						newList.add(model);
 					}
 
@@ -221,13 +200,13 @@ public class BrowserConnector extends ServerConnector {
 						newList);
 		}
 	};
-	
+
 	/**
 	 * Menghapus suatu kanvas
 	 * @param model
 	 */
-	public void deleteCanvas(UserModel user, CanvasModel model){
-		//TODO delete canvas
-		
+	public void deleteCanvas(UserModel user, CanvasModel model) {
+		// TODO delete canvas
+
 	}
 }

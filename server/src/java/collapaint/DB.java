@@ -307,7 +307,7 @@ public class DB {
                 /**
                  * Mengganti data geom, transform, style, dan status
                  */
-                public static final String DATA = "UPDATE " + DB.Objects + " SET " + DB.Objects.GEOM + "=?, "
+                public static final String DATA = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.GEOM + "=?, "
                         + DB.Objects.STYLE + "=?, " + DB.Objects.TRANSFORM + "=?, " + DB.Objects.EXIST + "=? WHERE "
                         + DB.Objects.CODE + "=?";
 

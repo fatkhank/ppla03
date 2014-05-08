@@ -13,7 +13,7 @@ class BoxHandler extends ShapeHandler {
 			RIGHT_BOTTOM = 3, LEFT = 4, TOP = 5, RIGHT = 6, BOTTOM = 7,
 			ROTATOR = 8, MOVER = 9;
 	private static final Rotator rotator = new Rotator(0, 0, 200, 0, ROTATOR);
-	private static final Mover mover = new Mover(0, 0, MOVER);
+	private static final Mover mover = new Mover(0, 0, null, MOVER);
 
 	private static final Corner cornerLeftTop = new Corner(0, 0, LEFT_TOP,
 			Corner.LEFT_TOP);
@@ -70,6 +70,7 @@ class BoxHandler extends ShapeHandler {
 			rotator.enable = true;
 		}
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
+			mover.setObject(instance.object);
 			mover.enable = true;
 		}
 		return instance;
@@ -160,6 +161,7 @@ class BoxHandler extends ShapeHandler {
 			sideRight.x = rect.right;
 			sideBottom.y = rect.bottom;
 			rotator.radius = rect.bottom + Rotator.MIN_RADIUS;
+			mover.setObject(instance.object);
 		}
 	}
 

@@ -200,8 +200,9 @@ public class MoveMultiple extends UserAction {
 				MoveMultiple tm = (MoveMultiple) action;
 				return tm.objects.equals(objects);
 			} else if (action instanceof TransformAction) {
-				TransformAction ma = (TransformAction) action;
-				return objects.contains(ma.object);
+				return objects.contains(((TransformAction) action).object);
+			} else if (action instanceof ReshapeAction) {
+				return objects.contains(((ReshapeAction) action).object);
 			}
 		}
 		return false;

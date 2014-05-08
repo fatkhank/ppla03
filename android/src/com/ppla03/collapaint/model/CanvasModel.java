@@ -1,5 +1,6 @@
 package com.ppla03.collapaint.model;
 
+import java.sql.Date;
 import java.util.ArrayList;
 
 import com.ppla03.collapaint.model.object.CanvasObject;
@@ -44,6 +45,8 @@ public class CanvasModel {
 	 * Tinggi kanvas
 	 */
 	private int height;
+	
+	public Date createDate;
 
 	/**
 	 * Daftar objek yang ada di kanvas, terurut dari yang berada paling belakang

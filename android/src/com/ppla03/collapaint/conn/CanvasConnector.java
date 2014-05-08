@@ -11,6 +11,9 @@ import android.util.Log;
 
 import collapaint.code.ActionCode;
 import collapaint.code.ActionJCode;
+import collapaint.code.PortalJCode;
+import collapaint.code.PortalJCode.Reply;
+import collapaint.code.PortalJCode.Request;
 
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
@@ -28,6 +31,13 @@ public class CanvasConnector extends ServerConnector {
 	}
 
 	public static String COMMIT_URL = HOST + "action";
+	public static String PORTAL_URL = HOST + "portal";
+
+	@Override
+	protected void onHostAddressChange(String host) {
+		COMMIT_URL = host + "action";
+		PORTAL_URL = host + "portal";
+	}
 
 	private static CanvasConnector instance;
 	private static SyncEventListener syncListener;
@@ -53,25 +63,6 @@ public class CanvasConnector extends ServerConnector {
 			instance = new CanvasConnector();
 		}
 		return instance;
-	}
-
-	/**
-	 * Listener untuk proses membuka suatu kanvas.
-	 * @author hamba v7
-	 * 
-	 */
-	public static interface OnCanvasOpenListener {
-		/**
-		 * Canvas sudah terbuka.
-		 * @param model model kanvas
-		 * @param status jika status == {@link ServerConnector#SUCCESS}, maka
-		 *            {@code model} berisi data kanvas terbaru.
-		 */
-		void onCanvasOpened(CanvasModel model, int status);
-	}
-
-	public static interface OnCanvasCloseListener {
-		void onCanvasClosed(CanvasModel model, int status);
 	}
 
 	public CanvasConnector setSyncListener(SyncEventListener cs) {
@@ -103,7 +94,8 @@ public class CanvasConnector extends ServerConnector {
 					co = ((DeleteAction) ua).object;
 				} else if (ua instanceof TransformAction) {
 					TransformAction ta = (TransformAction) ua;
-					joAct.put(ActionJCode.ACTION_CODE, ActionCode.TRANSFORM_ACTION);
+					joAct.put(ActionJCode.ACTION_CODE,
+							ActionCode.TRANSFORM_ACTION);
 					joAct.put(ActionJCode.ACTION_PARAM, ta.getParameter());
 					co = ta.object;
 				} else if (ua instanceof GeomAction) {
@@ -116,26 +108,31 @@ public class CanvasConnector extends ServerConnector {
 					joAct.put(ActionJCode.ACTION_CODE, ActionCode.STYLE_ACTION);
 					joAct.put(ActionJCode.ACTION_PARAM, sa.getParameter());
 					co = sa.object;
+				} else if (ua instanceof ResizeCanvas) {
+					ResizeCanvas rc = (ResizeCanvas) ua;
+					joAct.put(ActionJCode.ACTION_CODE, ActionCode.RESIZE_ACTION);
+					joAct.put(ActionJCode.ACTION_PARAM, rc.getParameter());
 				}
-
-				if (co.getGlobalID() == -1) {
-					// if object is new and the action is draw, put in object
-					// list
-					if (ua instanceof DrawAction) {
-						joAct.put(ActionJCode.ACTION_OBJ_LISTED, sentObjects.size());
-						sentObjects.add(co);
-					} else
-						// if object is new but the action is not draw, find in
-						// object list
-						for (int j = 0; j < sentObjects.size(); j++) {
-							if (sentObjects.get(j).privateID == co.privateID) {
-								joAct.put(ActionJCode.ACTION_OBJ_LISTED, j);
-								break;
+				if (co != null) {
+					if (co.getGlobalID() == -1) {
+						// jika objek baru dan aksi draw -> masukkan di list
+						if (ua instanceof DrawAction) {
+							joAct.put(ActionJCode.ACTION_OBJ_LISTED,
+									sentObjects.size());
+							sentObjects.add(co);
+						} else
+							// jika objek baru dan aksi bukan draw -> cari idnya
+							for (int j = 0; j < sentObjects.size(); j++) {
+								if (sentObjects.get(j).privateID == co.privateID) {
+									joAct.put(ActionJCode.ACTION_OBJ_LISTED, j);
+									break;
+								}
 							}
-						}
-				} else
-					// if object is known, just put object's global id
-					joAct.put(ActionJCode.ACTION_OBJ_KNOWN, co.getGlobalID());
+					} else
+						// jika objek sudah diketahui masukkan id globalnya
+						joAct.put(ActionJCode.ACTION_OBJ_KNOWN,
+								co.getGlobalID());
+				}
 				jarAct.put(joAct);
 				sentActions.add(ua);
 			}
@@ -162,8 +159,10 @@ public class CanvasConnector extends ServerConnector {
 				joObj.put(ActionJCode.OBJECT_LOCAL_ID, co.privateID);
 				joObj.put(ActionJCode.OBJECT_TRANSFORM,
 						TransformAction.getParameterOf(co));
-				joObj.put(ActionJCode.OBJECT_GEOM, GeomAction.getParameterOf(co));
-				joObj.put(ActionJCode.OBJECT_STYLE, StyleAction.getParameterOf(co));
+				joObj.put(ActionJCode.OBJECT_GEOM,
+						GeomAction.getParameterOf(co));
+				joObj.put(ActionJCode.OBJECT_STYLE,
+						StyleAction.getParameterOf(co));
 				jarObj.put(joObj);
 			}
 			msg.put(ActionJCode.OBJECT_LIST, jarObj);
@@ -171,9 +170,6 @@ public class CanvasConnector extends ServerConnector {
 			// ------------ lan ---------
 			msg.put(ActionJCode.LAST_ACTION_NUM, lastActNum);
 			msg.put(ActionJCode.CANVAS_ID, canvasID);
-
-			// TODO debug ccon
-			Log.d("POS", "send:" + msg.toString());
 
 			new Client(COMMIT_URL, replisUpdate).execute(msg);
 		} catch (JSONException ex) {
@@ -190,6 +186,7 @@ public class CanvasConnector extends ServerConnector {
 					syncListener.onActionUpdateFailed(status);
 					return;
 				}
+				// ada masalah dari server
 				if (reply.has(ActionJCode.ERROR)) {
 					int code = reply.getInt(ActionJCode.ERROR);
 					if (code == ActionJCode.SERVER_ERROR)
@@ -197,20 +194,18 @@ public class CanvasConnector extends ServerConnector {
 					else if (code == ActionJCode.BAD_REQUEST)
 						syncListener.onActionUpdateFailed(INTERNAL_PROBLEM);
 				}
-				// TODO debug ccon2
-				Log.d("POS", "rep:" + reply.toString());
 
-				// parse objects
+				// ----------------------- parse objects ----------------------
 				replyObjects.clear();
 				JSONArray jarObj = reply.getJSONArray(ActionJCode.OBJECT_LIST);
 				int length = jarObj.length();
 				for (int i = 0; i < length; i++) {
 					JSONObject joObj = jarObj.getJSONObject(i);
 					int gid = joObj.getInt(ActionJCode.OBJECT_GLOBAL_ID);
-					CanvasObject co;
+					CanvasObject co = null;
 					if (joObj.has(ActionJCode.OBJECT_LOCAL_ID)) {
-						// if object is in sent objects, assign global id from
-						// reply
+						// jika objek adalah objek dari request -> pasangkan
+						// global id dari server
 						int oid = joObj.getInt(ActionJCode.OBJECT_LOCAL_ID);
 						int j = 0;
 						do {
@@ -218,45 +213,63 @@ public class CanvasConnector extends ServerConnector {
 						} while (co.privateID != oid);
 						co.setGlobaID(gid);
 					} else {
-						// if object is new create object from reply
-						int code = joObj.getInt(ActionJCode.OBJECT_CODE);
-						String shape = joObj.getString(ActionJCode.OBJECT_GEOM);
-						String style = joObj.getString(ActionJCode.OBJECT_STYLE);
-						String transform = joObj
-								.getString(ActionJCode.OBJECT_TRANSFORM);
-						co = createObject(code, shape, style, transform);
-						objectMap.put(gid, co);
-						co.setGlobaID(gid);
+						// jika objek merupakan objek baru dari server ->
+						// abaikan jika data objek di server tidak ada
+						if (!joObj.has(ActionJCode.OBJECT_MISSING)) {
+							int code = joObj.getInt(ActionJCode.OBJECT_CODE);
+
+							String shape = joObj
+									.getString(ActionJCode.OBJECT_GEOM);
+							String style = joObj
+									.getString(ActionJCode.OBJECT_STYLE);
+							String transform = joObj
+									.getString(ActionJCode.OBJECT_TRANSFORM);
+							co = createObject(code, shape, style, transform);
+							if (co != null) {
+								objectMap.put(gid, co);
+								co.setGlobaID(gid);
+							}
+						}
 					}
 					replyObjects.add(co);
 				}
 
-				// parse actions
+				// ----------------- parse actions -----------------------
 				replyActions.clear();
 				JSONArray jarAct = reply.getJSONArray(ActionJCode.ACTION_LIST);
 				length = jarAct.length();
 				for (int i = 0; i < length; i++) {
 					JSONObject joAct = jarAct.getJSONObject(i);
 					if (joAct.has(ActionJCode.ACTION_SUBMITTED)) {
-						// if action is in sentActions, copy to replyActions
+						// aksi adalah aksi yang dikirim -> langsung masukkan ke
+						// replyActions
 						int said = joAct.getInt(ActionJCode.ACTION_SUBMITTED);
 						replyActions.add(sentActions.get(said));
 					} else {
-						// if action is new, create action from reply
+						// aksi dari server -> buat baru
 						int code = joAct.getInt(ActionJCode.ACTION_CODE);
-						String param = joAct.getString(ActionJCode.ACTION_PARAM);
-						CanvasObject co = null;
-						if (joAct.has(ActionJCode.ACTION_OBJ_LISTED))
-							// if action object is listed, find in replyObject
-							co = replyObjects.get(joAct
-									.getInt(ActionJCode.ACTION_OBJ_LISTED));
-						else
-							// if action object is already known, find in
-							// objectMap using global id
-							co = objectMap.get(joAct
-									.getInt(ActionJCode.ACTION_OBJ_KNOWN));
-						if (co != null)
-							replyActions.add(createAction(code, co, param));
+						String param = joAct
+								.getString(ActionJCode.ACTION_PARAM);
+						if (code == ActionCode.RESIZE_ACTION) {
+							// aksi resize canvas -> buat baru
+							replyActions.add(createAction(code, null, param));
+						} else {
+							// aksi lain -> cek dulu objeknya
+							CanvasObject co = null;
+							if (joAct.has(ActionJCode.ACTION_OBJ_LISTED))
+								// jika objek tercantumkan, cari di replyObject
+								co = replyObjects.get(joAct
+										.getInt(ActionJCode.ACTION_OBJ_LISTED));
+							else
+								// jika objek sudah diketahui, cari di objectMap
+								// menggunakan id globalnya
+								co = objectMap.get(joAct
+										.getInt(ActionJCode.ACTION_OBJ_KNOWN));
+
+							// abaikan aksi jika tidak diketahui objeknya
+							if (co != null)
+								replyActions.add(createAction(code, co, param));
+						}
 					}
 
 				}
@@ -323,17 +336,107 @@ public class CanvasConnector extends ServerConnector {
 			return new GeomAction(object, param);
 		else if (code == ActionCode.STYLE_ACTION)
 			return new StyleAction(object, false).setParameter(param);
+		else if (code == ActionCode.RESIZE_ACTION)
+			return new ResizeCanvas(param);
 		return null;
 	}
 
-	public void openCanvas(CanvasModel canvas, OnCanvasOpenListener listener) {
-		// TODO open canvas
-		this.openListener = listener;
+	/**
+	 * Listener untuk proses membuka suatu kanvas.
+	 * @author hamba v7
+	 * 
+	 */
+	public static interface OnCanvasOpenListener {
+		/**
+		 * Canvas sudah terbuka.
+		 * @param model model kanvas
+		 * @param status jika status == {@link ServerConnector#SUCCESS}, maka
+		 *            {@code model} berisi data kanvas terbaru.
+		 */
+		void onCanvasOpened(int status, int lastActNum);
 	}
+
+	/**
+	 * Listener untuk proses menutupp suatu kanvas.
+	 * @author hamba v7
+	 * 
+	 */
+	public static interface OnCanvasCloseListener {
+		/**
+		 * Canvas sudah tertutup.
+		 * @param model
+		 * @param status
+		 */
+		void onCanvasClosed(CanvasModel model, int status);
+	}
+
+	private static CanvasModel canvas;
+
+	public void openCanvas(int userId, CanvasModel canvasModel,
+			OnCanvasOpenListener listener) {
+		// TODO open canvas
+		canvas = canvasModel;
+		this.openListener = listener;
+		JSONObject jo = new JSONObject();
+		try {
+			jo.put(Request.ACTION, Request.ACTION_OPEN);
+			jo.put(Request.CANVAS_ID, canvas.getId());
+			jo.put(Request.USER_ID, userId);
+			new Client(PORTAL_URL, replyOpen);
+		} catch (JSONException e) {
+			openListener.onCanvasOpened(INTERNAL_PROBLEM, 0);
+		}
+	}
+
+	private ReplyListener replyOpen = new ReplyListener() {
+
+		@Override
+		public void process(int status, JSONObject reply) {
+			if (status == SUCCESS) {
+				try {
+					int lan = reply.getInt(Reply.LAST_ACTION_NUM);
+
+					// baca ukuran kanvas
+					int width = reply.getInt(Reply.CANVAS_WIDTH);
+					int height = reply.getInt(Reply.CANVAS_HEIGHT);
+					int left = reply.getInt(Reply.CANVAS_LEFT);
+					int top = reply.getInt(Reply.CANVAS_TOP);
+					canvas.setDimension(width, height, top, left);
+
+					// baca objek2 yang ada
+					objectMap.clear();
+					canvas.objects.clear();
+					JSONArray objects = reply.getJSONArray(Reply.OBJECT_LIST);
+					for (int i = 0; i < objects.length(); i++) {
+						JSONObject cob = objects.getJSONObject(i);
+						int code = cob.getInt(Reply.OBJECT_CODE);
+						int id = cob.getInt(Reply.OBJECT_ID);
+						String geom = cob.getString(Reply.OBJECT_GEOM);
+						String style = cob.getString(Reply.OBJECT_STYLE);
+						String transform = cob
+								.getString(Reply.OBJECT_TRANSFORM);
+						CanvasObject co = createObject(code, geom, style,
+								transform);
+						boolean exist = cob.getBoolean(Reply.OBJECT_EXIST);
+						if (exist)
+							canvas.objects.add(co);
+						objectMap.put(id, co);
+					}
+
+					openListener.onCanvasOpened(SUCCESS, lan);
+				} catch (JSONException e) {
+					openListener.onCanvasOpened(UNKNOWN_REPLY, 0);
+				}
+
+			} else
+				openListener.onCanvasOpened(status, 0);
+		}
+	};
 
 	public void closeCanvas(CanvasModel canvas, UserModel user,
 			OnCanvasCloseListener listener) {
 		// TODO close int connector
 		this.closeListener = listener;
 	}
+
 }

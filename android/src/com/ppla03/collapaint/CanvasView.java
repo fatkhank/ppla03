@@ -8,7 +8,10 @@ import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
 
-import android.animation.ObjectAnimator;
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -19,10 +22,13 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
+import android.widget.Toast;
 
 public class CanvasView extends View {
 	public static class Mode {
@@ -143,10 +149,8 @@ public class CanvasView extends View {
 	 * menyetujui aksinya, maka aksi dalam penampungan diabaikan karena ditimpa
 	 * oleh aksi pengguna.
 	 */
-	private final ArrayList<UserAction> pendingStyleActions = new ArrayList<UserAction>();
-	private final ArrayList<UserAction> pendingReshapeActions = new ArrayList<UserAction>();
-	private final ArrayList<UserAction> pendingMoveActions = new ArrayList<UserAction>();
-	private final ArrayList<UserAction> pendingDeleteActions = new ArrayList<UserAction>();
+	private final ArrayList<GeomAction> pendingGeomActions = new ArrayList<>();
+	private final ArrayList<TransformAction> pendingTransformActions = new ArrayList<>();
 
 	private CanvasListener listener;
 	private CanvasSynchronizer synczer;
@@ -202,12 +206,13 @@ public class CanvasView extends View {
 
 	// Kotak seleksi
 	private static final RectF selectRect = new RectF();
+	private static final int SELECT_COLOR = Color.argb(100, 0, 30, 200);
 	// Cat kotak seleksi
 	private static final Paint selectPaint;
 	static {
 		selectPaint = new Paint();
 		selectPaint.setStyle(Style.FILL);
-		selectPaint.setARGB(100, 0, 30, 200);
+		selectPaint.setColor(SELECT_COLOR);
 	}
 
 	// Cat kanvas putih dengan drop shadow ditepinya.
@@ -233,20 +238,40 @@ public class CanvasView extends View {
 	}
 
 	// ---------------------- proto area ---------------
-	static int PROTO_AREA_HEIGHT = 200;
-	private static final int NONE = 0, DRAG = 1, INFLATE = 2;
-	private int dragAction;
-	private static final int MIN_DRAG_DISTANCE = 50;
+	static int PROTO_AREA_WIDTH = 200;
+	private static final int NONE = 0,// tidak ada
+			CLICK = 128, // sedang di klik, tapi belum drag
+			DRAGGING = 1,// ada objek yang sedang didrag
+			PROTO = 2,// objek yang di drag adalah proto
+			DRAG_PROTO = DRAGGING | PROTO,// mendrag objek dari mainbar, ukuran
+											// masih kecil
+			INFLATE_FLAG = 32,// menggelembungkan objek ke ukuran sebenarnya
+			CLONE = 4, // objek yang di drag adalah clone
+			DRAG_CLONE = DRAGGING | CLONE,// mengatur peletakan objek yang sudah
+											// digelembungkan
+			DESTROY_FLAG = 64;// batal menggambar objek
+	/**
+	 * Aksi yang dilakukan pada objek di mainbar
+	 */
+	private int dragStatus;
+	private static final int MIN_DRAG_DISTANCE = 10, MIN_PROTO_STROKE = 10,
+			PROTO_TEXT_SIZE = 20;
+	/**
+	 * ikon delete di main bar
+	 */
+	private Drawable iconBin;
+	private int COLOR_NORMAL, COLOR_HIDDEN, COLOR_DESTROY = Color.argb(50, 255,
+			0, 0);
 
 	// ---------------------- proto objects -------------
-	private CaptureObject captureObject;
-	private CaptureObject captureLine;
-	private CaptureObject captureFree;
-	private CaptureObject captureRect;
-	private CaptureObject captureOval;
-	private CaptureObject capturePoly;
-	private CaptureObject captureText;
-	private CaptureObject capturePaste;
+	private ScaledObject captureObject;
+	private ScaledObject captureLine;
+	private ScaledObject captureFree;
+	private ScaledObject captureRect;
+	private ScaledObject captureOval;
+	private ScaledObject capturePoly;
+	private ScaledObject captureText;
+	private Capturer capturePaste;
 	private CanvasObject protoObject;
 	private LineObject protoLine;
 	private FreeObject protoFree;
@@ -254,70 +279,80 @@ public class CanvasView extends View {
 	private OvalObject protoOval;
 	private PolygonObject protoPoly;
 	private TextObject protoText;
-	
+
+	private static ValueAnimator animProto = new ValueAnimator();
+
 	private void initProtoArea() {
-		int icon_left = (int) (0.2 * PROTO_AREA_HEIGHT);
-		int icon_right = PROTO_AREA_HEIGHT - icon_left;
+		int icon_left = (int) (0.2 * PROTO_AREA_WIDTH);
+		int icon_right = PROTO_AREA_WIDTH - icon_left;
 		int icon_width = icon_right - icon_left;
-		int radius = icon_width / 2;
-		int center = PROTO_AREA_HEIGHT / 2;
+		int center = PROTO_AREA_WIDTH / 2;
 		int y = 0;
 		protoLine = new LineObject(icon_left, icon_left, strokeColor,
 				strokeWidth, strokeStyle);
 		protoLine.penTo(icon_right, icon_right);
-		captureLine = new CaptureObject(icon_left, y + icon_left, icon_width,
-				icon_width);
-		captureLine.capture(protoLine);
-
-		y += PROTO_AREA_HEIGHT;
+		captureLine = new ScaledObject(protoLine);
+		captureLine.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
 		// object free
-		protoFree = new FreeObject();
+		y += PROTO_AREA_WIDTH;
+		protoFree = new FreeObject(fillColor, strokeColor, strokeWidth,
+				strokeStyle);
 		protoFree.penDown(icon_left, y + icon_left);
 		protoFree.penTo(icon_right, y + center);
 		protoFree.penTo(icon_left, y + icon_right);
+		protoFree.penTo(icon_right, y + icon_right + icon_right);
 		protoFree.penUp();
-		captureFree = new CaptureObject(icon_left, y + icon_left, icon_width,
-				icon_width);
-		captureFree.capture(protoFree);
+		captureFree = new ScaledObject(protoFree);
+		captureFree.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
 		// atur objek rect
-		y += PROTO_AREA_HEIGHT;
+		y += PROTO_AREA_WIDTH;
 		defaultRectSize = centerY;
 		protoRect = new RectObject(center, y + center, defaultRectSize,
-				fillColor, strokeColor, strokeWidth, strokeStyle);
-		captureRect = new CaptureObject(icon_left, y + icon_left, icon_width,
-				icon_width);
-		captureRect.capture(protoRect);
+				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+		captureRect = new ScaledObject(protoRect);
+		captureRect.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
 		// atur objek oval
-		y += PROTO_AREA_HEIGHT;
+		y += PROTO_AREA_WIDTH;
 		defaultOvalRadius = centerY >> 1;
 		protoOval = new OvalObject(center, y + center, defaultOvalRadius,
-				fillColor, strokeColor, strokeWidth, strokeStyle);
-		captureOval = new CaptureObject(icon_left, y + icon_left, icon_width,
-				icon_width);
-		captureOval.capture(protoOval);
+				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+		captureOval = new ScaledObject(protoOval);
+		captureOval.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
 		// atur objek poly
-		y += PROTO_AREA_HEIGHT;
+		y += PROTO_AREA_WIDTH;
 		defaultPolyRadius = defaultOvalRadius;
 		protoPoly = new PolygonObject(3, defaultPolyRadius, center, y + center,
-				fillColor, strokeColor, strokeWidth, strokeStyle);
-		capturePoly = new CaptureObject(icon_left, y + icon_left, icon_width,
-				icon_width);
-		capturePoly.capture(protoPoly);
+				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+		capturePoly = new ScaledObject(protoPoly);
+		capturePoly.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
-		y += PROTO_AREA_HEIGHT;
+		// atur objek text
+		y += PROTO_AREA_WIDTH;
 		int fontCode = FontManager.getFontCode(textFont, fontBold, fontItalic,
 				textUnderline);
-		protoText = new TextObject("Abc", 20, y + 20, strokeColor, fontCode,
-				textSize);
-		captureText = new CaptureObject(icon_left, y + icon_left, icon_width,
+		protoText = new TextObject("Abc", icon_left, y + icon_left,
+				strokeColor, fontCode, PROTO_TEXT_SIZE);
+		captureText = new ScaledObject(protoText);
+		captureText.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+
+		// atur objek paste
+		y += PROTO_AREA_WIDTH;
+		capturePaste = new Capturer(icon_left, y + icon_left, icon_width,
 				icon_width);
-		captureText.capture(protoText);
-		
-		
+
+		// atur animasi mendrag dan membesarkan protoObject
+		captureObject = new ScaledObject(protoRect);
+		animProto.addUpdateListener(animProtoUpdate);
+		animProto.addListener(animProtoListener);
+		animProto.setDuration(500);
+		animProto.setInterpolator(new OvershootInterpolator());
+
+		iconBin.setBounds(0, centerY - PROTO_AREA_WIDTH / 2, PROTO_AREA_WIDTH,
+				PROTO_AREA_WIDTH);
 	}
 
 	public CanvasView(Context context, AttributeSet attrs) {
@@ -327,7 +362,7 @@ public class CanvasView extends View {
 		// default value
 		fillColor = Color.TRANSPARENT;
 		strokeColor = Color.BLACK;
-		strokeWidth = 1;
+		strokeWidth = 5;
 		strokeStyle = StrokeStyle.SOLID;
 		textSize = 30;
 		textFont = 0;
@@ -338,6 +373,19 @@ public class CanvasView extends View {
 		synczer = CanvasSynchronizer.getInstance();
 
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
+
+		if (isInEditMode()) {
+			iconBin = new ShapeDrawable();
+			COLOR_NORMAL = Color.BLUE;
+			COLOR_HIDDEN = Color.RED;
+		} else {
+			iconBin = context.getResources().getDrawable(
+					R.drawable.ic_action_discard);
+			COLOR_NORMAL = context.getResources().getColor(
+					R.color.workspace_normal);
+			COLOR_HIDDEN = context.getResources().getColor(
+					R.color.workspace_hidden);
+		}
 	}
 
 	/**
@@ -355,16 +403,13 @@ public class CanvasView extends View {
 	 *            id kanvas.
 	 */
 	public void open(CanvasModel model) {
-		// TODO set canvas size
 		this.model = model;
 		selectedObjects.clear();
 		userActions.clear();
 		redoStack.clear();
 		revertList.clear();
-		pendingDeleteActions.clear();
-		pendingMoveActions.clear();
-		pendingReshapeActions.clear();
-		pendingStyleActions.clear();
+		pendingGeomActions.clear();
+		pendingTransformActions.clear();
 		selectRect.setEmpty();
 		editRect.setEmpty();
 		// ---- reset ----
@@ -387,14 +432,18 @@ public class CanvasView extends View {
 
 	public void resizeCanvas(int width, int height, int top, int left) {
 		// TODO resize
+		ResizeCanvas rc = new ResizeCanvas(model, width, height, top, left,
+				true);
+		model.setDimension(width, height, top, left);
+		pushToUAStack(rc, true);
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
+		centerX = (w >> 1) - scrollX;
+		centerY = (h >> 1) - scrollY;
 		if (model != null) {
-			centerX = (w >> 1) - scrollX;
-			centerY = (h >> 1) - scrollY;
 			if (model.getWidth() >= w) {
 				minScrollX = w - CANVAS_MARGIN - model.getWidth();
 				maxScrollX = CANVAS_MARGIN;
@@ -411,17 +460,39 @@ public class CanvasView extends View {
 			}
 		}
 		// tinggi kanvas dibagi ke dalam 7 proto objek
-		PROTO_AREA_HEIGHT = h / 7;
+		PROTO_AREA_WIDTH = h / 7;
 		initProtoArea();
 	}
 
+	/**
+	 * Menggambar objek2 di mainbar
+	 * @param canvas
+	 */
 	private void drawProtoArea(Canvas canvas) {
-		protoLine.draw(canvas);
-		captureFree.draw(canvas);
-		protoRect.draw(canvas);
-		protoOval.draw(canvas);
-		protoPoly.draw(canvas);
-		protoText.draw(canvas);
+		selectPaint.setColor(Color.WHITE);
+		canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(), selectPaint);
+		if ((dragStatus & DRAGGING) != DRAGGING) {
+			// tampilkan ikon objek
+			captureLine.draw(canvas);
+			captureFree.draw(canvas);
+			captureRect.draw(canvas);
+			captureOval.draw(canvas);
+			capturePoly.draw(canvas);
+			captureText.draw(canvas);
+			capturePaste.draw(canvas);
+		} else {
+			if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
+				selectPaint.setColor(COLOR_DESTROY);
+				canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(),
+						selectPaint);
+			}
+			iconBin.setBounds(0, 0, PROTO_AREA_WIDTH, PROTO_AREA_WIDTH);
+			iconBin.draw(canvas);
+		}
+		selectPaint.setColor((hidden_mode) ? COLOR_HIDDEN : COLOR_NORMAL);
+		canvas.drawRect(PROTO_AREA_WIDTH, 0, PROTO_AREA_WIDTH + 3, getHeight(),
+				selectPaint);
+		selectPaint.setColor(SELECT_COLOR);
 	}
 
 	@Override
@@ -447,7 +518,12 @@ public class CanvasView extends View {
 			canvas.drawText(HIDDEN_MODE_TEXT, 10 - scrollX, getHeight() - 5
 					- scrollY, hideModeTextPaint);
 
+		canvas.translate(-scrollX, -scrollY);
 		drawProtoArea(canvas);
+
+		// tampilkan hasil clone objek
+		if ((dragStatus & PROTO) == PROTO)
+			captureObject.draw(canvas);
 
 		// DEBUG
 		// if (model != null)
@@ -472,14 +548,10 @@ public class CanvasView extends View {
 		canvas.drawText("C:" + checkpoint, getWidth() - 300, getHeight(),
 				debugPaint);
 
-		canvas.drawText("D[" + pendingDeleteActions.size() + "]",
-				getWidth() - 240, getHeight(), debugPaint);
-		canvas.drawText("M[" + pendingMoveActions.size() + "]",
+		canvas.drawText("G[" + pendingGeomActions.size() + "]",
 				getWidth() - 180, getHeight(), debugPaint);
-		canvas.drawText("S[" + pendingStyleActions.size() + "]",
+		canvas.drawText("T[" + pendingTransformActions.size() + "]",
 				getWidth() - 120, getHeight(), debugPaint);
-		canvas.drawText("R[" + pendingReshapeActions.size() + "]",
-				getWidth() - 60, getHeight(), debugPaint);
 		if (currentObject != null) {
 			canvas.drawText(String.format(
 					"(%d, %d)->(%d, %4.0f, %4.0f, %3.1f)",
@@ -592,61 +664,171 @@ public class CanvasView extends View {
 		}
 	}
 
+	AnimatorUpdateListener animProtoUpdate = new AnimatorUpdateListener() {
+
+		@Override
+		public void onAnimationUpdate(ValueAnimator animation) {
+			Float scale = (Float) animation.getAnimatedValue();
+			captureObject.setScale(scale);
+			CanvasView.this.postInvalidate();
+		}
+	};
+	Animator.AnimatorListener animProtoListener = new AnimatorListener() {
+
+		@Override
+		public void onAnimationStart(Animator animation) {}
+
+		@Override
+		public void onAnimationRepeat(Animator animation) {}
+
+		@Override
+		public void onAnimationEnd(Animator animation) {
+			// clone objek
+			if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
+				currentObject = null;
+				dragStatus = NONE;
+			} else {
+				currentObject = protoObject;
+				currentObject.offset(-scrollX, -scrollY);
+				if ((dragStatus & DRAGGING) != DRAGGING) {
+					// jika objek sudah dilepas oleh user ->langsung edit
+					dragStatus = NONE;
+					mode = Mode.DRAW;
+					editObject(currentObject, ShapeHandler.ALL);
+					redoStack.clear();
+					listener.onURStatusChange(true, false);
+				} else
+					dragStatus = DRAG_CLONE;
+			}
+			CanvasView.this.postInvalidate();
+		}
+
+		@Override
+		public void onAnimationCancel(Animator animation) {}
+	};
+
+	/**
+	 * Mengecek aksi user terhadap objek di mainbar
+	 * @param event
+	 * @param act
+	 * @return
+	 */
 	private boolean onTouchProtoArea(MotionEvent event, int act) {
 		int x = (int) event.getX();
 		int y = (int) event.getY();
-		if (act == MotionEvent.ACTION_DOWN) {
-			if (x < PROTO_AREA_HEIGHT) {
-				approveAction();
+		if (act == MotionEvent.ACTION_DOWN) {// saat layar mulai dipencet
+			// jika user memasuki area mainbar -> kemungkinan akan menggambar
+			if (x < PROTO_AREA_WIDTH) {
+				approveAction();// setujui semua aksinya dulu
 				anchorX = x;
 				anchorY = y;
-				int id = y / PROTO_AREA_HEIGHT;
+				// tentukan objek yang diklik oleh user
+				int id = y / PROTO_AREA_WIDTH;
 				if (id == 0) {
 					protoObject = protoLine;
+					captureObject.lookTo(captureLine);
+				} else if (id == 1) {
+					protoObject = protoFree;
+					captureObject.lookTo(captureFree);
+				} else if (id == 2) {
+					protoObject = protoRect;
+					captureObject.lookTo(captureRect);
+				} else if (id == 3) {
+					protoObject = protoOval;
+					captureObject.lookTo(captureOval);
+				} else if (id == 4) {
+					protoObject = protoPoly;
+					captureObject.lookTo(capturePoly);
 				} else if (id == 5) {
 					protoObject = protoText;
+					captureObject.lookTo(captureText);
 				} else if (id == 7) {
-					// paste
-				} else {
-					if (id == 1) {
-						protoObject = protoFree;
-					} else if (id == 2) {
-						protoObject = protoRect;
-					} else if (id == 3) {
-						protoObject = protoOval;
-					} else if (id == 4) {
-						protoObject = protoPoly;
-					}
+					// TODO icon paste
 				}
-				currentObject = protoObject.cloneObject();
+				dragStatus = CLICK;
 				postInvalidate();
-				dragAction = DRAG;
 				return true;
 			} else {
-				dragAction = NONE;
+				dragStatus = NONE;
 				return false;
 			}
 		} else {
-			if (dragAction == NONE)
+			if (dragStatus == NONE) // abaikan jika tidak ada objek yang didrag
 				return false;
-			float dx = x - anchorX;
-			float dy = y - anchorY;
 			if (act == MotionEvent.ACTION_MOVE) {
-				if (currentObject != null) {
-					currentObject.offsetTo(protoObject.offsetX() + dx,
-							protoObject.offsetY() + dy);
-					if (dragAction == DRAG) {
-						dragAction = INFLATE;
+				float dx = x - anchorX;
+				float dy = y - anchorY;
+				if (dragStatus == CLICK) {
+					// jika sudah melewati batas drag -> clone obje
+					if (Math.abs(dx) > MIN_DRAG_DISTANCE
+							|| Math.abs(dy) > MIN_DRAG_DISTANCE) {
+						protoObject = protoObject.cloneObject();
+						captureObject.setObject(protoObject);
+						dragStatus = DRAG_PROTO;
 					}
+				} else {
+					if ((dragStatus & DRAG_PROTO) == DRAG_PROTO) {
+						// sedang mendrag proto -> geser hasil capture
+						captureObject.offset(dx, dy);
+
+						// jika objek belum digelembungkan dan objek keluar dari
+						// main bar, gelembungkan objek
+						if ((dragStatus & INFLATE_FLAG) != INFLATE_FLAG
+								&& x > PROTO_AREA_WIDTH) {
+							dragStatus |= INFLATE_FLAG;
+							// animasikan penggelembungan
+							animProto.setFloatValues(captureObject.getScale(),
+									1);
+							animProto.start();
+							// sesuaikan ketebalan garis sebenarnya, ambil
+							// gambarnya, kembalikan seperti semula
+							if (protoObject instanceof BasicObject) {
+								BasicObject bo = (BasicObject) protoObject;
+								bo.setStrokeWidth(strokeWidth);
+							} else if (protoObject instanceof LineObject) {
+								((LineObject) protoObject)
+										.setWidth(strokeWidth);
+							}
+						}
+					} else if ((dragStatus & DRAG_CLONE) == DRAG_CLONE) {
+						// objek sudah diklon -> geser currentObject
+						currentObject.offset(dx, dy);
+					}
+					// jika masuk lagi ke drawbar -> tandai bahwa objek akan
+					// dihapus
+					if (x < PROTO_AREA_WIDTH)
+						dragStatus |= DESTROY_FLAG;
+					else
+						dragStatus &= ~DESTROY_FLAG;
+					anchorX = x;
+					anchorY = y;
 				}
 			} else if (act == MotionEvent.ACTION_UP) {
-				dragAction = NONE;
-				if (currentObject != null
-						&& (Math.abs(dx) > MIN_DRAG_DISTANCE || Math.abs(dy) > MIN_DRAG_DISTANCE)) {
-					mode = Mode.DRAW;
-					editObject(currentObject, ShapeHandler.ALL);
-				} else {
+				android.util.Log.d("POS", "sd:" + dragStatus);
+				if (dragStatus == CLICK) {
+					if (protoObject instanceof FreeObject) {
+						// jika objek free, ubah ke mode gambar biasa
+						insertPrimitive(ObjectType.FREE);
+						Toast.makeText(getContext(), "Drag to make line",
+								Toast.LENGTH_SHORT).show();
+					} else if (protoObject instanceof TextObject) {
+						// TODO text
+					}
+					dragStatus = NONE;
+				} else if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
+					// jika objek ditandai untuk dihapus
 					currentObject = null;
+					dragStatus = NONE;
+				} else if (dragStatus == DRAG_CLONE) {
+					// objek sudah diklon
+					mode = Mode.DRAW;
+					dragStatus = NONE;
+					editObject(currentObject, ShapeHandler.ALL);
+					redoStack.clear();
+					listener.onURStatusChange(true, false);
+				} else {
+					// tandai bahwa objek sudah dilepas oleh user
+					dragStatus &= ~DRAGGING;
 				}
 			}
 			postInvalidate();
@@ -684,9 +866,9 @@ public class CanvasView extends View {
 								strokeColor, strokeWidth, strokeStyle);
 						currentObject = currentLine;
 					} else if (objectType == ObjectType.FREE) {
-						currentFree = new FreeObject(fillColor,
-								strokeColor, strokeWidth, strokeStyle).penDown(
-								anchorX, anchorY);
+						currentFree = new FreeObject(fillColor, strokeColor,
+								strokeWidth, strokeStyle).penDown(anchorX,
+								anchorY);
 						currentBasic = currentFree;
 						currentObject = currentBasic;
 					}
@@ -773,12 +955,20 @@ public class CanvasView extends View {
 					reloadCache();
 				}
 				selectRect.setEmpty();
-				listener.onSelectionEvent(selected, selectedObjects.size());
+				if (selected)
+					listener.onSelectionEvent(CanvasListener.SELECT,
+							selectedObjects.size());
+				else
+					listener.onSelectionEvent(CanvasListener.CHANGE_MODE,
+							selectedObjects.size());
 			} else if (mode == Mode.DRAW) {
 				if (objectType == ObjectType.FREE
 						|| objectType == ObjectType.LINE) {
-					if (objectType == ObjectType.FREE)
+					if (objectType == ObjectType.FREE) {
 						currentFree.penUp();
+						protoFree = currentFree.cloneObject();
+						captureFree.setObject(protoFree);
+					}
 					redoStack.clear();
 					listener.onURStatusChange(true, false);
 					editObject(currentObject, ShapeHandler.ALL);
@@ -837,6 +1027,11 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Apakah sedang di mode seleksi atau tidak. Belum tentu ada objek yang
+	 * diseleksi, namun bisa saja masih encoba untuk menyeleksi .objek
+	 * @return
+	 */
 	public boolean isInSelectionMode() {
 		return (mode & Mode.SELECT) == Mode.SELECT;
 	}
@@ -854,6 +1049,27 @@ public class CanvasView extends View {
 				&& currentText == currentObject;
 	}
 
+	public String getTextContent() {
+		if (currentObject != currentText)
+			return null;
+		return currentText.getText();
+	}
+	
+	public void setTextContent(String text){
+		if(currentObject!=null && currentObject == currentText){
+			currentText.setText(text);
+		}
+	}
+
+	public boolean isEditingBasicObject() {
+		return ((mode & Mode.EDIT) == Mode.EDIT) && currentObject != null
+				&& currentBasic == currentObject;
+	}
+
+	/**
+	 * Apakah ada objek yang sedang deseleksi atau tidak
+	 * @return
+	 */
 	public boolean hasSelectedObject() {
 		return (mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION;
 	}
@@ -868,6 +1084,7 @@ public class CanvasView extends View {
 	 * @param filter filter Handler
 	 */
 	private void editObject(CanvasObject co, int filter) {
+		// Cast berdasarkan tipe objek untuk memudahkan operasi
 		currentObject = co;
 		if (co instanceof BasicObject) {
 			currentBasic = (BasicObject) co;
@@ -884,6 +1101,8 @@ public class CanvasView extends View {
 		} else if (co instanceof TextObject) {
 			currentText = (TextObject) co;
 		}
+		// checkpoint untuk perubahan minor, akan hilang saat approveAction atau
+		// cancelAction
 		checkpoint = userActions.size();
 		handler = co.getHandler(ShapeHandler.ALL);
 		if (handler != null)
@@ -892,12 +1111,14 @@ public class CanvasView extends View {
 		mode |= Mode.EDIT;
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.empty(), false);
+		listener.onSelectionEvent(CanvasListener.SELECT, 1);
 	}
 
 	/**
 	 * Menyetujui aksi edit yang dilakukan pengguna.
 	 */
 	public void approveAction() {
+		// hilangkan perubahan termporal
 		while (userActions.size() > checkpoint)
 			userActions.pop();
 		if ((mode & Mode.DRAW) == Mode.DRAW) {
@@ -908,28 +1129,28 @@ public class CanvasView extends View {
 				reloadCache();
 			}
 		} else {
-			int size = pendingDeleteActions.size();
-			for (int i = 0; i < size; i++)
-				execute(pendingDeleteActions.get(i), false);
-			pendingDeleteActions.clear();
+			// aksi move user meng-overwrite aksi transformasi user lain
 			if ((mode & Mode.MOVING) == Mode.MOVING) {
 				mode &= Mode.MOVING;
 				if (protaMove != null) {
 					protaMove.apply();
 					pushToUAStack(protaMove, !hidden_mode);
-					pendingMoveActions.clear();
+					pendingTransformActions.clear();
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				mode &= ~Mode.EDIT;
+				// aksi reshape user meng-overwrite aksi transformasi dan geom
+				// user lain
 				if (protaReshape != null) {
 					protaReshape.apply();
 					pushToUAStack(protaReshape, !hidden_mode);
-					pendingReshapeActions.clear();
+					pendingTransformActions.clear();
+					pendingGeomActions.clear();
 				}
+				// aksi style user meng-overwrite aksi style user lain
 				if (protaStyle != null) {
 					protaStyle.applyStyle();
 					pushToUAStack(protaStyle, !hidden_mode);
-					pendingStyleActions.clear();
 				}
 			}
 			cancelSelect();
@@ -955,8 +1176,11 @@ public class CanvasView extends View {
 	public void cancelAction() {
 		handler = null;
 		currentObject = null;
+		// hilangkan perubahan temporal dari stack
 		while (userActions.size() > checkpoint)
 			userActions.pop();
+
+		// kembalikan keadaan objek seperti sebelumnya
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			mode &= ~Mode.EDIT;
 			if (protaStyle != null)
@@ -974,18 +1198,14 @@ public class CanvasView extends View {
 		protaMove = null;
 		protaStyle = null;
 		protaReshape = null;
-		for (int i = 0; i < pendingStyleActions.size(); i++)
-			execute(pendingStyleActions.get(i), true);
-		for (int i = 0; i < pendingReshapeActions.size(); i++)
-			execute(pendingReshapeActions.get(i), true);
-		for (int i = 0; i < pendingMoveActions.size(); i++)
-			execute(pendingMoveActions.get(i), true);
-		for (int i = 0; i < pendingDeleteActions.size(); i++)
-			execute(pendingDeleteActions.get(i), true);
-		pendingStyleActions.clear();
-		pendingReshapeActions.clear();
-		pendingMoveActions.clear();
-		pendingDeleteActions.clear();
+
+		// jalankan aksi dari user lain yang sempat tertunda
+		for (int i = 0; i < pendingGeomActions.size(); i++)
+			execute(pendingGeomActions.get(i), true);
+		for (int i = 0; i < pendingTransformActions.size(); i++)
+			execute(pendingTransformActions.get(i), true);
+		pendingGeomActions.clear();
+		pendingTransformActions.clear();
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.isEmpty(), false);
 		reloadCache();
@@ -1001,14 +1221,15 @@ public class CanvasView extends View {
 	 */
 	public void setStrokeColor(int color, boolean save) {
 		strokeColor = color;
+		// ubah warna objek di mainbar
 		protoLine.setColor(color);
 		protoFree.setStrokeColor(color);
-		captureFree.capture(protoFree);
 		protoRect.setStrokeColor(color);
 		protoOval.setStrokeColor(color);
 		protoPoly.setStrokeColor(color);
-		protoText.setColor(color);
+
 		if (currentObject != null) {
+			// ubah objek yang sedang diedit
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			if (currentObject instanceof BasicObject)
@@ -1020,8 +1241,8 @@ public class CanvasView extends View {
 					pushToUAStack(protaStyle.capture(), false);
 				listener.onWaitForApproval();
 			}
-			postInvalidate();
 		}
+		postInvalidate();
 	}
 
 	/**
@@ -1058,13 +1279,15 @@ public class CanvasView extends View {
 	 */
 	public void setStrokeStyle(int style, boolean save) {
 		strokeStyle = style;
+		// ubah objek di main bar
 		protoLine.setStrokeStyle(style);
 		protoFree.setStrokeStyle(style);
-		captureFree.capture(protoFree);
 		protoRect.setStrokeStyle(style);
 		protoOval.setStrokeStyle(style);
 		protoPoly.setStrokeStyle(style);
+
 		if (currentObject != null) {
+			// ubah objek yang sedang diedit
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			if (currentObject instanceof BasicObject)
@@ -1076,8 +1299,8 @@ public class CanvasView extends View {
 					pushToUAStack(protaStyle.capture(), false);
 				listener.onWaitForApproval();
 			}
-			postInvalidate();
 		}
+		postInvalidate();
 	}
 
 	/**
@@ -1117,8 +1340,8 @@ public class CanvasView extends View {
 					pushToUAStack(protaStyle.capture(), false);
 				listener.onWaitForApproval();
 			}
-			postInvalidate();
 		}
+		postInvalidate();
 	}
 
 	/**
@@ -1129,7 +1352,7 @@ public class CanvasView extends View {
 	 */
 	public void setFontSize(int size, boolean save) {
 		textSize = size;
-		if (currentObject != null && currentObject instanceof TextObject) {
+		if (currentObject != null && currentObject == currentText) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
 				protaStyle = new StyleAction(currentObject, true);
 			currentText.setSize(size);
@@ -1261,7 +1484,6 @@ public class CanvasView extends View {
 	public void setFillParameter(boolean filled, int color, boolean save) {
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		protoFree.setFillMode(filled, color);
-		captureFree.capture(protoFree);
 		protoRect.setFillMode(filled, color);
 		protoOval.setFillMode(filled, color);
 		protoPoly.setFillMode(filled, color);
@@ -1317,7 +1539,7 @@ public class CanvasView extends View {
 			selectedObjects.get(i).select();
 		mode |= Mode.HAS_SELECTION;
 		reloadCache();
-		listener.onSelectionEvent(true, selectedObjects.size());
+		listener.onSelectionEvent(CanvasListener.SELECT, selectedObjects.size());
 		postInvalidate();
 		return selectedObjects.size();
 	}
@@ -1365,6 +1587,7 @@ public class CanvasView extends View {
 		handler = null;
 		reloadCache();
 		postInvalidate();
+		listener.onSelectionEvent(CanvasListener.DESELECT, 0);
 	}
 
 	/**
@@ -1397,7 +1620,7 @@ public class CanvasView extends View {
 		socY = 0;
 		reloadCache();
 		postInvalidate();
-		listener.onSelectionEvent(true, selectedObjects.size());
+		listener.onSelectionEvent(CanvasListener.SELECT, selectedObjects.size());
 		return selectedObjects.size();
 	}
 
@@ -1524,63 +1747,63 @@ public class CanvasView extends View {
 	 */
 	private void execute(UserAction action, boolean forced) {
 		if (action instanceof DrawAction) {
+			// aksi draw tidak ditunda
 			DrawAction da = (DrawAction) action;
 			model.objects.add(da.object);
 		} else if (action instanceof TransformAction) {
-			TransformAction ma = (TransformAction) action;
-			if (!forced && (protaMove != null) && protaMove.overwrites(ma))
-				pendingMoveActions.add(ma);
+			// aksi transform akan ditunda jika user sedang melakukan reshape
+			// atau move pada objek tersebut
+			TransformAction ta = (TransformAction) action;
+			if (!forced
+					&& ((protaMove != null && protaMove.overwrites(ta)) || (protaReshape != null && protaReshape
+							.overwrites(ta))))
+				pendingTransformActions.add(ta);
 			else
-				ma.apply();
+				ta.apply();
 		} else if (action instanceof ReshapeAction) {
+			// aksi reshape tidak akan ditunda
 			ReshapeAction ra = (ReshapeAction) action;
-			if (!forced && protaReshape != null && protaReshape.overwrites(ra))
-				pendingReshapeActions.add(ra);
-			else {
-				ra.apply();
-				if (handler != null && currentObject != null) {
-					if (grabbedCPoint != null) {
-						grabbedCPoint.release();
-						grabbedCPoint = null;
-					}
-					handler = currentObject.getHandler(ShapeHandler.ALL);
-				}
-			}
+			ra.apply();
 		} else if (action instanceof GeomAction) {
-			// TODO execute geom
+			// aksi geom ditunda jika user sedang melakukan reshape pada objek
+			// yang sama
 			GeomAction ga = (GeomAction) action;
-
-			ga.apply();
+			if (!forced && protaReshape != null && protaReshape.overwrites(ga))
+				pendingGeomActions.add(ga);
+			else
+				ga.apply();
 		} else if (action instanceof StyleAction) {
+			// aksi style tidak ditunda
 			StyleAction sa = (StyleAction) action;
-			if (!forced && (protaStyle != null) && protaStyle.overwrites(sa))
-				pendingStyleActions.add(sa);
-			else
-				sa.applyStyle();
+			sa.applyStyle();
 		} else if (action instanceof DeleteAction) {
+			// aksi delete tidak ditunda
 			DeleteAction da = (DeleteAction) action;
-			if (!forced && currentObject != null
-					&& da.object.equals(currentObject))
-				pendingDeleteActions.add(da);
-			else
-				model.objects.remove(da.object);
+			if (currentObject != null && currentObject.equals(da.object)) {
+				// jika objek sedang diedit -> batalkan editan
+				cancelAction();
+				cancelSelect();
+			}
+			model.objects.remove(da.object);
 		} else if (action instanceof MoveMultiple) {
+			// aksi move multiple tidak ditunda
 			((MoveMultiple) action).apply();
 		} else if (action instanceof DeleteMultiple) {
+			// aksi delete multiple tidak ditunda
 			DeleteMultiple da = (DeleteMultiple) action;
-			if (!forced && currentObject != null
-					&& da.objects.contains(currentObject))
-				pendingDeleteActions.add(da);
-			else
-				model.objects.removeAll(da.objects);
-		} else if (action instanceof DrawMultiple) {// undelete
+			model.objects.removeAll(da.objects);
+		} else if (action instanceof DrawMultiple) {
+			// undelete, tidak ditunda
 			DrawMultiple dm = (DrawMultiple) action;
 			model.objects.addAll(dm.objects);
 		} else if (action instanceof MoveStepper) {
+			// move tidak ditunda
 			MoveStepper ms = (MoveStepper) action;
 			ms.execute();
 		} else if (action instanceof ResizeCanvas) {
-			// TODO execute resize canvas
+			// aksi resize canvas tidak ditunda
+			ResizeCanvas rc = (ResizeCanvas) action;
+			model.setDimension(rc.width, rc.height, rc.top, rc.left);
 		}
 	}
 }

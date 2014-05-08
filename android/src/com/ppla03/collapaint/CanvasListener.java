@@ -9,6 +9,7 @@ import com.ppla03.collapaint.model.object.LineObject;
  * 
  */
 public interface CanvasListener {
+	int DESELECT=1, SELECT=3, CHANGE_MODE = 6;
 
 	/**
 	 * Dipicu saat hidden mode berubah.
@@ -21,7 +22,7 @@ public interface CanvasListener {
 	 * @param success kalau ada seleksi yang terjadi di kanvas.
 	 * @param selected jumlah objek yang diseleksi
 	 */
-	void onSelectionEvent(boolean success, int selected);
+	void onSelectionEvent(int event, int param);
 
 	/**
 	 * Dipicu saat ada perubahan status undo dan redo.

@@ -21,8 +21,10 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 
-public class ServerConnector {
+public abstract class ServerConnector {
 	public static String HOST = "http://192.168.43.64:8080/collapaint/";
+
+	protected abstract void onHostAddressChange(String host);
 
 	/**
 	 * Operasi berhasil dan mendapatkan jawaban dari server dalam bentuk yang
@@ -96,6 +98,9 @@ public class ServerConnector {
 				HttpParams params = new BasicHttpParams();
 				HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
 
+				// TODO debug server connection
+				android.util.Log.d("POS", "send:" + msgs[0].toString());
+
 				post.setParams(params);
 				post.setEntity(new StringEntity(msgs[0].toString()));
 				HttpResponse res = client.execute(post);
@@ -116,6 +121,10 @@ public class ServerConnector {
 					sb.append(st);
 
 				reply = new JSONObject(sb.toString());
+
+				// TODO debug server connection
+				android.util.Log.d("POS", "rep:" + reply.toString());
+
 				return SUCCESS;
 			} catch (UnsupportedEncodingException ue) {
 				return INTERNAL_PROBLEM;

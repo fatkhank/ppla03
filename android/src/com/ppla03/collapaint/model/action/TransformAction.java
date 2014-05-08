@@ -185,8 +185,11 @@ public class TransformAction extends AtomicAction {
 	public boolean overwrites(UserAction action) {
 		if (action != null) {
 			if (action instanceof TransformAction) {
-				TransformAction ta = (TransformAction) action;
-				return ta.object.equals(this.object);
+				return ((TransformAction) action).object.equals(this.object);
+			} else if (action instanceof ReshapeAction) {
+				return ((ReshapeAction) action).object.equals(this.object);
+			} else if (action instanceof MoveMultiple) {
+				return ((MoveMultiple) action).objects.contains(this.object);
 			}
 		}
 		return false;

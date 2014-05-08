@@ -169,7 +169,7 @@ public class TesterActivity extends Activity implements OnClickListener,
 			StrokeStyle.DOTTED };
 
 	@Override
-	public void onSelectionEvent(boolean success, int selected) {
+	public void onSelectionEvent(int state, int selected) {
 //		if (!success)
 //			Toast.makeText(this, "No object selected", Toast.LENGTH_SHORT)
 //					.show();

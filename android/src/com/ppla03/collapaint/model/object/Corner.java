@@ -22,7 +22,7 @@ public class Corner extends ControlPoint {
 	private static final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	private static final Path path = new Path();
 	static {
-		paint.setColor(Color.argb(150, 20, 20, 20));
+		paint.setColor(Color.rgb(20,40,255));
 		paint.setStyle(Style.FILL);
 		path.moveTo(3, 3);
 		path.lineTo(20, 3);
@@ -63,7 +63,7 @@ public class Corner extends ControlPoint {
 	void moveTo(float[] points) {
 		// rasio terhadap posisi awal
 		float mx = 1, my = 1;
-		if (anchorX > 0.01f || anchorY > 0.01f) {
+		if (Math.abs(anchorX) > 0.01f || Math.abs(anchorY) > 0.01f) {
 			mx = points[OBJ_X] / anchorX;
 			my = points[OBJ_Y] / anchorY;
 		}

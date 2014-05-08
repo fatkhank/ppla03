@@ -18,6 +18,7 @@ import javax.servlet.http.*;
  */
 @WebServlet(name = "action", urlPatterns = {"/action"})
 public class ActionServlet extends HttpServlet {
+
     private MysqlDataSource dataSource;
 
     @Override
@@ -28,7 +29,7 @@ public class ActionServlet extends HttpServlet {
         dataSource.setUser(DB.DB_USERNAME);
         dataSource.setPassword(DB.DB_PASSWORD);
     }
-    
+
     /**
      * Memproses request dari klien, baik
      *
@@ -44,7 +45,7 @@ public class ActionServlet extends HttpServlet {
 
         try (PrintWriter out = response.getWriter()) {
             JsonObjectBuilder reply = Json.createObjectBuilder();
-            try(Connection conn = dataSource.getConnection()) {
+            try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
 
                 //*************************** SAVE REQUEST *************************
@@ -108,7 +109,8 @@ public class ActionServlet extends HttpServlet {
      * @param userActions
      * @param objectPool
      */
-    void parseActions(JsonObject request, int canvasId, ArrayList<Action> userActions, ArrayList<CanvasObject> objectPool) {
+    void parseActions(JsonObject request, int canvasId, ArrayList<Action> userActions,
+            ArrayList<CanvasObject> objectPool) {
         //abaikan jika tidak ada daftar aksi
         if (!request.containsKey(ActionJCode.ACTION_LIST))
             return;
@@ -150,7 +152,8 @@ public class ActionServlet extends HttpServlet {
      * @param reply
      * @throws SQLException
      */
-    void processReply(Connection conn, JsonObject request, int canvasId, ArrayList<Action> userActions, ArrayList<CanvasObject> objectPool, JsonObjectBuilder reply) throws SQLException {
+    void processReply(Connection conn, JsonObject request, int canvasId, ArrayList<Action> userActions,
+            ArrayList<CanvasObject> objectPool, JsonObjectBuilder reply) throws SQLException {
         try (PreparedStatement lastestAction = conn.prepareStatement(DB.Action.Q.Select.LASTEST)) {
 
             // ----- ambil aksi terakhir.
@@ -192,7 +195,7 @@ public class ActionServlet extends HttpServlet {
                     int objectID = result.
                             getInt(DB.Action.Q.Select.Lastest.Column.OBJECT_ID);
                     //var ini tidak digunakan lagi, dioverwrite untuk mencari indeks objek yang berkaitan dengan aksi di atas.
-                    actionID = -1;
+                    actionID = OBJECT_INCOMPLETE;
                     //Cari apakah objek ada di object pool.
                     for (int i = 0; i < objectPool.size(); i++) {
                         if (objectPool.get(i).globalId == objectID) {
@@ -200,7 +203,7 @@ public class ActionServlet extends HttpServlet {
                             break;
                         }
                     }
-                    if (actionID != -1) {
+                    if (actionID != OBJECT_INCOMPLETE) {
                         //Jika objek ada di object pool, masukkan posisinya
                         actionObject.add(ActionJCode.ACTION_OBJ_LISTED, actionID);
                     } else if (actionCode == ActionCode.DRAW_ACTION) {
@@ -211,7 +214,7 @@ public class ActionServlet extends HttpServlet {
                         newObjects++;
                         actionObject.add(ActionJCode.ACTION_OBJ_LISTED, objectPool.
                                 size());
-                        objectPool.add(new CanvasObject(objectID, -1));
+                        objectPool.add(new CanvasObject(objectID, OBJECT_INCOMPLETE));
                     } else {
                         //objek sudah tersimpan di klien
                         actionObject.add(ActionJCode.ACTION_OBJ_KNOWN, objectID);
@@ -227,6 +230,8 @@ public class ActionServlet extends HttpServlet {
         }
     }
 
+    private static final int OBJECT_INCOMPLETE = -1, OBJECT_MISSING = -2;
+
     /**
      * Mncantumkan daftar objek di reply
      *
@@ -234,7 +239,8 @@ public class ActionServlet extends HttpServlet {
      * @param reply
      * @throws SQLException
      */
-    void addObjectsToReply(Connection conn, ArrayList<CanvasObject> objectPool, int incompleteObjectsCount, JsonObjectBuilder reply) throws SQLException {
+    void addObjectsToReply(Connection conn, ArrayList<CanvasObject> objectPool, int incompleteObjectsCount,
+            JsonObjectBuilder reply) throws SQLException {
         /*
          Ambil data untuk objek di object pool yang belum ada sebelumnya.
          Object yang ada di object pool, pasti object yang ada di request, 
@@ -244,50 +250,52 @@ public class ActionServlet extends HttpServlet {
 
         //ambil data objek yang belum lengkap
         if (incompleteObjectsCount > 0) {
-            int[] incompletes = new int[incompleteObjectsCount];
+            //menyimpan posisi objek yang belum lengkap
             int counter = 0;
             int size = objectPool.size();
             try (PreparedStatement getDetail = conn.prepareStatement(DB.Objects.Q.Select.BY_ID)) {
                 //catat objek yang datanya belum lengkap
                 for (int i = 0; i < size; i++) {
                     CanvasObject canvasObject = objectPool.get(i);
-                    if (canvasObject.id == -1) {
-                        incompletes[counter++] = i;
+                    if (canvasObject.id == OBJECT_INCOMPLETE) {
                         getDetail.
                                 setInt(DB.Objects.Q.Select.ById.ID, canvasObject.globalId);
-                        getDetail.addBatch();
+                        //ambil datanya
+                        ResultSet result = getDetail.executeQuery();
+                        //masukkan datanya ke objek
+                        counter = 0;
+                        if (result.next()) {
+                            canvasObject.globalId = result.
+                                    getInt(DB.Objects.Q.Select.ById.Column.ID);
+                            canvasObject.code = result.
+                                    getInt(DB.Objects.Q.Select.ById.Column.CODE);
+                            canvasObject.geom = result.
+                                    getString(DB.Objects.Q.Select.ById.Column.GEOM);
+                            canvasObject.style = result.
+                                    getString(DB.Objects.Q.Select.ById.Column.STYLE);
+                            canvasObject.transform = result.
+                                    getString(DB.Objects.Q.Select.ById.Column.TRANSFORM);
+                        } else
+                            canvasObject.id = OBJECT_MISSING;
                     }
-                }
-                //ambil datanya
-                ResultSet result = getDetail.executeQuery();
-                //masukkan datanya ke objek
-                counter = 0;
-                while (result.next()) {
-                    CanvasObject obj = objectPool.get(incompletes[counter++]);
-                    obj.globalId = result.
-                            getInt(DB.Objects.Q.Select.ById.Column.ID);
-                    obj.code = result.
-                            getInt(DB.Objects.Q.Select.ById.Column.CODE);
-                    obj.geom = result.
-                            getString(DB.Objects.Q.Select.ById.Column.GEOM);
-                    obj.style = result.
-                            getString(DB.Objects.Q.Select.ById.Column.STYLE);
-                    obj.transform = result.
-                            getString(DB.Objects.Q.Select.ById.Column.TRANSFORM);
                 }
             }
         }
         int size = objectPool.size();
         for (int i = 0; i < size; i++) {
             CanvasObject canvasObject = objectPool.get(i);
-            if (canvasObject.id == -1) {
-                //jika object merupakan objek yang baru
-                objectArray.add(Json.createObjectBuilder().
-                        add(ActionJCode.OBJECT_GLOBAL_ID, canvasObject.globalId).
-                        add(ActionJCode.OBJECT_CODE, canvasObject.code).
-                        add(ActionJCode.OBJECT_GEOM, canvasObject.geom).
-                        add(ActionJCode.OBJECT_STYLE, canvasObject.style).
-                        add(ActionJCode.OBJECT_TRANSFORM, canvasObject.transform));
+            if (canvasObject.id < 0) {
+                //jika object merupakan objek yang baru dan datanya terdapat di
+                if (canvasObject.id == OBJECT_MISSING) {
+                    objectArray.add(Json.createObjectBuilder().add(ActionJCode.OBJECT_GLOBAL_ID, canvasObject.globalId)
+                            .add(ActionJCode.OBJECT_MISSING, 1));
+                } else
+                    objectArray.add(Json.createObjectBuilder().
+                            add(ActionJCode.OBJECT_GLOBAL_ID, canvasObject.globalId).
+                            add(ActionJCode.OBJECT_CODE, canvasObject.code).
+                            add(ActionJCode.OBJECT_GEOM, canvasObject.geom).
+                            add(ActionJCode.OBJECT_STYLE, canvasObject.style).
+                            add(ActionJCode.OBJECT_TRANSFORM, canvasObject.transform));
             } else {
                 //jika objek berasal dari aksi di request, cantumkan id globalnya, supaya klien tahu.
                 objectArray.add(Json.createObjectBuilder().
@@ -308,7 +316,8 @@ public class ActionServlet extends HttpServlet {
         int size = objects.size();
         if (size == 0)
             return;
-        try (PreparedStatement insert = conn.prepareStatement(DB.Objects.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement insert = conn
+                .prepareStatement(DB.Objects.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < size; i++) {
                 CanvasObject obj = objects.get(0);
                 insert.setInt(DB.Objects.Q.Insert.All.CANVAS_ID, canvasId);
@@ -341,15 +350,16 @@ public class ActionServlet extends HttpServlet {
         if (size == 0)
             return;
 
-        try (PreparedStatement insertAction = conn.prepareStatement(DB.Action.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS);
-                PreparedStatement updateObj = conn.prepareStatement(DB.Objects.Q.Update.DATA);
-                PreparedStatement updateCanvas = conn.prepareStatement(DB.Canvas.Q.Update.SIZE);) {
+        try (PreparedStatement updateObj = conn.prepareStatement(DB.Objects.Q.Update.DATA); PreparedStatement insertAction = conn
+                .prepareStatement(DB.Action.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement updateCanvas = conn.prepareStatement(DB.Canvas.Q.Update.SIZE)) {
             for (int i = 0; i < size; i++) {
                 Action act = actions.get(i);
                 insertAction.setInt(DB.Action.Q.Insert.All.CANVAS_ID, canvasID);
-                insertAction.setString(DB.Action.Q.Insert.All.OBJECT_ID, act.param);
+                insertAction.setInt(DB.Action.Q.Insert.All.CODE, act.code);
+                insertAction.setString(DB.Action.Q.Insert.All.PARAMETER, act.param);
                 if (act instanceof Resize) {
-                    //Mengubah ukkuran kanvas
+                    //Mengubah ukuran kanvas
                     Resize rs = (Resize) act;
                     updateCanvas.setInt(DB.Canvas.Q.Update.Size.WIDTH, rs.width);
                     updateCanvas.setInt(DB.Canvas.Q.Update.Size.HEIGHT, rs.height);
@@ -410,8 +420,8 @@ public class ActionServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new com.sun.xml.bind.StringInputStream(request.
-//                getParameter("json")), response);
+        processRequest(new com.sun.xml.bind.StringInputStream(request.
+                getParameter("json")), response);
     }
 
     /**

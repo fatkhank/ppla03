@@ -86,7 +86,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:visibility="visible" >
 
         <LinearLayout
             android:layout_width="wrap_content"

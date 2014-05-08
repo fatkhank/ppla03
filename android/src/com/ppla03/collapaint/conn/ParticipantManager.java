@@ -13,7 +13,10 @@ import com.ppla03.collapaint.model.UserModel;
 public class ParticipantManager extends ServerConnector {
 	private static ParticipantManager instance;
 	private static ManageParticipantListener listener;
-	public static String MEMBER_URL = HOST + "member";
+	public static String MEMBER_URL = HOST + "participant";
+	protected void onHostAddressChange(String host) {
+		MEMBER_URL = host+"participant";
+	}
 
 	public ParticipantManager setListener(ManageParticipantListener mpl) {
 		listener = mpl;

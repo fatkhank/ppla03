@@ -13,7 +13,7 @@ public class SidePoint extends Joint {
 
 	private static final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
-		paint.setColor(Color.argb(150, 20, 20, 20));
+		paint.setColor(Color.rgb(255, 20, 20));
 		paint.setStyle(Style.FILL);
 	}
 

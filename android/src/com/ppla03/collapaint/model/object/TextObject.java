@@ -36,7 +36,7 @@ public class TextObject extends CanvasObject {
 	 */
 	protected final Paint paint;
 
-	private static final Mover mover = new Mover(0, 0, 1);
+	private static final Mover mover = new Mover(0, 0, null, 1);
 	private static final Rotator rotator = new Rotator(0, 0, 150, 0, 0);
 	private static final ShapeHandler handler = new ShapeHandler(null,
 			new ControlPoint[] { rotator, mover });
@@ -78,6 +78,7 @@ public class TextObject extends CanvasObject {
 	private void calculateBounds() {
 		paint.getTextBounds(text, 0, text.length(), bounds);
 		bounds.offset(-bounds.centerX(), -bounds.centerY());
+		mover.setObject(this);
 	}
 
 	/**
@@ -108,6 +109,23 @@ public class TextObject extends CanvasObject {
 	 */
 	public void setSize(int size) {
 		paint.setTextSize(size);
+		calculateBounds();
+	}
+	
+	/**
+	 * Mengambil teks.
+	 * @return
+	 */
+	public String getText(){
+		return this.text;
+	}
+
+	/**
+	 * Mengubah isi teks.
+	 * @param text teks yang baru
+	 */
+	public void setText(String text) {
+		this.text = text;
 		calculateBounds();
 	}
 
@@ -217,6 +235,7 @@ public class TextObject extends CanvasObject {
 		handler.object = this;
 		mover.x = 0;
 		mover.y = 0;
+		mover.setObject(this);
 		mover.enable = (filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE;
 
 		rotator.setCenter(0, 0);

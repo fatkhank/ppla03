@@ -17,7 +17,7 @@ public interface CanvasCreationListener {
 	/**
 	 * Kanvas gagal dibuat karena owner tidak terdaftar.
 	 */
-	int USER_UNKNOWN = 128;
+	int NOT_AUTHORIZED = 128;
 
 	/**
 	 * Dipicu saat pembuatan sebuah kanvas mendapat jawaban dari server.
@@ -27,7 +27,7 @@ public interface CanvasCreationListener {
 	 *            dibuat.<br/>
 	 *            {@link CanvasCreationListener#DUPLICATE_NAME} berarti kanvas
 	 *            dengan nama yang sama sudah pernah dibuat. <br/>
-	 *            {@link CanvasCreationListener#USER_UNKNOWN} berarti owner
+	 *            {@link CanvasCreationListener#NOT_AUTHORIZED} berarti owner
 	 *            belum terdaftar. <br/>
 	 *            Jika ada error lain, status akan berisi
 	 *            {@link ServerConnector#CONNECTION_PROBLEM},

@@ -52,7 +52,7 @@ public class PolygonObject extends BasicObject {
 	private final RectF bounds;
 
 	private static final Rotator rotator = new Rotator(0, 0, 150, 0, -1);
-	private static final Mover mover = new Mover(0, 0, -2);
+	private static final Mover mover = new Mover(0, 0, null, -2);
 
 	/**
 	 * Default handler untuk poligon
@@ -223,6 +223,7 @@ public class PolygonObject extends BasicObject {
 		// jika menampilkan pengatur translasi
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
 			mover.setPosition(0, 0);
+			mover.setObject(this);
 			mover.enable = true;
 		}
 		return handler;
@@ -274,6 +275,7 @@ public class PolygonObject extends BasicObject {
 
 				offsetRelative(-cx, -cy);
 				mover.setPosition(0, 0);
+				mover.setObject(this);
 				rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 			}
 		}

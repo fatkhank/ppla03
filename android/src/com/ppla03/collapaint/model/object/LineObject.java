@@ -3,6 +3,8 @@ package com.ppla03.collapaint.model.object;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Cap;
+import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 
@@ -13,7 +15,7 @@ import android.graphics.RectF;
  * @author hamba v7
  */
 public class LineObject extends CanvasObject {
-	private static Mover mover = new Mover(0, 0, 2);
+	private static Mover mover = new Mover(0, 0, null, 2);
 
 	private static ControlPoint[] cps = { new Joint(0, 0, 0),
 			new Joint(0, 0, 1), mover };
@@ -46,6 +48,8 @@ public class LineObject extends CanvasObject {
 		super();
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(color);
+		paint.setStrokeCap(Cap.ROUND);
+		paint.setStrokeJoin(Join.ROUND);
 		paint.setStyle(Style.STROKE);
 		paint.setStrokeWidth(width);
 		this.strokeStyle = strokeStyle;
@@ -151,10 +155,7 @@ public class LineObject extends CanvasObject {
 		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
 			mover.setPosition(0, 0);
 			mover.enable = true;
-			float left = Math.min(0, x2);
-			float top = Math.min(0, y2);
-			float right = Math.max(0, x2);
-			float bottom = Math.max(0, y2);
+			mover.setObject(this);
 		}
 		return handler;
 	}
@@ -166,6 +167,7 @@ public class LineObject extends CanvasObject {
 			// jika yang diubah titik ujung
 			x2 = cp.x;
 			y2 = cp.y;
+			mover.setObject(this);
 		} else {
 			// jika yang diubah titik pangkal, ubah translasi
 			offsetX += cp.x;
@@ -187,10 +189,6 @@ public class LineObject extends CanvasObject {
 			y2 = MIN_LENGTH;
 			cps[0].setPosition(x2, y2);
 		}
-		float left = Math.min(0, x2);
-		float top = Math.min(0, y2);
-		float right = Math.max(0, x2);
-		float bottom = Math.max(0, y2);
 	}
 
 	@Override

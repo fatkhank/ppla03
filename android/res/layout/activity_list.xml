@@ -5,7 +5,7 @@
     android:background="@drawable/bg2" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/w_stroke_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -17,8 +17,8 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView1"
-        android:layout_alignBottom="@+id/textView1"
+        android:layout_alignBaseline="@+id/w_stroke_label"
+        android:layout_alignBottom="@+id/w_stroke_label"
         android:layout_alignParentRight="true"
         android:layout_marginRight="15dp"
         android:text="@string/sign_out" />

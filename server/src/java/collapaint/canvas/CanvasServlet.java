@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package collapaint.canvas;
 
 import collapaint.code.CanvasJCode.Request;
@@ -197,7 +192,7 @@ public class CanvasServlet extends HttpServlet {
      * @param userId id user
      */
     private void list(Connection conn, JsonObjectBuilder reply, int userId) {
-        //abil daftar  partisipasi canvas
+        //ambil daftar  partisipasi canvas
         try (PreparedStatement participation = conn.prepareStatement(DB.Q.CANVAS_BY_USER)) {
             participation.setInt(DB.Q.CanvasByUser.USER_ID, userId);
             ResultSet result = participation.executeQuery();

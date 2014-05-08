@@ -118,9 +118,14 @@ public class ReshapeAction extends UserAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		if (action != null && action instanceof ReshapeAction) {
-			ReshapeAction ra = (ReshapeAction) action;
-			return ra.object.equals(this.object);
+		if (action != null) {
+			if (action instanceof ReshapeAction) {
+				return ((ReshapeAction) action).object.equals(this.object);
+			} else if (action instanceof TransformAction) {
+				return ((TransformAction) action).object.equals(this.object);
+			} else if (action instanceof GeomAction) {
+				return ((GeomAction) action).object.equals(this.object);
+			}
 		}
 		return false;
 	}

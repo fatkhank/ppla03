@@ -159,7 +159,9 @@ public class GeomAction extends AtomicAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		return action != null && action instanceof GeomAction
-				&& ((GeomAction) action).object.equals(object);
+		return (action != null)
+				&& ((action instanceof GeomAction && ((GeomAction) action).object
+						.equals(object)) || ((action instanceof ReshapeAction) && ((ReshapeAction) action).object
+						.equals(object)));
 	}
 }

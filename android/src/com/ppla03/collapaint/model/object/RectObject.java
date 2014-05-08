@@ -10,7 +10,8 @@ import android.graphics.RectF;
  * 
  */
 public class RectObject extends BasicObject {
-	private final RectF rect;
+	//TODO debug rect
+	public final RectF rect;
 
 	/**
 	 * Membuat kotak kosong.

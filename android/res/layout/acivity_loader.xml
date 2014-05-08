@@ -13,7 +13,7 @@
         android:indeterminate="true" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/w_stroke_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/l_progress"

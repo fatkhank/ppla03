@@ -12,11 +12,14 @@ import com.ppla03.collapaint.model.UserModel;
  * 
  */
 public class CollaUserManager extends ServerConnector {
-	private static final int USER_ID_IF_NULL = 3;
+	private static final int USER_ID_IF_NULL = 1;
 	private static final String USER_EMAIL_IF_NULL = "someone@gmail.com";
 	private static final String USER_NAME_IF_NULL = "Mr. Anonymous";
 
 	private static String CREATE_URL = HOST + "user";
+	protected void onHostAddressChange(String host) {
+		CREATE_URL = host+"user";
+	}
 
 	/**
 	 * Listener saat ada jawaban server terkait pengecekan suatu akun.

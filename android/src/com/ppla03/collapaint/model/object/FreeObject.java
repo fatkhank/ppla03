@@ -54,7 +54,7 @@ public class FreeObject extends BasicObject {
 	 */
 	private int state;
 
-	private static final Mover mover = new Mover(0, 0, 1);
+	private static final Mover mover = new Mover(0, 0, null, 1);
 	private static final Rotator rotator = new Rotator(0, 0, 200, 0, 0);
 
 	private static final ShapeHandler handler = new ShapeHandler(null,
@@ -95,7 +95,7 @@ public class FreeObject extends BasicObject {
 
 	@Override
 	public void drawSelf(Canvas canvas) {
-		if (fillPaint.getColor() != Color.TRANSPARENT)
+		if (state == CLOSED)
 			canvas.drawPath(path, fillPaint);
 		canvas.drawPath(path, strokePaint);
 	}
@@ -142,8 +142,9 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public FreeObject penUp() {
-		// tentukan apakah membentuk loop atu tidak
+		// tentukan apakah membentuk loop atau tidak
 		state &= ~EDIT_MASK;// buat jadi permanen
+
 		PointF first = points.get(0);
 		PointF last = points.get(points.size() - 1);
 		float dx = Math.abs(first.x - last.x);
@@ -251,6 +252,7 @@ public class FreeObject extends BasicObject {
 
 		mover.x = 0;
 		mover.y = 0;
+		mover.setObject(this);
 		mover.enable = ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE);
 
 		rotator.setCenter(0, 0);
