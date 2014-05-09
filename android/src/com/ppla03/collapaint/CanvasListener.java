@@ -9,7 +9,22 @@ import com.ppla03.collapaint.model.object.LineObject;
  * 
  */
 public interface CanvasListener {
-	int DESELECT=1, SELECT=3, CHANGE_MODE = 6;
+	/**
+	 * Saat memasuki mode select
+	 */
+	int ENTER_MODE = 4;
+	/**
+	 * Saat keluar dari mode seleksi
+	 */
+	int EXIT_MODE = 8;
+	/**
+	 * Saat ada sebuah objek yang diseleksi
+	 */
+	int EDIT_OBJECT = 32;
+	/**
+	 * Menyeleksi banyak objek
+	 */
+	int EDIT_MULTIPLE = 64;
 
 	/**
 	 * Dipicu saat hidden mode berubah.
@@ -18,9 +33,15 @@ public interface CanvasListener {
 	void onHideModeChange(boolean hidden);
 
 	/**
-	 * Dipicu saat ada operasi seleksi terjadi di kanvas.
-	 * @param success kalau ada seleksi yang terjadi di kanvas.
-	 * @param selected jumlah objek yang diseleksi
+	 * Dipicu saat ada operasi seleksi terjadi di kanvas. Jika {@code event} =
+	 * {@link CanvasListener#EDIT_OBJECT}, maka param berisi kode objek (
+	 * {@link CanvasView.ObjectType}). Jika {@code event} =
+	 * {@link CanvasListener#EDIT_MULTIPLE}, maka param berisi jumlah objek yang
+	 * terseleksi.
+	 * @param event kode event, {@link CanvasListener#ENTER_MODE},
+	 *            {@link CanvasListener#EDIT_OBJECT}, atau
+	 *            {@link CanvasListener#EDIT_MULTIPLE}
+	 * @param param parameter seleksi
 	 */
 	void onSelectionEvent(int event, int param);
 

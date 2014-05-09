@@ -19,11 +19,14 @@ import android.graphics.Paint.Style;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,8 +69,8 @@ public class CanvasView extends View {
 	private int mode;
 
 	public static class ObjectType {
-		public static final int LINE = 1, RECT = 2, OVAL = 3, FREE = 4;
-		private static final int TEXT = 6;
+		public static final int LINE = 1, FREE = 2, RECT = 3, OVAL = 4,
+				POLYGON = 5, TEXT = 6;
 	}
 
 	// Warna latar di luar kertas kanvas
@@ -164,9 +167,12 @@ public class CanvasView extends View {
 	private static int strokeStyle;
 	private static int textSize;
 	private static int textFont;
+	private static int textColor;
+	private static String textContent;
 	private static boolean textUnderline;
 	private static boolean fontBold;
 	private static boolean fontItalic;
+	private static int polyCorner;
 	private static boolean hidden_mode;
 
 	// Bitmap untuk menyimpan gambaran yang ada di kanvas, untuk mempercepat
@@ -210,7 +216,7 @@ public class CanvasView extends View {
 	// Cat kotak seleksi
 	private static final Paint selectPaint;
 	static {
-		selectPaint = new Paint();
+		selectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		selectPaint.setStyle(Style.FILL);
 		selectPaint.setColor(SELECT_COLOR);
 	}
@@ -225,20 +231,8 @@ public class CanvasView extends View {
 				CANVAS_SHADOW_DY, CANVAS_SHADOW_COLOR);
 	}
 
-	// Tulisan saat hidden_mode aktif
-	private static final String HIDDEN_MODE_TEXT = "HIDE MODE";
-	// Gambar tulisan HIDDEN_MODE
-	private static final Paint hideModeTextPaint;
-	static {
-		hideModeTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		hideModeTextPaint.setColor(Color.GRAY);
-		hideModeTextPaint.setTextSize(30);
-		hideModeTextPaint.setTypeface(Typeface.create(Typeface.SERIF,
-				Typeface.ITALIC));
-	}
-
 	// ---------------------- proto area ---------------
-	static int PROTO_AREA_WIDTH = 200;
+	private static int PROTO_AREA_WIDTH = 200, PROTO_AREA_TOP_MARGIN = 0;
 	private static final int NONE = 0,// tidak ada
 			CLICK = 128, // sedang di klik, tapi belum drag
 			DRAGGING = 1,// ada objek yang sedang didrag
@@ -249,19 +243,31 @@ public class CanvasView extends View {
 			CLONE = 4, // objek yang di drag adalah clone
 			DRAG_CLONE = DRAGGING | CLONE,// mengatur peletakan objek yang sudah
 											// digelembungkan
-			DESTROY_FLAG = 64;// batal menggambar objek
+			DESTROY_FLAG = 64,// batal menggambar objek
+			DRAWING = 256, // sedang menggambar
+			FREE = 512, // free objek
+			DRAWING_FREE = DRAWING | FREE, // sedang menggambar free objek
+			LINE = 1024, // objek garis
+			DRAWING_LINE = DRAWING | LINE;// sedang menggambar garis
+
 	/**
 	 * Aksi yang dilakukan pada objek di mainbar
 	 */
 	private int dragStatus;
-	private static final int MIN_DRAG_DISTANCE = 10, MIN_PROTO_STROKE = 10,
+	private static final int MIN_DRAG_DISTANCE = 10, PROTO_STROKE_WIDTH = 3,// ketebalan
+			// stroke
+			// yang
+			// terlihat
+			// objek
+			// di
+			// mainbar
 			PROTO_TEXT_SIZE = 20;
 	/**
 	 * ikon delete di main bar
 	 */
 	private Drawable iconBin;
-	private int COLOR_NORMAL, COLOR_HIDDEN, COLOR_DESTROY = Color.argb(50, 255,
-			0, 0);
+	private int COLOR_THEME_NORMAL, COLOR_THEME_HIDDEN, COLOR_DESTROY = Color
+			.argb(50, 255, 0, 0);
 
 	// ---------------------- proto objects -------------
 	private ScaledObject captureObject;
@@ -271,7 +277,7 @@ public class CanvasView extends View {
 	private ScaledObject captureOval;
 	private ScaledObject capturePoly;
 	private ScaledObject captureText;
-	private Capturer capturePaste;
+	private ScaledObject capturePaste;
 	private CanvasObject protoObject;
 	private LineObject protoLine;
 	private FreeObject protoFree;
@@ -280,16 +286,21 @@ public class CanvasView extends View {
 	private PolygonObject protoPoly;
 	private TextObject protoText;
 
+	private static final Path protoHighLight = new Path();
+
 	private static ValueAnimator animProto = new ValueAnimator();
 
-	private void initProtoArea() {
+	public void initProtoArea() {
+		PROTO_AREA_WIDTH = (getHeight() - PROTO_AREA_TOP_MARGIN) / 7;
+
 		int icon_left = (int) (0.2 * PROTO_AREA_WIDTH);
 		int icon_right = PROTO_AREA_WIDTH - icon_left;
 		int icon_width = icon_right - icon_left;
 		int center = PROTO_AREA_WIDTH / 2;
-		int y = 0;
+
+		int y = PROTO_AREA_TOP_MARGIN;
 		protoLine = new LineObject(icon_left, icon_left, strokeColor,
-				strokeWidth, strokeStyle);
+				PROTO_STROKE_WIDTH, strokeStyle);
 		protoLine.penTo(icon_right, icon_right);
 		captureLine = new ScaledObject(protoLine);
 		captureLine.placeTo(icon_left, y + icon_left, icon_width, icon_width);
@@ -305,30 +316,50 @@ public class CanvasView extends View {
 		protoFree.penUp();
 		captureFree = new ScaledObject(protoFree);
 		captureFree.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		// tentukan ukuran stroke agar terlihat jelas
+		protoFree.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureFree
+				.getScale()));
+
+		// atur highligh untuk free objek
+		RectF fr = new RectF(4, y + 4, PROTO_AREA_WIDTH - 4, y
+				+ PROTO_AREA_WIDTH - 4);
+		protoHighLight.rewind();
+		protoHighLight.moveTo(4, y + 4);
+		protoHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
+				Direction.CCW);
 
 		// atur objek rect
 		y += PROTO_AREA_WIDTH;
 		defaultRectSize = centerY;
 		protoRect = new RectObject(center, y + center, defaultRectSize,
-				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+				fillColor, strokeColor, PROTO_STROKE_WIDTH, strokeStyle);
 		captureRect = new ScaledObject(protoRect);
 		captureRect.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		// tentukan ukuran stroke agar terlihat jelas
+		protoRect.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureRect
+				.getScale()));
 
 		// atur objek oval
 		y += PROTO_AREA_WIDTH;
 		defaultOvalRadius = centerY >> 1;
 		protoOval = new OvalObject(center, y + center, defaultOvalRadius,
-				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+				fillColor, strokeColor, PROTO_STROKE_WIDTH, strokeStyle);
 		captureOval = new ScaledObject(protoOval);
 		captureOval.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		// tentukan ukuran stroke agar terlihat jelas
+		protoOval.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureOval
+				.getScale()));
 
 		// atur objek poly
 		y += PROTO_AREA_WIDTH;
 		defaultPolyRadius = defaultOvalRadius;
 		protoPoly = new PolygonObject(3, defaultPolyRadius, center, y + center,
-				fillColor, strokeColor, MIN_PROTO_STROKE, strokeStyle);
+				fillColor, strokeColor, PROTO_STROKE_WIDTH, strokeStyle);
 		capturePoly = new ScaledObject(protoPoly);
 		capturePoly.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		// tentukan ukuran stroke agar terlihat jelas
+		protoPoly.setStrokeWidth((int) (PROTO_STROKE_WIDTH / capturePoly
+				.getScale()));
 
 		// atur objek text
 		y += PROTO_AREA_WIDTH;
@@ -341,8 +372,8 @@ public class CanvasView extends View {
 
 		// atur objek paste
 		y += PROTO_AREA_WIDTH;
-		capturePaste = new Capturer(icon_left, y + icon_left, icon_width,
-				icon_width);
+		capturePaste = new ScaledObject(new LineObject());
+		capturePaste.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 
 		// atur animasi mendrag dan membesarkan protoObject
 		captureObject = new ScaledObject(protoRect);
@@ -351,7 +382,7 @@ public class CanvasView extends View {
 		animProto.setDuration(500);
 		animProto.setInterpolator(new OvershootInterpolator());
 
-		iconBin.setBounds(0, centerY - PROTO_AREA_WIDTH / 2, PROTO_AREA_WIDTH,
+		iconBin.setBounds(0, PROTO_AREA_TOP_MARGIN, PROTO_AREA_WIDTH,
 				PROTO_AREA_WIDTH);
 	}
 
@@ -375,15 +406,18 @@ public class CanvasView extends View {
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
 
 		if (isInEditMode()) {
+			PROTO_AREA_TOP_MARGIN = 48;
 			iconBin = new ShapeDrawable();
-			COLOR_NORMAL = Color.BLUE;
-			COLOR_HIDDEN = Color.RED;
+			COLOR_THEME_NORMAL = Color.BLUE;
+			COLOR_THEME_HIDDEN = Color.RED;
 		} else {
+			PROTO_AREA_TOP_MARGIN = (int) context.getResources().getDimension(
+					R.dimen.w_topbar_height);
 			iconBin = context.getResources().getDrawable(
 					R.drawable.ic_action_discard);
-			COLOR_NORMAL = context.getResources().getColor(
+			COLOR_THEME_NORMAL = context.getResources().getColor(
 					R.color.workspace_normal);
-			COLOR_HIDDEN = context.getResources().getColor(
+			COLOR_THEME_HIDDEN = context.getResources().getColor(
 					R.color.workspace_hidden);
 		}
 	}
@@ -459,8 +493,7 @@ public class CanvasView extends View {
 				maxScrollY = h - model.getHeight();
 			}
 		}
-		// tinggi kanvas dibagi ke dalam 7 proto objek
-		PROTO_AREA_WIDTH = h / 7;
+
 		initProtoArea();
 	}
 
@@ -474,6 +507,10 @@ public class CanvasView extends View {
 		if ((dragStatus & DRAGGING) != DRAGGING) {
 			// tampilkan ikon objek
 			captureLine.draw(canvas);
+			selectPaint.setColor(hidden_mode ? COLOR_THEME_HIDDEN
+					: COLOR_THEME_NORMAL);
+			if (dragStatus == DRAWING_FREE)
+				canvas.drawPath(protoHighLight, selectPaint);
 			captureFree.draw(canvas);
 			captureRect.draw(canvas);
 			captureOval.draw(canvas);
@@ -486,10 +523,12 @@ public class CanvasView extends View {
 				canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(),
 						selectPaint);
 			}
-			iconBin.setBounds(0, 0, PROTO_AREA_WIDTH, PROTO_AREA_WIDTH);
+			iconBin.setBounds(0, PROTO_AREA_TOP_MARGIN, PROTO_AREA_WIDTH,
+					PROTO_AREA_WIDTH);
 			iconBin.draw(canvas);
 		}
-		selectPaint.setColor((hidden_mode) ? COLOR_HIDDEN : COLOR_NORMAL);
+		selectPaint.setColor((hidden_mode) ? COLOR_THEME_HIDDEN
+				: COLOR_THEME_NORMAL);
 		canvas.drawRect(PROTO_AREA_WIDTH, 0, PROTO_AREA_WIDTH + 3, getHeight(),
 				selectPaint);
 		selectPaint.setColor(SELECT_COLOR);
@@ -514,9 +553,6 @@ public class CanvasView extends View {
 				handler.draw(canvas, editPaint);
 		} else if (mode == Mode.SELECT)
 			canvas.drawRect(selectRect, selectPaint);
-		if (hidden_mode)
-			canvas.drawText(HIDDEN_MODE_TEXT, 10 - scrollX, getHeight() - 5
-					- scrollY, hideModeTextPaint);
 
 		canvas.translate(-scrollX, -scrollY);
 		drawProtoArea(canvas);
@@ -723,7 +759,7 @@ public class CanvasView extends View {
 				anchorX = x;
 				anchorY = y;
 				// tentukan objek yang diklik oleh user
-				int id = y / PROTO_AREA_WIDTH;
+				int id = (y - PROTO_AREA_TOP_MARGIN) / PROTO_AREA_WIDTH;
 				if (id == 0) {
 					protoObject = protoLine;
 					captureObject.lookTo(captureLine);
@@ -804,17 +840,20 @@ public class CanvasView extends View {
 					anchorY = y;
 				}
 			} else if (act == MotionEvent.ACTION_UP) {
-				android.util.Log.d("POS", "sd:" + dragStatus);
 				if (dragStatus == CLICK) {
+					dragStatus = NONE;
 					if (protoObject instanceof FreeObject) {
 						// jika objek free, ubah ke mode gambar biasa
 						insertPrimitive(ObjectType.FREE);
+						Toast.makeText(getContext(), "Drag to make path",
+								Toast.LENGTH_SHORT).show();
+						dragStatus = DRAWING_FREE;
+					} else if (protoObject instanceof LineObject) {
+						insertPrimitive(ObjectType.LINE);
 						Toast.makeText(getContext(), "Drag to make line",
 								Toast.LENGTH_SHORT).show();
-					} else if (protoObject instanceof TextObject) {
-						// TODO text
+						dragStatus = DRAWING_LINE;
 					}
-					dragStatus = NONE;
 				} else if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
 					// jika objek ditandai untuk dihapus
 					currentObject = null;
@@ -947,27 +986,41 @@ public class CanvasView extends View {
 					}
 				} else {
 					selected = selectArea(selectRect);
-					if (selectedObjects.size() == 1)
-						editObject(selectedObjects.get(0), ShapeHandler.SHAPE);
+					if (selected) {
+						if (selectedObjects.size() == 1)
+							editObject(selectedObjects.get(0),
+									ShapeHandler.SHAPE);
+						else
+							listener.onSelectionEvent(
+									CanvasListener.EDIT_MULTIPLE,
+									selectedObjects.size());
+					}
 				}
 				if (selected) {
 					mode |= Mode.HAS_SELECTION;
 					reloadCache();
 				}
 				selectRect.setEmpty();
-				if (selected)
-					listener.onSelectionEvent(CanvasListener.SELECT,
-							selectedObjects.size());
-				else
-					listener.onSelectionEvent(CanvasListener.CHANGE_MODE,
+				if (!selected)
+					listener.onSelectionEvent(CanvasListener.ENTER_MODE,
 							selectedObjects.size());
 			} else if (mode == Mode.DRAW) {
+				// saat pena diangkat
 				if (objectType == ObjectType.FREE
 						|| objectType == ObjectType.LINE) {
 					if (objectType == ObjectType.FREE) {
 						currentFree.penUp();
 						protoFree = currentFree.cloneObject();
 						captureFree.setObject(protoFree);
+						// hitung ukuran stroke agar kelihatan jelas di main bar
+						float scale = captureFree.getScale();
+						if (scale > 1)
+							protoFree.setStrokeWidth(PROTO_STROKE_WIDTH);
+						else
+							protoFree.setStrokeWidth((int) (protoFree
+									.getStrokeWidth() / scale));
+
+						selectRect.setEmpty();
 					}
 					redoStack.clear();
 					listener.onURStatusChange(true, false);
@@ -1049,16 +1102,79 @@ public class CanvasView extends View {
 				&& currentText == currentObject;
 	}
 
-	public String getTextContent() {
+	public String getTextObjContent() {
 		if (currentObject != currentText)
 			return null;
 		return currentText.getText();
 	}
-	
-	public void setTextContent(String text){
-		if(currentObject!=null && currentObject == currentText){
+
+	/**
+	 * Mengambil warna pinggiran yang sedang aktif.
+	 * @return
+	 */
+	public int getStrokeColor() {
+		return this.strokeColor;
+	}
+
+	/**
+	 * Mengambil warna isian yang sedang aktif.
+	 * @return
+	 */
+	public int getFillColor() {
+		return this.fillColor;
+	}
+
+	/**
+	 * Mengambil warna teks yang sedang aktif.
+	 * @return
+	 */
+	public int getTextColor() {
+		return this.textColor;
+	}
+
+	/**
+	 * Mengubah isi objek teks yang sedang aktif
+	 * @param text
+	 * @return
+	 */
+	public boolean setTextObjContent(String text) {
+		protoText.setText((text.length() > 3) ? text.substring(0, 4) : text);
+		textContent = text;
+		if (currentObject != null && currentObject == currentText) {
 			currentText.setText(text);
+			postInvalidate();
+			return true;
 		}
+		postInvalidate();
+		return false;
+	}
+
+	/**
+	 * Mengubah jumlah sudut poligon yang sedat diedit
+	 * @param corner
+	 * @param save
+	 */
+	public void setPolygonCorner(int corner, boolean save) {
+		CanvasView.polyCorner = corner;
+		protoPoly.changeShape(corner, defaultPolyRadius);
+		if (currentObject != null && currentObject == currentPoly) {
+			currentPoly.changeShape(corner, defaultPolyRadius);
+			if (save) {
+				if (grabbedCPoint != null)
+					handler.releasePoint(grabbedCPoint);
+				handler = currentPoly.getHandler(ShapeHandler.ALL);
+			} else
+				handler = null;
+		}
+		postInvalidate();
+	}
+
+	/**
+	 * Mengambil jumlah sudut pada poligon saat ini
+	 * @return
+	 */
+	public int getPolygonCorner() {
+		return CanvasView.polyCorner;
 	}
 
 	public boolean isEditingBasicObject() {
@@ -1086,20 +1202,32 @@ public class CanvasView extends View {
 	private void editObject(CanvasObject co, int filter) {
 		// Cast berdasarkan tipe objek untuk memudahkan operasi
 		currentObject = co;
+		int objCode = ObjectType.LINE;
 		if (co instanceof BasicObject) {
 			currentBasic = (BasicObject) co;
-			if (currentBasic instanceof RectObject)
+			if (currentBasic instanceof RectObject) {
 				currentRect = (RectObject) currentBasic;
-			else if (currentBasic instanceof OvalObject)
+				objCode = ObjectType.RECT;
+			} else if (currentBasic instanceof OvalObject) {
 				currentOval = (OvalObject) currentBasic;
-			else if (currentBasic instanceof PolygonObject)
+				objCode = ObjectType.OVAL;
+			} else if (currentBasic instanceof PolygonObject) {
 				currentPoly = (PolygonObject) currentBasic;
-			else if (currentBasic instanceof FreeObject)
+				objCode = ObjectType.POLYGON;
+			} else if (currentBasic instanceof FreeObject) {
 				currentFree = (FreeObject) currentBasic;
+				objCode = ObjectType.FREE;
+			}
+			fillColor = currentBasic.getFillColor();
+			strokeColor = currentBasic.getStrokeColor();
 		} else if (co instanceof LineObject) {
 			currentLine = (LineObject) co;
+			objCode = ObjectType.LINE;
+			strokeColor = currentLine.getColor();
 		} else if (co instanceof TextObject) {
 			currentText = (TextObject) co;
+			objCode = ObjectType.TEXT;
+			textColor = currentText.getTextColor();
 		}
 		// checkpoint untuk perubahan minor, akan hilang saat approveAction atau
 		// cancelAction
@@ -1111,7 +1239,7 @@ public class CanvasView extends View {
 		mode |= Mode.EDIT;
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.empty(), false);
-		listener.onSelectionEvent(CanvasListener.SELECT, 1);
+		listener.onSelectionEvent(CanvasListener.EDIT_OBJECT, objCode);
 	}
 
 	/**
@@ -1329,7 +1457,7 @@ public class CanvasView extends View {
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setTextColor(int color, boolean save) {
-		strokeColor = color;
+		textColor = color;
 		protoText.setColor(color);
 		if (currentObject != null && currentObject instanceof TextObject) {
 			if ((mode & Mode.DRAW) != Mode.DRAW && protaStyle == null)
@@ -1454,6 +1582,7 @@ public class CanvasView extends View {
 		}
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.empty(), false);
+		listener.onSelectionEvent(CanvasListener.EXIT_MODE, 0);
 		invalidate();
 	}
 
@@ -1533,13 +1662,16 @@ public class CanvasView extends View {
 	public int selectAllObject() {
 		if (model.objects.isEmpty())
 			return 0;
+		if (currentObject != null)
+			approveAction();
 		selectedObjects.clear();
 		selectedObjects.addAll(model.objects);
 		for (int i = 0; i < selectedObjects.size(); i++)
 			selectedObjects.get(i).select();
 		mode |= Mode.HAS_SELECTION;
 		reloadCache();
-		listener.onSelectionEvent(CanvasListener.SELECT, selectedObjects.size());
+		listener.onSelectionEvent(CanvasListener.EDIT_MULTIPLE,
+				selectedObjects.size());
 		postInvalidate();
 		return selectedObjects.size();
 	}
@@ -1574,6 +1706,10 @@ public class CanvasView extends View {
 		cancelSelect();
 	}
 
+	/**
+	 * Menghilangkan seleksi pada objek, jika ada aksi yang belum tersimpan,
+	 * maka akan mengabaikannya.
+	 */
 	public void cancelSelect() {
 		currentObject = null;
 		selectRect.setEmpty();
@@ -1587,7 +1723,7 @@ public class CanvasView extends View {
 		handler = null;
 		reloadCache();
 		postInvalidate();
-		listener.onSelectionEvent(CanvasListener.DESELECT, 0);
+		listener.onSelectionEvent(CanvasListener.ENTER_MODE, 0);
 	}
 
 	/**
@@ -1610,6 +1746,8 @@ public class CanvasView extends View {
 		if (objs.size() > 1) {
 			DrawMultiple dm = new DrawMultiple(selectedObjects);
 			pushToUAStack(dm, !hidden_mode);
+			listener.onSelectionEvent(CanvasListener.EDIT_MULTIPLE,
+					selectedObjects.size());
 		} else {
 			CanvasObject co = selectedObjects.get(0);
 			DrawAction da = new DrawAction(co);
@@ -1620,7 +1758,7 @@ public class CanvasView extends View {
 		socY = 0;
 		reloadCache();
 		postInvalidate();
-		listener.onSelectionEvent(CanvasListener.SELECT, selectedObjects.size());
+		int size = selectedObjects.size();
 		return selectedObjects.size();
 	}
 
@@ -1702,6 +1840,7 @@ public class CanvasView extends View {
 		}
 		hidden_mode = hidden;
 		postInvalidate();
+		listener.onHideModeChange(hidden);
 	}
 
 	/**

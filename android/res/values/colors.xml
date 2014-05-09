@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="loader_cover">#99001010</color>
-    <color name="workspace_normal">#6734ff</color>
+    <color name="workspace_normal">#ffafaeff</color>
     <color name="workspace_hidden">#e064b7</color>
+    <color name="black_transparent">#44000000</color>
     
 </resources>

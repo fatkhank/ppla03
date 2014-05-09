@@ -46,7 +46,7 @@ public class FreeObject extends BasicObject {
 	private static final int EDIT_MASK = 1, EDITABLE = 1, PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;
 
-	private static final float MAKE_LOOP_DIST = 5;
+	private static final float MAKE_LOOP_DIST = 20;
 
 	/**
 	 * Status bentuk objek; NEW = masih dibentuk, OPEN = terbuka (tidak
@@ -142,9 +142,9 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public FreeObject penUp() {
-		// tentukan apakah membentuk loop atau tidak
 		state &= ~EDIT_MASK;// buat jadi permanen
 
+		// tentukan apakah membentuk loop atau tidak
 		PointF first = points.get(0);
 		PointF last = points.get(points.size() - 1);
 		float dx = Math.abs(first.x - last.x);
@@ -190,7 +190,7 @@ public class FreeObject extends BasicObject {
 	@Override
 	public void setGeom(float[] param, int start, int end) {
 		// catat daftar titik-titik
-		state = (int) param[start++];
+		state = Float.floatToIntBits(param[start++]);
 		int size = (end - start) >> 1;
 		xLocs = new float[size];
 		yLocs = new float[size];
@@ -217,7 +217,7 @@ public class FreeObject extends BasicObject {
 
 	@Override
 	public int extractGeom(float[] data, int start) {
-		data[start++] = state;
+		// data[start++] = Float.intBitsToFloat(state);
 		System.arraycopy(xLocs, 0, data, start, xLocs.length);
 		System.arraycopy(yLocs, 0, data, start + xLocs.length, yLocs.length);
 		return 1 + xLocs.length + yLocs.length;

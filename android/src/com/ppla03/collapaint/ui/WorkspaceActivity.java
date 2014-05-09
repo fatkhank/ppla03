@@ -1,25 +1,27 @@
 package com.ppla03.collapaint.ui;
 
-import java.util.ArrayList;
-
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CanvasView;
+import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.FontManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.FontManager.Font;
 import com.ppla03.collapaint.model.object.CanvasObject;
+import com.ppla03.collapaint.model.object.PolygonObject;
 import com.ppla03.collapaint.model.object.StrokeStyle;
-import com.ppla03.collapaint.ui.ColorDialog.ColorChangeListener;
+import com.ppla03.collapaint.ui.ColorPane.ColorChangeListener;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -29,6 +31,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -41,18 +44,27 @@ import android.widget.ToggleButton;
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
-		OnCheckedChangeListener, OnEditorActionListener {
+		OnCheckedChangeListener, OnEditorActionListener, AnimationListener {
 
-	private ImageButton select, hand, undo, redo, showDash;
+	// --------- top button ---------
+	private LinearLayout topbarButtons;
+	private CheckBox select, hand;
+	private ImageButton undo, redo, showDash;
 
-	private ImageButton showProp, cut, copy, move, delete;
+	// --------- select additional ---------
+	private LinearLayout selectAddButtons;
+	private ImageButton cut, copy, move, delete;
 
 	// property dan dashboard
+	private CheckBox showProp;
+	private ColorPane colorPane;
+	private View colorPaneView;
 	private View propertyPane;
-	private RelativeLayout topBar;
-	private int colorNormal, colorHidden, currentColor;
+	private int colorNormal, colorHidden, currentThemeColor;
 	private TextView canvasTitle;
 	private View colorConsumer;
+	private ScaleAnimation animPropShow;
+	private ScaleAnimation animPropHide;
 
 	// --------- stroke setting ---------
 	private RelativeLayout strokePane;
@@ -80,110 +92,148 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private TextView textSizeText;
 	private ToggleButton textBold, textItalic, textUnderline;
 
+	// ---------- poly ------------
+	private RelativeLayout shapePane;
+	private SeekBar polySeek;
+	private TextView polyText;
+
 	// ------
 	private CanvasView canvas;
-	private ColorDialog colorDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_workspace);
-		// --- top bar ---
-		select = (ImageButton) findViewById(R.id.w_main_select);
-		hand = (ImageButton) findViewById(R.id.w_main_hand);
-		undo = (ImageButton) findViewById(R.id.w_undo);
-		redo = (ImageButton) findViewById(R.id.w_redo);
-		showDash = (ImageButton) findViewById(R.id.w_show_dash);
+		try {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.activity_workspace);
+			// --- top bar ---
+			topbarButtons = (LinearLayout) findViewById(R.id.w_top_button);
+			select = (CheckBox) findViewById(R.id.w_main_select);
+			hand = (CheckBox) findViewById(R.id.w_main_hand);
+			undo = (ImageButton) findViewById(R.id.w_undo);
+			redo = (ImageButton) findViewById(R.id.w_redo);
+			showDash = (ImageButton) findViewById(R.id.w_show_dash);
 
-		select.setOnClickListener(this);
-		select.setOnLongClickListener(this);
-		hand.setOnClickListener(this);
-		undo.setOnClickListener(this);
-		undo.setEnabled(false);
-		redo.setOnClickListener(this);
-		redo.setEnabled(false);
-		showDash.setOnClickListener(this);
+			select.setOnClickListener(this);
+			select.setOnLongClickListener(this);
+			hand.setOnClickListener(this);
+			undo.setOnClickListener(this);
+			undo.setEnabled(false);
+			redo.setOnClickListener(this);
+			redo.setEnabled(false);
+			showDash.setOnClickListener(this);
 
-		// --- select ---
-		propertyPane = (View) findViewById(R.id.w_property_scroll);
-		showProp = (ImageButton) findViewById(R.id.w_show_property);
-		cut = (ImageButton) findViewById(R.id.w_sel_cut);
-		copy = (ImageButton) findViewById(R.id.w_sel_copy);
-		move = (ImageButton) findViewById(R.id.w_sel_move);
-		delete = (ImageButton) findViewById(R.id.w_sel_del);
-		showProp.setOnClickListener(this);
-		cut.setOnClickListener(this);
-		copy.setOnClickListener(this);
-		move.setOnClickListener(this);
-		delete.setOnClickListener(this);
+			// --- select ---
+			selectAddButtons = (LinearLayout) findViewById(R.id.w_selection_pane);
+			selectAddButtons.setVisibility(View.GONE);
+			showProp = (CheckBox) findViewById(R.id.w_show_property);
+			showProp.setChecked(false);
+			cut = (ImageButton) findViewById(R.id.w_sel_cut);
+			copy = (ImageButton) findViewById(R.id.w_sel_copy);
+			move = (ImageButton) findViewById(R.id.w_sel_move);
+			delete = (ImageButton) findViewById(R.id.w_sel_del);
+			showProp.setOnClickListener(this);
+			cut.setOnClickListener(this);
+			copy.setOnClickListener(this);
+			move.setOnClickListener(this);
+			delete.setOnClickListener(this);
 
-		// --------- stroke ---------
-		strokePane = (RelativeLayout) findViewById(R.id.w_prop_stroke);
+			// --- property ppane ---
+			propertyPane = (View) findViewById(R.id.w_property_scroll);
+			propertyPane.setVisibility(View.GONE);
+			animPropShow = new ScaleAnimation(0, 1, 0, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 0);
+			animPropShow.setDuration(300);
+			animPropShow.setAnimationListener(this);
+			animPropShow.setFillAfter(true);
+			animPropHide = new ScaleAnimation(1, 0, 1, 0,
+					ScaleAnimation.RELATIVE_TO_SELF, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 0);
+			animPropHide.setDuration(300);
+			animPropHide.setAnimationListener(this);
+			animPropHide.setFillAfter(false);
 
-		// atur lebar stroke
-		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
-		strokeWidthText = (TextView) findViewById(R.id.w_stroke_width_text);
-		strokeWidth.setOnSeekBarChangeListener(this);
-		strokeWidth.setMax(CanvasObject.MAX_STROKE_WIDTH
-				- CanvasObject.MIN_STROKE_WIDTH);
-		strokeWidth.setProgress(0);
+			// --------- stroke ---------
+			strokePane = (RelativeLayout) findViewById(R.id.w_prop_stroke);
 
-		// atur stroke style
-		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-				android.R.layout.simple_list_item_1, STR_STYLES_NAMES);
-		strokeStyle.setAdapter(adapter);
-		strokeStyle.setOnItemSelectedListener(this);
+			// atur lebar stroke
+			strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
+			strokeWidthText = (TextView) findViewById(R.id.w_stroke_width_text);
+			strokeWidth.setOnSeekBarChangeListener(this);
+			strokeWidth.setMax(CanvasObject.MAX_STROKE_WIDTH
+					- CanvasObject.MIN_STROKE_WIDTH);
+			strokeWidth.setProgress(0);
 
-		// atur stroke color
-		strokeColor = (Button) findViewById(R.id.w_stroke_color);
-		strokeColor.setOnClickListener(this);
+			// atur stroke style
+			strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+					android.R.layout.simple_list_item_1, STR_STYLES_NAMES);
+			strokeStyle.setAdapter(adapter);
+			strokeStyle.setOnItemSelectedListener(this);
 
-		// --------- fill ---------
-		fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
-		fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
-		fillCheck.setOnCheckedChangeListener(this);
-		fillColor = (Button) findViewById(R.id.w_fill_color);
-		fillColor.setOnClickListener(this);
+			// atur stroke color
+			strokeColor = (Button) findViewById(R.id.w_stroke_color);
+			strokeColor.setOnClickListener(this);
 
-		// --------- font ---------
-		textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
-		textInput = (EditText) findViewById(R.id.w_font_input);
-		textInput.setSingleLine(true);
-		textInput.setOnEditorActionListener(this);
-		textSize = (SeekBar) findViewById(R.id.w_font_size);
-		fontStyles = (Spinner) findViewById(R.id.w_font_style);
-		textBold = (ToggleButton) findViewById(R.id.w_font_bold);
-		textItalic = (ToggleButton) findViewById(R.id.w_font_italic);
-		textUnderline = (ToggleButton) findViewById(R.id.w_font_underline);
-		textBold.setOnCheckedChangeListener(this);
-		textItalic.setOnCheckedChangeListener(this);
-		textUnderline.setOnCheckedChangeListener(this);
-		textSizeText = (TextView) findViewById(R.id.w_font_size_text);
-		textSize.setOnSeekBarChangeListener(this);
-		textSize.setMax(FontManager.MAX_FONT_SIZE - FontManager.MIN_FONT_SIZE);
-		textSize.setProgress(FontManager.MIN_FONT_SIZE);
-		fontStyles.setAdapter(FontManager.getAdapter(this));
-		fontStyles.setOnItemSelectedListener(this);
-		textColor = (Button) findViewById(R.id.w_font_color);
-		textColor.setOnClickListener(this);
+			// --------- fill ---------
+			fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
+			fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
+			fillCheck.setOnCheckedChangeListener(this);
+			fillColor = (Button) findViewById(R.id.w_fill_color);
+			fillColor.setOnClickListener(this);
 
-		// --- prepare dialog ---
-		colorDialog = new ColorDialog(this, this);
-		colorDialog.setColor(Color.BLACK);
+			// --------- font ---------
+			textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
+			textInput = (EditText) findViewById(R.id.w_font_input);
+			textInput.setOnEditorActionListener(this);
+			textSize = (SeekBar) findViewById(R.id.w_font_size);
+			fontStyles = (Spinner) findViewById(R.id.w_font_style);
+			textBold = (ToggleButton) findViewById(R.id.w_font_bold);
+			textItalic = (ToggleButton) findViewById(R.id.w_font_italic);
+			textUnderline = (ToggleButton) findViewById(R.id.w_font_underline);
+			textBold.setOnCheckedChangeListener(this);
+			textItalic.setOnCheckedChangeListener(this);
+			textUnderline.setOnCheckedChangeListener(this);
+			textSizeText = (TextView) findViewById(R.id.w_font_size_text);
+			textSize.setOnSeekBarChangeListener(this);
+			textSize.setMax(FontManager.MAX_FONT_SIZE
+					- FontManager.MIN_FONT_SIZE);
+			textSize.setProgress(FontManager.MIN_FONT_SIZE);
+			fontStyles.setAdapter(FontManager.getAdapter(this));
+			fontStyles.setOnItemSelectedListener(this);
+			textColor = (Button) findViewById(R.id.w_font_color);
+			textColor.setOnClickListener(this);
 
-		// --- prepare canvas ---
-		colorNormal = getResources().getColor(R.color.workspace_normal);
-		colorHidden = getResources().getColor(R.color.workspace_hidden);
-		currentColor = colorNormal;
-		topBar = (RelativeLayout) findViewById(R.id.w_topbar);
-		topBar.setBackgroundColor(colorNormal);
-		canvasTitle = (TextView) findViewById(R.id.w_canvas_name);
-		canvas = (CanvasView) findViewById(R.id.w_canvas);
-		canvas.setListener(this);
-		CanvasSynchronizer.getInstance().setCanvasView(canvas);
-		canvasTitle.setText(canvas.getModel().name);
-		onClick(select);
+			// --------- poly ---------
+			shapePane = (RelativeLayout) findViewById(R.id.w_shape_pane);
+			polySeek = (SeekBar) findViewById(R.id.w_poly_seek);
+			polySeek.setOnSeekBarChangeListener(this);
+			polySeek.setMax(PolygonObject.MAX_CORNER_COUNT
+					- PolygonObject.MIN_CORNER_COUNT);
+			polySeek.setProgress(0);
+			polyText = (TextView) findViewById(R.id.w_poly_text);
+			polyText.setText(String.valueOf(PolygonObject.MIN_CORNER_COUNT));
+
+			// --- prepare dialog ---
+			colorPaneView = findViewById(R.id.w_color_pane_scroll);
+			colorPane = new ColorPane(this, colorPaneView, this);
+
+			// --- prepare canvas ---
+			colorNormal = getResources().getColor(R.color.workspace_normal);
+			colorHidden = getResources().getColor(R.color.workspace_hidden);
+			currentThemeColor = colorNormal;
+			canvasTitle = (TextView) findViewById(R.id.w_canvas_name);
+			canvas = (CanvasView) findViewById(R.id.w_canvas);
+			canvas.setListener(this);
+			CanvasSynchronizer.getInstance().setCanvasView(canvas);
+			canvasTitle.setText(canvas.getModel().name);
+			onClick(select);
+		} catch (Exception ex) {
+			StackTraceElement[] ste = ex.getStackTrace();
+			for (StackTraceElement s : ste) {
+				android.util.Log.d("POS", s.toString());
+			}
+		}
 	}
 
 	@Override
@@ -214,60 +264,68 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onHideModeChange(boolean hidden) {
 		if (hidden) {
-			currentColor = colorHidden;
 			canvasTitle.setText(canvas.getModel().name + " (hide mode)");
+			currentThemeColor = colorHidden;
+			topbarButtons.setBackgroundResource(R.drawable.w_top_button_hidden);
+			propertyPane.setBackgroundResource(R.drawable.w_property_hidden);
+			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_hidden);
 		} else {
-			currentColor = colorNormal;
 			canvasTitle.setText(canvas.getModel().name);
+			currentThemeColor = colorNormal;
+			topbarButtons.setBackgroundResource(R.drawable.w_top_button_normal);
+			propertyPane.setBackgroundResource(R.drawable.w_property_normal);
+			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_normal);
 		}
+		canvasTitle.setBackgroundColor(currentThemeColor);
+		selectAddButtons.setBackgroundColor(currentThemeColor);
 	}
 
 	@Override
 	public void onSelectionEvent(int state, int param) {
-		if (state == CanvasListener.CHANGE_MODE) {
-			select.setBackgroundColor(Color.WHITE);
-		} else {
-			setSelectAdditionalBar(state == CanvasListener.SELECT, param > 1);
-			if (canvas.isInSelectionMode())
-				select.setBackgroundColor(Color.WHITE);
-			else
-				select.setBackgroundColor(currentColor);
-		}
-	}
-
-	private void setSelectAdditionalBar(boolean show, boolean withMove) {
-		if (show) {
-			showProp.setVisibility(View.VISIBLE);
-			cut.setVisibility(View.VISIBLE);
-			copy.setVisibility(View.VISIBLE);
-			delete.setVisibility(View.VISIBLE);
-			if (withMove)
+		if (state == CanvasListener.EDIT_MULTIPLE
+				|| state == CanvasListener.EDIT_OBJECT) {
+			selectAddButtons.setVisibility(View.VISIBLE);
+			// showProp.setVisibility(View.VISIBLE);
+			// cut.setVisibility(View.VISIBLE);
+			// copy.setVisibility(View.VISIBLE);
+			// delete.setVisibility(View.VISIBLE);
+			if (state == CanvasListener.EDIT_MULTIPLE)
 				move.setVisibility(View.VISIBLE);
 			else
 				move.setVisibility(View.GONE);
 
-			if (canvas.isEditingTextObject()) {
+			strokePane.setVisibility(View.GONE);
+			fillPane.setVisibility(View.GONE);
+			textPane.setVisibility(View.GONE);
+			shapePane.setVisibility(View.GONE);
+			if (param == ObjectType.TEXT) {
 				// jika sedang mengedit teks, tampilkan properti text saja
 				textPane.setVisibility(View.VISIBLE);
-				fillPane.setVisibility(View.GONE);
-				strokePane.setVisibility(View.GONE);
-				textInput.setText(canvas.getTextContent());
-			} else if (canvas.isEditingBasicObject()) {
+				textInput.setText(canvas.getTextObjContent());
+				textColor.setBackgroundColor(canvas.getTextColor());
+			} else if (param == ObjectType.LINE) {
+				// edit line
+				strokePane.setVisibility(View.VISIBLE);
+				strokeColor.setBackgroundColor(canvas.getStrokeColor());
+			} else {
 				// jika sedang mengedit basic object, tampilkan properti
 				// stroke
 				// dan fill
-				textPane.setVisibility(View.GONE);
 				fillPane.setVisibility(View.VISIBLE);
+				fillColor.setBackgroundColor(canvas.getFillColor());
 				strokePane.setVisibility(View.VISIBLE);
-			} else {// edit line
-				fillPane.setVisibility(View.GONE);
-				strokePane.setVisibility(View.VISIBLE);
+				strokeColor.setBackgroundColor(canvas.getStrokeColor());
+				if (param == ObjectType.POLYGON)
+					shapePane.setVisibility(View.VISIBLE);
 			}
+			setPropPaneVisibility(showProp.isChecked());
 		} else {
-			cut.setVisibility(View.GONE);
-			copy.setVisibility(View.GONE);
-			delete.setVisibility(View.GONE);
-			showProp.setVisibility(View.GONE);
+			selectAddButtons.setVisibility(View.GONE);
+			// cut.setVisibility(View.GONE);
+			// copy.setVisibility(View.GONE);
+			// delete.setVisibility(View.GONE);
+			// showProp.setVisibility(View.GONE);
+			setPropPaneVisibility(false);
 		}
 	}
 
@@ -278,9 +336,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onWaitForApproval() {
-
-	}
+	public void onWaitForApproval() {}
 
 	@Override
 	public void onBeginDraw() {
@@ -292,16 +348,16 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// main-toolbar
 		if (v == select) {
 			canvas.setMode(CanvasView.Mode.SELECT);
-			if (canvas.isInSelectionMode())
-				select.setBackgroundColor(currentColor);
-			else
-				select.setBackgroundColor(Color.WHITE);
+			if (canvas.isInSelectionMode()) {
+				hand.setChecked(false);
+				select.setChecked(true);
+			}
 		} else if (v == hand) {
 			canvas.setMode(CanvasView.Mode.HAND);
 			if (canvas.isInHandMode())
-				hand.setBackgroundColor(currentColor);
-			else
-				hand.setBackgroundColor(Color.WHITE);
+				select.setChecked(false);
+			else if (canvas.isInSelectionMode() && !canvas.hasSelectedObject())
+				select.setChecked(true);
 		} else if (v == undo) {
 			canvas.undo();
 		} else if (v == redo) {
@@ -309,16 +365,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == showDash) {
 			// TODO show dash
 		} else if (v == showProp) {
-			if (propertyPane.getVisibility() == View.VISIBLE) {
-				propertyPane.setVisibility(View.GONE);
-				if (canvas.isInHideMode())
-					showProp.setBackgroundColor(colorHidden);
-				else
-					showProp.setBackgroundColor(colorNormal);
-			} else {
-				propertyPane.setVisibility(View.VISIBLE);
-				showProp.setBackgroundColor(Color.WHITE);
-			}
+			setPropPaneVisibility(showProp.isChecked());
 		}
 
 		// select-additional-toolbar
@@ -338,13 +385,16 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// color
 		else if (v == strokeColor) {
 			colorConsumer = strokeColor;
-			colorDialog.show();
+			colorPane.setColor(canvas.getStrokeColor());
+			colorPane.show();
 		} else if (v == fillColor) {
 			colorConsumer = fillColor;
-			colorDialog.show();
+			colorPane.setColor(canvas.getFillColor());
+			colorPane.show();
 		} else if (v == textColor) {
 			colorConsumer = textColor;
-			colorDialog.show();
+			colorPane.setColor(canvas.getTextColor());
+			colorPane.show();
 		}
 	}
 
@@ -369,6 +419,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				fillColor.setVisibility(View.VISIBLE);
 			else
 				fillColor.setVisibility(View.GONE);
+			canvas.setFillParameter(fillCheck.isChecked(),
+					canvas.getFillColor(), true);
 		} else if (button == textBold)
 			canvas.setFontBold(isChecked, true);
 		else if (button == textItalic)
@@ -385,14 +437,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				progress += CanvasObject.MIN_STROKE_WIDTH;
 				strokeWidthText.setText(String.valueOf(progress));
 				canvas.setStrokeWidth(progress, false);
-				// TODO poly
-				// } else if (seekBar == polySeek) {
-				// polyText.setText(String.valueOf(progress
-				// + PolygonObject.MIN_CORNER_COUNT));
+			} else if (seekBar == polySeek) {
+				progress += PolygonObject.MIN_CORNER_COUNT;
+				canvas.setPolygonCorner(progress, false);
+				polyText.setText(String.valueOf(progress));
 			} else if (seekBar == textSize) {
-				int size = progress + FontManager.MIN_FONT_SIZE;
-				canvas.setFontSize(size, false);
-				textSizeText.setText(String.valueOf(size));
+				progress += FontManager.MIN_FONT_SIZE;
+				canvas.setFontSize(progress, false);
+				textSizeText.setText(String.valueOf(progress));
 			}
 		}
 	}
@@ -405,6 +457,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (seekBar == strokeWidth) {
 			canvas.setStrokeWidth(seekBar.getProgress()
 					+ CanvasObject.MIN_STROKE_WIDTH, true);
+		} else if (seekBar == polySeek) {
+			canvas.setPolygonCorner(seekBar.getProgress()
+					+ PolygonObject.MIN_CORNER_COUNT, true);
 		} else if (seekBar == textSize) {
 			int size = seekBar.getProgress() + FontManager.MIN_FONT_SIZE;
 			canvas.setFontSize(size, true);
@@ -440,9 +495,36 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		if (v == textInput) {
-			canvas.setTextContent(textInput.getText().toString());
-			return true;
+			canvas.setTextObjContent(textInput.getText().toString());
 		}
-		return false;
+		return true;
 	}
+
+	private void setPropPaneVisibility(boolean visible) {
+		int vis = propertyPane.getVisibility();
+		if (visible) {
+			if (vis == View.GONE)
+				propertyPane.startAnimation(animPropShow);
+		} else {
+			if (vis == View.VISIBLE)
+				propertyPane.startAnimation(animPropHide);
+		}
+	}
+
+	@Override
+	public void onAnimationStart(Animation animation) {
+		if (animation == animPropShow) {
+			propertyPane.setVisibility(View.VISIBLE);
+		}
+	}
+
+	@Override
+	public void onAnimationEnd(Animation animation) {
+		if (animation == animPropHide) {
+			propertyPane.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public void onAnimationRepeat(Animation animation) {}
 }

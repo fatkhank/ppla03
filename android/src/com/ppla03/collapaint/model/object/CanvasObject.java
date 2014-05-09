@@ -94,7 +94,7 @@ public abstract class CanvasObject {
 	/**
 	 * Tebal maksimal garis pinggiran
 	 */
-	public static final int MAX_STROKE_WIDTH = 100;
+	public static final int MAX_STROKE_WIDTH = 50;
 
 	/**
 	 * Tebal minimal garis pinggiran

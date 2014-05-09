@@ -22,15 +22,15 @@ public class ActionJCode {
     /**
      * Parameter tinggi kanvas.
      */
-    public static final String CANVAS_HEIGHT = "wd";
+    public static final String CANVAS_HEIGHT = "hg";
     /**
      * Parameter left kanvas.
      */
-    public static final String CANVAS_LEFT = "wd";
+    public static final String CANVAS_LEFT = "le";
     /**
      * Parameter top kanvas.
      */
-    public static final String CANVAS_TOP = "wd";
+    public static final String CANVAS_TOP = "to";
     /**
      * Daftar aksi.
      */
@@ -79,6 +79,10 @@ public class ActionJCode {
      * Parameter style objek.
      */
     public static final String OBJECT_STYLE = "st";
+    /**
+     * Untuk menandai bahwa data objek tidak ditemukan.
+     */
+    public static final String OBJECT_MISSING = "miss";
 
     /**
      * Menandakan bahwa aksi ini adalah aksi yang disubmit oleh klien.
