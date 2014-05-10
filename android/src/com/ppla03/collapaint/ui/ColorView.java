@@ -16,7 +16,7 @@ import android.view.View;
  * 
  */
 public class ColorView extends View {
-	static final int[] colors = new int[] {
+	static final int[] colors2 = new int[] {
 			// abu
 			Color.rgb(255, 255, 255),
 			Color.rgb(225, 225, 225),
@@ -84,6 +84,10 @@ public class ColorView extends View {
 			Color.rgb(227, 108, 9), Color.rgb(151, 72, 6),
 	// end
 	};
+
+	static final int colors[] = { Color.BLACK, Color.WHITE, Color.RED,
+			Color.GREEN, Color.BLUE, Color.YELLOW, Color.GRAY, Color.MAGENTA,
+			Color.CYAN };
 
 	static int size = 70;
 	static final Paint paint = new Paint();

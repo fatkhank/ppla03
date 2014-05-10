@@ -12,6 +12,9 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -29,7 +32,8 @@ import android.widget.TextView;
  * 
  */
 public class ColorPane implements OnSeekBarChangeListener,
-		OnEditorActionListener, android.view.View.OnClickListener {
+		OnEditorActionListener, android.view.View.OnClickListener,
+		AnimationListener {
 	/**
 	 * Listener saat ada warna yang dipilih.
 	 * @author hamba v7
@@ -68,6 +72,7 @@ public class ColorPane implements OnSeekBarChangeListener,
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
 	private int selectedColor;
+	private TranslateAnimation animShow;
 
 	public ColorPane(Activity activity, View view, ColorChangeListener listener) {
 		try {
@@ -76,10 +81,10 @@ public class ColorPane implements OnSeekBarChangeListener,
 			this.parent = view;
 
 			// --- setup rgb chooser ---
-			rSlider = (SeekBar) view.findViewById(R.id.cd_r_slider);
-			gSlider = (SeekBar) view.findViewById(R.id.cd_g_slider);
-			bSlider = (SeekBar) view.findViewById(R.id.cd_b_slider);
-			aSlider = (SeekBar) view.findViewById(R.id.cd_a_slider);
+			rSlider = (SeekBar) view.findViewById(R.id.cp_r_slider);
+			gSlider = (SeekBar) view.findViewById(R.id.cp_g_slider);
+			bSlider = (SeekBar) view.findViewById(R.id.cp_b_slider);
+			aSlider = (SeekBar) view.findViewById(R.id.cp_a_slider);
 
 			rSlider.setOnSeekBarChangeListener(this);
 			gSlider.setOnSeekBarChangeListener(this);
@@ -97,22 +102,30 @@ public class ColorPane implements OnSeekBarChangeListener,
 			// bSlider.getThumb().setColorFilter(blueFilter);
 			// aSlider.getThumb().setColorFilter(alphaFilter);
 
-			rInput = (EditText) view.findViewById(R.id.cd_r_input);
-			gInput = (EditText) view.findViewById(R.id.cd_g_input);
-			bInput = (EditText) view.findViewById(R.id.cd_b_input);
-			aInput = (EditText) view.findViewById(R.id.cd_a_input);
+			rInput = (EditText) view.findViewById(R.id.cp_r_input);
+			gInput = (EditText) view.findViewById(R.id.cp_g_input);
+			bInput = (EditText) view.findViewById(R.id.cp_b_input);
+			aInput = (EditText) view.findViewById(R.id.cp_a_input);
 
 			rInput.setOnEditorActionListener(this);
 			gInput.setOnEditorActionListener(this);
 			bInput.setOnEditorActionListener(this);
 			aInput.setOnEditorActionListener(this);
 
-			preview = (Button) view.findViewById(R.id.cd_rgb_preview);
+			preview = (Button) view.findViewById(R.id.cp_rgb_preview);
 
-			approve = (ImageButton) view.findViewById(R.id.w_color_ok);
-			cancel = (ImageButton) view.findViewById(R.id.w_color_cancel);
+			approve = (ImageButton) view.findViewById(R.id.cp_ok);
+			cancel = (ImageButton) view.findViewById(R.id.cp_cancel);
 			approve.setOnClickListener(this);
 			cancel.setOnClickListener(this);
+
+			animShow = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
+					Animation.RELATIVE_TO_SELF, 1, Animation.RELATIVE_TO_SELF,
+					0, Animation.RELATIVE_TO_SELF, 0);
+
+			animShow.setDuration(500);
+			animShow.setFillAfter(true);
+			animShow.setAnimationListener(this);
 
 			parent.setVisibility(View.GONE);
 			setColor(Color.BLACK);
@@ -158,6 +171,7 @@ public class ColorPane implements OnSeekBarChangeListener,
 	public void show() {
 		setColor(selectedColor);
 		parent.setVisibility(View.VISIBLE);
+		// parent.startAnimation(animShow);
 	}
 
 	@Override
@@ -233,4 +247,15 @@ public class ColorPane implements OnSeekBarChangeListener,
 		}
 		parent.setVisibility(View.GONE);
 	}
+
+	@Override
+	public void onAnimationStart(Animation animation) {
+		parent.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onAnimationEnd(Animation animation) {}
+
+	@Override
+	public void onAnimationRepeat(Animation animation) {}
 }

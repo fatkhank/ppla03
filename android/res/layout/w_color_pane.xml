@@ -1,156 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="200dp"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:paddingBottom="5dp"
+    android:paddingLeft="5dp" >
+
+    <TextView
+        android:id="@+id/cp_r_label"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dp"
+        android:gravity="center_vertical"
+        android:text="@string/cp_r"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/cp_r_input"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/cp_r_label"
+        android:ems="10"
+        android:inputType="number"
+        android:text="255" />
+
+    <SeekBar
+        android:id="@+id/cp_r_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/cp_r_label"
+        android:layout_toLeftOf="@id/cp_r_input"
+        android:layout_toRightOf="@id/cp_r_label"
+        android:max="255"
+        android:progress="1" />
+
+    <TextView
+        android:id="@+id/cp_g_label"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/cp_r_label"
+        android:layout_marginRight="5dp"
+        android:gravity="center_vertical"
+        android:text="@string/cp_g"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/cp_g_input"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/cp_g_label"
+        android:ems="10"
+        android:inputType="number"
+        android:text="255" />
+
+    <SeekBar
+        android:id="@+id/cp_g_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/cp_g_label"
+        android:layout_toLeftOf="@id/cp_g_input"
+        android:layout_toRightOf="@id/cp_g_label"
+        android:max="255"
+        android:progress="1" />
+
+    <TextView
+        android:id="@+id/cp_b_label"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@id/cp_g_label"
+        android:layout_marginRight="5dp"
+        android:gravity="center_vertical"
+        android:text="@string/cp_b"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/cp_b_input"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/cp_b_label"
+        android:ems="10"
+        android:inputType="number"
+        android:text="255" />
+
+    <SeekBar
+        android:id="@+id/cp_b_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/cp_b_label"
+        android:layout_toLeftOf="@id/cp_b_input"
+        android:layout_toRightOf="@id/cp_b_label"
+        android:max="255"
+        android:progress="1" />
+
+    <TextView
+        android:id="@+id/cp_a_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/cp_b_label"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/cp_b_label"
+        android:gravity="center_horizontal"
+        android:text="@string/cp_a"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
-        android:id="@+id/cd_rgb_preview"
+        android:id="@+id/cp_rgb_preview"
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_margin="20dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/cp_cancel"
+        android:layout_alignTop="@+id/cp_cancel"
+        android:layout_margin="3dp"
+        android:layout_toLeftOf="@+id/cp_ok"
+        android:layout_toRightOf="@+id/cp_cancel"
         android:background="@android:color/holo_blue_dark" />
 
-    <TextView
-        android:id="@+id/cd_r_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
+    <EditText
+        android:id="@+id/cp_a_input"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/cp_a_slider"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/cp_a_label"
+        android:layout_toRightOf="@+id/cp_b_slider"
+        android:ems="10"
+        android:inputType="number" >
+    </EditText>
+
+    <SeekBar
+        android:id="@+id/cp_a_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/cd_rgb_preview"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/cd_r"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/cd_r_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cd_r_label"
-        android:ems="10"
-        android:inputType="number" />
-
-    <SeekBar
-        android:id="@+id/cd_r_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cd_r_label"
-        android:layout_toLeftOf="@id/cd_r_input"
-        android:layout_toRightOf="@id/cd_r_label"
-        android:max="255"
-        android:progress="1" />
-
-    <TextView
-        android:id="@+id/cd_g_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/cd_r_label"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/cd_g"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/cd_g_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cd_g_label"
-        android:ems="10"
-        android:inputType="number" />
-
-    <SeekBar
-        android:id="@+id/cd_g_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cd_g_label"
-        android:layout_toLeftOf="@id/cd_g_input"
-        android:layout_toRightOf="@id/cd_g_label"
-        android:max="255"
-        android:progress="1" />
-
-    <TextView
-        android:id="@+id/cd_b_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_below="@id/cd_g_label"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/cd_b"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/cd_b_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cd_b_label"
-        android:ems="10"
-        android:inputType="number" />
-
-    <SeekBar
-        android:id="@+id/cd_b_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cd_b_label"
-        android:layout_toLeftOf="@id/cd_b_input"
-        android:layout_toRightOf="@id/cd_b_label"
-        android:max="255"
-        android:progress="1" />
-
-    <TextView
-        android:id="@+id/cd_a_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_below="@id/cd_b_label"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/cd_a"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/cd_a_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cd_a_label"
-        android:ems="10"
-        android:inputType="number" />
-
-    <SeekBar
-        android:id="@+id/cd_a_slider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cd_a_label"
-        android:layout_toLeftOf="@id/cd_a_input"
-        android:layout_toRightOf="@id/cd_a_label"
+        android:layout_below="@+id/cp_a_label"
+        android:layout_toLeftOf="@+id/cp_a_input"
         android:max="255"
         android:progress="1" />
 
     <ImageButton
-        android:id="@+id/w_color_cancel"
+        android:id="@+id/cp_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cd_a_label"
-        android:layout_alignTop="@+id/w_color_ok"
-        android:background="@android:color/transparent"
+        android:layout_alignLeft="@+id/cp_a_slider"
+        android:layout_alignTop="@+id/cp_ok"
+        android:background="@drawable/round_button_small"
         android:src="@drawable/ic_action_cancel" />
 
     <ImageButton
-        android:id="@+id/w_color_ok"
+        android:id="@+id/cp_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/cd_a_input"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/transparent"
+        android:layout_below="@+id/cp_a_input"
+        android:layout_marginTop="17dp"
+        android:background="@drawable/round_button_small"
         android:src="@drawable/ic_action_accept" />
 
 </RelativeLayout>

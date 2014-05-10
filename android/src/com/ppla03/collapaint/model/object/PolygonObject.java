@@ -179,7 +179,7 @@ public class PolygonObject extends BasicObject {
 	 */
 	@Override
 	public void setGeom(float[] param, int start, int end) {
-		this.corner = Float.floatToIntBits(param[start]);
+		this.corner = Float.floatToIntBits(param[start++]);
 		if (xLocs.length < corner) {
 			int nsize = xLocs.length;
 			while (nsize < corner)
@@ -273,8 +273,8 @@ public class PolygonObject extends BasicObject {
 			for (int i = joints.length; i < corner; i++)
 				newJoint[i] = new Joint(xLocs[i], yLocs[i], i);
 			joints = newJoint;
-		} else
-			System.arraycopy(joints, 0, handler.points, 0, corner);
+		}
+		System.arraycopy(joints, 0, handler.points, 0, corner);
 
 		handler.points[corner] = rotator;
 		handler.points[corner + 1] = mover;

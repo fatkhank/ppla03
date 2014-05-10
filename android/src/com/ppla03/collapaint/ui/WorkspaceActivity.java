@@ -137,7 +137,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			move.setOnClickListener(this);
 			delete.setOnClickListener(this);
 
-			// --- property ppane ---
+			// --- property pane ---
 			propertyPane = (View) findViewById(R.id.w_property_scroll);
 			propertyPane.setVisibility(View.GONE);
 			animPropShow = new ScaleAnimation(0, 1, 0, 1,
@@ -214,7 +214,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			polyText = (TextView) findViewById(R.id.w_poly_text);
 			polyText.setText(String.valueOf(PolygonObject.MIN_CORNER_COUNT));
 
-			// --- prepare dialog ---
+			// --- prepare color ---
 			colorPaneView = findViewById(R.id.w_color_pane_scroll);
 			colorPane = new ColorPane(this, colorPaneView, this);
 
@@ -266,65 +266,68 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (hidden) {
 			canvasTitle.setText(canvas.getModel().name + " (hide mode)");
 			currentThemeColor = colorHidden;
-			topbarButtons.setBackgroundResource(R.drawable.w_top_button_hidden);
+			topbarButtons
+					.setBackgroundResource(R.drawable.w_topbar_left_hidden);
+			selectAddButtons
+					.setBackgroundResource(R.drawable.w_topbar_right_hidden);
 			propertyPane.setBackgroundResource(R.drawable.w_property_hidden);
 			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_hidden);
 		} else {
 			canvasTitle.setText(canvas.getModel().name);
 			currentThemeColor = colorNormal;
-			topbarButtons.setBackgroundResource(R.drawable.w_top_button_normal);
+			topbarButtons
+					.setBackgroundResource(R.drawable.w_topbar_left_normal);
+			selectAddButtons
+					.setBackgroundResource(R.drawable.w_topbar_right_normal);
 			propertyPane.setBackgroundResource(R.drawable.w_property_normal);
 			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_normal);
 		}
 		canvasTitle.setBackgroundColor(currentThemeColor);
-		selectAddButtons.setBackgroundColor(currentThemeColor);
 	}
 
 	@Override
 	public void onSelectionEvent(int state, int param) {
 		if (state == CanvasListener.EDIT_MULTIPLE
 				|| state == CanvasListener.EDIT_OBJECT) {
+			hand.setChecked(false);
+			select.setChecked(false);
 			selectAddButtons.setVisibility(View.VISIBLE);
-			// showProp.setVisibility(View.VISIBLE);
-			// cut.setVisibility(View.VISIBLE);
-			// copy.setVisibility(View.VISIBLE);
-			// delete.setVisibility(View.VISIBLE);
-			if (state == CanvasListener.EDIT_MULTIPLE)
-				move.setVisibility(View.VISIBLE);
-			else
-				move.setVisibility(View.GONE);
-
 			strokePane.setVisibility(View.GONE);
 			fillPane.setVisibility(View.GONE);
 			textPane.setVisibility(View.GONE);
 			shapePane.setVisibility(View.GONE);
-			if (param == ObjectType.TEXT) {
-				// jika sedang mengedit teks, tampilkan properti text saja
-				textPane.setVisibility(View.VISIBLE);
-				textInput.setText(canvas.getTextObjContent());
-				textColor.setBackgroundColor(canvas.getTextColor());
-			} else if (param == ObjectType.LINE) {
-				// edit line
-				strokePane.setVisibility(View.VISIBLE);
-				strokeColor.setBackgroundColor(canvas.getStrokeColor());
+
+			if (state == CanvasListener.EDIT_MULTIPLE) {
+				move.setVisibility(View.VISIBLE);
+				showProp.setVisibility(View.GONE);
 			} else {
-				// jika sedang mengedit basic object, tampilkan properti
-				// stroke
-				// dan fill
-				fillPane.setVisibility(View.VISIBLE);
-				fillColor.setBackgroundColor(canvas.getFillColor());
-				strokePane.setVisibility(View.VISIBLE);
-				strokeColor.setBackgroundColor(canvas.getStrokeColor());
-				if (param == ObjectType.POLYGON)
-					shapePane.setVisibility(View.VISIBLE);
+				move.setVisibility(View.GONE);
+				showProp.setVisibility(View.VISIBLE);
+				if (param == ObjectType.TEXT) {
+					// jika sedang mengedit teks, tampilkan properti text saja
+					textPane.setVisibility(View.VISIBLE);
+					textInput.setText(canvas.getTextObjContent());
+					textColor.setBackgroundColor(canvas.getTextColor());
+				} else if (param == ObjectType.LINE) {
+					// edit line
+					strokePane.setVisibility(View.VISIBLE);
+					strokeColor.setBackgroundColor(canvas.getStrokeColor());
+				} else {
+					// jika sedang mengedit basic object, tampilkan properti
+					// stroke dan fill
+					if (canvas.isEditingFillableObject())
+						fillPane.setVisibility(View.VISIBLE);
+					fillColor.setBackgroundColor(canvas.getFillColor());
+					strokePane.setVisibility(View.VISIBLE);
+					strokeColor.setBackgroundColor(canvas.getStrokeColor());
+					if (param == ObjectType.POLYGON)
+						shapePane.setVisibility(View.VISIBLE);
+				}
+				setPropPaneVisibility(showProp.isChecked());
 			}
-			setPropPaneVisibility(showProp.isChecked());
 		} else {
+			select.setChecked(canvas.isInSelectionMode());
 			selectAddButtons.setVisibility(View.GONE);
-			// cut.setVisibility(View.GONE);
-			// copy.setVisibility(View.GONE);
-			// delete.setVisibility(View.GONE);
-			// showProp.setVisibility(View.GONE);
 			setPropPaneVisibility(false);
 		}
 	}

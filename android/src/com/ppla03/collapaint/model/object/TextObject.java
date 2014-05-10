@@ -1,5 +1,7 @@
 package com.ppla03.collapaint.model.object;
 
+import java.util.Arrays;
+
 import com.ppla03.collapaint.FontManager;
 
 import android.graphics.Canvas;
@@ -111,12 +113,12 @@ public class TextObject extends CanvasObject {
 		paint.setTextSize(size);
 		calculateBounds();
 	}
-	
+
 	/**
 	 * Mengambil teks.
 	 * @return
 	 */
-	public String getText(){
+	public String getText() {
 		return this.text;
 	}
 
@@ -173,8 +175,10 @@ public class TextObject extends CanvasObject {
 
 	@Override
 	public void setGeom(float[] param, int start, int end) {
-		// hitung jumlah karakter yang dibaca dan pastikan ukuran buffer cukup
+		// hitung juwmlah karakter yang dibaca dan pastikan ukuran buffer cukup
+		// TODO
 		int charLength = Float.floatToIntBits(param[start++]);
+		// int charLength = (int) param[start++];
 		int bufferLength = (charLength + 2) & 0xfffffffe;
 		if (setBuffer.length < bufferLength)
 			setBuffer = new char[bufferLength];
@@ -209,7 +213,8 @@ public class TextObject extends CanvasObject {
 		data[start++] = Float.intBitsToFloat(charLength);
 
 		// ekstrak karakter ke buffer, kemudian masukkan ke data
-		int dataLength = ((charLength + 1) >> 1) + 1;
+		int dataLength = start + ((charLength + 1) >> 1);
+
 		text.getChars(0, charLength, extractBuffer, 0);
 		int charCtr = 0;
 		while (start < dataLength) {
@@ -217,7 +222,8 @@ public class TextObject extends CanvasObject {
 			int c2 = (charCtr < charLength) ? extractBuffer[charCtr++] : 0;
 			data[start++] = Float.intBitsToFloat(c1 | c2);
 		}
-		return (dataLength >> 1) + 1;
+
+		return ((charLength + 1) >> 1) + 1;
 	}
 
 	@Override

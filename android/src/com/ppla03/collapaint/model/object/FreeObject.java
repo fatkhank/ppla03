@@ -181,12 +181,20 @@ public class FreeObject extends BasicObject {
 			super.setFillMode(filled, color);
 	}
 
+	/**
+	 * Mengetahui apakah objek ini bisa diberi isian atau tidak (membentuk loop
+	 * atau tidak).
+	 * @return
+	 */
+	public boolean fillable() {
+		return state == CLOSED;
+	}
+
 	/*
 	 * Param indeks pertama berisi informasi state objek param. Indeks
 	 * berikutnya berisi xLocs, kemudian yLocs dengan ukuran yang sama dengan
 	 * xlocs.
 	 */
-
 	@Override
 	public void setGeom(float[] param, int start, int end) {
 		// catat daftar titik-titik

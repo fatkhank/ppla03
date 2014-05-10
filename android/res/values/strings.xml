@@ -5,10 +5,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_loader">LoaderActivity</string>
-    <string name="cd_r">R</string>
-    <string name="cd_g">G</string>
-    <string name="cd_b">B</string>
-    <string name="cd_a">Opacity</string>
+    <string name="cp_r">R</string>
+    <string name="cp_g">G</string>
+    <string name="cp_b">B</string>
+    <string name="cp_a">Opacity</string>
     <string name="title_activity_color_tester">ColorTesterActivity</string>
     <string name="emptyString">\"\"</string>
     <string name="emptyString2"></string>

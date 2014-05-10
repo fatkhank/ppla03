@@ -3,6 +3,7 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import com.ppla03.collapaint.R.drawable;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
@@ -10,6 +11,7 @@ import com.ppla03.collapaint.model.object.*;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
@@ -233,41 +236,57 @@ public class CanvasView extends View {
 
 	// ---------------------- proto area ---------------
 	private static int PROTO_AREA_WIDTH = 200, PROTO_AREA_TOP_MARGIN = 0;
-	private static final int NONE = 0,// tidak ada
-			CLICK = 128, // sedang di klik, tapi belum drag
-			DRAGGING = 1,// ada objek yang sedang didrag
-			PROTO = 2,// objek yang di drag adalah proto
-			DRAG_PROTO = DRAGGING | PROTO,// mendrag objek dari mainbar, ukuran
-											// masih kecil
-			INFLATE_FLAG = 32,// menggelembungkan objek ke ukuran sebenarnya
-			CLONE = 4, // objek yang di drag adalah clone
-			DRAG_CLONE = DRAGGING | CLONE,// mengatur peletakan objek yang sudah
-											// digelembungkan
-			DESTROY_FLAG = 64,// batal menggambar objek
-			DRAWING = 256, // sedang menggambar
-			FREE = 512, // free objek
-			DRAWING_FREE = DRAWING | FREE, // sedang menggambar free objek
-			LINE = 1024, // objek garis
-			DRAWING_LINE = DRAWING | LINE;// sedang menggambar garis
+	private static final int DS_NONE = 0,// tidak ada
+			DS_CLICK = 1, // sedang di klik, tapi belum drag
+			DS_DRAG = 2,// ada objek yang sedang didrag
+			DS_PROTO = 4,// objek yang didrag adalah proto
+			DS_PASTE = 8, // objek yang didrag adalah paste
+			DS_MASK_PROPAS = DS_PROTO | DS_PASTE,// masking proto atau paste
+			DS_ANIM_FINISH = 16,// animasi selesai
+			DS_INFLATE_FLAG = 32,// menggembungkan objek
+			DS_DEFLATE_FLAG = 64,// objek sedang dikempeskan
+			// animasi penggembungan selesai
+			DS_INFLATED = DS_INFLATE_FLAG | DS_ANIM_FINISH,
+			// animasi penggembungan selesai
+			DS_DEFLATED = DS_DEFLATE_FLAG | DS_ANIM_FINISH,
+			// batal menggambar objek
+			DS_DESTROY_FLAG = 128,
+			// sedang menggambar
+			DS_DRAW = 256,
+			// free objek
+			DS_FREE = 512,
+			// objek garis
+			DS_LINE = 1024,
+			// mask free atau line
+			DS_MASK_FREELINE = DS_FREE | DS_LINE,
+			// mendrag objek dari mainbar, ukuran masih kecil
+			DS_DRAG_PROTO = DS_DRAG | DS_PROTO,
+			// mengatur posisi paste objek
+			DS_DRAG_PASTE = DS_DRAG | DS_PASTE,
+			// mengatur peletakan proto objek yang sudah digembungkan
+			DS_DRAG_PROTO_INFLATED = DS_DRAG | DS_INFLATED | DS_PROTO,
+			// mengatur peletakan proto objek yang sudah digembungkan
+			DS_DRAG_PASTE_INFLATED = DS_DRAG | DS_INFLATED | DS_PASTE,
+			// animasi menyimpan hasil copy
+			DS_PASTE_DEFLATING = DS_DEFLATE_FLAG | DS_PASTE,
+			// sedang menggambar free objek
+			DS_DRAW_FREE = DS_DRAW | DS_FREE,
+			// sedang menggambar garis
+			DS_DRAW_LINE = DS_DRAW | DS_LINE;
 
 	/**
 	 * Aksi yang dilakukan pada objek di mainbar
 	 */
-	private int dragStatus;
-	private static final int MIN_DRAG_DISTANCE = 10, PROTO_STROKE_WIDTH = 3,// ketebalan
-			// stroke
-			// yang
-			// terlihat
-			// objek
-			// di
-			// mainbar
-			PROTO_TEXT_SIZE = 20;
+	private int dragStatus, protoY;
+	private static final int MIN_DRAG_DISTANCE = 10, PROTO_STROKE_WIDTH = 3;
+	// ketebalan stroke yang terlihat objek di mainbar
+	private static final int PROTO_TEXT_SIZE = 20;
 	/**
 	 * ikon delete di main bar
 	 */
 	private Drawable iconBin;
 	private int COLOR_THEME_NORMAL, COLOR_THEME_HIDDEN, COLOR_DESTROY = Color
-			.argb(50, 255, 0, 0);
+			.argb(100, 255, 0, 0), COLOR_HIGHLIGHT = Color.argb(100, 0, 0, 0);
 
 	// ---------------------- proto objects -------------
 	private ScaledObject captureObject;
@@ -277,7 +296,8 @@ public class CanvasView extends View {
 	private ScaledObject captureOval;
 	private ScaledObject capturePoly;
 	private ScaledObject captureText;
-	private ScaledObject capturePaste;
+	private ScaledBitmap capturePaste;
+	private ScaledBitmap draggedPaste;
 	private CanvasObject protoObject;
 	private LineObject protoLine;
 	private FreeObject protoFree;
@@ -288,7 +308,11 @@ public class CanvasView extends View {
 
 	private static final Path protoHighLight = new Path();
 
-	private static ValueAnimator animProto = new ValueAnimator();
+	private static ValueAnimator animator = new ValueAnimator();
+	private static OvershootInterpolator interOvershoot = new OvershootInterpolator();
+	private static LinearInterpolator interLinear = new LinearInterpolator();
+	private static final int INFLATE_DURATION = 500, DEFLATE_DURATION = 300;
+	private static float pasteOfsX, pasteOfsY, pasteScale;
 
 	public void initProtoArea() {
 		PROTO_AREA_WIDTH = (getHeight() - PROTO_AREA_TOP_MARGIN) / 7;
@@ -297,6 +321,13 @@ public class CanvasView extends View {
 		int icon_right = PROTO_AREA_WIDTH - icon_left;
 		int icon_width = icon_right - icon_left;
 		int center = PROTO_AREA_WIDTH / 2;
+
+		// atur highligh ikon main bar
+		RectF fr = new RectF(4, 4, PROTO_AREA_WIDTH - 4, PROTO_AREA_WIDTH - 4);
+		protoHighLight.rewind();
+		protoHighLight.moveTo(4, 4);
+		protoHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
+				Direction.CCW);
 
 		int y = PROTO_AREA_TOP_MARGIN;
 		protoLine = new LineObject(icon_left, icon_left, strokeColor,
@@ -319,14 +350,6 @@ public class CanvasView extends View {
 		// tentukan ukuran stroke agar terlihat jelas
 		protoFree.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureFree
 				.getScale()));
-
-		// atur highligh untuk free objek
-		RectF fr = new RectF(4, y + 4, PROTO_AREA_WIDTH - 4, y
-				+ PROTO_AREA_WIDTH - 4);
-		protoHighLight.rewind();
-		protoHighLight.moveTo(4, y + 4);
-		protoHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
-				Direction.CCW);
 
 		// atur objek rect
 		y += PROTO_AREA_WIDTH;
@@ -372,18 +395,20 @@ public class CanvasView extends View {
 
 		// atur objek paste
 		y += PROTO_AREA_WIDTH;
-		capturePaste = new ScaledObject(new LineObject());
-		capturePaste.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		capturePaste = new ScaledBitmap(icon_left, y + icon_left, icon_width,
+				icon_width);
+		draggedPaste = new ScaledBitmap(icon_left, y + icon_left, icon_width,
+				icon_width);
 
 		// atur animasi mendrag dan membesarkan protoObject
 		captureObject = new ScaledObject(protoRect);
-		animProto.addUpdateListener(animProtoUpdate);
-		animProto.addListener(animProtoListener);
-		animProto.setDuration(500);
-		animProto.setInterpolator(new OvershootInterpolator());
+		animator.addUpdateListener(animProtoUpdate);
+		animator.addListener(animProtoListener);
+		animator.setDuration(INFLATE_DURATION);
+		animator.setInterpolator(interOvershoot);
 
 		iconBin.setBounds(0, PROTO_AREA_TOP_MARGIN, PROTO_AREA_WIDTH,
-				PROTO_AREA_WIDTH);
+				PROTO_AREA_WIDTH + PROTO_AREA_TOP_MARGIN);
 	}
 
 	public CanvasView(Context context, AttributeSet attrs) {
@@ -465,7 +490,6 @@ public class CanvasView extends View {
 	}
 
 	public void resizeCanvas(int width, int height, int top, int left) {
-		// TODO resize
 		ResizeCanvas rc = new ResizeCanvas(model, width, height, top, left,
 				true);
 		model.setDimension(width, height, top, left);
@@ -504,29 +528,42 @@ public class CanvasView extends View {
 	private void drawProtoArea(Canvas canvas) {
 		selectPaint.setColor(Color.WHITE);
 		canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(), selectPaint);
-		if ((dragStatus & DRAGGING) != DRAGGING) {
+		if ((dragStatus & DS_DRAG) != DS_DRAG) {
+			// tampilkan highligh kalau diklik
+			if ((dragStatus & DS_DRAW) == DS_DRAW) {
+				selectPaint.setColor(hidden_mode ? COLOR_THEME_HIDDEN
+						: COLOR_THEME_NORMAL);
+				// bawa ke posisi ikon yang sedang menggambar
+				canvas.translate(0, protoY);
+				canvas.drawPath(protoHighLight, selectPaint);
+				canvas.translate(0, -protoY);
+			}
+			if ((dragStatus & DS_CLICK) == DS_CLICK) {
+				selectPaint.setColor(COLOR_HIGHLIGHT);
+				canvas.translate(0, protoY);
+				canvas.drawPath(protoHighLight, selectPaint);
+				canvas.translate(0, -protoY);
+			}
 			// tampilkan ikon objek
 			captureLine.draw(canvas);
-			selectPaint.setColor(hidden_mode ? COLOR_THEME_HIDDEN
-					: COLOR_THEME_NORMAL);
-			if (dragStatus == DRAWING_FREE)
-				canvas.drawPath(protoHighLight, selectPaint);
 			captureFree.draw(canvas);
 			captureRect.draw(canvas);
 			captureOval.draw(canvas);
 			capturePoly.draw(canvas);
 			captureText.draw(canvas);
-			capturePaste.draw(canvas);
+			if (ObjectClipboard.hasObject()
+					&& ((dragStatus & DS_PASTE) != DS_PASTE))
+				capturePaste.draw(canvas);
 		} else {
-			if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
+			if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
 				selectPaint.setColor(COLOR_DESTROY);
 				canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(),
 						selectPaint);
 			}
-			iconBin.setBounds(0, PROTO_AREA_TOP_MARGIN, PROTO_AREA_WIDTH,
-					PROTO_AREA_WIDTH);
 			iconBin.draw(canvas);
 		}
+
+		// gambar pemisah mainbar dengan kanvas
 		selectPaint.setColor((hidden_mode) ? COLOR_THEME_HIDDEN
 				: COLOR_THEME_NORMAL);
 		canvas.drawRect(PROTO_AREA_WIDTH, 0, PROTO_AREA_WIDTH + 3, getHeight(),
@@ -547,6 +584,7 @@ public class CanvasView extends View {
 		}
 		if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION)
 			canvas.drawBitmap(selectedObjectsCache, socX, socY, cachePaint);
+
 		if (currentObject != null) {
 			currentObject.draw(canvas);
 			if (handler != null)
@@ -558,8 +596,12 @@ public class CanvasView extends View {
 		drawProtoArea(canvas);
 
 		// tampilkan hasil clone objek
-		if ((dragStatus & PROTO) == PROTO)
+		if (((dragStatus & DS_DRAG) == DS_DRAG)
+				&& ((dragStatus & DS_PROTO) == DS_PROTO)
+				&& ((dragStatus & DS_INFLATED) != DS_INFLATED)) {
 			captureObject.draw(canvas);
+		} else if ((dragStatus & DS_PASTE) == DS_PASTE)
+			draggedPaste.draw(canvas);
 
 		// DEBUG
 		// if (model != null)
@@ -684,8 +726,8 @@ public class CanvasView extends View {
 				editRect.right += EDIT_BORDER_PADDING;
 				editRect.bottom += EDIT_BORDER_PADDING;
 				selectRect.setEmpty();
-				// TODO draw edit rect
-				// cacheCanvas.drawRect(editRect, editPaint);
+				if (size > 1)
+					cacheCanvas.drawRect(editRect, editPaint);
 				if ((mode & Mode.MOVING) == Mode.MOVING) {
 					cacheCanvas.drawLine(editRect.left, editRect.top,
 							editRect.right, editRect.bottom, editPaint);
@@ -704,8 +746,21 @@ public class CanvasView extends View {
 
 		@Override
 		public void onAnimationUpdate(ValueAnimator animation) {
-			Float scale = (Float) animation.getAnimatedValue();
-			captureObject.setScale(scale);
+			Float progress = (Float) animation.getAnimatedValue();
+			if (dragStatus == DS_PASTE_DEFLATING) {
+				// animasi hasil copy
+				float ofx = capturePaste.offsetX() + progress * pasteOfsX;
+				float ofy = capturePaste.offsetY() + progress * pasteOfsY;
+				draggedPaste.offsetTo(ofx, ofy);
+				float scale = pasteScale + (1 - pasteScale) * progress;
+				draggedPaste.scaleTo(scale);
+			} else if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+				// inflate proto objek
+				captureObject.setScale(progress);
+			} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
+				// inflate paste
+				draggedPaste.scaleTo(progress);
+			}
 			CanvasView.this.postInvalidate();
 		}
 	};
@@ -719,22 +774,35 @@ public class CanvasView extends View {
 
 		@Override
 		public void onAnimationEnd(Animator animation) {
-			// clone objek
-			if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
-				currentObject = null;
-				dragStatus = NONE;
-			} else {
+			// jika user masih melakukan drag
+			if ((dragStatus & DS_DRAG) == DS_DRAG) {
+				// jika yang dianimasi objek proto
 				currentObject = protoObject;
 				currentObject.offset(-scrollX, -scrollY);
-				if ((dragStatus & DRAGGING) != DRAGGING) {
+				dragStatus |= DS_ANIM_FINISH;
+			} else {
+				if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
+					// jika objek ditandai untuk dihapus
+					currentObject = null;
+
+				} else if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+					// jika yang dianimasi objek proto
+					currentObject = protoObject;
+					currentObject.offset(-scrollX, -scrollY);
 					// jika objek sudah dilepas oleh user ->langsung edit
-					dragStatus = NONE;
 					mode = Mode.DRAW;
 					editObject(currentObject, ShapeHandler.ALL);
-					redoStack.clear();
-					listener.onURStatusChange(true, false);
-				} else
-					dragStatus = DRAG_CLONE;
+				} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
+					if ((dragStatus & DS_INFLATE_FLAG) == DS_INFLATE_FLAG) {
+						// jika animasi mempaste
+						placePaste();
+					} else {
+						// jika animasi mengkopi
+						dragStatus = DS_NONE;
+						capturePaste.copy(draggedPaste);
+					}
+				}
+				dragStatus = DS_NONE;
 			}
 			CanvasView.this.postInvalidate();
 		}
@@ -742,6 +810,16 @@ public class CanvasView extends View {
 		@Override
 		public void onAnimationCancel(Animator animation) {}
 	};
+
+	private void placePaste() {
+		pasteFromClipboard();// paste objek
+		// hitung pergeseran dari saat dicopy
+		float ofx = draggedPaste.offsetX() - capturePaste.offsetX() - pasteOfsX;
+		float ofy = draggedPaste.offsetY() - capturePaste.offsetY() - pasteOfsY;
+		// atur penempatan objek2 yang sudah di paste
+		for (int i = 0; i < selectedObjects.size(); i++)
+			selectedObjects.get(i).offset(ofx, ofy);
+	}
 
 	/**
 	 * Mengecek aksi user terhadap objek di mainbar
@@ -752,7 +830,10 @@ public class CanvasView extends View {
 	private boolean onTouchProtoArea(MotionEvent event, int act) {
 		int x = (int) event.getX();
 		int y = (int) event.getY();
-		if (act == MotionEvent.ACTION_DOWN) {// saat layar mulai dipencet
+		if (act == MotionEvent.ACTION_DOWN) {
+			// saat layar mulai dipencet -> abaikan jika sedang ada aksi lain
+			if (dragStatus != DS_NONE)
+				return false;
 			// jika user memasuki area mainbar -> kemungkinan akan menggambar
 			if (x < PROTO_AREA_WIDTH) {
 				approveAction();// setujui semua aksinya dulu
@@ -760,62 +841,84 @@ public class CanvasView extends View {
 				anchorY = y;
 				// tentukan objek yang diklik oleh user
 				int id = (y - PROTO_AREA_TOP_MARGIN) / PROTO_AREA_WIDTH;
-				if (id == 0) {
-					protoObject = protoLine;
-					captureObject.lookTo(captureLine);
-				} else if (id == 1) {
-					protoObject = protoFree;
-					captureObject.lookTo(captureFree);
-				} else if (id == 2) {
-					protoObject = protoRect;
-					captureObject.lookTo(captureRect);
-				} else if (id == 3) {
-					protoObject = protoOval;
-					captureObject.lookTo(captureOval);
-				} else if (id == 4) {
-					protoObject = protoPoly;
-					captureObject.lookTo(capturePoly);
-				} else if (id == 5) {
-					protoObject = protoText;
-					captureObject.lookTo(captureText);
-				} else if (id == 7) {
-					// TODO icon paste
+				if (id >= 6) {
+					// tandai bahwa yang diklik adalah paste
+					if (ObjectClipboard.hasObject())
+						dragStatus = DS_CLICK | DS_PASTE;// klik paste
+				} else {
+					dragStatus = DS_CLICK | DS_PROTO;// sedang mengklik proto
+					if (id == 0) {
+						protoObject = protoLine;
+						captureObject.lookTo(captureLine);
+					} else if (id == 1) {
+						protoObject = protoFree;
+						captureObject.lookTo(captureFree);
+					} else if (id == 2) {
+						protoObject = protoRect;
+						captureObject.lookTo(captureRect);
+					} else if (id == 3) {
+						protoObject = protoOval;
+						captureObject.lookTo(captureOval);
+					} else if (id == 4) {
+						protoObject = protoPoly;
+						captureObject.lookTo(capturePoly);
+					} else if (id == 5) {
+						protoObject = protoText;
+						captureObject.lookTo(captureText);
+					}
 				}
-				dragStatus = CLICK;
+				// tandai posisi ikon
+				protoY = PROTO_AREA_TOP_MARGIN + id * PROTO_AREA_WIDTH;
 				postInvalidate();
 				return true;
-			} else {
-				dragStatus = NONE;
-				return false;
 			}
+			return false;
 		} else {
-			if (dragStatus == NONE) // abaikan jika tidak ada objek yang didrag
+			if (dragStatus == DS_NONE) // abaikan jika tak ada aksi
 				return false;
 			if (act == MotionEvent.ACTION_MOVE) {
 				float dx = x - anchorX;
 				float dy = y - anchorY;
-				if (dragStatus == CLICK) {
-					// jika sudah melewati batas drag -> clone obje
+				if ((dragStatus & DS_CLICK) == DS_CLICK) {
+					// jika sudah melewati batas drag -> tandai drag
 					if (Math.abs(dx) > MIN_DRAG_DISTANCE
 							|| Math.abs(dy) > MIN_DRAG_DISTANCE) {
-						protoObject = protoObject.cloneObject();
-						captureObject.setObject(protoObject);
-						dragStatus = DRAG_PROTO;
+						dragStatus &= ~DS_CLICK;// matikan klik
+						dragStatus |= DS_DRAG;// tandai drag
+						if (dragStatus == DS_DRAG_PROTO) {
+							// sedang mendrag proto -> clone objek
+							protoObject = protoObject.cloneObject();
+							captureObject.setObject(protoObject);
+						} else if (dragStatus == DS_DRAG_PASTE) {
+							// sedang mendrag paste -> clone capture paste
+							draggedPaste.copy(capturePaste);
+							draggedPaste.matchSize(capturePaste);
+						}
 					}
 				} else {
-					if ((dragStatus & DRAG_PROTO) == DRAG_PROTO) {
-						// sedang mendrag proto -> geser hasil capture
-						captureObject.offset(dx, dy);
+					// drag objek berdasarkan jenisnya (proto atau paste) dan
+					// sudah digembungkan atau belum
+					if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+						// typenya proto
+						if ((dragStatus & DS_ANIM_FINISH) == DS_ANIM_FINISH) {
+							// sedang mendrag objek yang sudah digembungkan
+							currentObject.offset(dx, dy);
+						} else
+							// sedang mendrag proto
+							captureObject.offset(dx, dy);
+					} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
+						draggedPaste.offset(dx, dy);
+					}
+					anchorX = x;
+					anchorY = y;
 
-						// jika objek belum digelembungkan dan objek keluar dari
-						// main bar, gelembungkan objek
-						if ((dragStatus & INFLATE_FLAG) != INFLATE_FLAG
-								&& x > PROTO_AREA_WIDTH) {
-							dragStatus |= INFLATE_FLAG;
-							// animasikan penggelembungan
-							animProto.setFloatValues(captureObject.getScale(),
-									1);
-							animProto.start();
+					// yg belum digembungkan dan keluar mainbar -> gembungkan
+					if ((dragStatus & DS_INFLATE_FLAG) != DS_INFLATE_FLAG
+							&& x > PROTO_AREA_WIDTH) {
+						dragStatus |= DS_INFLATE_FLAG;
+						if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+							// animasikan penggembungan
+							animator.setFloatValues(captureObject.getScale(), 1);
 							// sesuaikan ketebalan garis sebenarnya, ambil
 							// gambarnya, kembalikan seperti semula
 							if (protoObject instanceof BasicObject) {
@@ -825,49 +928,62 @@ public class CanvasView extends View {
 								((LineObject) protoObject)
 										.setWidth(strokeWidth);
 							}
+						} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
+							float sc = capturePaste.scale();
+							animator.setFloatValues(sc, 1);
+							draggedPaste.scaleTo(sc);
 						}
-					} else if ((dragStatus & DRAG_CLONE) == DRAG_CLONE) {
-						// objek sudah diklon -> geser currentObject
-						currentObject.offset(dx, dy);
+						animator.setInterpolator(interOvershoot);
+						animator.setDuration(INFLATE_DURATION);
+						animator.start();
 					}
-					// jika masuk lagi ke drawbar -> tandai bahwa objek akan
-					// dihapus
+
+					// jika masuk lagi ke mainbar, tandai objek akan dihapus
 					if (x < PROTO_AREA_WIDTH)
-						dragStatus |= DESTROY_FLAG;
+						dragStatus |= DS_DESTROY_FLAG;
 					else
-						dragStatus &= ~DESTROY_FLAG;
-					anchorX = x;
-					anchorY = y;
+						dragStatus &= ~DS_DESTROY_FLAG;
 				}
 			} else if (act == MotionEvent.ACTION_UP) {
-				if (dragStatus == CLICK) {
-					dragStatus = NONE;
-					if (protoObject instanceof FreeObject) {
-						// jika objek free, ubah ke mode gambar biasa
-						insertPrimitive(ObjectType.FREE);
-						Toast.makeText(getContext(), "Drag to make path",
-								Toast.LENGTH_SHORT).show();
-						dragStatus = DRAWING_FREE;
-					} else if (protoObject instanceof LineObject) {
-						insertPrimitive(ObjectType.LINE);
-						Toast.makeText(getContext(), "Drag to make line",
-								Toast.LENGTH_SHORT).show();
-						dragStatus = DRAWING_LINE;
+				// ------ user hanya mengklik tombol ------
+				if ((dragStatus & DS_CLICK) == DS_CLICK) {
+					if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
+						// diklik paste -> paste objek dari kanvas
+						pasteFromClipboard();
+						dragStatus = DS_NONE;
+					} else {
+						if (protoObject instanceof FreeObject) {
+							// jika objek free, ubah ke mode gambar biasa
+							insertPrimitive(ObjectType.FREE);
+							Toast.makeText(getContext(), "Drag to make path",
+									Toast.LENGTH_SHORT).show();
+							dragStatus = DS_DRAW_FREE;
+						} else if (protoObject instanceof LineObject) {
+							insertPrimitive(ObjectType.LINE);
+							Toast.makeText(getContext(), "Drag to make line",
+									Toast.LENGTH_SHORT).show();
+							dragStatus = DS_DRAW_LINE;
+						}
 					}
-				} else if ((dragStatus & DESTROY_FLAG) == DESTROY_FLAG) {
+					// --- user sudah mendrag ---
+				} else if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
 					// jika objek ditandai untuk dihapus
 					currentObject = null;
-					dragStatus = NONE;
-				} else if (dragStatus == DRAG_CLONE) {
-					// objek sudah diklon
-					mode = Mode.DRAW;
-					dragStatus = NONE;
-					editObject(currentObject, ShapeHandler.ALL);
-					redoStack.clear();
-					listener.onURStatusChange(true, false);
+					dragStatus = DS_NONE;
+
+				} else if ((dragStatus & DS_ANIM_FINISH) == DS_ANIM_FINISH) {
+					// jika proses animasi sudah selesai
+					if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+						// objek sudah diklon
+						mode = Mode.DRAW;
+						editObject(currentObject, ShapeHandler.ALL);
+					} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE)
+						placePaste();
+					dragStatus = DS_NONE;
 				} else {
+					// animasi belum selesai
 					// tandai bahwa objek sudah dilepas oleh user
-					dragStatus &= ~DRAGGING;
+					dragStatus &= ~DS_DRAG;
 				}
 			}
 			postInvalidate();
@@ -1012,15 +1128,10 @@ public class CanvasView extends View {
 						currentFree.penUp();
 						protoFree = currentFree.cloneObject();
 						captureFree.setObject(protoFree);
-						// hitung ukuran stroke agar kelihatan jelas di main bar
-						float scale = captureFree.getScale();
-						if (scale > 1)
-							protoFree.setStrokeWidth(PROTO_STROKE_WIDTH);
-						else
-							protoFree.setStrokeWidth((int) (protoFree
-									.getStrokeWidth() / scale));
 
-						selectRect.setEmpty();
+						// hitung ukuran stroke agar kelihatan jelas di main bar
+						float w = PROTO_STROKE_WIDTH / captureFree.getScale();
+						protoFree.setStrokeWidth((int) w);
 					}
 					redoStack.clear();
 					listener.onURStatusChange(true, false);
@@ -1160,9 +1271,10 @@ public class CanvasView extends View {
 		if (currentObject != null && currentObject == currentPoly) {
 			currentPoly.changeShape(corner, defaultPolyRadius);
 			if (save) {
-				if (grabbedCPoint != null)
+				if (handler != null && grabbedCPoint != null)
 					handler.releasePoint(grabbedCPoint);
 				handler = currentPoly.getHandler(ShapeHandler.ALL);
+				handler.init();
 			} else
 				handler = null;
 		}
@@ -1177,9 +1289,10 @@ public class CanvasView extends View {
 		return CanvasView.polyCorner;
 	}
 
-	public boolean isEditingBasicObject() {
+	public boolean isEditingFillableObject() {
 		return ((mode & Mode.EDIT) == Mode.EDIT) && currentObject != null
-				&& currentBasic == currentObject;
+				&& currentBasic == currentObject
+				&& (currentBasic != currentFree || currentFree.fillable());
 	}
 
 	/**
@@ -1229,12 +1342,13 @@ public class CanvasView extends View {
 			objCode = ObjectType.TEXT;
 			textColor = currentText.getTextColor();
 		}
+		selectedObjects.clear();
+		selectedObjects.add(co);
 		// checkpoint untuk perubahan minor, akan hilang saat approveAction atau
 		// cancelAction
 		checkpoint = userActions.size();
 		handler = co.getHandler(ShapeHandler.ALL);
-		if (handler != null)
-			handler.init();
+		handler.init();
 		listener.onWaitForApproval();
 		mode |= Mode.EDIT;
 		redoStack.clear();
@@ -1690,6 +1804,16 @@ public class CanvasView extends View {
 
 	public int copySelectedObjects() {
 		ObjectClipboard.put(selectedObjects);
+		draggedPaste.capture(selectedObjects);
+		pasteOfsX = draggedPaste.offsetX() - capturePaste.offsetX();
+		pasteOfsY = draggedPaste.offsetY() - capturePaste.offsetY();
+		pasteScale = draggedPaste.rescaleTo(capturePaste);
+		dragStatus = DS_PASTE_DEFLATING;
+		animator.setInterpolator(interLinear);
+		animator.setFloatValues(1, 0);
+		animator.setDuration(DEFLATE_DURATION);
+		animator.start();
+		postInvalidate();
 		return selectedObjects.size();
 	}
 

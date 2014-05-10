@@ -4,8 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 
 public class ScaledObject {
-	private CanvasObject object;
-	private float scale, left, top, width, height;
+	protected CanvasObject object;
+	protected float scale, left, top, width, height;
 
 	public ScaledObject(CanvasObject object) {
 		this.object = object;
