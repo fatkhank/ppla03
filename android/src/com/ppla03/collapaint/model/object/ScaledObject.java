@@ -26,8 +26,8 @@ public class ScaledObject {
 	}
 
 	public void offsetTo(float x, float y) {
-		object.offsetX += x-this.left;
-		object.offsetY += y-this.top;
+		object.offsetX += x - this.left;
+		object.offsetY += y - this.top;
 		this.left = x;
 		this.top = y;
 	}
@@ -51,14 +51,14 @@ public class ScaledObject {
 		float widthRatio = width / objBounds.width();
 		float heightRatio = height / objBounds.height();
 
-		scale = Math.min(widthRatio, heightRatio);
+		scale = Math.abs(Math.min(widthRatio, heightRatio));
 		objBounds.left -= object.offsetX;
 		objBounds.top -= object.offsetY;
 		object.offsetTo(left - scale * objBounds.left, top - scale
 				* objBounds.top);
 	}
-	
-	public void lookTo(ScaledObject so){
+
+	public void lookTo(ScaledObject so) {
 		this.left = so.left;
 		this.top = so.top;
 		this.width = so.width;

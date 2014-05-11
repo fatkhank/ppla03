@@ -157,4 +157,31 @@ public class FontManager {
 		return adapter;
 	}
 
+	/**
+	 * Mengetahui apakah kode font berikut tebal atau tidak.
+	 * @param fontCode
+	 * @return
+	 */
+	public static boolean isBold(int fontCode) {
+		return (fontCode & Typeface.BOLD) == Typeface.BOLD;
+	}
+
+	/**
+	 * Mengetahui apakah kode font berikut miring atau tidak.
+	 * @param fontCode
+	 * @return
+	 */
+	public static boolean isItalic(int fontCode) {
+		return (fontCode & Typeface.ITALIC) == Typeface.ITALIC;
+	}
+
+	/**
+	 * Mengetahui apakah kode font berikut bergaris bawah atau tidak.
+	 * @param fontCode
+	 * @return
+	 */
+	public static boolean isUnderline(int fontCode) {
+		return (fontCode & UNDERLINE) == UNDERLINE;
+	}
+
 }

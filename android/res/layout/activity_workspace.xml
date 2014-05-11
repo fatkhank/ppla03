@@ -11,12 +11,13 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
+        android:layout_below="@+id/w_dashboard" />
 
     <LinearLayout
         android:id="@+id/w_top_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/w_dashboard"
         android:background="@drawable/w_topbar_left_normal"
         android:paddingRight="3dp" >
 
@@ -73,6 +74,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_below="@+id/w_dashboard"
         android:background="@drawable/w_topbar_right_normal"
         android:gravity="right"
         android:orientation="horizontal"
@@ -127,7 +129,8 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/w_selection_pane"
         android:background="@drawable/w_property_normal"
-        android:padding="5dp" >
+        android:padding="5dp"
+        android:visibility="gone" >
 
         <include layout="@layout/w_property_pane" />
     </ScrollView>
@@ -141,7 +144,7 @@
         android:layout_toLeftOf="@+id/w_property_scroll"
         android:background="@drawable/w_colorpane_normal"
         android:padding="5dp"
-        android:visibility="visible" >
+        android:visibility="gone" >
 
         <include layout="@layout/w_color_pane" />
     </ScrollView>
@@ -150,8 +153,8 @@
         android:id="@+id/w_canvas_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@+id/w_dashboard"
         android:layout_toLeftOf="@+id/w_selection_pane"
         android:layout_toRightOf="@+id/w_top_button"
         android:background="@color/workspace_normal"

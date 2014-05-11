@@ -19,6 +19,10 @@ public class ScaledBitmap {
 	public ScaledBitmap(float left, float top, int width, int height) {
 		this.left = left;
 		this.top = top;
+		if (width < 32)
+			width = 32;
+		if (height < 32)
+			height = 32;
 		this.width = width;
 		this.height = height;
 		bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);

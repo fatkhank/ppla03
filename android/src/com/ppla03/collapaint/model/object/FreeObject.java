@@ -114,6 +114,7 @@ public class FreeObject extends BasicObject {
 			points.add(new PointF(0, 0));
 			path.reset();
 			path.moveTo(0, 0);
+			path.lineTo(0, 0);
 		}
 		return this;
 	}
@@ -208,7 +209,7 @@ public class FreeObject extends BasicObject {
 		// pindahkan ke path
 		path.rewind();
 		path.moveTo(xLocs[0], yLocs[0]);
-		for (int i = 1; i < size; i++)
+		for (int i = 0; i < size; i++)
 			path.lineTo(xLocs[i], yLocs[i]);
 		if ((state & LOOP_MASK) == CLOSED)
 			path.close();

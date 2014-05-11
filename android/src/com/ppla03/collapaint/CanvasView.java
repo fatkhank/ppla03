@@ -8,6 +8,7 @@ import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
+import com.ppla03.collapaint.ui.WorkspaceActivity;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -279,6 +280,7 @@ public class CanvasView extends View {
 	 */
 	private int dragStatus, protoY;
 	private static final int MIN_DRAG_DISTANCE = 10, PROTO_STROKE_WIDTH = 3;
+	private static final float SCALE_THRESHOLD = .0002f;
 	// ketebalan stroke yang terlihat objek di mainbar
 	private static final int PROTO_TEXT_SIZE = 20;
 	/**
@@ -348,8 +350,10 @@ public class CanvasView extends View {
 		captureFree = new ScaledObject(protoFree);
 		captureFree.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 		// tentukan ukuran stroke agar terlihat jelas
-		protoFree.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureFree
-				.getScale()));
+		float w = PROTO_STROKE_WIDTH
+				/ (captureFree.getScale() > SCALE_THRESHOLD ? captureFree
+						.getScale() : 1);
+		protoFree.setStrokeWidth((int) (w));
 
 		// atur objek rect
 		y += PROTO_AREA_WIDTH;
@@ -359,8 +363,10 @@ public class CanvasView extends View {
 		captureRect = new ScaledObject(protoRect);
 		captureRect.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 		// tentukan ukuran stroke agar terlihat jelas
-		protoRect.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureRect
-				.getScale()));
+		w = PROTO_STROKE_WIDTH
+				/ (captureRect.getScale() > SCALE_THRESHOLD ? captureRect
+						.getScale() : 1);
+		protoRect.setStrokeWidth((int) (w));
 
 		// atur objek oval
 		y += PROTO_AREA_WIDTH;
@@ -370,8 +376,10 @@ public class CanvasView extends View {
 		captureOval = new ScaledObject(protoOval);
 		captureOval.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 		// tentukan ukuran stroke agar terlihat jelas
-		protoOval.setStrokeWidth((int) (PROTO_STROKE_WIDTH / captureOval
-				.getScale()));
+		w = PROTO_STROKE_WIDTH
+				/ (captureOval.getScale() > SCALE_THRESHOLD ? captureOval
+						.getScale() : 1);
+		protoOval.setStrokeWidth((int) (w));
 
 		// atur objek poly
 		y += PROTO_AREA_WIDTH;
@@ -381,8 +389,10 @@ public class CanvasView extends View {
 		capturePoly = new ScaledObject(protoPoly);
 		capturePoly.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 		// tentukan ukuran stroke agar terlihat jelas
-		protoPoly.setStrokeWidth((int) (PROTO_STROKE_WIDTH / capturePoly
-				.getScale()));
+		w = PROTO_STROKE_WIDTH
+				/ (capturePoly.getScale() > SCALE_THRESHOLD ? capturePoly
+						.getScale() : 1);
+		protoPoly.setStrokeWidth((int) w);
 
 		// atur objek text
 		y += PROTO_AREA_WIDTH;
@@ -407,8 +417,8 @@ public class CanvasView extends View {
 		animator.setDuration(INFLATE_DURATION);
 		animator.setInterpolator(interOvershoot);
 
-		iconBin.setBounds(0, PROTO_AREA_TOP_MARGIN, PROTO_AREA_WIDTH,
-				PROTO_AREA_WIDTH + PROTO_AREA_TOP_MARGIN);
+		iconBin.setBounds(0, getHeight() - PROTO_AREA_WIDTH, PROTO_AREA_WIDTH,
+				getHeight());
 	}
 
 	public CanvasView(Context context, AttributeSet attrs) {
@@ -1130,7 +1140,11 @@ public class CanvasView extends View {
 						captureFree.setObject(protoFree);
 
 						// hitung ukuran stroke agar kelihatan jelas di main bar
-						float w = PROTO_STROKE_WIDTH / captureFree.getScale();
+						float w = captureFree.getScale();
+						if (w > SCALE_THRESHOLD)
+							w = PROTO_STROKE_WIDTH / w;
+						else
+							w = PROTO_STROKE_WIDTH;
 						protoFree.setStrokeWidth((int) w);
 					}
 					redoStack.clear();
@@ -1241,6 +1255,33 @@ public class CanvasView extends View {
 	 */
 	public int getTextColor() {
 		return this.textColor;
+	}
+
+	/**
+	 * Mengetahui apakah teks yang diedit tebal atau tidak.
+	 * @return
+	 */
+	public boolean isCurrentTextBold() {
+		return (currentText != null)
+				&& FontManager.isBold(currentText.getFontCode());
+	}
+
+	/**
+	 * Mengetahui apakah teks yang diedit miring atau tidak.
+	 * @return
+	 */
+	public boolean isCurrentTextItalic() {
+		return (currentText != null)
+				&& FontManager.isItalic(currentText.getFontCode());
+	}
+
+	/**
+	 * Mengetahui apakah teks yang diedit bergaris bawah atau tidak.
+	 * @return
+	 */
+	public boolean isCurrentTextUnderline() {
+		return (currentText != null)
+				&& FontManager.isUnderline(currentText.getFontCode());
 	}
 
 	/**

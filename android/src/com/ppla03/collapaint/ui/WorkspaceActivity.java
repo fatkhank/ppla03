@@ -22,6 +22,7 @@ import android.view.View.OnLongClickListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -57,14 +58,19 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	// property dan dashboard
 	private CheckBox showProp;
-	private ColorPane colorPane;
-	private View colorPaneView;
-	private View propertyPane;
+
 	private int colorNormal, colorHidden, currentThemeColor;
 	private TextView canvasTitle;
 	private View colorConsumer;
+
+	private ColorPane colorPane;
+	private View colorPaneView;
+	private View propertyPane;
+	private View dashboard;
+
 	private ScaleAnimation animPropShow;
 	private ScaleAnimation animPropHide;
+	private TranslateAnimation animDashShow;
 
 	// --------- stroke setting ---------
 	private RelativeLayout strokePane;
@@ -90,7 +96,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private Spinner fontStyles;
 	private SeekBar textSize;
 	private TextView textSizeText;
-	private ToggleButton textBold, textItalic, textUnderline;
+	private CheckBox textBold, textItalic, textUnderline;
 
 	// ---------- poly ------------
 	private RelativeLayout shapePane;
@@ -166,9 +172,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 			// atur stroke style
 			strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
-			ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-					android.R.layout.simple_list_item_1, STR_STYLES_NAMES);
-			strokeStyle.setAdapter(adapter);
+			strokeStyle.setAdapter(new StrokeStyleAdapter(this));
 			strokeStyle.setOnItemSelectedListener(this);
 
 			// atur stroke color
@@ -188,9 +192,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			textInput.setOnEditorActionListener(this);
 			textSize = (SeekBar) findViewById(R.id.w_font_size);
 			fontStyles = (Spinner) findViewById(R.id.w_font_style);
-			textBold = (ToggleButton) findViewById(R.id.w_font_bold);
-			textItalic = (ToggleButton) findViewById(R.id.w_font_italic);
-			textUnderline = (ToggleButton) findViewById(R.id.w_font_underline);
+			textBold = (CheckBox) findViewById(R.id.w_font_bold);
+			textItalic = (CheckBox) findViewById(R.id.w_font_italic);
+			textUnderline = (CheckBox) findViewById(R.id.w_font_underline);
 			textBold.setOnCheckedChangeListener(this);
 			textItalic.setOnCheckedChangeListener(this);
 			textUnderline.setOnCheckedChangeListener(this);
@@ -217,6 +221,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- prepare color ---
 			colorPaneView = findViewById(R.id.w_color_pane_scroll);
 			colorPane = new ColorPane(this, colorPaneView, this);
+
+			// --- dashboard ---
+			// dashboard = findViewById(R.id.w_dashboard);
+			animDashShow = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
+					0, Animation.RELATIVE_TO_SELF, 0,
+					Animation.RELATIVE_TO_SELF, 0,
+					Animation.RELATIVE_TO_PARENT, 1);
+			animDashShow.setDuration(1000);
+			animDashShow.setAnimationListener(this);
 
 			// --- prepare canvas ---
 			colorNormal = getResources().getColor(R.color.workspace_normal);
@@ -308,6 +321,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					textPane.setVisibility(View.VISIBLE);
 					textInput.setText(canvas.getTextObjContent());
 					textColor.setBackgroundColor(canvas.getTextColor());
+					textBold.setChecked(canvas.isCurrentTextBold());
+					textItalic.setChecked(canvas.isCurrentTextItalic());
+					textUnderline.setChecked(canvas.isCurrentTextUnderline());
 				} else if (param == ObjectType.LINE) {
 					// edit line
 					strokePane.setVisibility(View.VISIBLE);
@@ -342,9 +358,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onWaitForApproval() {}
 
 	@Override
-	public void onBeginDraw() {
-
-	}
+	public void onBeginDraw() {}
 
 	@Override
 	public void onClick(View v) {
@@ -367,6 +381,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.redo();
 		} else if (v == showDash) {
 			// TODO show dash
+			dashboard.startAnimation(animDashShow);
 		} else if (v == showProp) {
 			setPropPaneVisibility(showProp.isChecked());
 		}
@@ -473,7 +488,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
 		if (parent == strokeStyle) {
-			canvas.setStrokeStyle(STROKE_STYLES[position], true);
+			canvas.setStrokeStyle(position, true);
 		} else if (parent == fontStyles) {
 			Font f = FontManager.getFont(position);
 			if (f.hasBold()) {
