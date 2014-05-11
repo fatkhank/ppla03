@@ -78,7 +78,8 @@ public class StyleAction extends AtomicAction {
 	static class StyleStepper extends StyleAction {
 		private StyleAction parent;
 
-		public StyleStepper(StyleAction parent, CanvasObject object, StyleStepper inverse) {
+		public StyleStepper(StyleAction parent, CanvasObject object,
+				StyleStepper inverse) {
 			super(object, inverse);
 			this.parent = parent;
 		}
@@ -194,22 +195,22 @@ public class StyleAction extends AtomicAction {
 		int a = style[0];
 		encByte[0] = (byte) (a >> 24);
 		encByte[1] = (byte) (a >> 16);
-		encByte[2] = (byte) (a >> 16);
+		encByte[2] = (byte) (a >> 8);
 		encByte[3] = (byte) (a);
 		int b = style[1];
 		encByte[4] = (byte) (b >> 24);
 		encByte[5] = (byte) (b >> 16);
-		encByte[6] = (byte) (b >> 16);
+		encByte[6] = (byte) (b >> 8);
 		encByte[7] = (byte) (b);
 		int c = style[2];
 		encByte[8] = (byte) (c >> 24);
 		encByte[9] = (byte) (c >> 16);
-		encByte[10] = (byte) (c >> 16);
+		encByte[10] = (byte) (c >> 8);
 		encByte[11] = (byte) (c);
 		int d = style[3];
 		encByte[12] = (byte) (d >> 24);
 		encByte[13] = (byte) (d >> 16);
-		encByte[14] = (byte) (d >> 16);
+		encByte[14] = (byte) (d >> 8);
 		encByte[15] = (byte) (d);
 
 		return Base64.encodeToString(encByte, Base64.URL_SAFE);
