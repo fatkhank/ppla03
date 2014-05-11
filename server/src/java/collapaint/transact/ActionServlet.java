@@ -378,24 +378,25 @@ public class ActionServlet extends HttpServlet {
                             setInt(DB.Action.Q.Insert.All.OBJECT_ID, actionObject.objectID);
                     if (act.code == ActionCode.GEOM_ACTION) {
                         //ubah geometri objek
-                        updateGeom.setString(DB.Objects.Q.Update.Data.GEOM, act.param);
-                        updateGeom.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateGeom.setString(DB.Objects.Q.Update.Geom.GEOM_PARAM, act.param);
+                        updateGeom.setInt(DB.Objects.Q.Update.Geom.OBJECT_ID, actionObject.objectID);
                         updateGeom.addBatch();
                     } else if (act.code == ActionCode.TRANSFORM_ACTION) {
                         //ubah transformasi objek
-                        updateTrans.setString(DB.Objects.Q.Update.Data.TRANS, act.param);
-                        updateTrans.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateTrans.setString(DB.Objects.Q.Update.Transform.TRANS_PARAM, act.param);
+                        updateTrans.setInt(DB.Objects.Q.Update.Transform.OBJECT_ID, actionObject.objectID);
                         updateTrans.addBatch();
                     } else if (act.code == ActionCode.STYLE_ACTION) {
                         //ubah style objek
-                        updateStyle.setString(DB.Objects.Q.Update.Data.STYLE, act.param);
-                        updateStyle.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateStyle.setString(DB.Objects.Q.Update.Style.STYLE_PARAM, act.param);
+                        updateStyle.setInt(DB.Objects.Q.Update.Style.OBJECT_ID, actionObject.objectID);
                         updateStyle.addBatch();
                     } else if (act.code == ActionCode.DELETE_ACTION) {
                         //ubah status objek menjadi sudah terhapus
-                        deleteObject.setInt(DB.Objects.Q.Update.Data.EXIST, 0);
-                        deleteObject.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        deleteObject.setBoolean(DB.Objects.Q.Update.Status.STATUS_PARAM, false);
+                        deleteObject.setInt(DB.Objects.Q.Update.Status.OBJECT_ID, actionObject.objectID);
                         deleteObject.addBatch();
+                        System.out.println("hore");
                     }
                 }
                 insertAction.addBatch();
@@ -404,6 +405,7 @@ public class ActionServlet extends HttpServlet {
             updateTrans.executeBatch();
             updateStyle.executeBatch();
             updateCanvas.executeBatch();
+            deleteObject.executeBatch();
             insertAction.executeBatch();
             ResultSet keys = insertAction.getGeneratedKeys();
             int i = 0;
