@@ -25,12 +25,12 @@ public class CanvasModel {
 	 * Nama kanvas.
 	 */
 	public final String name;
-	
+
 	/**
 	 * Koordinat y titik pojok kiri atas kanvas.
 	 */
 	private int top;
-	
+
 	/**
 	 * Koordinat x titik pojok kiri atas kanvas.
 	 */
@@ -45,7 +45,7 @@ public class CanvasModel {
 	 * Tinggi kanvas
 	 */
 	private int height;
-	
+
 	public Date createDate;
 
 	/**
@@ -115,25 +115,31 @@ public class CanvasModel {
 	public int getHeight() {
 		return height;
 	}
-	
+
 	/**
 	 * Mengambil koordinat y pojok kiri atas kanvas.
 	 * @return
 	 */
-	public int getTop(){
+	public int getTop() {
 		return top;
 	}
-	
+
 	/**
 	 * Mengambil koordinat x pojok kiri atas kanvas.
 	 * @return
 	 */
-	public int getLeft(){
+	public int getLeft() {
 		return left;
 	}
 
 	@Override
 	public String toString() {
 		return name + " by " + owner.name;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof CanvasModel)
+				&& (((CanvasModel) o).globalID == this.globalID);
 	}
 }

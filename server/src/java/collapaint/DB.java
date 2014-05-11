@@ -231,7 +231,7 @@ public class DB {
         public static final String TRANSFORM = "transform";
         public static final String GEOM = "geom";
         public static final String STYLE = "style";
-        public static final String EXIST = "exist";
+        public static final String EXIST = "`exist`";
 
         public static final class Q {
 
@@ -309,7 +309,7 @@ public class DB {
                  */
                 public static final String DATA = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.GEOM + "=?, "
                         + DB.Objects.STYLE + "=?, " + DB.Objects.TRANSFORM + "=?, " + DB.Objects.EXIST + "=? WHERE "
-                        + DB.Objects.CODE + "=?";
+                        + DB.Objects.ID + "=?";
 
                 public static final class Data {
 

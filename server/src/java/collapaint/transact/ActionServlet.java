@@ -66,6 +66,7 @@ public class ActionServlet extends HttpServlet {
             } catch (JsonException | NullPointerException | ClassCastException ex) {
                 reply.add(ActionJCode.ERROR, ActionJCode.BAD_REQUEST);
             } catch (SQLException ex) {
+                ex.printStackTrace();
                 reply.add(ActionJCode.ERROR, ActionJCode.SERVER_ERROR);
             }
             out.println(reply.build());
@@ -350,7 +351,11 @@ public class ActionServlet extends HttpServlet {
         if (size == 0)
             return;
 
-        try (PreparedStatement updateObj = conn.prepareStatement(DB.Objects.Q.Update.DATA); PreparedStatement insertAction = conn
+        try (PreparedStatement updateTrans = conn.prepareStatement(DB.Objects.Q.Update.TRANSFORM);
+                PreparedStatement updateStyle = conn.prepareStatement(DB.Objects.Q.Update.STYLE);
+                PreparedStatement updateGeom = conn.prepareStatement(DB.Objects.Q.Update.GEOM);
+                PreparedStatement deleteObject = conn.prepareStatement(DB.Objects.Q.Update.STATUS);
+                PreparedStatement insertAction = conn
                 .prepareStatement(DB.Action.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS);
                 PreparedStatement updateCanvas = conn.prepareStatement(DB.Canvas.Q.Update.SIZE)) {
             for (int i = 0; i < size; i++) {
@@ -371,33 +376,33 @@ public class ActionServlet extends HttpServlet {
                     ActionObject actionObject = (ActionObject) act;
                     insertAction.
                             setInt(DB.Action.Q.Insert.All.OBJECT_ID, actionObject.objectID);
-                    String geom = DB.Objects.GEOM;
-                    String style = DB.Objects.STYLE;
-                    String transform = DB.Objects.TRANSFORM;
-                    String status = DB.Objects.EXIST;
                     if (act.code == ActionCode.GEOM_ACTION) {
                         //ubah geometri objek
-                        geom = act.param;
+                        updateGeom.setString(DB.Objects.Q.Update.Data.GEOM, act.param);
+                        updateGeom.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateGeom.addBatch();
                     } else if (act.code == ActionCode.TRANSFORM_ACTION) {
                         //ubah transformasi objek
-                        transform = act.param;
+                        updateTrans.setString(DB.Objects.Q.Update.Data.TRANS, act.param);
+                        updateTrans.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateTrans.addBatch();
                     } else if (act.code == ActionCode.STYLE_ACTION) {
                         //ubah style objek
-                        style = act.param;
+                        updateStyle.setString(DB.Objects.Q.Update.Data.STYLE, act.param);
+                        updateStyle.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        updateStyle.addBatch();
                     } else if (act.code == ActionCode.DELETE_ACTION) {
                         //ubah status objek menjadi sudah terhapus
-                        status = String.valueOf(false);
+                        deleteObject.setInt(DB.Objects.Q.Update.Data.EXIST, 0);
+                        deleteObject.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
+                        deleteObject.addBatch();
                     }
-                    updateObj.setString(DB.Objects.Q.Update.Data.GEOM, geom);
-                    updateObj.setString(DB.Objects.Q.Update.Data.STYLE, style);
-                    updateObj.setString(DB.Objects.Q.Update.Data.TRANS, transform);
-                    updateObj.setString(DB.Objects.Q.Update.Data.EXIST, status);
-                    updateObj.setInt(DB.Objects.Q.Update.Data.OBJECT_ID, actionObject.objectID);
-                    updateObj.addBatch();
                 }
                 insertAction.addBatch();
             }
-            updateObj.executeBatch();
+            updateGeom.executeBatch();
+            updateTrans.executeBatch();
+            updateStyle.executeBatch();
             updateCanvas.executeBatch();
             insertAction.executeBatch();
             ResultSet keys = insertAction.getGeneratedKeys();

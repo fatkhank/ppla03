@@ -193,6 +193,7 @@ public class CanvasConnector extends ServerConnector {
 						syncListener.onActionUpdateFailed(SERVER_PROBLEM);
 					else if (code == ActionJCode.BAD_REQUEST)
 						syncListener.onActionUpdateFailed(INTERNAL_PROBLEM);
+					return;
 				}
 
 				// ----------------------- parse objects ----------------------

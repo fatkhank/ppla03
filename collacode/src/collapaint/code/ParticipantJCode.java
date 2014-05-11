@@ -81,6 +81,8 @@ public class ParticipantJCode {
     }
 
     public static final class Reply {
+        
+        public static final String CANVAS_ID = "cid";
         /**
          * Id user
          */

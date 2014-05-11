@@ -6,10 +6,10 @@ import collapaint.code.ParticipantJCode;
 import collapaint.code.ParticipantJCode.Reply;
 import collapaint.code.ParticipantJCode.Request;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import com.sun.xml.bind.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -279,6 +279,10 @@ public class ParticipantServlet extends HttpServlet {
         try (PreparedStatement check = conn.prepareStatement(Q.Select.CHECK_PARTICIPATION)) {
             check.setInt(Q.Select.CheckParticipation.USER_ID, userId);
             check.setInt(Q.Select.CheckParticipation.CANVAS_ID, canvasId);
+            //masukkan data request
+            reply.add(Reply.USER_ID, userId);
+            reply.add(Reply.CANVAS_ID, canvasId);
+            
             ResultSet checkResult = check.executeQuery();
             if (!checkResult.next()) {
                 //jika user tidak diinvite atau kanvas tidak ada, maka tidak berhak meresponse
@@ -353,7 +357,7 @@ public class ParticipantServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(new StringInputStream(request.
+        processRequest(new com.sun.xml.bind.StringInputStream(request.
                 getParameter("json")), response);
     }
 

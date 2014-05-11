@@ -18,6 +18,11 @@ public class UserModel {
 	 * Nama akun.
 	 */
 	public String name;
+	
+	/**
+	 * Status user sekarang.
+	 */
+	public String status;
 
 	public UserModel() {
 		collaID = -1;
