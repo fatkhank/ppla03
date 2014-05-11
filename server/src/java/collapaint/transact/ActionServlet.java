@@ -127,8 +127,8 @@ public class ActionServlet extends HttpServlet {
                 //aksi berkatian dengan kanvas
                 int width = obj.getInt(ActionJCode.CANVAS_WIDTH);
                 int height = obj.getInt(ActionJCode.CANVAS_HEIGHT);
-                int top = obj.getInt(ActionJCode.CANVAS_TOP);
-                int left = obj.getInt(ActionJCode.CANVAS_LEFT);
+                int top = obj.getInt(ActionJCode.CANVAS_TOP, 0);
+                int left = obj.getInt(ActionJCode.CANVAS_LEFT, 0);
                 userActions.
                         add(new Resize(canvasId, width, height, top, left, param));
             } else {
@@ -364,6 +364,7 @@ public class ActionServlet extends HttpServlet {
                 insertAction.setInt(DB.Action.Q.Insert.All.CODE, act.code);
                 insertAction.setString(DB.Action.Q.Insert.All.PARAMETER, act.param);
                 if (act instanceof Resize) {
+                    insertAction.setInt(DB.Action.Q.Insert.All.OBJECT_ID, 0);
                     //Mengubah ukuran kanvas
                     Resize rs = (Resize) act;
                     updateCanvas.setInt(DB.Canvas.Q.Update.Size.WIDTH, rs.width);

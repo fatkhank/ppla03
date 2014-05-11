@@ -320,32 +320,32 @@ public class DB {
                     public static final int OBJECT_ID = 5;
                 }
 
-                public static final String TRANSFORM = "UPDATE " + DB.Objects + " SET " + DB.Objects.TRANSFORM
-                        + "=? WHERE " + DB.Objects.CODE + "=?";
+                public static final String TRANSFORM = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.TRANSFORM
+                        + "=? WHERE " + DB.Objects.ID + "=?";
 
                 public static final class Transform {
 
                     public static final int TRANS_PARAM = 1;
                     public static final int OBJECT_ID = 2;
                 }
-                public static final String GEOM = "UPDATE " + DB.Objects + " SET " + DB.Objects.GEOM + "=? WHERE "
-                        + DB.Objects.CODE + "=?";
+                public static final String GEOM = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.GEOM + "=? WHERE "
+                        + DB.Objects.ID + "=?";
 
                 public static final class Geom {
 
                     public static final int GEOM_PARAM = 1;
                     public static final int OBJECT_ID = 2;
                 }
-                public static final String STYLE = "UPDATE " + DB.Objects + " SET " + DB.Objects.STYLE + "=? WHERE "
-                        + DB.Objects.CODE + "=?";
+                public static final String STYLE = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.STYLE
+                        + "=? WHERE " + DB.Objects.ID + "=?";
 
                 public static final class Style {
 
                     public static final int STYLE_PARAM = 1;
                     public static final int OBJECT_ID = 2;
                 }
-                public static final String STATUS = "UPDATE " + DB.Objects + " SET " + DB.Objects.EXIST + "=? WHERE "
-                        + DB.Objects.CODE + "=?";
+                public static final String STATUS = "UPDATE " + DB.TABLE_OBJECT + " SET " + DB.Objects.EXIST
+                        + "=? WHERE " + DB.Objects.ID + "=?";
 
                 public static final class Status {
 
