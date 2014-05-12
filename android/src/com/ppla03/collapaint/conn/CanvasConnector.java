@@ -7,11 +7,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import collapaint.code.ActionCode;
 import collapaint.code.ActionJCode;
-import collapaint.code.PortalJCode;
 import collapaint.code.PortalJCode.Reply;
 import collapaint.code.PortalJCode.Request;
 
@@ -42,7 +40,6 @@ public class CanvasConnector extends ServerConnector {
 	private static CanvasConnector instance;
 	private static SyncEventListener syncListener;
 	private static OnCanvasOpenListener openListener;
-	private static OnCanvasCloseListener closeListener;
 	private ArrayList<AtomicAction> sentActions;
 	private ArrayList<CanvasObject> sentObjects;
 	private ArrayList<AtomicAction> replyActions;
@@ -112,6 +109,10 @@ public class CanvasConnector extends ServerConnector {
 					ResizeCanvas rc = (ResizeCanvas) ua;
 					joAct.put(ActionJCode.ACTION_CODE, ActionCode.RESIZE_ACTION);
 					joAct.put(ActionJCode.ACTION_PARAM, rc.getParameter());
+					joAct.put(ActionJCode.CANVAS_WIDTH, rc.width);
+					joAct.put(ActionJCode.CANVAS_HEIGHT, rc.height);
+					joAct.put(ActionJCode.CANVAS_TOP, rc.top);
+					joAct.put(ActionJCode.CANVAS_LEFT, rc.left);
 				}
 				if (co != null) {
 					if (co.getGlobalID() == -1) {
@@ -192,7 +193,8 @@ public class CanvasConnector extends ServerConnector {
 					if (code == ActionJCode.SERVER_ERROR)
 						syncListener.onActionUpdateFailed(SERVER_PROBLEM);
 					else if (code == ActionJCode.BAD_REQUEST)
-						syncListener.onActionUpdateFailed(INTERNAL_PROBLEM);
+						syncListener
+								.onActionUpdateFailed(ActionJCode.BAD_REQUEST);
 					return;
 				}
 
@@ -278,12 +280,6 @@ public class CanvasConnector extends ServerConnector {
 
 				syncListener.onActionUpdated(lan, replyActions);
 			} catch (Exception e) {
-				StackTraceElement[] ste = e.getStackTrace();
-				Log.d("POS", "internal error");
-				for (int i = 0; i < ste.length; i++) {
-					Log.d("POS", i + ":" + ste[i]);
-				}
-
 				syncListener.onActionUpdateFailed(INTERNAL_PROBLEM);
 			}
 		}
@@ -357,33 +353,18 @@ public class CanvasConnector extends ServerConnector {
 		void onCanvasOpened(int status, int lastActNum);
 	}
 
-	/**
-	 * Listener untuk proses menutupp suatu kanvas.
-	 * @author hamba v7
-	 * 
-	 */
-	public static interface OnCanvasCloseListener {
-		/**
-		 * Canvas sudah tertutup.
-		 * @param model
-		 * @param status
-		 */
-		void onCanvasClosed(CanvasModel model, int status);
-	}
-
 	private static CanvasModel canvas;
 
 	public void openCanvas(int userId, CanvasModel canvasModel,
 			OnCanvasOpenListener listener) {
-		// TODO open canvas
 		canvas = canvasModel;
-		this.openListener = listener;
+		openListener = listener;
 		JSONObject jo = new JSONObject();
 		try {
 			jo.put(Request.ACTION, Request.ACTION_OPEN);
-			jo.put(Request.CANVAS_ID, canvas.getId());
+			jo.put(Request.CANVAS_ID, canvasModel.getId());
 			jo.put(Request.USER_ID, userId);
-			new Client(PORTAL_URL, replyOpen);
+			new Client(PORTAL_URL, replyOpen).execute(jo);
 		} catch (JSONException e) {
 			openListener.onCanvasOpened(INTERNAL_PROBLEM, 0);
 		}
@@ -411,13 +392,16 @@ public class CanvasConnector extends ServerConnector {
 					for (int i = 0; i < objects.length(); i++) {
 						JSONObject cob = objects.getJSONObject(i);
 						int code = cob.getInt(Reply.OBJECT_CODE);
-						int id = cob.getInt(Reply.OBJECT_ID);
 						String geom = cob.getString(Reply.OBJECT_GEOM);
 						String style = cob.getString(Reply.OBJECT_STYLE);
 						String transform = cob
 								.getString(Reply.OBJECT_TRANSFORM);
 						CanvasObject co = createObject(code, geom, style,
 								transform);
+
+						// masukkan idnya
+						int id = cob.getInt(Reply.OBJECT_ID);
+						co.setGlobaID(id);
 						boolean exist = cob.getBoolean(Reply.OBJECT_EXIST);
 						if (exist)
 							canvas.objects.add(co);
@@ -434,10 +418,25 @@ public class CanvasConnector extends ServerConnector {
 		}
 	};
 
-	public void closeCanvas(CanvasModel canvas, UserModel user,
-			OnCanvasCloseListener listener) {
-		// TODO close int connector
-		this.closeListener = listener;
+	public void closeCanvas(CanvasModel canvas, UserModel user) {
+		JSONObject request = new JSONObject();
+		try {
+			request.put(Request.CANVAS_ID, canvas.getId());
+			request.put(Request.USER_ID, user.collaID);
+			request.put(Request.ACTION, Request.ACTION_CLOSE);
+
+			new Client(PORTAL_URL, replisClose).execute(request);
+		} catch (JSONException e) {
+			replisClose.process(INTERNAL_PROBLEM, null);
+		}
 	}
+
+	private ReplyListener replisClose = new ReplyListener() {
+
+		@Override
+		public void process(int status, JSONObject reply) {
+			syncListener.onCanvasClosed(status);
+		}
+	};
 
 }

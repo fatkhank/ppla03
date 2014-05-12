@@ -94,7 +94,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 		// --- setup ---
 		BrowserConnector.getInstance().setCreateListener(this);
-		android.util.Log.d("POS", "instance");
 
 		// --- dialog create canvas ---
 		AlertDialog.Builder createDB = new AlertDialog.Builder(this);

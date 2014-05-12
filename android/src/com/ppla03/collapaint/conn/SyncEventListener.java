@@ -29,8 +29,7 @@ public interface SyncEventListener {
 
 	/**
 	 * Dipicu saat proses penutupan kanvas berhasil
-	 * @param model
 	 * @param status
 	 */
-	void onCanvasClosed(CanvasModel model, int status);
+	void onCanvasClosed(int status);
 }

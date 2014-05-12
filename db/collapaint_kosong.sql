@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.2.2
+-- version 4.1.12
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 03, 2014 at 02:34 AM
--- Server version: 5.5.27
--- PHP Version: 5.4.7
+-- Generation Time: May 12, 2014 at 01:12 AM
+-- Server version: 5.6.16
+-- PHP Version: 5.5.11
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `collapaint`
 --
+CREATE DATABASE IF NOT EXISTS `collapaint` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `collapaint`;
 
 -- --------------------------------------------------------
 
@@ -33,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `action` (
   `object_id` int(11) NOT NULL,
   `parameter` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
 
 -- --------------------------------------------------------
 
@@ -47,8 +49,12 @@ CREATE TABLE IF NOT EXISTS `canvas` (
   `width` int(11) NOT NULL,
   `height` int(11) NOT NULL,
   `owner` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+  `create_time` datetime NOT NULL,
+  `left` int(11) NOT NULL DEFAULT '0',
+  `top` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`,`owner`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 -- --------------------------------------------------------
 
@@ -57,13 +63,15 @@ CREATE TABLE IF NOT EXISTS `canvas` (
 --
 
 CREATE TABLE IF NOT EXISTS `object` (
+  `canvas_id` int(11) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `exist` tinyint(1) NOT NULL DEFAULT '1',
   `code` char(1) NOT NULL,
-  `transform` varchar(12) NOT NULL,
+  `transform` varchar(16) NOT NULL,
   `style` varchar(24) NOT NULL,
-  `shape` text NOT NULL,
+  `geom` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
 
 -- --------------------------------------------------------
 
@@ -74,6 +82,9 @@ CREATE TABLE IF NOT EXISTS `object` (
 CREATE TABLE IF NOT EXISTS `participation` (
   `user_id` int(11) NOT NULL,
   `canvas_id` int(11) NOT NULL,
+  `status` enum('INVITE','MEMBER','OWNER') NOT NULL DEFAULT 'INVITE',
+  `last_access` datetime NOT NULL,
+  `action` enum('OPEN','CLOSE') NOT NULL DEFAULT 'CLOSE',
   PRIMARY KEY (`user_id`,`canvas_id`),
   KEY `canvas_id` (`canvas_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -86,10 +97,12 @@ CREATE TABLE IF NOT EXISTS `participation` (
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) NOT NULL,
+  `account_id` varchar(22) NOT NULL,
+  `nickname` varchar(32) NOT NULL,
+  `status` enum('LOGIN','LOGOUT') NOT NULL DEFAULT 'LOGIN',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+  UNIQUE KEY `username` (`account_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
 -- Constraints for dumped tables

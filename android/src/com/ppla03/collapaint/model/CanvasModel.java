@@ -47,6 +47,8 @@ public class CanvasModel {
 	private int height;
 
 	public Date createDate;
+	
+	
 
 	/**
 	 * Daftar objek yang ada di kanvas, terurut dari yang berada paling belakang

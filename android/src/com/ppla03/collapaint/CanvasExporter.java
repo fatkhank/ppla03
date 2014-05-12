@@ -3,6 +3,7 @@ package com.ppla03.collapaint;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import android.R.drawable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -78,7 +79,8 @@ public class CanvasExporter {
 			int i = 1;
 			while (recent.exists())
 				recent = new File(dir, filename + i++ + extension);
-			boolean result = export(canvas, recent, format, transparent, cropped);
+			boolean result = export(canvas, recent, format, transparent,
+					cropped);
 			if (result)
 				return SUCCESS;
 			else
@@ -102,29 +104,8 @@ public class CanvasExporter {
 
 	private static boolean export(CanvasModel model, File file,
 			CompressFormat format, boolean transparent, boolean cropped) {
-		Bitmap oriBitmap = Bitmap.createBitmap(model.getWidth(),
-				model.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas canvas = new Canvas(oriBitmap);
-
-		// gambar dan hitung bound
-		if (transparent)
-			canvas.drawColor(Color.TRANSPARENT,android.graphics.PorterDuff.Mode.CLEAR);
-		else
-			canvas.drawColor(Color.WHITE);
-		
-		RectF bound = new RectF(model.getWidth(), model.getHeight(), 0, 0);
-		RectF r = new RectF();
-		for (int i = 0; i < model.objects.size(); i++) {
-			CanvasObject sp = model.objects.get(i);
-			sp.draw(canvas);
-			sp.getWorldBounds(r);
-			bound.union(r);
-		}
-
-		bound.left -= CROP_PADDING;
-		bound.top -= CROP_PADDING;
-		bound.right += CROP_PADDING;
-		bound.bottom += CROP_PADDING;
+		RectF bound = new RectF();
+		Bitmap oriBitmap = draw(model, transparent, bound);
 
 		// hitung gambar akhir
 		Bitmap finalBitmap;
@@ -144,5 +125,48 @@ public class CanvasExporter {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Mendapatkan bitmap dari sebuah kanvas.
+	 * @param model
+	 * @param transparent
+	 * @param bound
+	 * @return
+	 */
+	private static Bitmap draw(CanvasModel model, boolean transparent,
+			RectF bound) {
+		Bitmap bitmap = Bitmap.createBitmap(model.getWidth(),
+				model.getHeight(), Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		// gambar dan hitung bound
+		if (transparent)
+			canvas.drawColor(Color.TRANSPARENT,
+					android.graphics.PorterDuff.Mode.CLEAR);
+		else
+			canvas.drawColor(Color.WHITE);
+
+		bound.set(model.getWidth(), model.getHeight(), 0, 0);
+		RectF r = new RectF();
+		for (int i = 0; i < model.objects.size(); i++) {
+			CanvasObject sp = model.objects.get(i);
+			sp.draw(canvas);
+			sp.getWorldBounds(r);
+			bound.union(r);
+		}
+
+		bound.left -= CROP_PADDING;
+		bound.top -= CROP_PADDING;
+		bound.right += CROP_PADDING;
+		bound.bottom += CROP_PADDING;
+
+		return bitmap;
+	}
+
+	public void savePreview(CanvasModel model) {
+		RectF bound = new RectF();
+		Bitmap preview = draw(model, false, bound);
+		
+		
 	}
 }

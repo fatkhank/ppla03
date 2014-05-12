@@ -62,14 +62,17 @@ public class PolygonObject extends BasicObject {
 	/**
 	 * Untuk menampung joint yang sudah pernah dibuat.
 	 */
-	private static Joint[] joints = { new Joint(0, 0, 0), new Joint(0, 0, 1),
-			new Joint(0, 0, 2) };
+	private static Joint[] joints = new Joint[MAX_CORNER_COUNT];
+	static {
+		for (int i = 0; i < MAX_CORNER_COUNT; i++)
+			joints[i] = new Joint(0, 0, i);
+	};
 
 	/**
 	 * Default handler untuk poligon
 	 */
 	private static final ShapeHandler handler = new ShapeHandler(null,
-			new ControlPoint[MIN_CORNER_COUNT + 2]);
+			new ControlPoint[MAX_CORNER_COUNT + 2]);
 
 	/**
 	 * Membuat objek poligon kosong.
@@ -144,7 +147,7 @@ public class PolygonObject extends BasicObject {
 	 * Mendapatkan jumalh tiitk pjok poligon.
 	 * @return
 	 */
-	public int getCorner() {
+	public int corner() {
 		return corner;
 	}
 
@@ -256,24 +259,8 @@ public class PolygonObject extends BasicObject {
 	@Override
 	public ShapeHandler getHandler(int filter) {
 		handler.object = this;
-
-		// pastikan jumlah ControlPoint pada handler mencukupi
 		handler.size = corner + 2;
-		if (handler.size > handler.points.length) {
-			handler.points = new ControlPoint[handler.size];
-		}
 
-		// salin join
-		if (corner > joints.length) {
-			// jika banyaknya joint tidak mencukupi
-			Joint[] newJoint = new Joint[corner];
-			// pindahkan joint yang sudah ada
-			System.arraycopy(joints, 0, newJoint, 0, joints.length);
-			// lengkapi kekuranganya
-			for (int i = joints.length; i < corner; i++)
-				newJoint[i] = new Joint(xLocs[i], yLocs[i], i);
-			joints = newJoint;
-		}
 		System.arraycopy(joints, 0, handler.points, 0, corner);
 
 		handler.points[corner] = rotator;

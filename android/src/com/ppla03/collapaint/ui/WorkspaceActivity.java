@@ -2,8 +2,10 @@ package com.ppla03.collapaint.ui;
 
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
+import com.ppla03.collapaint.CanvasSynchronizer.CanvasCloseListener;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.CanvasView.ObjectType;
+import com.ppla03.collapaint.CanvasView.Param;
 import com.ppla03.collapaint.FontManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.FontManager.Font;
@@ -13,6 +15,7 @@ import com.ppla03.collapaint.model.object.StrokeStyle;
 import com.ppla03.collapaint.ui.ColorPane.ColorChangeListener;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -45,7 +48,7 @@ import android.widget.ToggleButton;
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
-		OnCheckedChangeListener, OnEditorActionListener, AnimationListener {
+		OnCheckedChangeListener, OnEditorActionListener, AnimationListener, CanvasCloseListener {
 
 	// --------- top button ---------
 	private LinearLayout topbarButtons;
@@ -74,24 +77,19 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	// --------- stroke setting ---------
 	private RelativeLayout strokePane;
-	private Button strokeColor;
+	private ImageButton strokeColor;
 	private Spinner strokeStyle;
 	private SeekBar strokeWidth;
 	private TextView strokeWidthText;
 
-	private static final int[] STROKE_STYLES = new int[] { StrokeStyle.SOLID,
-			StrokeStyle.DASHED, StrokeStyle.DOTTED };
-	private static final String[] STR_STYLES_NAMES = new String[] { "Solid",
-			"Dashed", "Dotted" };
-
 	// --------- fill setting ---------
 	private RelativeLayout fillPane;
 	private CheckBox fillCheck;
-	private Button fillColor;
+	private ImageButton fillColor;
 
 	// --------- font setting ---------
 	private RelativeLayout textPane;
-	private Button textColor;
+	private ImageButton textColor;
 	private EditText textInput;
 	private Spinner fontStyles;
 	private SeekBar textSize;
@@ -108,6 +106,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		//TODO remove try
 		try {
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_workspace);
@@ -132,7 +131,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			selectAddButtons = (LinearLayout) findViewById(R.id.w_selection_pane);
 			selectAddButtons.setVisibility(View.GONE);
 			showProp = (CheckBox) findViewById(R.id.w_show_property);
-			showProp.setChecked(false);
+			showProp.setChecked(true);
 			cut = (ImageButton) findViewById(R.id.w_sel_cut);
 			copy = (ImageButton) findViewById(R.id.w_sel_copy);
 			move = (ImageButton) findViewById(R.id.w_sel_move);
@@ -176,14 +175,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			strokeStyle.setOnItemSelectedListener(this);
 
 			// atur stroke color
-			strokeColor = (Button) findViewById(R.id.w_stroke_color);
+			strokeColor = (ImageButton) findViewById(R.id.w_stroke_color);
 			strokeColor.setOnClickListener(this);
 
 			// --------- fill ---------
 			fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
 			fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
 			fillCheck.setOnCheckedChangeListener(this);
-			fillColor = (Button) findViewById(R.id.w_fill_color);
+			fillColor = (ImageButton) findViewById(R.id.w_fill_color);
 			fillColor.setOnClickListener(this);
 
 			// --------- font ---------
@@ -205,7 +204,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			textSize.setProgress(FontManager.MIN_FONT_SIZE);
 			fontStyles.setAdapter(FontManager.getAdapter(this));
 			fontStyles.setOnItemSelectedListener(this);
-			textColor = (Button) findViewById(R.id.w_font_color);
+			textColor = (ImageButton) findViewById(R.id.w_font_color);
 			textColor.setOnClickListener(this);
 
 			// --------- poly ---------
@@ -252,6 +251,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public void onBackPressed() {
 		// TODO close canvas
+		CanvasSynchronizer.getInstance().closeCanvas(this);
 	}
 
 	@Override
@@ -319,23 +319,16 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				if (param == ObjectType.TEXT) {
 					// jika sedang mengedit teks, tampilkan properti text saja
 					textPane.setVisibility(View.VISIBLE);
-					textInput.setText(canvas.getTextObjContent());
-					textColor.setBackgroundColor(canvas.getTextColor());
-					textBold.setChecked(canvas.isCurrentTextBold());
-					textItalic.setChecked(canvas.isCurrentTextItalic());
-					textUnderline.setChecked(canvas.isCurrentTextUnderline());
 				} else if (param == ObjectType.LINE) {
 					// edit line
 					strokePane.setVisibility(View.VISIBLE);
-					strokeColor.setBackgroundColor(canvas.getStrokeColor());
 				} else {
 					// jika sedang mengedit basic object, tampilkan properti
 					// stroke dan fill
-					if (canvas.isEditingFillableObject())
+					if ((boolean) canvas.getObjectParam(Param.fillable))
 						fillPane.setVisibility(View.VISIBLE);
-					fillColor.setBackgroundColor(canvas.getFillColor());
 					strokePane.setVisibility(View.VISIBLE);
-					strokeColor.setBackgroundColor(canvas.getStrokeColor());
+
 					if (param == ObjectType.POLYGON)
 						shapePane.setVisibility(View.VISIBLE);
 				}
@@ -370,11 +363,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				select.setChecked(true);
 			}
 		} else if (v == hand) {
-			canvas.setMode(CanvasView.Mode.HAND);
-			if (canvas.isInHandMode())
-				select.setChecked(false);
-			else if (canvas.isInSelectionMode() && !canvas.hasSelectedObject())
-				select.setChecked(true);
+			canvas.resizeCanvas(400, 400, 0, 0);
+			//TODO workspace click hand
+//			canvas.setMode(CanvasView.Mode.HAND);
+//			if (canvas.isInHandMode())
+//				select.setChecked(false);
+//			else if (canvas.isInSelectionMode() && !canvas.hasSelectedObject())
+//				select.setChecked(true);
 		} else if (v == undo) {
 			canvas.undo();
 		} else if (v == redo) {
@@ -403,15 +398,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// color
 		else if (v == strokeColor) {
 			colorConsumer = strokeColor;
-			colorPane.setColor(canvas.getStrokeColor());
+			colorPane.setColor((int) canvas.getObjectParam(Param.strokeColor));
 			colorPane.show();
 		} else if (v == fillColor) {
 			colorConsumer = fillColor;
-			colorPane.setColor(canvas.getFillColor());
+			colorPane.setColor((int) canvas.getObjectParam(Param.fillColor));
 			colorPane.show();
 		} else if (v == textColor) {
 			colorConsumer = textColor;
-			colorPane.setColor(canvas.getTextColor());
+			colorPane.setColor((int) canvas.getObjectParam(Param.textColor));
 			colorPane.show();
 		}
 	}
@@ -438,7 +433,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			else
 				fillColor.setVisibility(View.GONE);
 			canvas.setFillParameter(fillCheck.isChecked(),
-					canvas.getFillColor(), true);
+					(int) canvas.getState(Param.fillColor), true);
 		} else if (button == textBold)
 			canvas.setFontBold(isChecked, true);
 		else if (button == textItalic)
@@ -521,8 +516,31 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private void setPropPaneVisibility(boolean visible) {
 		int vis = propertyPane.getVisibility();
 		if (visible) {
-			if (vis == View.GONE)
+			if (vis == View.GONE) {
 				propertyPane.startAnimation(animPropShow);
+				strokeColor.setBackgroundColor((int) canvas
+						.getObjectParam(Param.strokeColor));
+				strokeWidth.setProgress((int) canvas
+						.getObjectParam(Param.strokeWidth)
+						+ CanvasObject.MIN_STROKE_WIDTH);
+				strokeStyle.setSelection((int) canvas
+						.getObjectParam(Param.strokeStyle));
+				textInput.setText((String) canvas
+						.getObjectParam(Param.textContent));
+				textColor.setBackgroundColor((int) canvas
+						.getObjectParam(Param.textColor));
+				textBold.setChecked((boolean) canvas
+						.getObjectParam(Param.fontBold));
+				textItalic.setChecked((boolean) canvas
+						.getObjectParam(Param.fontItalic));
+				textUnderline.setChecked((boolean) canvas
+						.getObjectParam(Param.textUnderline));
+				fillColor.setBackgroundColor((int) canvas
+						.getObjectParam(Param.fillColor));
+				polySeek.setProgress((int) canvas
+						.getObjectParam(Param.polygonCorner)
+						- PolygonObject.MIN_CORNER_COUNT);
+			}
 		} else {
 			if (vis == View.VISIBLE)
 				propertyPane.startAnimation(animPropHide);
@@ -545,4 +563,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onAnimationRepeat(Animation animation) {}
+
+	@Override
+	public void onCanvasClosed(int status) {
+		Intent intent = new Intent(this, BrowserActivity.class);
+		startActivity(intent);
+	}
 }

@@ -130,7 +130,7 @@
         android:layout_below="@id/w_selection_pane"
         android:background="@drawable/w_property_normal"
         android:padding="5dp"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <include layout="@layout/w_property_pane" />
     </ScrollView>
@@ -144,7 +144,7 @@
         android:layout_toLeftOf="@+id/w_property_scroll"
         android:background="@drawable/w_colorpane_normal"
         android:padding="5dp"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <include layout="@layout/w_color_pane" />
     </ScrollView>

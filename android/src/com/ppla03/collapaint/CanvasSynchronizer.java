@@ -46,11 +46,15 @@ public class CanvasSynchronizer implements SyncEventListener,
 	 * 
 	 */
 	public static interface CanvasCloseListener {
-		// TODO close listener
-		void onCanvasClosed(CanvasModel model, int status);
+		/**
+		 * Dipicu saat proses penutupan kanvas mendapat jawaban dari server.
+		 * @param status
+		 */
+		void onCanvasClosed(int status);
 	}
 
 	private CanvasLoadListener loadListener;
+	private CanvasCloseListener closeListener;
 	private CanvasModel currentModel;
 
 	private AlertDialog hideModeDialog;
@@ -85,7 +89,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private final int IDLE = 1;
 	private final int SYNCING = 2;
 	private final int FORCED = 4;
-	private final int LOADING = 7;
+	// private final int LOADING = 7;
 	private final int STOP = 16;
 
 	private CanvasSynchronizer() {
@@ -134,23 +138,21 @@ public class CanvasSynchronizer implements SyncEventListener,
 			actionBuffer.clear();
 			playbackList.clear();
 			sentList.clear();
-			mode = LOADING;
-			updater.run();
 			connector.openCanvas(CollaUserManager.getCurrentUser().collaID,
 					currentModel, this);
 		}
 	}
 
 	public void closeCanvas(CanvasCloseListener listener) {
-		// TODO close canvas
-
+		this.closeListener = listener;
+		mode |= STOP;
+		connector.closeCanvas(currentModel, CollaUserManager.getCurrentUser());
 	}
 
 	public void setCanvasView(CanvasView canvas) {
-		// TODO onset set view
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				canvas.getContext());
-		builder.setMessage("There is a connection problem. Change to Hide Mode?");
+		builder.setMessage("There is connection problem. Change to Hide Mode?");
 		hideModeDialog = builder.setPositiveButton("YES", this)
 				.setNegativeButton("NO", this).setCancelable(false).create();
 		this.view = canvas;
@@ -227,45 +229,36 @@ public class CanvasSynchronizer implements SyncEventListener,
 
 	@Override
 	public void onActionUpdated(int newId, ArrayList<AtomicAction> actions) {
-		if (mode == LOADING) {
-			Log.d("POS", "canvasLoaded");
-			mode = IDLE;
-			actionBuffer.addAll(actions);
-			loadListener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
-		} else {
-			playbackList.clear();
-			// undo aksi yang dilakukan selama proses update
-			int c = actionBuffer.size() - 1;
-			for (int i = c; i >= 0; i--)
-				playbackList.add(actionBuffer.get(i).getInverse());
-			// undo aksi yang sedang diupdate
-			c = sentList.size() - 1;
-			for (int i = c; i >= 0; i--)
-				playbackList.add(sentList.get(i).getInverse());
-			// jalankan aksi dari server
-			playbackList.addAll(actions);
-			// redo aksi yang dilakukan selama proses update
-			playbackList.addAll(actionBuffer);
-			view.execute(playbackList);
-			lastActNum = newId;
-			sentList.clear();
+		playbackList.clear();
 
-			if ((mode & FORCED) == FORCED) {
-				mode &= ~FORCED;
-				updater.run();
-			} else if ((mode & STOP) != STOP) {
-				mode = IDLE;
-				handler.postDelayed(updater, sync_time);
-			}
+		// undo aksi yang dilakukan selama proses update
+		int c = actionBuffer.size() - 1;
+		for (int i = c; i >= 0; i--)
+			playbackList.add(actionBuffer.get(i).getInverse());
+		// undo aksi yang sedang diupdate
+		c = sentList.size() - 1;
+		for (int i = c; i >= 0; i--)
+			playbackList.add(sentList.get(i).getInverse());
+		// jalankan aksi dari server
+		playbackList.addAll(actions);
+		// redo aksi yang dilakukan selama proses update
+		playbackList.addAll(actionBuffer);
+		view.execute(playbackList);
+		lastActNum = newId;
+		sentList.clear();
+
+		if ((mode & FORCED) == FORCED) {
+			mode &= ~FORCED;
+			updater.run();
+		} else if ((mode & STOP) != STOP) {
+			mode = IDLE;
+			handler.postDelayed(updater, sync_time);
 		}
 	}
 
 	@Override
 	public void onActionUpdateFailed(int status) {
-		if ((mode & LOADING) == LOADING) {
-			mode &= ~LOADING;
-			loadListener.onCanvasLoaded(currentModel, status);
-		} else if (status == ServerConnector.CONNECTION_PROBLEM
+		if (status == ServerConnector.CONNECTION_PROBLEM
 				|| status == ServerConnector.SERVER_PROBLEM) {
 			if (!view.isInHideMode())
 				hideModeDialog.show();
@@ -282,15 +275,15 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	@Override
-	public void onCanvasClosed(CanvasModel model, int status) {
-		// TODO Auto-generated method stub
-
+	public void onCanvasOpened(int status, int lan) {
+		if (status == ServerConnector.SUCCESS) {
+			this.lastActNum = lan;
+		}
+		loadListener.onCanvasLoaded(currentModel, status);
 	}
 
 	@Override
-	public void onCanvasOpened(int status, int lan) {
-		if (status == ServerConnector.SUCCESS)
-			this.lastActNum = lan;
-		loadListener.onCanvasLoaded(currentModel, status);
+	public void onCanvasClosed(int status) {
+		closeListener.onCanvasClosed(status);
 	}
 }

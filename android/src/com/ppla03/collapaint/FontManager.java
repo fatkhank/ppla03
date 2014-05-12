@@ -184,4 +184,13 @@ public class FontManager {
 		return (fontCode & UNDERLINE) == UNDERLINE;
 	}
 
+	/**
+	 * Mengambil indeks jenis huruf
+	 * @param fontCode
+	 * @return
+	 */
+	public static int fontId(int fontCode) {
+		return fontCode >> 3;
+	}
+
 }

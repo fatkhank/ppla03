@@ -3,16 +3,13 @@ package com.ppla03.collapaint;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import com.ppla03.collapaint.R.drawable;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
-import com.ppla03.collapaint.ui.WorkspaceActivity;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
-import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
@@ -28,8 +25,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
-import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,7 +32,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
-public class CanvasView extends View {
+public class CanvasView extends View implements View.OnLongClickListener {
 	public static class Mode {
 		/**
 		 * Mode untuk menyeleksi objek yang ada di kanvas.
@@ -73,8 +68,8 @@ public class CanvasView extends View {
 	private int mode;
 
 	public static class ObjectType {
-		public static final int LINE = 1, FREE = 2, RECT = 3, OVAL = 4,
-				POLYGON = 5, TEXT = 6;
+		public static final int NONE = 0, LINE = 1, FREE = 2, RECT = 3,
+				OVAL = 4, POLYGON = 5, TEXT = 6, MULTIPLE = 7;
 	}
 
 	// Warna latar di luar kertas kanvas
@@ -132,6 +127,7 @@ public class CanvasView extends View {
 	private FreeObject currentFree;
 	private LineObject currentLine;
 	private BasicObject currentBasic;
+	private int currentType;
 	private MoveMultiple protaMove;
 	private StyleAction protaStyle;
 	private ReshapeAction protaReshape;
@@ -177,7 +173,7 @@ public class CanvasView extends View {
 	private static boolean fontBold;
 	private static boolean fontItalic;
 	private static int polyCorner;
-	private static boolean hidden_mode;
+	private static boolean hide_mode;
 
 	// Bitmap untuk menyimpan gambaran yang ada di kanvas, untuk mempercepat
 	// proses refresh, tanpa harus menggambar tiap objek satu-persatu.
@@ -258,16 +254,10 @@ public class CanvasView extends View {
 			DS_FREE = 512,
 			// objek garis
 			DS_LINE = 1024,
-			// mask free atau line
-			DS_MASK_FREELINE = DS_FREE | DS_LINE,
 			// mendrag objek dari mainbar, ukuran masih kecil
 			DS_DRAG_PROTO = DS_DRAG | DS_PROTO,
 			// mengatur posisi paste objek
 			DS_DRAG_PASTE = DS_DRAG | DS_PASTE,
-			// mengatur peletakan proto objek yang sudah digembungkan
-			DS_DRAG_PROTO_INFLATED = DS_DRAG | DS_INFLATED | DS_PROTO,
-			// mengatur peletakan proto objek yang sudah digembungkan
-			DS_DRAG_PASTE_INFLATED = DS_DRAG | DS_INFLATED | DS_PASTE,
 			// animasi menyimpan hasil copy
 			DS_PASTE_DEFLATING = DS_DEFLATE_FLAG | DS_PASTE,
 			// sedang menggambar free objek
@@ -455,6 +445,9 @@ public class CanvasView extends View {
 			COLOR_THEME_HIDDEN = context.getResources().getColor(
 					R.color.workspace_hidden);
 		}
+
+		// TODO
+		// setOnLongClickListener(this);
 	}
 
 	/**
@@ -503,7 +496,14 @@ public class CanvasView extends View {
 		ResizeCanvas rc = new ResizeCanvas(model, width, height, top, left,
 				true);
 		model.setDimension(width, height, top, left);
+		cacheImage = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
+				Config.ARGB_8888);
+		selectedObjectsCache = Bitmap.createBitmap(model.getWidth(),
+				model.getHeight(), Config.ARGB_8888);
+		cacheCanvas.setBitmap(cacheImage);
 		pushToUAStack(rc, true);
+		reloadCache();
+		postInvalidate();
 	}
 
 	@Override
@@ -541,7 +541,7 @@ public class CanvasView extends View {
 		if ((dragStatus & DS_DRAG) != DS_DRAG) {
 			// tampilkan highligh kalau diklik
 			if ((dragStatus & DS_DRAW) == DS_DRAW) {
-				selectPaint.setColor(hidden_mode ? COLOR_THEME_HIDDEN
+				selectPaint.setColor(hide_mode ? COLOR_THEME_HIDDEN
 						: COLOR_THEME_NORMAL);
 				// bawa ke posisi ikon yang sedang menggambar
 				canvas.translate(0, protoY);
@@ -574,7 +574,7 @@ public class CanvasView extends View {
 		}
 
 		// gambar pemisah mainbar dengan kanvas
-		selectPaint.setColor((hidden_mode) ? COLOR_THEME_HIDDEN
+		selectPaint.setColor((hide_mode) ? COLOR_THEME_HIDDEN
 				: COLOR_THEME_NORMAL);
 		canvas.drawRect(PROTO_AREA_WIDTH, 0, PROTO_AREA_WIDTH + 3, getHeight(),
 				selectPaint);
@@ -584,9 +584,12 @@ public class CanvasView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		// gambar background kanvas
 		canvas.drawColor(CANVAS_BACKGROUND_COLOR);
+
 		canvas.translate(scrollX, scrollY);
 		if (model != null) {
+			// gambar lembaran kanvas
 			canvas.drawRect(0, 0, model.getWidth(), model.getHeight(),
 					canvasPaint);
 			if (cacheImage != null)
@@ -1107,19 +1110,24 @@ public class CanvasView extends View {
 							SELECTION_MIN_SIZE);
 					selected = currentObject != null;
 					if (selected) {
+						// menyeleksi satu objek
 						selectedObjects.add(currentObject);
 						editObject(currentObject, ShapeHandler.SHAPE);
 					}
 				} else {
 					selected = selectArea(selectRect);
 					if (selected) {
+						// menyeleksi satu objek
 						if (selectedObjects.size() == 1)
 							editObject(selectedObjects.get(0),
 									ShapeHandler.SHAPE);
-						else
+						else {
+							// menyeleksi banyak objek
 							listener.onSelectionEvent(
 									CanvasListener.EDIT_MULTIPLE,
 									selectedObjects.size());
+							currentType = ObjectType.MULTIPLE;
+						}
 					}
 				}
 				if (selected) {
@@ -1222,66 +1230,104 @@ public class CanvasView extends View {
 		return (mode & Mode.HAND) == Mode.HAND;
 	}
 
-	public boolean isEditingTextObject() {
-		return ((mode & Mode.EDIT) == Mode.EDIT) && currentObject != null
-				&& currentText == currentObject;
+	public int currentObject() {
+		return objectType;
 	}
 
-	public String getTextObjContent() {
-		if (currentObject != currentText)
-			return null;
-		return currentText.getText();
+	public enum Param {
+		fillColor, strokeColor, strokeWidth, strokeStyle, textSize, textFont, textColor, textContent, textUnderline, fontBold, fontItalic, polygonCorner, fillable
 	}
 
 	/**
-	 * Mengambil warna pinggiran yang sedang aktif.
+	 * Mengambil variabel state kanvas saat ini.
+	 * @param param parameter yang akan diambil.
 	 * @return
 	 */
-	public int getStrokeColor() {
-		return this.strokeColor;
+	public Object getState(Param param) {
+		switch (param) {
+		case fillColor:
+			return fillColor;
+		case strokeColor:
+			return strokeColor;
+		case strokeWidth:
+			return strokeWidth;
+		case strokeStyle:
+			return strokeStyle;
+		case textSize:
+			return textSize;
+		case textFont:
+			return textFont;
+		case textColor:
+			return textColor;
+		case textContent:
+			return textContent;
+		case textUnderline:
+			return textUnderline;
+		case fontBold:
+			return fontBold;
+		case fontItalic:
+			return fontItalic;
+		case polygonCorner:
+			return polyCorner;
+		}
+		return null;
 	}
 
 	/**
-	 * Mengambil warna isian yang sedang aktif.
-	 * @return
+	 * Mengambil parameter objek yang sedang terseleksi.
+	 * @param param
+	 * @return null jika tidak ada objek yang diseleksi atau objek yang
+	 *         diseleksi tidak memiliki parameter tersebut
 	 */
-	public int getFillColor() {
-		return this.fillColor;
-	}
-
-	/**
-	 * Mengambil warna teks yang sedang aktif.
-	 * @return
-	 */
-	public int getTextColor() {
-		return this.textColor;
-	}
-
-	/**
-	 * Mengetahui apakah teks yang diedit tebal atau tidak.
-	 * @return
-	 */
-	public boolean isCurrentTextBold() {
-		return (currentText != null)
-				&& FontManager.isBold(currentText.getFontCode());
-	}
-
-	/**
-	 * Mengetahui apakah teks yang diedit miring atau tidak.
-	 * @return
-	 */
-	public boolean isCurrentTextItalic() {
-		return (currentText != null)
-				&& FontManager.isItalic(currentText.getFontCode());
-	}
-
-	/**
-	 * Mengetahui apakah teks yang diedit bergaris bawah atau tidak.
-	 * @return
-	 */
-	public boolean isCurrentTextUnderline() {
-		return (currentText != null)
-				&& FontManager.isUnderline(currentText.getFontCode());
+	public Object getObjectParam(Param param) {
+		switch (param) {
+		case fillColor:
+			if (currentObject == currentBasic)
+				return currentBasic.getFillColor();
+		case strokeColor:
+			if (currentObject == currentBasic)
+				return currentBasic.getStrokeColor();
+			if (currentObject == currentLine)
+				return currentLine.getColor();
+		case strokeWidth:
+			if (currentObject == currentBasic)
+				return currentBasic.getStrokeWidth();
+			if (currentObject == currentLine)
+				return currentLine.getWidth();
+		case strokeStyle:
+			if (currentObject == currentBasic)
+				return currentBasic.getStrokeStyle();
+			if (currentObject == currentLine)
+				return currentLine.getStrokeStyle();
+		case textSize:
+			if (currentObject == currentText)
+				return currentText.getFontSize();
+		case textFont:
+			if (currentObject == currentText)
+				return FontManager.fontId(currentText.getFontCode());
+		case textColor:
+			if (currentObject == currentText)
+				return currentText.getTextColor();
+		case textContent:
+			if (currentObject == currentText)
+				return currentText.getText();
+		case textUnderline:
+			if (currentObject == currentText)
+				return FontManager.isUnderline(currentText.getFontCode());
+		case fontBold:
+			if (currentObject == currentText)
+				return FontManager.isBold(currentText.getFontCode());
+		case fontItalic:
+			if (currentObject == currentText)
+				return FontManager.isItalic(currentText.getFontCode());
+		case polygonCorner:
+			if (currentObject == currentPoly)
+				return currentPoly.corner();
+		case fillable:
+			return (currentObject == currentBasic)
+					&& (currentBasic != currentFree || currentFree.fillable());
+		}
+		return null;
 	}
 
 	/**
@@ -1323,27 +1369,18 @@ public class CanvasView extends View {
 	}
 
 	/**
-	 * Mengambil jumlah sudut pada poligon saat ini
-	 * @return
-	 */
-	public int getPolygonCorner() {
-		return CanvasView.polyCorner;
-	}
-
-	public boolean isEditingFillableObject() {
-		return ((mode & Mode.EDIT) == Mode.EDIT) && currentObject != null
-				&& currentBasic == currentObject
-				&& (currentBasic != currentFree || currentFree.fillable());
-	}
-
-	/**
-	 * Apakah ada objek yang sedang deseleksi atau tidak
+	 * Mengetahui apakah ada objek yang sedang deseleksi atau tidak.
 	 * @return
 	 */
 	public boolean hasSelectedObject() {
 		return (mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION;
 	}
 
+	/**
+	 * Mengetahui apakah ada perubahan yang belum disimpan dari terakhir
+	 * menyeleksi objek atau tidak.
+	 * @return
+	 */
 	public boolean hasUnsavedChanges() {
 		return protaReshape != null || protaStyle != null || protaMove != null;
 	}
@@ -1356,31 +1393,30 @@ public class CanvasView extends View {
 	private void editObject(CanvasObject co, int filter) {
 		// Cast berdasarkan tipe objek untuk memudahkan operasi
 		currentObject = co;
-		int objCode = ObjectType.LINE;
 		if (co instanceof BasicObject) {
 			currentBasic = (BasicObject) co;
 			if (currentBasic instanceof RectObject) {
 				currentRect = (RectObject) currentBasic;
-				objCode = ObjectType.RECT;
+				currentType = ObjectType.RECT;
 			} else if (currentBasic instanceof OvalObject) {
 				currentOval = (OvalObject) currentBasic;
-				objCode = ObjectType.OVAL;
+				currentType = ObjectType.OVAL;
 			} else if (currentBasic instanceof PolygonObject) {
 				currentPoly = (PolygonObject) currentBasic;
-				objCode = ObjectType.POLYGON;
+				currentType = ObjectType.POLYGON;
 			} else if (currentBasic instanceof FreeObject) {
 				currentFree = (FreeObject) currentBasic;
-				objCode = ObjectType.FREE;
+				currentType = ObjectType.FREE;
 			}
 			fillColor = currentBasic.getFillColor();
 			strokeColor = currentBasic.getStrokeColor();
 		} else if (co instanceof LineObject) {
 			currentLine = (LineObject) co;
-			objCode = ObjectType.LINE;
+			currentType = ObjectType.LINE;
 			strokeColor = currentLine.getColor();
 		} else if (co instanceof TextObject) {
 			currentText = (TextObject) co;
-			objCode = ObjectType.TEXT;
+			currentType = ObjectType.TEXT;
 			textColor = currentText.getTextColor();
 		}
 		selectedObjects.clear();
@@ -1394,7 +1430,7 @@ public class CanvasView extends View {
 		mode |= Mode.EDIT;
 		redoStack.clear();
 		listener.onURStatusChange(!userActions.empty(), false);
-		listener.onSelectionEvent(CanvasListener.EDIT_OBJECT, objCode);
+		listener.onSelectionEvent(CanvasListener.EDIT_OBJECT, currentType);
 	}
 
 	/**
@@ -1408,7 +1444,7 @@ public class CanvasView extends View {
 			if (currentObject != null) {
 				model.objects.add(currentObject);
 				UserAction action = new DrawAction(currentObject);
-				pushToUAStack(action, !hidden_mode);
+				pushToUAStack(action, !hide_mode);
 				reloadCache();
 			}
 		} else {
@@ -1417,7 +1453,7 @@ public class CanvasView extends View {
 				mode &= Mode.MOVING;
 				if (protaMove != null) {
 					protaMove.apply();
-					pushToUAStack(protaMove, !hidden_mode);
+					pushToUAStack(protaMove, !hide_mode);
 					pendingTransformActions.clear();
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
@@ -1426,14 +1462,14 @@ public class CanvasView extends View {
 				// user lain
 				if (protaReshape != null) {
 					protaReshape.apply();
-					pushToUAStack(protaReshape, !hidden_mode);
+					pushToUAStack(protaReshape, !hide_mode);
 					pendingTransformActions.clear();
 					pendingGeomActions.clear();
 				}
 				// aksi style user meng-overwrite aksi style user lain
 				if (protaStyle != null) {
 					protaStyle.applyStyle();
-					pushToUAStack(protaStyle, !hidden_mode);
+					pushToUAStack(protaStyle, !hide_mode);
 				}
 			}
 			cancelSelect();
@@ -1862,11 +1898,11 @@ public class CanvasView extends View {
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			DeleteAction dm = new DeleteAction(currentObject);
 			model.objects.remove(currentObject);
-			pushToUAStack(dm, !hidden_mode);
+			pushToUAStack(dm, !hide_mode);
 		} else {
 			DeleteMultiple dm = new DeleteMultiple(selectedObjects);
 			model.objects.removeAll(selectedObjects);
-			pushToUAStack(dm, !hidden_mode);
+			pushToUAStack(dm, !hide_mode);
 		}
 		cancelSelect();
 	}
@@ -1886,6 +1922,7 @@ public class CanvasView extends View {
 			cancelAction();
 		selectedObjects.clear();
 		handler = null;
+		currentType = ObjectType.NONE;
 		reloadCache();
 		postInvalidate();
 		listener.onSelectionEvent(CanvasListener.ENTER_MODE, 0);
@@ -1910,13 +1947,13 @@ public class CanvasView extends View {
 		mode |= Mode.HAS_SELECTION;
 		if (objs.size() > 1) {
 			DrawMultiple dm = new DrawMultiple(selectedObjects);
-			pushToUAStack(dm, !hidden_mode);
+			pushToUAStack(dm, !hide_mode);
 			listener.onSelectionEvent(CanvasListener.EDIT_MULTIPLE,
 					selectedObjects.size());
 		} else {
 			CanvasObject co = selectedObjects.get(0);
 			DrawAction da = new DrawAction(co);
-			pushToUAStack(da, !hidden_mode);
+			pushToUAStack(da, !hide_mode);
 			editObject(co, ShapeHandler.ALL);
 		}
 		socX = 0;
@@ -1927,13 +1964,21 @@ public class CanvasView extends View {
 		return selectedObjects.size();
 	}
 
+	/**
+	 * Memasukkan aksi ke stack
+	 * @param action
+	 * @param flush kirim ke synchronizer atau tidak
+	 */
 	private void pushToUAStack(UserAction action, boolean flush) {
 		if (action == null)
 			return;
 		userActions.push(action);
+		// masukkan ke sync
 		if (flush)
 			synczer.addToBuffer(action);
-		else if (hidden_mode)
+
+		// jika sedang hidden_mode, catat untuk dikembalikan
+		else if (hide_mode)
 			revertList.add(action.getInverse());
 		listener.onURStatusChange(true, !redoStack.isEmpty());
 	}
@@ -1964,7 +2009,7 @@ public class CanvasView extends View {
 				return;
 			execute(inverse, true);
 			// TODO meragukan
-			if (!hidden_mode)
+			if (!hide_mode)
 				synczer.addToBuffer(inverse);
 			reloadCache();
 			redoStack.push(action);
@@ -1973,6 +2018,10 @@ public class CanvasView extends View {
 		}
 	}
 
+	/**
+	 * Apakah bisa dilaukan redo atau tidak
+	 * @return
+	 */
 	public boolean isRedoable() {
 		return !redoStack.isEmpty();
 	}
@@ -1981,7 +2030,7 @@ public class CanvasView extends View {
 		if (!redoStack.isEmpty()) {
 			UserAction action = redoStack.pop();
 			execute(action, true);
-			pushToUAStack(action, !hidden_mode);
+			pushToUAStack(action, !hide_mode);
 			reloadCache();
 			invalidate();
 		}
@@ -1993,17 +2042,17 @@ public class CanvasView extends View {
 	 * @param hidden
 	 */
 	public void setHideMode(boolean hidden) {
-		// TODO revert user chance
 		if (hidden) {
-			if (!hidden_mode) {
+			if (!hide_mode) {
 				synczer.markCheckpoint();
 				revertList.clear();
+				synczer.stop();
 			}
-		} else if (hidden_mode) {
+		} else if (hide_mode) {
 			synczer.revert();
 			execute(revertList, false);
 		}
-		hidden_mode = hidden;
+		hide_mode = hidden;
 		postInvalidate();
 		listener.onHideModeChange(hidden);
 	}
@@ -2013,7 +2062,7 @@ public class CanvasView extends View {
 	 * @return
 	 */
 	public boolean isInHideMode() {
-		return hidden_mode;
+		return hide_mode;
 	}
 
 	/**
@@ -2035,7 +2084,7 @@ public class CanvasView extends View {
 		for (int i = 0; i < size; i++) {
 			UserAction ua = actions.get(i);
 			execute(ua, false);
-			if (hidden_mode && revertable)
+			if (hide_mode && revertable)
 				revertList.add(ua.getInverse());
 		}
 		reloadCache();
@@ -2109,5 +2158,12 @@ public class CanvasView extends View {
 			ResizeCanvas rc = (ResizeCanvas) action;
 			model.setDimension(rc.width, rc.height, rc.top, rc.left);
 		}
+	}
+
+	@Override
+	public boolean onLongClick(View v) {
+		// TODO Auto-generated method stub
+
+		return false;
 	}
 }

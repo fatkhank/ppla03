@@ -66,14 +66,15 @@
             android:layout_below="@+id/w_stroke_style_label"
             android:layout_centerHorizontal="true" />
 
-        <Button
+        <ImageButton
             android:id="@+id/w_stroke_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@android:color/holo_blue_dark"
-            android:gravity="right" />
+            android:background="@android:color/white"
+            android:gravity="right"
+            android:src="@drawable/w_color_button" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -83,14 +84,15 @@
         android:layout_below="@+id/w_prop_stroke"
         android:layout_marginBottom="10dp" >
 
-        <Button
+        <ImageButton
             android:id="@+id/w_fill_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@android:color/holo_blue_dark"
-            android:gravity="right" />
+            android:gravity="right"
+            android:src="@drawable/w_color_button" />
 
         <CheckBox
             android:id="@+id/w_fill_check"
@@ -214,13 +216,14 @@
             android:text="Color"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <Button
+        <ImageButton
             android:id="@+id/w_font_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_font_style"
-            android:background="@android:color/holo_blue_dark" />
+            android:background="@android:color/holo_blue_dark"
+            android:src="@drawable/w_color_button" />
     </RelativeLayout>
 
     <RelativeLayout

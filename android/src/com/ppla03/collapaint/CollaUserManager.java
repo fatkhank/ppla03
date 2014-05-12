@@ -3,6 +3,10 @@ package com.ppla03.collapaint;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import collapaint.code.UserJCode;
+import collapaint.code.UserJCode.Reply;
+import collapaint.code.UserJCode.Request;
+
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.UserModel;
 
@@ -17,8 +21,9 @@ public class CollaUserManager extends ServerConnector {
 	private static final String USER_NAME_IF_NULL = "Mr. Anonymous";
 
 	private static String CREATE_URL = HOST + "user";
+
 	protected void onHostAddressChange(String host) {
-		CREATE_URL = host+"user";
+		CREATE_URL = host + "user";
 	}
 
 	/**
@@ -42,24 +47,12 @@ public class CollaUserManager extends ServerConnector {
 		public void onAccountChecked(int status);
 	}
 
-	static class UserJCode {
-
-		static final String COLLA_ID = "id";
-		static final String ACCOUNT_ID = "acid";
-		static final String NAME = "name";
-		// --- reply ---
-		static final String ERROR = "error";
-		static final String STATUS = "status";
-		static final int NEW = 3;
-		static final int EXIST = 9;
-	}
-
 	private static final CollaUserManager instance = new CollaUserManager();
 	private static OnUserCheckListener listener;
 
 	private static UserModel checkUser;
 	private static UserModel currentUser = new UserModel(USER_ID_IF_NULL,
-			USER_EMAIL_IF_NULL, USER_NAME_IF_NULL);;
+			USER_EMAIL_IF_NULL, USER_NAME_IF_NULL);
 
 	private CollaUserManager() {}
 
@@ -82,8 +75,10 @@ public class CollaUserManager extends ServerConnector {
 
 		JSONObject request = new JSONObject();
 		try {
-			request.put(UserJCode.NAME, nickname);
-			request.put(UserJCode.ACCOUNT_ID, accountID);
+			request.put(Request.USER_NAME, nickname);
+			request.put(Request.USER_EMAIL, accountID);
+			request.put(Request.ACTION, Request.ACTION_CHECK);
+
 			instance.check(request);
 		} catch (JSONException e) {
 			replisCheck.process(INTERNAL_PROBLEM, null);
@@ -103,7 +98,7 @@ public class CollaUserManager extends ServerConnector {
 					listener.onAccountChecked(SERVER_PROBLEM);
 				else {
 					try {
-						checkUser.collaID = reply.getInt(UserJCode.COLLA_ID);
+						checkUser.collaID = reply.getInt(Reply.USER_ID);
 						currentUser = checkUser;
 						listener.onAccountChecked(SUCCESS);
 					} catch (JSONException e) {
@@ -114,11 +109,11 @@ public class CollaUserManager extends ServerConnector {
 				listener.onAccountChecked(status);
 		}
 	};
-	
+
 	/**
-	 * Melogout pengguna sekarang 
+	 * Melogout pengguna sekarang
 	 */
-	public static void logout(){
-		
+	public static void logout() {
+
 	}
 }
