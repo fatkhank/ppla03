@@ -64,6 +64,7 @@ public class ActionServlet extends HttpServlet {
                 //*************************** REPLY *************************
                 processReply(conn, request, canvasId, userActions, objectPool, reply);
             } catch (JsonException | NullPointerException | ClassCastException ex) {
+                ex.printStackTrace();
                 reply.add(ActionJCode.ERROR, ActionJCode.BAD_REQUEST);
             } catch (SQLException ex) {
                 ex.printStackTrace();

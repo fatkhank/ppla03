@@ -8,6 +8,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -96,14 +97,18 @@ public class UserServlet extends HttpServlet {
                 }
             } else {
                 //jika email belum terdaftar, buat akun baru dengan status sudah login
-                try (PreparedStatement create = conn.prepareStatement(DB.User.Q.Insert.ALL)) {
+                try (PreparedStatement create = conn
+                        .prepareStatement(DB.User.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
                     create.setString(DB.User.Q.Insert.All.ACCOUNT_ID, email);
                     create.setString(DB.User.Q.Insert.All.NAME, username);
                     create.setString(DB.User.Q.Insert.All.STATUS, DB.User.Status.LOGIN);
-                    if (create.executeUpdate() > 0)
+                    if (create.executeUpdate() > 0){
                         //akun berhasil dibuat
                         reply.add(Reply.STATUS, Reply.ACCOUNT_CREATED);
-                    else
+                        //ambil key
+                        ResultSet key = create.getGeneratedKeys();
+                        reply.add(Reply.USER_ID, key.getInt(1));
+                    }else
                         reply.add(UserJCode.ERROR, UserJCode.Error.SERVER_ERROR);
                 }
             }
@@ -114,9 +119,10 @@ public class UserServlet extends HttpServlet {
 
     /**
      * Melogout user.
+     *
      * @param conn
      * @param reply
-     * @param userID 
+     * @param userID
      */
     private void logout(Connection conn, JsonObjectBuilder reply, int userID) {
         //ubah status user jadi logout
