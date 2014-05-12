@@ -56,6 +56,10 @@ public class UserJCode {
     public static final class Reply {
 
         /**
+         * Id user yang telah dibuat.
+         */
+        public static final String USER_ID = "uid";
+        /**
          * Status operasi
          */
         public static final String STATUS = "stat";
