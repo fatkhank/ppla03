@@ -69,7 +69,7 @@ public class ParticipantManager extends ServerConnector {
 		}
 	}
 
-	private final ArrayList<Participation> participants = new ArrayList<>();
+	private final ArrayList<Participation> participants = new ArrayList<Participation>();
 
 	private final ReplyListener replisMember = new ReplyListener() {
 
@@ -231,7 +231,7 @@ public class ParticipantManager extends ServerConnector {
 		}
 	};
 
-	private ArrayList<Participation> invitationList = new ArrayList<>();
+	private ArrayList<Participation> invitationList = new ArrayList<Participation>();
 
 	/**
 	 * Response terhadap undangan

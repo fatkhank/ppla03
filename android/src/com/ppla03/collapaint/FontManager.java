@@ -42,12 +42,12 @@ public class FontManager {
 		}
 	}
 
-	private static final ArrayList<Font> fonts = new ArrayList<>();
+	private static final ArrayList<Font> fonts = new ArrayList<Font>();
 	static {
 		fonts.add(new Font("Sans Serif"));
 	};
 
-	private static final HashMap<String, Font> mapper = new HashMap<>();
+	private static final HashMap<String, Font> mapper = new HashMap<String, Font>();
 
 	/**
 	 * Memerintahkan untuk memuat daftar huruf dengan membaca daftar berkas
@@ -152,7 +152,7 @@ public class FontManager {
 
 	public static ArrayAdapter<Font> getAdapter(Context context) {
 		if (adapter == null || !adapter.getContext().equals(context))
-			adapter = new ArrayAdapter<>(context,
+			adapter = new ArrayAdapter<Font>(context,
 					android.R.layout.simple_list_item_1, fonts);
 		return adapter;
 	}

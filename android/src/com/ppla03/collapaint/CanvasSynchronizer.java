@@ -93,9 +93,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private final int STOP = 16;
 
 	private CanvasSynchronizer() {
-		actionBuffer = new ArrayList<>();
-		playbackList = new ArrayList<>();
-		sentList = new ArrayList<>();
+		actionBuffer = new ArrayList<UserAction>();
+		playbackList = new ArrayList<UserAction>();
+		sentList = new ArrayList<AtomicAction>();
 		handler = new Handler();
 		mode = IDLE;
 	}

@@ -325,7 +325,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				} else {
 					// jika sedang mengedit basic object, tampilkan properti
 					// stroke dan fill
-					if ((boolean) canvas.getObjectParam(Param.fillable))
+					if ((Boolean) canvas.getObjectParam(Param.fillable))
 						fillPane.setVisibility(View.VISIBLE);
 					strokePane.setVisibility(View.VISIBLE);
 
@@ -398,15 +398,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// color
 		else if (v == strokeColor) {
 			colorConsumer = strokeColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.strokeColor));
+			colorPane.setColor((Integer) canvas.getObjectParam(Param.strokeColor));
 			colorPane.show();
 		} else if (v == fillColor) {
 			colorConsumer = fillColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.fillColor));
+			colorPane.setColor((Integer) canvas.getObjectParam(Param.fillColor));
 			colorPane.show();
 		} else if (v == textColor) {
 			colorConsumer = textColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.textColor));
+			colorPane.setColor((Integer) canvas.getObjectParam(Param.textColor));
 			colorPane.show();
 		}
 	}
@@ -433,7 +433,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			else
 				fillColor.setVisibility(View.GONE);
 			canvas.setFillParameter(fillCheck.isChecked(),
-					(int) canvas.getState(Param.fillColor), true);
+					(Integer) canvas.getState(Param.fillColor), true);
 		} else if (button == textBold)
 			canvas.setFontBold(isChecked, true);
 		else if (button == textItalic)
@@ -518,26 +518,26 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (visible) {
 			if (vis == View.GONE) {
 				propertyPane.startAnimation(animPropShow);
-				strokeColor.setBackgroundColor((int) canvas
+				strokeColor.setBackgroundColor((Integer) canvas
 						.getObjectParam(Param.strokeColor));
-				strokeWidth.setProgress((int) canvas
+				strokeWidth.setProgress((Integer)canvas
 						.getObjectParam(Param.strokeWidth)
 						+ CanvasObject.MIN_STROKE_WIDTH);
-				strokeStyle.setSelection((int) canvas
+				strokeStyle.setSelection((Integer) canvas
 						.getObjectParam(Param.strokeStyle));
 				textInput.setText((String) canvas
 						.getObjectParam(Param.textContent));
-				textColor.setBackgroundColor((int) canvas
+				textColor.setBackgroundColor((Integer) canvas
 						.getObjectParam(Param.textColor));
-				textBold.setChecked((boolean) canvas
+				textBold.setChecked( (Boolean) canvas
 						.getObjectParam(Param.fontBold));
-				textItalic.setChecked((boolean) canvas
+				textItalic.setChecked((Boolean) canvas
 						.getObjectParam(Param.fontItalic));
-				textUnderline.setChecked((boolean) canvas
+				textUnderline.setChecked((Boolean) canvas
 						.getObjectParam(Param.textUnderline));
-				fillColor.setBackgroundColor((int) canvas
+				fillColor.setBackgroundColor((Integer) canvas
 						.getObjectParam(Param.fillColor));
-				polySeek.setProgress((int) canvas
+				polySeek.setProgress((Integer)canvas
 						.getObjectParam(Param.polygonCorner)
 						- PolygonObject.MIN_CORNER_COUNT);
 			}

@@ -139,7 +139,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	// Daftar aksi untuk redo
 	private final Stack<UserAction> redoStack = new Stack<UserAction>();
 	// Daftar aksi yang dilakukan saat hide_mode
-	private final ArrayList<UserAction> revertList = new ArrayList<>();
+	private final ArrayList<UserAction> revertList = new ArrayList<UserAction>();
 	// Banyak perubahan yang terjadi terhadap objek sejak diseleksi.
 	private int checkpoint;
 
@@ -152,8 +152,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * menyetujui aksinya, maka aksi dalam penampungan diabaikan karena ditimpa
 	 * oleh aksi pengguna.
 	 */
-	private final ArrayList<GeomAction> pendingGeomActions = new ArrayList<>();
-	private final ArrayList<TransformAction> pendingTransformActions = new ArrayList<>();
+	private final ArrayList<GeomAction> pendingGeomActions = new ArrayList<GeomAction>();
+	private final ArrayList<TransformAction> pendingTransformActions = new ArrayList<TransformAction>();
 
 	private CanvasListener listener;
 	private CanvasSynchronizer synczer;
