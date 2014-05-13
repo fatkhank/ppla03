@@ -162,6 +162,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	private ControlPoint grabbedCPoint;
 
 	private static int fillColor;
+	private static int fillColorOri;
+	private static boolean filled;
 	private static int strokeColor;
 	private static int strokeWidth;
 	private static int strokeStyle;
@@ -244,8 +246,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			DS_DEFLATE_FLAG = 64,// objek sedang dikempeskan
 			// animasi penggembungan selesai
 			DS_INFLATED = DS_INFLATE_FLAG | DS_ANIM_FINISH,
-			// animasi penggembungan selesai
-			DS_DEFLATED = DS_DEFLATE_FLAG | DS_ANIM_FINISH,
 			// batal menggambar objek
 			DS_DESTROY_FLAG = 128,
 			// sedang menggambar
@@ -420,8 +420,12 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		strokeColor = Color.BLACK;
 		strokeWidth = 5;
 		strokeStyle = StrokeStyle.SOLID;
-		textSize = 30;
+		textSize = 35;
 		textFont = 0;
+		textColor = Color.BLACK;
+		fontBold = false;
+		fontItalic = false;
+		textUnderline = false;
 
 		scrollX = 20;
 		scrollY = 20;
@@ -940,6 +944,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 							} else if (protoObject instanceof LineObject) {
 								((LineObject) protoObject)
 										.setWidth(strokeWidth);
+							} else if (protoObject instanceof TextObject) {
+								((TextObject) protoObject).setSize(textSize);
 							}
 						} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
 							float sc = capturePaste.scale();
@@ -1235,7 +1241,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	}
 
 	public enum Param {
-		fillColor, strokeColor, strokeWidth, strokeStyle, textSize, textFont, textColor, textContent, textUnderline, fontBold, fontItalic, polygonCorner, fillable
+		fillColor, strokeColor, strokeWidth, strokeStyle, textSize, textFont, textColor, textContent, textUnderline, fontBold, fontItalic, polygonCorner, fillable, filled
 	}
 
 	/**
@@ -1246,7 +1252,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	public Object getState(Param param) {
 		switch (param) {
 		case fillColor:
-			return fillColor;
+			return fillColorOri;
 		case strokeColor:
 			return strokeColor;
 		case strokeWidth:
@@ -1269,8 +1275,14 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			return fontItalic;
 		case polygonCorner:
 			return polyCorner;
+		case fillable:
+			return (currentObject == currentBasic)
+					&& (currentBasic != currentFree || currentFree.fillable());
+		case filled:
+			return fillColor != Color.TRANSPARENT;
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -1284,45 +1296,61 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		case fillColor:
 			if (currentObject == currentBasic)
 				return currentBasic.getFillColor();
+			break;
 		case strokeColor:
 			if (currentObject == currentBasic)
 				return currentBasic.getStrokeColor();
 			if (currentObject == currentLine)
 				return currentLine.getColor();
+			break;
 		case strokeWidth:
 			if (currentObject == currentBasic)
 				return currentBasic.getStrokeWidth();
 			if (currentObject == currentLine)
 				return currentLine.getWidth();
+			break;
 		case strokeStyle:
 			if (currentObject == currentBasic)
 				return currentBasic.getStrokeStyle();
 			if (currentObject == currentLine)
 				return currentLine.getStrokeStyle();
+			break;
 		case textSize:
 			if (currentObject == currentText)
 				return currentText.getFontSize();
+			break;
 		case textFont:
 			if (currentObject == currentText)
 				return FontManager.fontId(currentText.getFontCode());
+			break;
 		case textColor:
 			if (currentObject == currentText)
 				return currentText.getTextColor();
+			break;
 		case textContent:
 			if (currentObject == currentText)
 				return currentText.getText();
+			break;
 		case textUnderline:
 			if (currentObject == currentText)
 				return FontManager.isUnderline(currentText.getFontCode());
+			break;
 		case fontBold:
 			if (currentObject == currentText)
 				return FontManager.isBold(currentText.getFontCode());
+			break;
 		case fontItalic:
 			if (currentObject == currentText)
 				return FontManager.isItalic(currentText.getFontCode());
+			break;
 		case polygonCorner:
 			if (currentObject == currentPoly)
 				return currentPoly.corner();
+			break;
+		case filled:
+			if (currentObject == currentBasic)
+				return currentBasic.getFillColor() != Color.TRANSPARENT;
+			break;
 		case fillable:
 			return (currentObject == currentBasic)
 					&& (currentBasic != currentFree || currentFree.fillable());
@@ -1802,6 +1830,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 *            hanya merubah parameter objek saja.
 	 */
 	public void setFillParameter(boolean filled, int color, boolean save) {
+		this.filled = filled;
+		fillColorOri = color;
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		protoFree.setFillMode(filled, color);
 		protoRect.setFillMode(filled, color);
@@ -1960,7 +1990,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		socY = 0;
 		reloadCache();
 		postInvalidate();
-		int size = selectedObjects.size();
 		return selectedObjects.size();
 	}
 

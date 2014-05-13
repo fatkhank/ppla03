@@ -22,6 +22,11 @@ import com.ppla03.collapaint.model.action.*;
  */
 public class CanvasSynchronizer implements SyncEventListener,
 		DialogInterface.OnClickListener, OnCanvasOpenListener {
+
+	private static final int DEFAULT_CANVAS_WIDTH = 800,
+			DEFAULT_CANVAS_HEIGHT = 400, DEFAULT_CANVAS_ID = 1;
+	private static final String DEFAULT_CANVAS_NAME = "Untitled";
+
 	/**
 	 * Listener proses memuat kanvas.
 	 * @author hamba v7
@@ -124,13 +129,11 @@ public class CanvasSynchronizer implements SyncEventListener,
 		if (connector == null)
 			connector = CanvasConnector.getInstance().setSyncListener(this);
 		if (currentModel == null) {
-			// TODO dummy canvas
-			UserModel owner = new UserModel();
-			owner.collaID = 1;
-			owner.accountID = "accountofdebugger";
-			owner.name = "debugger";
-			currentModel = new CanvasModel(owner, "test canvas", 800, 400);
-			currentModel.setid(1);
+			// buat dummy kanvas kalau tidak ada
+			UserModel owner = CollaUserManager.getCurrentUser();
+			currentModel = new CanvasModel(owner, DEFAULT_CANVAS_NAME,
+					DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+			currentModel.setid(DEFAULT_CANVAS_ID);
 			listener.onCanvasLoaded(currentModel, ServerConnector.SUCCESS);
 		} else {
 			this.loadListener = listener;
@@ -160,7 +163,6 @@ public class CanvasSynchronizer implements SyncEventListener,
 		canvas.execute(actionBuffer);
 		actionBuffer.clear();
 		if (!canvas.isInHideMode()) {
-			// TODO debug sync
 			Log.d("POS", "----- synchronizer started ------");
 			handler.postDelayed(updater, sync_time);
 		}
@@ -173,6 +175,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 		mode |= STOP;
 	}
 
+	/**
+	 * Memerintahkan untuk melakukan sinkronasasi sekarang juga.
+	 */
 	public void forceUpdate() {
 		mode |= FORCED;
 		if ((mode & SYNCING) != SYNCING)

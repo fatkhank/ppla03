@@ -1,10 +1,13 @@
 package com.ppla03.collapaint;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-import android.R.drawable;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
@@ -26,17 +29,22 @@ public class CanvasExporter {
 	/**
 	 * Kanvas berhasil diekspor.
 	 */
-	public static int SUCCESS = 1;
+	public static final int SUCCESS = 1;
 
 	/**
 	 * Gagal membuat file.
 	 */
-	public static int FAILED = 0;
+	public static final int FAILED = 0;
 
 	/**
 	 * Penyimpanan eksternal tidak tersedia.
 	 */
-	public static int DISK_UNAVAILABLE = 3;
+	public static final int DISK_UNAVAILABLE = 3;
+
+	/**
+	 * Ukuran preview kanvas
+	 */
+	private static final int PREVIEW_SIZE = 64;
 
 	/**
 	 * Mengubah format kanvas ke format gambar JPG atau PNG. Gambar bertipe PNG
@@ -119,7 +127,7 @@ public class CanvasExporter {
 		FileOutputStream out = null;
 		try {
 			out = new FileOutputStream(file);
-			finalBitmap.compress(format, 90, out);
+			finalBitmap.compress(format, 100, out);
 			out.close();
 		} catch (Exception e) {
 			return false;
@@ -163,10 +171,38 @@ public class CanvasExporter {
 		return bitmap;
 	}
 
-	public void savePreview(CanvasModel model) {
+	/**
+	 * Menyimpan preview dari sebuah kanvas ke penyimpanan lokal.
+	 * @param model
+	 * @param context
+	 */
+	public static void savePreview(CanvasModel model, Context context) {
 		RectF bound = new RectF();
 		Bitmap preview = draw(model, false, bound);
-		
-		
+
+		// kecilkan gambar
+		preview = Bitmap.createScaledBitmap(preview, PREVIEW_SIZE,
+				PREVIEW_SIZE, false);
+
+		try {
+			FileOutputStream out = context.openFileOutput("c" + model.getId()
+					+ ".png", Context.MODE_PRIVATE);
+			preview.compress(CompressFormat.PNG, 90, out);
+		} catch (FileNotFoundException e) {}
+	}
+
+	/**
+	 * Mengambil gambaran dari sebuah kanvas yang tersmpan d penympanan lokal.
+	 * @param model
+	 * @param context
+	 * @return null jika kanvas tersebut belum mempunya preview.
+	 */
+	public static Bitmap getPreview(CanvasModel model, Context context) {
+		try {
+			FileInputStream in = context.openFileInput("c" + model.getId()
+					+ ".png");
+			return BitmapFactory.decodeStream(in);
+		} catch (FileNotFoundException e) {}
+		return null;
 	}
 }

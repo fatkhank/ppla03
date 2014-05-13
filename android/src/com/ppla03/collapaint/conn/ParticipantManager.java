@@ -249,10 +249,11 @@ public class ParticipantManager extends ServerConnector {
 		DECLINE
 	}
 
-	public void responseInvitation(Participation invitation,
+	public void responseInvitation(CanvasModel model, UserModel user,
 			InviteResponse response) {
 		JSONObject request = new JSONObject();
 		try {
+			Participation invitation  = new Participation(user,model); 
 			invitationList.add(invitation);
 			request.put(Request.ACTION, Request.Action.RESPONSE);
 			request.put(Request.USER_ID, invitation.user.collaID);
