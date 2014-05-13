@@ -291,4 +291,5 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void onCanvasClosed(int status) {
 		closeListener.onCanvasClosed(status);
 	}
+	
 }

@@ -48,10 +48,10 @@ public class CanvasConnector extends ServerConnector {
 
 	@SuppressLint("UseSparseArrays")
 	private CanvasConnector() {
-		sentActions = new ArrayList<>();
-		replyActions = new ArrayList<>();
-		sentObjects = new ArrayList<>();
-		replyObjects = new ArrayList<>();
+		sentActions = new ArrayList<AtomicAction>();
+		replyActions = new ArrayList<AtomicAction>();
+		sentObjects = new ArrayList<CanvasObject>();
+		replyObjects = new ArrayList<CanvasObject>();
 		objectMap = new HashMap<Integer, CanvasObject>();
 	}
 

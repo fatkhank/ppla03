@@ -316,7 +316,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 		public CanvasListAdapter(BrowserActivity context) {
 			this.activity = context;
-			models = new ArrayList<>();
+			models = new ArrayList<CanvasModel>();
 		}
 
 		public void addAll(ArrayList<CanvasModel> list) {
