@@ -335,6 +335,6 @@ public abstract class CanvasObject {
 
 	@Override
 	public int hashCode() {
-		return globalID * 200 + privateID;
+		return globalID << 10 + privateID;
 	}
 }

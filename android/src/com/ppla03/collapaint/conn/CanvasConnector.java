@@ -40,10 +40,25 @@ public class CanvasConnector extends ServerConnector {
 	private static CanvasConnector instance;
 	private static SyncEventListener syncListener;
 	private static OnCanvasOpenListener openListener;
+	/**
+	 * Menampung daftar aksi yang dikirim
+	 */
 	private ArrayList<AtomicAction> sentActions;
+	/**
+	 * Menampung daftar objek yang dikirim
+	 */
 	private ArrayList<CanvasObject> sentObjects;
+	/**
+	 * menampung daftar aksi yang diterima dari server.
+	 */
 	private ArrayList<AtomicAction> replyActions;
+	/**
+	 * Menampung daftar objek yang diterima dari server.
+	 */
 	private ArrayList<CanvasObject> replyObjects;
+	/**
+	 * Katalog objek.
+	 */
 	private HashMap<Integer, CanvasObject> objectMap;
 
 	@SuppressLint("UseSparseArrays")
@@ -402,6 +417,7 @@ public class CanvasConnector extends ServerConnector {
 						// masukkan idnya
 						int id = cob.getInt(Reply.OBJECT_ID);
 						co.setGlobaID(id);
+						//cek objek sudah didelete atau belum
 						boolean exist = cob.getBoolean(Reply.OBJECT_EXIST);
 						if (exist)
 							canvas.objects.add(co);

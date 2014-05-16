@@ -102,6 +102,7 @@
             android:layout_toLeftOf="@+id/w_fill_color"
             android:text="Fill"
             android:textAppearance="?android:attr/textAppearanceLarge" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -165,14 +166,6 @@
             android:imeOptions="flagNoFullscreen|actionDone"
             android:inputType="text" />
 
-        <TextView
-            android:id="@+id/w_font_size_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/w_font_input"
-            android:text="Size"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
         <SeekBar
             android:id="@+id/w_font_size"
             android:layout_width="wrap_content"
@@ -224,6 +217,16 @@
             android:layout_below="@+id/w_font_style"
             android:background="@android:color/holo_blue_dark"
             android:src="@drawable/w_color_button" />
+
+        <TextView
+            android:id="@+id/w_font_size_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/w_font_input"
+            android:text="Size"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
     </RelativeLayout>
 
     <RelativeLayout

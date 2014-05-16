@@ -96,17 +96,6 @@
         android:max="255"
         android:progress="1" />
 
-    <TextView
-        android:id="@+id/cp_a_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cp_b_label"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/cp_b_label"
-        android:gravity="center_horizontal"
-        android:text="@string/cp_a"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <Button
         android:id="@+id/cp_rgb_preview"
         android:layout_width="wrap_content"
@@ -118,6 +107,17 @@
         android:layout_toRightOf="@+id/cp_cancel"
         android:background="@android:color/holo_blue_dark" />
 
+    <TextView
+        android:id="@+id/cp_a_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/cp_b_label"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/cp_b_label"
+        android:gravity="center_horizontal"
+        android:text="@string/cp_a"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <EditText
         android:id="@+id/cp_a_input"
         android:layout_width="60dp"
@@ -125,7 +125,6 @@
         android:layout_alignBottom="@+id/cp_a_slider"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/cp_a_label"
-        android:layout_toRightOf="@+id/cp_b_slider"
         android:ems="10"
         android:inputType="number" >
     </EditText>
@@ -137,7 +136,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/cp_a_label"
         android:layout_toLeftOf="@+id/cp_a_input"
-        android:max="255"
+        android:max="254"
         android:progress="1" />
 
     <ImageButton
