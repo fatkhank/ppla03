@@ -1,5 +1,19 @@
 package com.ppla03.collapaint.ui;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.facebook.widget.LoginButton.UserInfoChangedCallback;
+
+import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CanvasSynchronizer.CanvasCloseListener;
@@ -15,10 +29,16 @@ import com.ppla03.collapaint.model.object.StrokeStyle;
 import com.ppla03.collapaint.model.object.TextObject;
 import com.ppla03.collapaint.ui.ColorPane.ColorChangeListener;
 
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -51,18 +71,29 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
 		OnCheckedChangeListener, OnEditorActionListener, AnimationListener,
-		CanvasCloseListener {
+		CanvasCloseListener, AnimatorUpdateListener {
+	
+	//---------- share--------
+	public LoginButton share;
+	private String TAG="Share";
+	private UiLifecycleHelper uiHelper;
+	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
 
 	// --------- top button ---------
 	private LinearLayout topbarButtons;
 	private CheckBox select, hand;
-	private ImageButton undo, redo, showDash;
+	private ImageButton undo, redo;
 
 	// --------- select additional ---------
 	private LinearLayout selectAddButtons;
 	private ImageButton cut, copy, move, delete;
 
-	// property dan dashboard
+	// --------- dashboard ---------
+	private CheckBox showDash;
+	private View dashboardView;
+	Dashboard dashboard;
+
+	// --------- property --------
 	private CheckBox showProp;
 
 	private int colorNormal, colorHidden, currentThemeColor;
@@ -72,11 +103,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private ColorPane colorPane;
 	private View colorPaneView;
 	private View propertyPane;
-	private View dashboard;
 
 	private ScaleAnimation animPropShow;
 	private ScaleAnimation animPropHide;
-	private TranslateAnimation animDashShow;
 
 	// --------- stroke setting ---------
 	private RelativeLayout strokePane;
@@ -105,7 +134,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private TextView polyText;
 
 	// ------
-	private CanvasView canvas;
+	CanvasView canvas;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +146,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		hand = (CheckBox) findViewById(R.id.w_main_hand);
 		undo = (ImageButton) findViewById(R.id.w_undo);
 		redo = (ImageButton) findViewById(R.id.w_redo);
-		showDash = (ImageButton) findViewById(R.id.w_show_dash);
+		showDash = (CheckBox) findViewById(R.id.w_show_dash);
 
 		select.setOnClickListener(this);
 		select.setOnLongClickListener(this);
@@ -223,14 +252,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		colorPaneView = findViewById(R.id.w_color_pane_scroll);
 		colorPane = new ColorPane(this, colorPaneView, this);
 
-		// --- dashboard ---
-		// dashboard = findViewById(R.id.w_dashboard);
-		animDashShow = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
-				Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0,
-				Animation.RELATIVE_TO_PARENT, 1);
-		animDashShow.setDuration(1000);
-		animDashShow.setAnimationListener(this);
-
 		// --- prepare canvas ---
 		colorNormal = getResources().getColor(R.color.workspace_normal);
 		colorHidden = getResources().getColor(R.color.workspace_hidden);
@@ -239,13 +260,42 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		canvas = (CanvasView) findViewById(R.id.w_canvas);
 		canvas.setListener(this);
 		CanvasSynchronizer.getInstance().setCanvasView(canvas);
+
+		// --- dashboard ---
+		dashboardView = findViewById(R.id.dashboard);
+		dashboardView.setVisibility(View.GONE);
+		dashboard = new Dashboard(this, dashboardView);
+
+		// --- load ---
 		canvasTitle.setText(canvas.getModel().name);
 		onClick(select);
+		
+		//--- Share --
+		uiHelper = new UiLifecycleHelper(this, statusCallback);
+	    uiHelper.onCreate(savedInstanceState);
+	    share = (LoginButton) findViewById(R.id.fb_login_button);
+	    share.setUserInfoChangedCallback(new UserInfoChangedCallback() {
+	    @Override
+	            public void onUserInfoFetched(GraphUser user) {
+	                if (user != null) {
+	                    postImage();
+	                    uiHelper.onDestroy();
+	                } else {
+	                	Toast.makeText(WorkspaceActivity.this,
+	                            "",
+	                            Toast.LENGTH_LONG).show();
+	                }
+	            }
+	        });
+		share.setVisibility(View.GONE);
 	}
 
 	@Override
 	public void onBackPressed() {
-		// TODO close canvas
+		closeCanvas();
+	}
+
+	public void closeCanvas() {
 		CanvasSynchronizer.getInstance().closeCanvas(this);
 	}
 
@@ -368,8 +418,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == redo) {
 			canvas.redo();
 		} else if (v == showDash) {
-			// TODO show dash
-			dashboard.startAnimation(animDashShow);
+			if (showDash.isChecked()) {
+				// munculkan
+				dashboard.show();
+				// dashboard.startAnimation(animDashShow);
+			} else {
+				// sembunyikan
+				dashboard.hide();
+			}
 		} else if (v == showProp) {
 			setPropPaneVisibility(showProp.isChecked());
 		}
@@ -562,7 +618,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 							.getObjectParam(Param.textSize);
 					if (txtSize == null)
 						txtSize = (Integer) canvas.getState(Param.textSize);
-					textSize.setProgress(txtSize.intValue() - FontManager.MIN_FONT_SIZE);
+					textSize.setProgress(txtSize.intValue()
+							- FontManager.MIN_FONT_SIZE);
 					textSizeText.setText(String.valueOf(txtSize));
 
 					// teks bold
@@ -650,4 +707,98 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		Intent intent = new Intent(this, BrowserActivity.class);
 		startActivity(intent);
 	}
+
+	@Override
+	public void onAnimationUpdate(ValueAnimator animation) {}
+	
+	
+	
+//======================SHARE===========================================
+	
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state,
+                Exception exception) {
+            if (state.isOpened()) {
+                Log.d("FacebookSampleActivity", "Facebook session opened");
+            } else if (state.isClosed()) {
+                Log.d("FacebookSampleActivity", "Facebook session closed");
+            }
+        }
+    };
+	
+    public void postImage() {
+        if (checkPermissions()) {
+        	CanvasExporter export=new CanvasExporter();
+        	export.export(canvas.getModel(), CompressFormat.PNG, false, false);
+        	File image= export.getResultFile();
+        	
+            Bitmap img = BitmapFactory.decodeFile(image.getPath());
+            
+            Request uploadRequest = Request.newUploadPhotoRequest(
+                    Session.getActiveSession(), img, new Request.Callback() {
+                        @Override
+                        public void onCompleted(Response response) {
+                            Toast.makeText(WorkspaceActivity.this,
+                                    "Photo uploaded successfully",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+            uploadRequest.executeAsync();
+            if (Session.getActiveSession() != null) {
+                Session.getActiveSession().closeAndClearTokenInformation();
+            }
+
+            Session.setActiveSession(null);
+        } else {
+            requestPermissions();}
+        
+   }
+    
+    public boolean checkPermissions() {
+        Session s = Session.getActiveSession();
+        if (s != null) {
+            return s.getPermissions().contains("publish_actions");
+        } else
+            return false;
+    }
+ 
+    public void requestPermissions() {
+        Session s = Session.getActiveSession();
+        if (s != null)
+            s.requestNewPublishPermissions(new Session.NewPermissionsRequest(
+                    this, PERMISSIONS));
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+    }
+ 
+    @Override
+    public void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+    }
+ 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+ 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
+    }
+ 
+    @Override
+    public void onSaveInstanceState(Bundle savedState) {
+        super.onSaveInstanceState(savedState);
+        uiHelper.onSaveInstanceState(savedState);
+    }
+	
+	
 }

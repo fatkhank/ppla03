@@ -24,20 +24,31 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.acivity_loader);
-		if (FontManager.readFontAsset(getAssets())) {
-			CanvasSynchronizer.getInstance().loadCanvas(this);
-			handler = new Handler();
-			progress = (ProgressBar) findViewById(R.id.l_progress);
-		} else {
-			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT)
-					.show();
+		// TODO debug loader
+		android.util.Log.d("POS", "create loader");
+		try {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.acivity_loader);
+			if (FontManager.readFontAsset(getAssets())) {
+				CanvasSynchronizer.getInstance().loadCanvas(this);
+				handler = new Handler();
+				progress = (ProgressBar) findViewById(R.id.l_progress);
+			} else {
+				Toast.makeText(this, "Cannot load font assets",
+						Toast.LENGTH_SHORT).show();
+			}
+		} catch (Exception ex) {
+			android.util.Log.d("POS", "e:" + ex);
+			StackTraceElement[] ste = ex.getStackTrace();
+			for (StackTraceElement s : ste) {
+				android.util.Log.d("POS", "e:" + s);
+			}
 		}
 	}
 
 	@Override
 	public void onCanvasLoaded(CanvasModel model, int status) {
+		android.util.Log.d("POS", "canvas loaded:" + status);
 		if (status == ServerConnector.SUCCESS) {
 			Intent intent = new Intent(this, WorkspaceActivity.class);
 			startActivity(intent);

@@ -64,10 +64,8 @@ public class ActionServlet extends HttpServlet {
                 //*************************** REPLY *************************
                 processReply(conn, request, canvasId, userActions, objectPool, reply);
             } catch (JsonException | NullPointerException | ClassCastException ex) {
-                ex.printStackTrace();
                 reply.add(ActionJCode.ERROR, ActionJCode.BAD_REQUEST);
             } catch (SQLException ex) {
-                ex.printStackTrace();
                 reply.add(ActionJCode.ERROR, ActionJCode.SERVER_ERROR);
             }
             out.println(reply.build());
@@ -398,7 +396,6 @@ public class ActionServlet extends HttpServlet {
                         deleteObject.setBoolean(DB.Objects.Q.Update.Status.STATUS_PARAM, false);
                         deleteObject.setInt(DB.Objects.Q.Update.Status.OBJECT_ID, actionObject.objectID);
                         deleteObject.addBatch();
-                        System.out.println("hore");
                     }
                 }
                 insertAction.addBatch();

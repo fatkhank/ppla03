@@ -1,188 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:padding="5dp"
     android:textAlignment="center" >
 
-    <LinearLayout
-        android:id="@+id/d_title"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/d_parti_tab"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@color/workspace_normal"
-        android:orientation="horizontal" >
+        android:layout_toLeftOf="@+id/d_title" >
 
-        <LinearLayout
-            android:id="@+id/d_parti_tab"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/d_text_parti"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Participant"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ListView
+            android:id="@+id/d_parti_list"
+            android:layout_width="226dp"
+            android:layout_height="174dp"
+            android:layout_above="@+id/d_insert_email"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/d_text_parti" >
+        </ListView>
 
-            <TextView
-                android:id="@+id/d_text_parti"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_weight="2"
-                android:text="Participant"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <ListView
-                android:id="@+id/d_parti_list"
-                android:layout_width="226dp"
-                android:layout_height="174dp"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/d_text_parti"
-                android:background="@color/workspace_normal" >
-
-            </ListView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="2" >
-
-                <EditText
-                    android:id="@+id/d_insert_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1.00"
-                    android:inputType="textEmailAddress"
-                    android:text="Insert Email Here" />
-
-                <ImageButton
-                    android:id="@+id/d_add_user"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_add_user" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
+        <EditText
+            android:id="@+id/d_insert_email"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical" >
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/d_add_user"
+            android:layout_toLeftOf="@+id/d_add_user"
+            android:inputType="textEmailAddress"
+            android:text="Insert Email Here" />
 
-            <LinearLayout
-                android:layout_width="307dp"
-                android:layout_height="wrap_content" >
+        <ImageButton
+            android:id="@+id/d_add_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/round_button_small"
+            android:src="@drawable/ic_add_user" />
 
-                <ImageButton
-                    android:id="@+id/d_button_hide"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.03"
-                    android:src="@drawable/ic_action_hide" />
+        <ProgressBar
+            android:id="@+id/d_participant_loader"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/d_parti_list"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
 
-                <ImageButton
-                    android:id="@+id/d_button_share"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_action_share" />
+        <Button
+            android:id="@+id/d_parti_reload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/round_button_small"
+            android:text="Reload" />
 
-                <ImageButton
-                    android:id="@+id/d_button_close"
-                    android:layout_width="56dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_launcher" />
-            </LinearLayout>
+        <TextView
+            android:id="@+id/d_parti_failed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/d_parti_reload"
+            android:layout_centerHorizontal="true"
+            android:text="Failed to fetch list"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/d_title"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" >
+
+        <RelativeLayout
+            android:id="@+id/d_setting_pane"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/d_second_button"
+            android:orientation="vertical"
+            android:visibility="gone" >
 
             <TextView
-                android:id="@+id/d_text_setting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="Setting"
-                android:textAlignment="center"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/d_resize_canvas"
+                android:id="@+id/d_setting_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resize Canvas" />
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:text="Resize canvas"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <EditText
-                    android:id="@+id/d_width_input"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.85"
-                    android:ems="10"
-                    android:inputType="numberDecimal" />
-
-                <EditText
-                    android:id="@+id/d_height_input"
-                    android:layout_width="66dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.47"
-                    android:ems="10"
-                    android:inputType="numberDecimal" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/d_setting_x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="x"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <Button
                 android:id="@+id/d_button_resize"
                 android:layout_width="wrap_content"
-                android:layout_height="31dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/round_button_small"
                 android:gravity="center_vertical|center_horizontal|start"
                 android:text="Resize" />
 
-            <TextView
-                android:id="@+id/d_text_download"
-                android:layout_width="136dp"
+            <EditText
+                android:id="@+id/d_width_input"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Download" />
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/d_setting_x"
+                android:layout_weight="0.85"
+                android:ems="10"
+                android:imeOptions="actionDone|flagNoFullscreen"
+                android:inputType="number" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+            <EditText
+                android:id="@+id/d_height_input"
+                android:layout_width="66dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/d_width_input"
+                android:layout_alignBottom="@+id/d_width_input"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@+id/d_setting_x"
+                android:layout_weight="0.47"
+                android:ems="10"
+                android:imeOptions="actionDone|flagNoFullscreen"
+                android:inputType="number" />
 
-                <TextView
-                    android:id="@+id/d_text_format"
-                    android:layout_width="98dp"
-                    android:layout_height="wrap_content"
-                    android:text="Format"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+        </RelativeLayout>
 
-                <ExpandableListView
-                    android:id="@+id/d_option_format"
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp" >
-                </ExpandableListView>
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/d_main_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true" >
+
+            <ImageButton
+                android:id="@+id/d_button_hide"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.03"
+                android:background="@drawable/round_button_small"
+                android:src="@drawable/unhide" />
+
+            <ImageButton
+                android:id="@+id/d_button_report"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/round_button_small"
+                android:src="@drawable/bug" />
+
+            <ImageButton
+                android:id="@+id/imageButton1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.03"
+                android:src="@drawable/ic_action_share" />
+
+            <ImageButton
+                android:id="@+id/d_button_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/round_button_small"
+                android:src="@drawable/ic_action_cancel" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/d_second_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/d_main_button"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
 
             <CheckBox
-                android:id="@+id/d_checkbox_cropped"
-                android:layout_width="116dp"
+                android:id="@+id/d_download_header"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.55"
-                android:text="cropped" />
+                android:layout_weight="1"
+                android:background="@drawable/round_checkbox_small"
+                android:button="@drawable/ic_action_download"
+                android:checked="true"
+                android:text="Download" />
+
+            <CheckBox
+                android:id="@+id/d_setting_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/round_checkbox_small"
+                android:button="@drawable/ic_action_settings"
+                android:checked="true"
+                android:text="Setting" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/d_download_pane"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/d_second_button"
+            android:visibility="visible" >
+
+            <TextView
+                android:id="@+id/d_text_format"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/d_download_format"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center_vertical"
+                android:text="Format"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Spinner
+                android:id="@+id/d_download_format"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@+id/d_text_format" />
 
             <Button
                 android:id="@+id/d_button_download"
                 android:layout_width="wrap_content"
-                android:layout_height="31dp"
-                android:layout_gravity="start"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/round_button_small"
                 android:gravity="center_vertical|center_horizontal|start"
                 android:text="Download"
                 android:textAlignment="gravity" />
 
-        </LinearLayout>
+            <CheckBox
+                android:id="@+id/d_checkbox_cropped"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/d_download_format"
+                android:layout_centerHorizontal="true"
+                android:gravity="center_vertical|start"
+                android:text="cropped" />
 
-    </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

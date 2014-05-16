@@ -8,7 +8,6 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -69,8 +68,8 @@ public class UserServlet extends HttpServlet {
             } catch (NullPointerException | ClassCastException | SQLException ex) {
                 reply.add(UserJCode.ERROR, UserJCode.Error.SERVER_ERROR);
             }
+            out.println(reply.build());
         }
-
     }
 
     /**
@@ -87,12 +86,14 @@ public class UserServlet extends HttpServlet {
             checkAccount.setString(DB.User.Q.Select.ByEmail.EMAIL, email);
             ResultSet checkResult = checkAccount.executeQuery();
             if (checkResult.next()) {
+                //ambil id user
+                reply.add(Reply.USER_ID, checkResult.getInt(DB.User.Q.Select.ByEmail.Column.ID));
                 //email sudah terdaftar, ubah status jadi login
                 int userId = checkResult.getInt(DB.User.Q.Select.ByEmail.Column.ID);
                 try (PreparedStatement changeStatus = conn.prepareStatement(DB.User.Q.Update.STATUS_BY_ID)) {
                     changeStatus.setInt(DB.User.Q.Update.StatusById.USER_ID, userId);
                     changeStatus.setString(DB.User.Q.Update.StatusById.STATUS, DB.User.Status.LOGIN);
-                    changeStatus.executeQuery();
+                    changeStatus.execute();
                     reply.add(Reply.STATUS, Reply.ACCOUNT_EXIST);
                 }
             } else {
@@ -102,14 +103,13 @@ public class UserServlet extends HttpServlet {
                     create.setString(DB.User.Q.Insert.All.ACCOUNT_ID, email);
                     create.setString(DB.User.Q.Insert.All.NAME, username);
                     create.setString(DB.User.Q.Insert.All.STATUS, DB.User.Status.LOGIN);
-                    if (create.executeUpdate() > 0){
-                        //akun berhasil dibuat
-                        reply.add(Reply.STATUS, Reply.ACCOUNT_CREATED);
-                        //ambil key
-                        ResultSet key = create.getGeneratedKeys();
-                        reply.add(Reply.USER_ID, key.getInt(1));
-                    }else
-                        reply.add(UserJCode.ERROR, UserJCode.Error.SERVER_ERROR);
+                    create.execute();
+                    //akun berhasil dibuat
+                    reply.add(Reply.STATUS, Reply.ACCOUNT_CREATED);
+                    //ambil key
+                    ResultSet key = create.getGeneratedKeys();
+                    key.next();
+                    reply.add(Reply.USER_ID, key.getInt(1));
                 }
             }
         } catch (SQLException ex) {
@@ -129,8 +129,8 @@ public class UserServlet extends HttpServlet {
         try (PreparedStatement logout = conn.prepareStatement(DB.User.Q.Update.STATUS_BY_ID)) {
             logout.setInt(DB.User.Q.Update.StatusById.USER_ID, userID);
             logout.setString(DB.User.Q.Update.StatusById.STATUS, DB.User.Status.LOGOUT);
-            if (logout.executeUpdate() > 0)
-                reply.add(Reply.STATUS, Reply.LOGOUT_SUCESS);
+            logout.execute();
+            reply.add(Reply.STATUS, Reply.LOGOUT_SUCESS);
         } catch (SQLException ex) {
             reply.add(UserJCode.ERROR, UserJCode.Error.SERVER_ERROR);
         }
@@ -165,8 +165,8 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        processRequest(new com.sun.xml.bind.StringInputStream(request.
-//                getParameter("json")), response);
+        processRequest(new com.sun.xml.bind.StringInputStream(request.
+                getParameter("json")), response);
     }
 
     /**

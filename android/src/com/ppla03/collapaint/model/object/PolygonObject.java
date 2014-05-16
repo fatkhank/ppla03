@@ -11,6 +11,7 @@ import android.graphics.Paint.Join;
  * Objek dialam kanvas yang berbentuk poligon, memiliki sisi minimal tiga
  * (segitiga). Jumlah sisinya tetap, namun titik-titik sudutnya bisa digeser
  * sehingga memiliki yang tidak beraturan. Objek bisa dirotasi dan translasi.
+ * 
  * @author hamba v7
  * 
  */
@@ -86,17 +87,25 @@ public class PolygonObject extends BasicObject {
 
 	/**
 	 * Membuat objek poligon dengan parameter tertentu.
-	 * @param corner jumlah sudut/sisi poligon
-	 * @param radius jari-jari poligon. Jika kurang dari {@code MINIMAL_RADIUS},
+	 * 
+	 * @param corner
+	 *            jumlah sudut/sisi poligon
+	 * @param radius
+	 *            jari-jari poligon. Jika kurang dari {@code MINIMAL_RADIUS},
 	 *            jari-jari poligon = {@code MINIMAL_RADIUS}.
-	 * @param worldX koordinat x titik tengah poligon (koordinat kanvas).
-	 * @param worldY koordinat y titik tengah poligon (koordinat kanvas).
-	 * @param fillColor warna isian poligon. Jika warna =
-	 *            {@code Color.TRANSPARENT}, poligon dianggap tidak memiliki
-	 *            isian. Lihat {@link Color}.
-	 * @param strokeColor warna pinggiran poligon. Lihat {@link Color}.
-	 * @param strokeWidth tebal garis pinggiran poligon.
-	 * @param strokeStyle jenis dekorasi pinggiran poligon.
+	 * @param worldX
+	 *            koordinat x titik tengah poligon (koordinat kanvas).
+	 * @param worldY
+	 *            koordinat y titik tengah poligon (koordinat kanvas).
+	 * @param fillColor
+	 *            warna isian poligon. Jika warna = {@code Color.TRANSPARENT},
+	 *            poligon dianggap tidak memiliki isian. Lihat {@link Color}.
+	 * @param strokeColor
+	 *            warna pinggiran poligon. Lihat {@link Color}.
+	 * @param strokeWidth
+	 *            tebal garis pinggiran poligon.
+	 * @param strokeStyle
+	 *            jenis dekorasi pinggiran poligon.
 	 */
 	public PolygonObject(int corner, int radius, int worldX, int worldY,
 			int fillColor, int strokeColor, int strokeWidth, int strokeStyle) {
@@ -112,6 +121,7 @@ public class PolygonObject extends BasicObject {
 
 	/**
 	 * Mengubah jumlah titik pojok poligon
+	 * 
 	 * @param corner
 	 */
 	public void changeShape(int corner, int radius) {
@@ -145,6 +155,7 @@ public class PolygonObject extends BasicObject {
 
 	/**
 	 * Mendapatkan jumalh tiitk pjok poligon.
+	 * 
 	 * @return
 	 */
 	public int corner() {
@@ -154,7 +165,9 @@ public class PolygonObject extends BasicObject {
 	/**
 	 * Mengekstrak titik dari array, dipindah di path sekaligus menghitung bound
 	 * akhir
-	 * @param reoffset digeser atau tidak
+	 * 
+	 * @param reoffset
+	 *            digeser atau tidak
 	 */
 	private void arrayToPath(boolean reoffset) {
 		path.rewind();
@@ -258,36 +271,42 @@ public class PolygonObject extends BasicObject {
 
 	@Override
 	public ShapeHandler getHandler(int filter) {
-		handler.object = this;
-		handler.size = corner + 2;
+		try {
+			handler.object = this;
+			handler.size = corner + 2;
 
-		System.arraycopy(joints, 0, handler.points, 0, corner);
+			System.arraycopy(joints, 0, handler.points, 0, corner);
 
-		handler.points[corner] = rotator;
-		handler.points[corner + 1] = mover;
-		handler.setEnableAllPoints(false);
+			handler.points[corner] = rotator;
+			handler.points[corner + 1] = mover;
+			handler.setEnableAllPoints(false);
 
-		// jika menampilkan pengatur shape
-		if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {
-			for (int i = 0; i < corner; i++) {
-				ControlPoint cp = handler.points[i];
-				cp.x = xLocs[i];
-				cp.y = yLocs[i];
-				cp.enable = true;
+			// jika menampilkan pengatur shape
+			if ((filter & ShapeHandler.SHAPE) == ShapeHandler.SHAPE) {
+				for (int i = 0; i < corner; i++) {
+					ControlPoint cp = handler.points[i];
+					cp.x = xLocs[i];
+					cp.y = yLocs[i];
+					cp.enable = true;
+				}
 			}
-		}
 
-		// jika menampilkan pengatur rotasi
-		if ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE) {
-			rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
-			rotator.enable = true;
-		}
+			// jika menampilkan pengatur rotasi
+			if ((filter & ShapeHandler.ROTATE) == ShapeHandler.ROTATE) {
+				rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
+				rotator.enable = true;
+			}
 
-		// jika menampilkan pengatur translasi
-		if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
-			mover.setPosition(0, 0);
-			mover.setObject(this);
-			mover.enable = true;
+			// jika menampilkan pengatur translasi
+			if ((filter & ShapeHandler.TRANSLATE) == ShapeHandler.TRANSLATE) {
+				mover.setPosition(0, 0);
+				mover.setObject(this);
+				mover.enable = true;
+			}
+		} catch (Exception ex) {
+			//TODO handler polygon
+			android.util.Log.d("POS", "ex:" + ex);
+			android.util.Log.d("POS", "st:" + ex.getStackTrace()[0]);
 		}
 		return handler;
 	}

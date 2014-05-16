@@ -94,7 +94,7 @@ public class ShapeHandler {
 	 * @param enable
 	 */
 	void setEnableAllPoints(boolean enable) {
-		for (int i = 0; i < points.length; i++)
+		for (int i = 0; i < size; i++)
 			points[i].enable = enable;
 	}
 	

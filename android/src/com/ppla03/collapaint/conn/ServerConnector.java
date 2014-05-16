@@ -60,14 +60,18 @@ public abstract class ServerConnector {
 
 	/**
 	 * Listener saat jawaban dari server diterima.
+	 * 
 	 * @author hamba v7
 	 * 
 	 */
 	protected interface ReplyListener {
 		/**
 		 * Jawaban telah diterima
-		 * @param status status jawaban
-		 * @param reply jawaban dari server, atau null jika {@code status} !=
+		 * 
+		 * @param status
+		 *            status jawaban
+		 * @param reply
+		 *            jawaban dari server, atau null jika {@code status} !=
 		 *            {@link ServerConnector#SUCCESS}.
 		 * @see {@link ServerConnector#SUCCESS},
 		 *      {@link ServerConnector#INTERNAL_PROBLEM},
@@ -99,7 +103,8 @@ public abstract class ServerConnector {
 				HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
 
 				// TODO debug server connection
-				android.util.Log.d("POS", "send:" + msgs[0].toString());
+				android.util.Log.d("POS", "send:" + msgs[0].toString() + ":"
+						+ url);
 
 				post.setParams(params);
 				post.setEntity(new StringEntity(msgs[0].toString()));

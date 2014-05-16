@@ -82,7 +82,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		String message = intent
 				.getStringExtra(AuthenticationActivity.EXTRA_MESSAGE);
 
-		mSignOutButton = (Button) findViewById(R.id.button1);
+		mSignOutButton = (Button) findViewById(R.id.d_parti_reload);
 		mSignOutButton.setOnClickListener(this);
 		mCreateButton = (Button) findViewById(R.id.b_create);
 		mCreateButton.setOnClickListener(this);
@@ -163,7 +163,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.button1:
+		case R.id.d_parti_reload:
 			//TODO warning signout
 			AuthenticationActivity.TERM = true;
 			finish();

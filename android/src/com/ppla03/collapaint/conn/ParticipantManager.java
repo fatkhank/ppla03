@@ -21,7 +21,7 @@ public class ParticipantManager extends ServerConnector {
 	private static ParticipantManager instance;
 	private static ManageParticipantListener listener;
 	private InvitationResponseListener responseListener;
-	public static String PARTICIPANT_SERVLET_URL = HOST + "participant";
+	private static String PARTICIPANT_SERVLET_URL = HOST + "participant";
 
 	@Override
 	protected void onHostAddressChange(String host) {
@@ -56,6 +56,8 @@ public class ParticipantManager extends ServerConnector {
 	 */
 	public void getParticipants(CanvasModel canvas) {
 		JSONObject request = new JSONObject();
+		// TODO debug participant manager
+		android.util.Log.d("POS", "part manager get par");
 		try {
 			// masukan aksi, id user dan kanvas
 			askPartModel = canvas;
@@ -64,7 +66,9 @@ public class ParticipantManager extends ServerConnector {
 			int uid = CollaUserManager.getCurrentUser().collaID;
 			request.put(Request.USER_ID, uid);
 			new Client(PARTICIPANT_SERVLET_URL, replisMember).execute(request);
+			android.util.Log.d("POS", "executed");
 		} catch (JSONException e) {
+			android.util.Log.d("POS", "exception:" + e);
 			replisMember.process(INTERNAL_PROBLEM, null);
 		}
 	}
@@ -253,7 +257,7 @@ public class ParticipantManager extends ServerConnector {
 			InviteResponse response) {
 		JSONObject request = new JSONObject();
 		try {
-			Participation invitation  = new Participation(user,model); 
+			Participation invitation = new Participation(user, model);
 			invitationList.add(invitation);
 			request.put(Request.ACTION, Request.Action.RESPONSE);
 			request.put(Request.USER_ID, invitation.user.collaID);

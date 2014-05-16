@@ -338,7 +338,7 @@ public class ParticipantServlet extends HttpServlet {
             invitation.setInt(Q.Insert.All.CANVAS_ID, canvasId);
             Date today = new Date(System.currentTimeMillis());
             invitation.setObject(Q.Insert.All.LAST_ACCESS, today);
-            invitation.setString(Q.Insert.All.STATUS, DB.Participation.Status.INVITATION);
+            invitation.setString(Q.Insert.All.STATUS, status);
             invitation.setString(Q.Insert.All.ACTION, DB.Participation.Action.CLOSE);
 
             return invitation.executeUpdate() > 0;
