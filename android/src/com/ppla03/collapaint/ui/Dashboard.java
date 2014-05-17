@@ -144,7 +144,9 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 				.findViewById(R.id.d_checkbox_cropped);
 		downloadButton = (Button) parent.findViewById(R.id.d_button_download);
 		downloadButton.setOnClickListener(this);
-
+		
+		//--- Setting ------
+		settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
 		settHeader.setOnClickListener(this);
 
 		// sembuyikan pengaturan jika bukan owner
