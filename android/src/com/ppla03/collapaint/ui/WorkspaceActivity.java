@@ -694,5 +694,34 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		dashboard.onResume();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		dashboard.onPause();
+	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		dashboard.onDestroy();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		dashboard.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		dashboard.onSaveInstanceState(outState);
+	}
 }
