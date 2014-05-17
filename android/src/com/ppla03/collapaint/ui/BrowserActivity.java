@@ -329,7 +329,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 	}
 
 	/**
-	 * Menghapus partisiasi user pada suatu kanvas
+	 * Menghapus partisiasi user pada suatu kanvas. (Me-kick dirinya sendiri).
 	 * @param model kanvas yang dimaksud
 	 */
 	void removeParticipation(CanvasModel model) {
