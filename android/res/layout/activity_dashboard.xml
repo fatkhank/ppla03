@@ -199,21 +199,22 @@
                 android:button="@drawable/ic_action_settings"
                 android:checked="true" />
 
-            <ImageButton
-                android:id="@+id/b_invite_decline"
+            <CheckBox
+                android:id="@+id/d_share_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_round"
-                android:src="@drawable/ic_action_share" />
+                android:button="@drawable/ic_action_share"
+                android:checked="false"
+                android:text="@string/emptyString2" />
 
-            <ImageButton
-                android:id="@+id/d_button_report"
+            <CheckBox
+                android:id="@+id/d_report_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_round"
-                android:src="@drawable/ic_action_copy" />
+                android:button="@drawable/bug"
+                android:text="@string/emptyString2" />
 
         </LinearLayout>
 

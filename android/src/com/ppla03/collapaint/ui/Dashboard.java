@@ -6,6 +6,18 @@ import java.util.Arrays;
 import java.util.List;
 
 
+//--share---
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.facebook.widget.LoginButton.UserInfoChangedCallback;
+
+
+
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
@@ -44,11 +56,8 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	WorkspaceActivity workspace;
 	ParticipantManager manager;
 
-	ImageButton close, report, share;
+	ImageButton close;
 	ImageButton hide;
-
-	private static final List<String> PERMISSIONS = Arrays
-			.asList("publish_actions");;
 
 	// --- participant list ---
 	ListView partiList;
@@ -66,6 +75,18 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	CheckBox downloadCropped;
 	Button downloadButton;
 	ArrayAdapter<String> formatAdapter;
+	
+	// --- share ---
+	CheckBox shareHeader;
+	View shareContainter;
+	LoginButton loginFb;
+	ImageButton shareFb;
+	private String TAG="Share";
+	private UiLifecycleHelper uiHelper;
+	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
+	
+	// --- report ---
+	CheckBox reportHeader;
 
 	// --- setting ---
 	View settCont;
@@ -73,16 +94,12 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	public Dashboard(WorkspaceActivity activity, View parent) {
+	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity, View parent) {
 		this.workspace = activity;
 		this.parent = parent;
 
 		close = (ImageButton) parent.findViewById(R.id.d_button_close);
 		close.setOnClickListener(this);
-		report = (ImageButton) parent.findViewById(R.id.d_button_report);
-		report.setOnClickListener(this);
-		share = (ImageButton) parent.findViewById(R.id.imageButton1);
-		share.setOnClickListener(this);
 		hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
 		hide.setOnClickListener(this);
 
@@ -102,6 +119,15 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		email = (EditText) parent.findViewById(R.id.d_insert_email);
 		invite.setOnClickListener(this);
 
+		// ------ share -------
+		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
+		shareHeader.setOnClickListener(this);
+		
+		
+		// ------ report ------
+		reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
+		reportHeader.setOnClickListener(this);
+		
 		// ------ download ------
 		downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
 		downHeader.setOnClickListener(this);
@@ -119,8 +145,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		downloadButton = (Button) parent.findViewById(R.id.d_button_download);
 		downloadButton.setOnClickListener(this);
 
-		// ------ setting ------
-		settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
 		settHeader.setOnClickListener(this);
 
 		// sembuyikan pengaturan jika bukan owner
@@ -143,10 +167,9 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// main button
 		if (v == close) {
 			workspace.closeCanvas();
-		} else if (v == report) {
+		} else if (v == reportHeader) {
 			reportWork();
-		} else if (v == share) {
-			
+		} else if (v == shareHeader) {
 			
 			
 		} else if (v == hide) {
@@ -350,4 +373,83 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// show it
 		alertDialog.show();
 	}
+	
+	//======================SHARE=========================================== 
+    
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() { 
+        @Override
+        public void call(Session session, SessionState state, 
+                Exception exception) { 
+            if (state.isOpened()) { 
+                Log.d("FacebookSampleActivity", "Facebook session opened"); 
+            } else if (state.isClosed()) { 
+                Log.d("FacebookSampleActivity", "Facebook session closed"); 
+            } 
+        } 
+    }; 
+      
+    public void postImage() { 
+        if (checkPermissions()) { 
+            CanvasExporter export=new CanvasExporter(); 
+            export.export(workspace.canvas.getModel(), CompressFormat.PNG, false, false); 
+            File image= export.getResultFile(); 
+              
+            Bitmap img = BitmapFactory.decodeFile(image.getPath()); 
+              
+            Request uploadRequest = Request.newUploadPhotoRequest( 
+                    Session.getActiveSession(), img, new Request.Callback() { 
+                        @Override
+                        public void onCompleted(Response response) { 
+                            Toast.makeText(workspace, 
+                                    "Photo uploaded successfully", 
+                                    Toast.LENGTH_LONG).show(); 
+                        } 
+                    }); 
+            uploadRequest.executeAsync(); 
+            if (Session.getActiveSession() != null) { 
+                Session.getActiveSession().closeAndClearTokenInformation(); 
+            } 
+  
+            Session.setActiveSession(null); 
+        } else { 
+            requestPermissions();} 
+          
+   } 
+      
+    public boolean checkPermissions() { 
+        Session s = Session.getActiveSession(); 
+        if (s != null) { 
+            return s.getPermissions().contains("publish_actions"); 
+        } else
+            return false; 
+    } 
+   
+    public void requestPermissions() { 
+        Session s = Session.getActiveSession(); 
+        if (s != null) 
+            s.requestNewPublishPermissions(new Session.NewPermissionsRequest( 
+                    workspace, PERMISSIONS)); 
+    } 
+      
+    void onResume() { 
+        uiHelper.onResume(); 
+    } 
+   
+    void onPause() { 
+        uiHelper.onPause(); 
+    } 
+   
+    void onDestroy() {  
+        uiHelper.onDestroy(); 
+    } 
+   
+	void onActivityResult(int requestCode, int resultCode, Intent data) { 
+        uiHelper.onActivityResult(requestCode, resultCode, data); 
+    } 
+   
+	void onSaveInstanceState(Bundle savedState) { 
+        uiHelper.onSaveInstanceState(savedState); 
+    } 
+	
+	
 }
