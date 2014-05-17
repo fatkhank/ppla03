@@ -6,18 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 
-//--share---
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphUser;
-import com.facebook.widget.LoginButton;
-import com.facebook.widget.LoginButton.UserInfoChangedCallback;
-
-
-
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
@@ -78,13 +66,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	CheckBox downloadCropped;
 	Button downloadButton;
 	ArrayAdapter<String> formatAdapter;
-	
-	// --- share ---
-	CheckBox shareHeader;
-	View shareContainter;
-	LoginButton loginFb;
-	
-	
 
 	// --- setting ---
 	View settCont;
@@ -92,7 +73,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity, View parent) {
+	public Dashboard(WorkspaceActivity activity, View parent) {
 		this.workspace = activity;
 		this.parent = parent;
 
