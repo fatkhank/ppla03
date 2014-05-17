@@ -234,7 +234,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// --- dashboard ---
 		dashboardView = findViewById(R.id.dashboard);
 		dashboardView.setVisibility(View.GONE);
-		dashboard = new Dashboard(this, dashboardView);
+		dashboard = new Dashboard(savedInstanceState, this, dashboardView);
 
 		// --- load ---
 		canvasTitle.setText(canvas.getModel().name);
