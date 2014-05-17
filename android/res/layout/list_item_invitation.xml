@@ -1,32 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="48dp" >
 
     <TextView
         android:id="@+id/b_invite_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Medium Text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/d_invite_owner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/b_invite_owner"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="Medium Text"
+        android:gravity="center_vertical"
+        android:text="Canvas name"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ImageButton
-        android:id="@+id/imageButton1"
+        android:id="@+id/b_invite_decline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/button_round"
+        android:src="@drawable/ic_action_cancel" />
+
+    <TextView
+        android:id="@+id/b_invite_owner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/b_invite_decline"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/b_invite_accept"
+        android:gravity="center_vertical"
+        android:text="owner name"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ImageButton
+        android:id="@+id/b_invite_accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="15dp"
-        android:layout_toRightOf="@+id/d_invite_owner"
+        android:layout_marginLeft="8dp"
+        android:layout_toLeftOf="@+id/b_invite_decline"
         android:background="@drawable/button_round"
-        android:src="@drawable/ic_action_cancel" />
+        android:src="@drawable/ic_action_accept" />
 
 </RelativeLayout>
