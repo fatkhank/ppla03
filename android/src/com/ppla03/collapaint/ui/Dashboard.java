@@ -5,14 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphUser;
-import com.facebook.widget.LoginButton;
-import com.facebook.widget.LoginButton.UserInfoChangedCallback;
 
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
@@ -52,10 +44,11 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	WorkspaceActivity workspace;
 	ParticipantManager manager;
 
-	ImageButton close, report,share;
+	ImageButton close, report, share;
 	ImageButton hide;
-	
-	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
+
+	private static final List<String> PERMISSIONS = Arrays
+			.asList("publish_actions");;
 
 	// --- participant list ---
 	ListView partiList;
@@ -80,11 +73,10 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	
 	public Dashboard(WorkspaceActivity activity, View parent) {
 		this.workspace = activity;
 		this.parent = parent;
-		
+
 		close = (ImageButton) parent.findViewById(R.id.d_button_close);
 		close.setOnClickListener(this);
 		report = (ImageButton) parent.findViewById(R.id.d_button_report);
@@ -106,11 +98,9 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		partiReload.setOnClickListener(this);
 		partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
 		partiFailed.setVisibility(View.GONE);
-		invite= (ImageButton)parent.findViewById(R.id.d_add_user);
-		email= (EditText)parent.findViewById(R.id.d_insert_email);
+		invite = (ImageButton) parent.findViewById(R.id.d_add_user);
+		email = (EditText) parent.findViewById(R.id.d_insert_email);
 		invite.setOnClickListener(this);
-		
-		
 
 		// ------ download ------
 		downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
@@ -144,7 +134,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		settHeight = (EditText) parent.findViewById(R.id.d_height_input);
 		settOK = (Button) parent.findViewById(R.id.d_button_resize);
 		settOK.setOnClickListener(this);
-		
+
 		manager = ParticipantManager.getInstance().setListener(this);
 	}
 
@@ -155,22 +145,24 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 			workspace.closeCanvas();
 		} else if (v == report) {
 			reportWork();
-		} else if (v== share){
-			shareWork();
+		} else if (v == share) {
+			
+			
+			
 		} else if (v == hide) {
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
 
 			// participant
 		} else if (v == partiReload) {
 			reloadList();
-			
-		} else if (v == invite){
-			if(email.getText()==null){}
-			else{
-				manager.inviteUser(email.getText().toString(), workspace.canvas.getModel());
+
+		} else if (v == invite) {
+			if (email.getText() == null) {} else {
+				manager.inviteUser(email.getText().toString(),
+						workspace.canvas.getModel());
 			}
 		}
-			//download
+		// download
 		else if (v == downloadButton) {
 			downloadCanvas();
 		} else if (v == downHeader) {
@@ -185,23 +177,21 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 			downContainer.setVisibility(View.GONE);
 			settHeader.setChecked(true);
 			settCont.setVisibility(View.VISIBLE);
-			settWidth.setText(String.valueOf(workspace.canvas.getModel().getWidth()));
-			settHeight.setText(String.valueOf(workspace.canvas.getModel().getHeight()));
+			settWidth.setText(String.valueOf(workspace.canvas.getModel()
+					.getWidth()));
+			settHeight.setText(String.valueOf(workspace.canvas.getModel()
+					.getHeight()));
 		} else if (v == settOK) {
 			// ubah ukuran kanvas
 			int width = Integer.parseInt(settWidth.getText().toString());
 			int height = Integer.parseInt(settHeight.getText().toString());
 			workspace.canvas.resizeCanvas(width, height, 0, 0);
-		} 
+		}
 	}
 
 	private void reportWork() {
 		// TODO
 		createDialog("report");
-	}
-	
-	public void shareWork(){
-		workspace.share.performClick();
 	}
 
 	private void downloadCanvas() {
@@ -263,82 +253,99 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 
 	@Override
 	public void onInviteUser(String accountId, CanvasModel model, int status) {
-		//TODO invite message
-		if(status==ServerConnector.SUCCESS){
-			Toast.makeText(workspace, "User is invited", Toast.LENGTH_SHORT).show();
+		// TODO invite message
+		if (status == ServerConnector.SUCCESS) {
+			Toast.makeText(workspace, "User is invited", Toast.LENGTH_SHORT)
+					.show();
 			reloadList();
-		}else if(status == ManageParticipantListener.ALREADY_INVITED){
-			Toast.makeText(workspace, "User has been invited", Toast.LENGTH_SHORT).show();
-		}else if (status == ManageParticipantListener.ALREADY_JOINED){
-			Toast.makeText(workspace, "The user has joined this canvas", Toast.LENGTH_SHORT).show();
-		}else Toast.makeText(workspace,"Error,please check your connection problem", Toast.LENGTH_SHORT).show();
+		} else if (status == ManageParticipantListener.ALREADY_INVITED) {
+			Toast.makeText(workspace, "User has been invited",
+					Toast.LENGTH_SHORT).show();
+		} else if (status == ManageParticipantListener.ALREADY_JOINED) {
+			Toast.makeText(workspace, "The user has joined this canvas",
+					Toast.LENGTH_SHORT).show();
+		} else
+			Toast.makeText(workspace,
+					"Error,please check your connection problem",
+					Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onKickUser(UserModel user, CanvasModel model, int status) {
-		//TODO kick
-		if(status==ServerConnector.SUCCESS){
-			Toast.makeText(workspace, "User get kick :'(", Toast.LENGTH_SHORT).show();
+		// TODO kick
+		if (status == ServerConnector.SUCCESS) {
+			Toast.makeText(workspace, "User get kick :'(", Toast.LENGTH_SHORT)
+					.show();
 			reloadList();
-		}else Toast.makeText(workspace,"Error" , Toast.LENGTH_SHORT).show();
+		} else
+			Toast.makeText(workspace, "Error", Toast.LENGTH_SHORT).show();
 	}
-	
-	public void kick(Participation part){
+
+	public void kick(Participation part) {
 		manager.kickUser(part.user, part.canvas);
 	}
-	
-	
-	private void createDialog(String what){
+
+	private void createDialog(String what) {
 		LayoutInflater li = workspace.getLayoutInflater();
 		View promptsView;
-		
-	    promptsView = li.inflate(R.layout.dialog_report, null);
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(workspace);
+		promptsView = li.inflate(R.layout.dialog_report, null);
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+				workspace);
 
 		alertDialogBuilder.setView(promptsView);
-		
-		//Report Here
-		if (what.equals("report")){
-		final EditText userInput = (EditText) promptsView
-				.findViewById(R.id.editTextDialogUserInput);
 
-		// set dialog message
-		alertDialogBuilder
-			.setCancelable(false)
-			.setPositiveButton("OK",
-			  new DialogInterface.OnClickListener() {
-			    public void onClick(DialogInterface dialog,int id) {
-				// get user input and set it to result
-				// edit text
-			    	String to = "darwinmdn12@gmail.com";
-					  String subject = "report bug 3:)";
-					  String message = userInput.getText().toString();
-		 
-					  Intent email = new Intent(Intent.ACTION_SEND);
-					  email.putExtra(Intent.EXTRA_EMAIL, new String[]{ to});
-					  //email.putExtra(Intent.EXTRA_CC, new String[]{ to});
-					  //email.putExtra(Intent.EXTRA_BCC, new String[]{to});
-					  email.putExtra(Intent.EXTRA_SUBJECT, subject);
-					  email.putExtra(Intent.EXTRA_TEXT, message);
-		 
-					  //need this to prompts email client only
-					  email.setType("message/rfc822");
-		 
-					  workspace.startActivity(Intent.createChooser(email, "Choose an Email client :"));
-			    }
-			  })
-			.setNegativeButton("Cancel",
-			  new DialogInterface.OnClickListener() {
-			    public void onClick(DialogInterface dialog,int id) {
-				dialog.cancel();
-			    }
-			  });
+		// Report Here
+		if (what.equals("report")) {
+			final EditText userInput = (EditText) promptsView
+					.findViewById(R.id.editTextDialogUserInput);
+
+			// set dialog message
+			alertDialogBuilder
+					.setCancelable(false)
+					.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// get user input and set it to result
+									// edit text
+									String to = "darwinmdn12@gmail.com";
+									String subject = "report bug 3:)";
+									String message = userInput.getText()
+											.toString();
+
+									Intent email = new Intent(
+											Intent.ACTION_SEND);
+									email.putExtra(Intent.EXTRA_EMAIL,
+											new String[] { to });
+									// email.putExtra(Intent.EXTRA_CC, new
+									// String[]{ to});
+									// email.putExtra(Intent.EXTRA_BCC, new
+									// String[]{to});
+									email.putExtra(Intent.EXTRA_SUBJECT,
+											subject);
+									email.putExtra(Intent.EXTRA_TEXT, message);
+
+									// need this to prompts email client only
+									email.setType("message/rfc822");
+
+									workspace.startActivity(Intent
+											.createChooser(email,
+													"Choose an Email client :"));
+								}
+							})
+					.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
 		}
-		
+
 		// create alert dialog
 		AlertDialog alertDialog = alertDialogBuilder.create();
-		
 
 		// show it
 		alertDialog.show();

@@ -3,13 +3,13 @@
 
     <item
         android:bottom="0dp"
-        android:drawable="@drawable/w_prop_stroke_normal"
+        android:drawable="@drawable/w_bg_prop"
         android:left="0dp"
         android:right="0dp"
         android:top="0dp"/>
     <item
         android:bottom="3dp"
-        android:drawable="@drawable/w_prop_bg"
+        android:drawable="@drawable/bg_dialog"
         android:left="3dp"
         android:right="3dp"
         android:top="3dp"/>

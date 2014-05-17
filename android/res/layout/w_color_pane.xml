@@ -145,7 +145,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/cp_a_slider"
         android:layout_alignTop="@+id/cp_ok"
-        android:background="@drawable/round_button_small"
+        android:background="@drawable/button_round"
         android:src="@drawable/ic_action_cancel" />
 
     <ImageButton
@@ -155,7 +155,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/cp_a_input"
         android:layout_marginTop="17dp"
-        android:background="@drawable/round_button_small"
+        android:background="@drawable/button_round"
         android:src="@drawable/ic_action_accept" />
 
 </RelativeLayout>

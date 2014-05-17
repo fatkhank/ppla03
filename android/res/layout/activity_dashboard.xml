@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:background="@drawable/round_button_small"
+            android:background="@drawable/button_round"
             android:src="@drawable/ic_add_user" />
 
         <ProgressBar
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/round_button_small"
+            android:background="@drawable/button_round"
             android:text="Reload" />
 
         <TextView
@@ -117,7 +117,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/round_button_small"
+                android:background="@drawable/button_round"
                 android:gravity="center_vertical|center_horizontal|start"
                 android:text="Resize" />
 
@@ -159,30 +159,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.03"
-                android:background="@drawable/round_button_small"
+                android:background="@drawable/button_round"
                 android:src="@drawable/unhide" />
-
-            <ImageButton
-                android:id="@+id/d_button_report"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/round_button_small"
-                android:src="@drawable/bug" />
-
-            <ImageButton
-                android:id="@+id/imageButton1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.03"
-                android:src="@drawable/ic_action_share" />
 
             <ImageButton
                 android:id="@+id/d_button_close"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/round_button_small"
+                android:background="@drawable/button_round"
                 android:src="@drawable/ic_action_cancel" />
         </LinearLayout>
 
@@ -201,20 +186,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/round_checkbox_small"
+                android:background="@drawable/checkbox_topbar"
                 android:button="@drawable/ic_action_download"
-                android:checked="true"
-                android:text="Download" />
+                android:checked="true" />
 
             <CheckBox
                 android:id="@+id/d_setting_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/round_checkbox_small"
+                android:background="@drawable/checkbox_topbar"
                 android:button="@drawable/ic_action_settings"
-                android:checked="true"
-                android:text="Setting" />
+                android:checked="true" />
+
+            <ImageButton
+                android:id="@+id/imageButton1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_round"
+                android:src="@drawable/ic_action_share" />
+
+            <ImageButton
+                android:id="@+id/d_button_report"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_round"
+                android:src="@drawable/ic_action_copy" />
+
         </LinearLayout>
 
         <RelativeLayout
@@ -250,7 +250,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/round_button_small"
+                android:background="@drawable/button_round"
                 android:gravity="center_vertical|center_horizontal|start"
                 android:text="Download"
                 android:textAlignment="gravity" />

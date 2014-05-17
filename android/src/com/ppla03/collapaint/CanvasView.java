@@ -15,6 +15,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.ColorFilter;
 import android.graphics.Paint.Style;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -444,6 +445,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					R.dimen.w_topbar_height);
 			iconBin = context.getResources().getDrawable(
 					R.drawable.ic_action_discard);
+			iconBin.setColorFilter(Color.DKGRAY,
+					android.graphics.PorterDuff.Mode.CLEAR);
 			COLOR_THEME_NORMAL = context.getResources().getColor(
 					R.color.workspace_normal);
 			COLOR_THEME_HIDDEN = context.getResources().getColor(
@@ -467,9 +470,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Memuat data kanvas dari server. Jika proses sudah selesai, maka akan
 	 * memanggil {@link CanvasListener#onCanvasModelLoaded(CanvasModel, int)}
 	 * 
-	 * @param model
-	 *            model kanvas yang akan dibuka, minimal harus memiliki data id
-	 *            kanvas.
+	 * @param model model kanvas yang akan dibuka, minimal harus memiliki data
+	 *            id kanvas.
 	 */
 	public void open(CanvasModel model) {
 		this.model = model;
@@ -790,12 +792,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	Animator.AnimatorListener animProtoListener = new AnimatorListener() {
 
 		@Override
-		public void onAnimationStart(Animator animation) {
-		}
+		public void onAnimationStart(Animator animation) {}
 
 		@Override
-		public void onAnimationRepeat(Animator animation) {
-		}
+		public void onAnimationRepeat(Animator animation) {}
 
 		@Override
 		public void onAnimationEnd(Animator animation) {
@@ -833,8 +833,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		}
 
 		@Override
-		public void onAnimationCancel(Animator animation) {
-		}
+		public void onAnimationCancel(Animator animation) {}
 	};
 
 	private void placePaste() {
@@ -864,6 +863,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			// jika user memasuki area mainbar -> kemungkinan akan menggambar
 			if (x < PROTO_AREA_WIDTH && y > PROTO_AREA_TOP_MARGIN) {
 				approveAction();// setujui semua aksinya dulu
+				mode = Mode.SELECT;
 				anchorX = x;
 				anchorY = y;
 				// tentukan objek yang diklik oleh user
@@ -1258,8 +1258,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengambil variabel state kanvas saat ini.
 	 * 
-	 * @param param
-	 *            parameter yang akan diambil.
+	 * @param param parameter yang akan diambil.
 	 * @return
 	 */
 	public Object getState(Param param) {
@@ -1435,8 +1434,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Mengedit satu buah objek.
 	 * 
 	 * @param co
-	 * @param filter
-	 *            filter Handler
+	 * @param filter filter Handler
 	 */
 	private void editObject(CanvasObject co, int filter) {
 		// Cast berdasarkan tipe objek untuk memudahkan operasi
@@ -1583,10 +1581,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Mengganti warna pinggiran objek yang sedang aktif atau yang akan
 	 * digambar. Berlaku untuk {@link LineObject} dan {@link BasicObject}.
 	 * 
-	 * @param color
-	 *            . Lihat {@link Color}.
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param color . Lihat {@link Color}.
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setStrokeColor(int color, boolean save) {
@@ -1620,8 +1616,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * {@link LineObject} dan {@link BasicObject}
 	 * 
 	 * @param width
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setStrokeWidth(int width, boolean save) {
@@ -1646,10 +1641,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Mengganti jenis dekorasi pinggiran objek yang sedang aktif atau akan
 	 * digambar. Berlaku untuk {@link LineObject} dan {@link BasicObject}.
 	 * 
-	 * @param style
-	 *            jenis dekorasi. Lihat {@link StrokeStyle}.
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param style jenis dekorasi. Lihat {@link StrokeStyle}.
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setStrokeStyle(int style, boolean save) {
@@ -1681,8 +1674,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Memasukkan objek teks ke dalam kanvas.
 	 * 
-	 * @param text
-	 *            teks
+	 * @param text teks
 	 */
 	public void insertText(String text) {
 		if (text == null || text.isEmpty())
@@ -1702,10 +1694,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengatur warna teks.
 	 * 
-	 * @param color
-	 *            warna, lihat {@link Color}
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param color warna, lihat {@link Color}
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setTextColor(int color, boolean save) {
@@ -1727,10 +1717,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah ukuran huruf.
 	 * 
-	 * @param size
-	 *            ukuran
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param size ukuran
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah ukuran teks.
 	 */
 	public void setFontSize(int size, boolean save) {
@@ -1751,14 +1739,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah dekorasi teks.
 	 * 
-	 * @param font
-	 *            indeks huruf di {@link FontManager}
-	 * @param bold
-	 *            teks tebal atau tidak
-	 * @param italic
-	 *            teks miring atau tidak
-	 * @param save
-	 *            jika true, aksi langsung disimpan di stack, jika false, aksi
+	 * @param font indeks huruf di {@link FontManager}
+	 * @param bold teks tebal atau tidak
+	 * @param italic teks miring atau tidak
+	 * @param save jika true, aksi langsung disimpan di stack, jika false, aksi
 	 *            hanya merubah tampilan objek.
 	 */
 	public void setFontStyle(int font, boolean bold, boolean italic,
@@ -1795,8 +1779,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah ketebalan teks.
 	 * 
-	 * @param bold
-	 *            tebal atau tidak
+	 * @param bold tebal atau tidak
 	 * @param save
 	 */
 	public void setFontBold(boolean bold, boolean save) {
@@ -1806,8 +1789,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah kemiringan teks
 	 * 
-	 * @param italic
-	 *            teks miring atau tidak
+	 * @param italic teks miring atau tidak
 	 * @param save
 	 */
 	public void setFontItalic(boolean italic, boolean save) {
@@ -1828,8 +1810,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Memasukkan objek primitive ke kanvas. Objek yang sedang digambar dan
 	 * belum disimpan akan tertimpa.
 	 * 
-	 * @param type
-	 *            {@link ObjectType#RECT}, {@link ObjectType#OVAL},
+	 * @param type {@link ObjectType#RECT}, {@link ObjectType#OVAL},
 	 *            {@link ObjectType#LINE} atau {@link ObjectType#FREE}
 	 */
 	public void insertPrimitive(int type) {
@@ -1858,8 +1839,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Memasukkan objek poligon ke kanvas, objek yang sedang digambar dan belum
 	 * disimpan akan tertimpa.
 	 * 
-	 * @param corner
-	 *            jumah sudut, minimum 3
+	 * @param corner jumah sudut, minimum 3
 	 */
 	public void insertPolygon(int corner) {
 		currentPoly = new PolygonObject(corner, defaultPolyRadius, centerX,
@@ -1875,13 +1855,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah warna isian dari {@link BasicObject}.
 	 * 
-	 * @param filled
-	 *            jika true berarti memiliki isian, jika false maka tidak
+	 * @param filled jika true berarti memiliki isian, jika false maka tidak
 	 *            memiliki isian dan nilai {@code color} diabaikan.
-	 * @param color
-	 *            warna isian, lihat {@link Color}
-	 * @param save
-	 *            jika true, aksi langsung disimpan ke stack, jika false, aksi
+	 * @param color warna isian, lihat {@link Color}
+	 * @param save jika true, aksi langsung disimpan ke stack, jika false, aksi
 	 *            hanya merubah parameter objek saja.
 	 */
 	public void setFillParameter(boolean filled, int color, boolean save) {
@@ -2054,8 +2031,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Memasukkan aksi ke stack
 	 * 
 	 * @param action
-	 * @param flush
-	 *            kirim ke synchronizer atau tidak
+	 * @param flush kirim ke synchronizer atau tidak
 	 */
 	private void pushToUAStack(UserAction action, boolean flush) {
 		if (action == null)
@@ -2170,9 +2146,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * Mengeksekusi kumpulan aksi secara berurutan.
 	 * 
 	 * @param actions
-	 * @param forced
-	 *            jika true berarti langsung dijalankan, jika false dan sedang
-	 *            hide mode, maka akan dimasukkan ke revertList
+	 * @param forced jika true berarti langsung dijalankan, jika false dan
+	 *            sedang hide mode, maka akan dimasukkan ke revertList
 	 */
 	private void execute(ArrayList<UserAction> actions, boolean revertable) {
 		int size = actions.size();
@@ -2189,12 +2164,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengeksekusi suatu perintah.
 	 * 
-	 * @param action
-	 *            aksi yang dieksekusi
-	 * @param forced
-	 *            jika true -> aksi langsung dijalankan. jika false -> aksi akan
-	 *            ditunda jika objek yang berkaitan dengan aksi tersebut sedang
-	 *            diedit.
+	 * @param action aksi yang dieksekusi
+	 * @param forced jika true -> aksi langsung dijalankan. jika false -> aksi
+	 *            akan ditunda jika objek yang berkaitan dengan aksi tersebut
+	 *            sedang diedit.
 	 */
 	private void execute(UserAction action, boolean forced) {
 		if (action instanceof DrawAction) {

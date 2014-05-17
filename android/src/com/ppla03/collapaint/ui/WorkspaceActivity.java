@@ -4,15 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphUser;
-import com.facebook.widget.LoginButton;
-import com.facebook.widget.LoginButton.UserInfoChangedCallback;
-
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
@@ -73,19 +64,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnCheckedChangeListener, OnEditorActionListener, AnimationListener,
 		CanvasCloseListener, AnimatorUpdateListener {
 	
-	//---------- share--------
-	public LoginButton share;
-	private String TAG="Share";
-	private UiLifecycleHelper uiHelper;
-	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
-
-	// --------- top button ---------
-	private LinearLayout topbarButtons;
+	// --------- top bar ---------
+	private View topbar;
 	private CheckBox select, hand;
 	private ImageButton undo, redo;
 
 	// --------- select additional ---------
-	private LinearLayout selectAddButtons;
+	private View selectAddButtons;
 	private ImageButton cut, copy, move, delete;
 
 	// --------- dashboard ---------
@@ -141,9 +126,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_workspace);
 		// --- top bar ---
-		topbarButtons = (LinearLayout) findViewById(R.id.w_top_button);
-		select = (CheckBox) findViewById(R.id.w_main_select);
-		hand = (CheckBox) findViewById(R.id.w_main_hand);
+		topbar = findViewById(R.id.w_topbar);
+		select = (CheckBox) findViewById(R.id.w_select);
+		hand = (CheckBox) findViewById(R.id.w_hand);
 		undo = (ImageButton) findViewById(R.id.w_undo);
 		redo = (ImageButton) findViewById(R.id.w_redo);
 		showDash = (CheckBox) findViewById(R.id.w_show_dash);
@@ -270,24 +255,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		canvasTitle.setText(canvas.getModel().name);
 		onClick(select);
 		
-		//--- Share --
-		uiHelper = new UiLifecycleHelper(this, statusCallback);
-	    uiHelper.onCreate(savedInstanceState);
-	    share = (LoginButton) findViewById(R.id.fb_login_button);
-	    share.setUserInfoChangedCallback(new UserInfoChangedCallback() {
-	    @Override
-	            public void onUserInfoFetched(GraphUser user) {
-	                if (user != null) {
-	                    postImage();
-	                    uiHelper.onDestroy();
-	                } else {
-	                	Toast.makeText(WorkspaceActivity.this,
-	                            "",
-	                            Toast.LENGTH_LONG).show();
-	                }
-	            }
-	        });
-		share.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -324,23 +291,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (hidden) {
 			canvasTitle.setText(canvas.getModel().name + " (hide mode)");
 			currentThemeColor = colorHidden;
-			topbarButtons
-					.setBackgroundResource(R.drawable.w_topbar_left_hidden);
-			selectAddButtons
-					.setBackgroundResource(R.drawable.w_topbar_right_hidden);
 			propertyPane.setBackgroundResource(R.drawable.w_property_hidden);
-			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_hidden);
 		} else {
 			canvasTitle.setText(canvas.getModel().name);
 			currentThemeColor = colorNormal;
-			topbarButtons
-					.setBackgroundResource(R.drawable.w_topbar_left_normal);
-			selectAddButtons
-					.setBackgroundResource(R.drawable.w_topbar_right_normal);
-			propertyPane.setBackgroundResource(R.drawable.w_property_normal);
-			colorPaneView.setBackgroundResource(R.drawable.w_colorpane_normal);
 		}
-		canvasTitle.setBackgroundColor(currentThemeColor);
+		topbar.setBackgroundColor(currentThemeColor);
 	}
 
 	@Override
@@ -709,96 +665,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onAnimationUpdate(ValueAnimator animation) {}
-	
-	
-	
-//======================SHARE===========================================
-	
-    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state,
-                Exception exception) {
-            if (state.isOpened()) {
-                Log.d("FacebookSampleActivity", "Facebook session opened");
-            } else if (state.isClosed()) {
-                Log.d("FacebookSampleActivity", "Facebook session closed");
-            }
-        }
-    };
-	
-    public void postImage() {
-        if (checkPermissions()) {
-        	CanvasExporter export=new CanvasExporter();
-        	export.export(canvas.getModel(), CompressFormat.PNG, false, false);
-        	File image= export.getResultFile();
-        	
-            Bitmap img = BitmapFactory.decodeFile(image.getPath());
-            
-            Request uploadRequest = Request.newUploadPhotoRequest(
-                    Session.getActiveSession(), img, new Request.Callback() {
-                        @Override
-                        public void onCompleted(Response response) {
-                            Toast.makeText(WorkspaceActivity.this,
-                                    "Photo uploaded successfully",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-            uploadRequest.executeAsync();
-            if (Session.getActiveSession() != null) {
-                Session.getActiveSession().closeAndClearTokenInformation();
-            }
-
-            Session.setActiveSession(null);
-        } else {
-            requestPermissions();}
-        
-   }
-    
-    public boolean checkPermissions() {
-        Session s = Session.getActiveSession();
-        if (s != null) {
-            return s.getPermissions().contains("publish_actions");
-        } else
-            return false;
-    }
- 
-    public void requestPermissions() {
-        Session s = Session.getActiveSession();
-        if (s != null)
-            s.requestNewPublishPermissions(new Session.NewPermissionsRequest(
-                    this, PERMISSIONS));
-    }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-        uiHelper.onResume();
-    }
- 
-    @Override
-    public void onPause() {
-        super.onPause();
-        uiHelper.onPause();
-    }
- 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        uiHelper.onDestroy();
-    }
- 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        uiHelper.onActivityResult(requestCode, resultCode, data);
-    }
- 
-    @Override
-    public void onSaveInstanceState(Bundle savedState) {
-        super.onSaveInstanceState(savedState);
-        uiHelper.onSaveInstanceState(savedState);
-    }
-	
+	public void onAnimationUpdate(ValueAnimator animation) {}	
 	
 }
