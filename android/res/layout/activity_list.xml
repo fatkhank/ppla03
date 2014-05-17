@@ -2,110 +2,207 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-   
-
-    <TextView
-        android:id="@+id/w_stroke_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_toLeftOf="@+id/d_parti_reload"
-        android:text="TextView" />
-
-    <Button
-        android:id="@+id/d_parti_reload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/w_stroke_label"
-        android:layout_alignBottom="@+id/w_stroke_label"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="15dp"
-        android:text="@string/sign_out" />
-
-    <Button
-        android:id="@+id/b_create"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="20dp"
-        android:text="@string/create" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/b_header"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/b_create"
-        android:layout_marginBottom="20dp" >
+        android:background="@color/workspace_normal"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" >
 
-        <ListView
-            android:id="@+id/b_canvas_list"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/d_parti_reload"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentRight="true"
+            android:background="@drawable/button_round"
+            android:text="@string/sign_out"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/b_create_show"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/button_round"
+            android:text="@string/create"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/b_list_text"
+            android:id="@+id/d_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/d_parti_reload"
+            android:layout_alignBottom="@+id/d_parti_reload"
+            android:layout_centerHorizontal="true"
+            android:text="Hello, Anonym"
+            android:textColor="@android:color/white" />
+
+        <ImageButton
+            android:id="@+id/b_list_reload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/d_username"
+            android:background="@drawable/button_round"
+            android:src="@drawable/ic_action_refresh" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/b_create_pane"
+        android:layout_width="@dimen/b_create_pane_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/b_header"
+        android:padding="8dp" >
+
+        <TextView
+            android:id="@+id/b_create_name_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:text="@string/bcl_loading"
-            android:textAppearance="@android:style/TextAppearance.Large" />
+            android:text="Canvas Name"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/dark" />
 
-        <ProgressBar
-            android:id="@+id/b_list_progress"
-            style="@android:attr/progressBarStyleInverse"
+        <EditText
+            android:id="@+id/b_create_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/b_create_name_label" >
 
-        <Button
-            android:id="@+id/b_list_reload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Reload" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/b_loader_cover"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@color/loader_cover"
-        android:visibility="invisible" >
-
-        <ProgressBar
-            android:id="@+id/b_loader_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
+            <requestFocus />
+        </EditText>
 
         <TextView
-            android:id="@+id/b_loader_text"
+            android:id="@+id/b_create_size_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/b_loader_progress"
+            android:layout_below="@+id/b_create_name"
             android:layout_centerHorizontal="true"
-            android:text="Creating canvas"
-            android:textAppearance="@android:style/TextAppearance.Inverse" />
+            android:layout_marginTop="8dp"
+            android:text="Canvas Size"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/dark" />
+
+        <EditText
+            android:id="@+id/b_create_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/b_create_name"
+            android:layout_below="@+id/b_create_size_label"
+            android:layout_toLeftOf="@+id/b_create_size_x"
+            android:inputType="number" />
+
+        <TextView
+            android:id="@+id/b_create_size_x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/b_create_width"
+            android:layout_alignTop="@+id/b_create_width"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_vertical"
+            android:text="x"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <EditText
+            android:id="@+id/b_create_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/b_create_name"
+            android:layout_below="@+id/b_create_size_label"
+            android:layout_toRightOf="@+id/b_create_size_x"
+            android:inputType="number" />
 
         <Button
-            android:id="@+id/b_loader_cancel"
-            style="?android:attr/buttonStyleSmall"
+            android:id="@+id/b_create"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/b_loader_progress"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:text="cancel" />
+            android:background="@drawable/button_round"
+            android:text="Create"
+            android:textColor="@color/dark" />
     </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/d_list_scroll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/b_header"
+        android:layout_toRightOf="@+id/b_create_pane"
+        android:fillViewport="false" >
+
+        <RelativeLayout
+            android:id="@+id/d_list_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/b_header"
+            android:layout_toRightOf="@+id/b_create_pane" >
+
+            <TextView
+                android:id="@+id/b_invitation_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:background="@color/workspace_normal"
+                android:text="You have invitations"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
+
+            <ListView
+                android:id="@+id/b_invitation_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/b_invitation_header" >
+            </ListView>
+
+            <TextView
+                android:id="@+id/b_canvas_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/b_invitation_list"
+                android:background="@color/workspace_normal"
+                android:text="Canvas List"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
+
+            <ListView
+                android:id="@+id/b_canvas_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/b_canvas_header" />
+
+            <ProgressBar
+                android:id="@+id/b_list_loader_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/b_list_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:text="Loading" />
+
+        </RelativeLayout>
+    </ScrollView>
 
 </RelativeLayout>
