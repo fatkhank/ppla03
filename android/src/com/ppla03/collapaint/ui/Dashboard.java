@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 //--share---
 import com.facebook.Request;
 import com.facebook.Response;
@@ -14,6 +15,8 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.UserInfoChangedCallback;
+
+
 
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
@@ -72,17 +75,16 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	CheckBox downloadCropped;
 	Button downloadButton;
 	ArrayAdapter<String> formatAdapter;
-
+	
 	// --- share ---
 	CheckBox shareHeader;
 	View shareContainter;
 	LoginButton loginFb;
 	ImageButton shareFb;
-	private String TAG = "Share";
+	private String TAG="Share";
 	private UiLifecycleHelper uiHelper;
-	private static final List<String> PERMISSIONS = Arrays
-			.asList("publish_actions");;
-
+	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
+	
 	// --- report ---
 	CheckBox reportHeader;
 
@@ -92,98 +94,90 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity,
-			View parent) {
-		try {
-			this.workspace = activity;
-			this.parent = parent;
+	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity, View parent) {
+		this.workspace = activity;
+		this.parent = parent;
 
-			close = (ImageButton) parent.findViewById(R.id.d_button_close);
-			close.setOnClickListener(this);
-			hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
-			hide.setOnClickListener(this);
+		close = (ImageButton) parent.findViewById(R.id.d_button_close);
+		close.setOnClickListener(this);
+		hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
+		hide.setOnClickListener(this);
 
-			// ------ participant list ------
-			adapter = new ParticipantAdapter(this);
-			partiList = (ListView) parent.findViewById(R.id.d_parti_list);
-			partiList.setVisibility(View.GONE);
-			partiList.setAdapter(adapter);
-			partiLoader = (ProgressBar) parent
-					.findViewById(R.id.d_participant_loader);
-			partiReload = (Button) parent.findViewById(R.id.d_parti_reload);
-			partiReload.setVisibility(View.GONE);
-			partiReload.setOnClickListener(this);
-			partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
-			partiFailed.setVisibility(View.GONE);
-			invite = (ImageButton) parent.findViewById(R.id.d_add_user);
-			email = (EditText) parent.findViewById(R.id.d_insert_email);
-			invite.setOnClickListener(this);
+		// ------ participant list ------
+		adapter = new ParticipantAdapter(this);
+		partiList = (ListView) parent.findViewById(R.id.d_parti_list);
+		partiList.setVisibility(View.GONE);
+		partiList.setAdapter(adapter);
+		partiLoader = (ProgressBar) parent
+				.findViewById(R.id.d_participant_loader);
+		partiReload = (Button) parent.findViewById(R.id.d_parti_reload);
+		partiReload.setVisibility(View.GONE);
+		partiReload.setOnClickListener(this);
+		partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
+		partiFailed.setVisibility(View.GONE);
+		invite = (ImageButton) parent.findViewById(R.id.d_add_user);
+		email = (EditText) parent.findViewById(R.id.d_insert_email);
+		invite.setOnClickListener(this);
 
-			// ------ share -------
-			shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
-			shareHeader.setOnClickListener(this);
-			uiHelper = new UiLifecycleHelper(workspace, statusCallback);
-			uiHelper.onCreate(savedInstanceState);
-			loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button);
-			loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() {
-				@Override
-				public void onUserInfoFetched(GraphUser user) {
-					if (user != null) {
-						postImage();
-						uiHelper.onDestroy();
-					} else {
-						Toast.makeText(workspace, "Wait", Toast.LENGTH_LONG)
-								.show();
-					}
-				}
-			});
-			loginFb.setVisibility(View.GONE);
+		// ------ share -------
+		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
+		shareHeader.setOnClickListener(this);
+		uiHelper = new UiLifecycleHelper(workspace, statusCallback); 
+        uiHelper.onCreate(savedInstanceState); 
+        loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button); 
+        loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() { 
+        @Override
+                public void onUserInfoFetched(GraphUser user) { 
+                    if (user != null) { 
+                        postImage(); 
+                        uiHelper.onDestroy(); 
+                    } else { 
+                        Toast.makeText(workspace, 
+                                "Wait", 
+                                Toast.LENGTH_LONG).show(); 
+                    } 
+                } 
+            }); 
+        loginFb.setVisibility(View.GONE); 
+        
+		
+		// ------ report ------
+		reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
+		reportHeader.setOnClickListener(this);
+		
+		// ------ download ------
+		downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
+		downHeader.setOnClickListener(this);
+		downContainer = parent.findViewById(R.id.d_download_pane);
+		downContainer.setVisibility(View.VISIBLE);
+		downloadFormat = (Spinner) parent.findViewById(R.id.d_download_format);
+		formatAdapter = new ArrayAdapter<>(activity,
+				android.R.layout.simple_list_item_1);
+		formatAdapter.add("PNG");
+		formatAdapter.add("JPG");
+		downloadFormat.setSelection(0);
+		downloadFormat.setAdapter(formatAdapter);
+		downloadCropped = (CheckBox) parent
+				.findViewById(R.id.d_checkbox_cropped);
+		downloadButton = (Button) parent.findViewById(R.id.d_button_download);
+		downloadButton.setOnClickListener(this);
 
-			// ------ report ------
-			reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
-			reportHeader.setOnClickListener(this);
+		settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
+		settHeader.setOnClickListener(this);
 
-			// ------ download ------
-			downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
-			downHeader.setOnClickListener(this);
-			downContainer = parent.findViewById(R.id.d_download_pane);
-			downContainer.setVisibility(View.VISIBLE);
-			downloadFormat = (Spinner) parent
-					.findViewById(R.id.d_download_format);
-			formatAdapter = new ArrayAdapter<>(activity,
-					android.R.layout.simple_list_item_1);
-			formatAdapter.add("PNG");
-			formatAdapter.add("JPG");
-			downloadFormat.setSelection(0);
-			downloadFormat.setAdapter(formatAdapter);
-			downloadCropped = (CheckBox) parent
-					.findViewById(R.id.d_checkbox_cropped);
-			downloadButton = (Button) parent
-					.findViewById(R.id.d_button_download);
-			downloadButton.setOnClickListener(this);
-
-			settHeader.setOnClickListener(this);
-
-			// sembuyikan pengaturan jika bukan owner
-			if (!workspace.canvas.getModel().owner.equals(CollaUserManager
-					.getCurrentUser())) {
-				settHeader.setVisibility(View.GONE);
-			}
-			settCont = parent.findViewById(R.id.d_setting_pane);
-			settCont.setVisibility(View.GONE);
-			settWidth = (EditText) parent.findViewById(R.id.d_width_input);
-			settHeight = (EditText) parent.findViewById(R.id.d_height_input);
-			settOK = (Button) parent.findViewById(R.id.d_button_resize);
-			settOK.setOnClickListener(this);
-
-			manager = ParticipantManager.getInstance().setListener(this);
-		} catch (Exception ex) {
-			android.util.Log.d("POS", "e:" + ex);
-			for (StackTraceElement s : ex.getStackTrace()) {
-				android.util.Log.d("POS", "ex:" + s);
-			}
+		// sembuyikan pengaturan jika bukan owner
+		if (!workspace.canvas.getModel().owner.equals(CollaUserManager
+				.getCurrentUser())) {
+			settHeader.setVisibility(View.GONE);
 		}
+		settCont = parent.findViewById(R.id.d_setting_pane);
+		settCont.setVisibility(View.GONE);
+		settWidth = (EditText) parent.findViewById(R.id.d_width_input);
+		settHeight = (EditText) parent.findViewById(R.id.d_height_input);
+		settOK = (Button) parent.findViewById(R.id.d_button_resize);
+		settOK.setOnClickListener(this);
 
+		manager = ParticipantManager.getInstance().setListener(this);
 	}
 
 	@Override
@@ -194,7 +188,8 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		} else if (v == reportHeader) {
 			reportWork();
 		} else if (v == shareHeader) {
-
+			
+			
 		} else if (v == hide) {
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
 
@@ -396,84 +391,83 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// show it
 		alertDialog.show();
 	}
-
-	// ======================SHARE===========================================
-
-	private Session.StatusCallback statusCallback = new Session.StatusCallback() {
-		@Override
-		public void call(Session session, SessionState state,
-				Exception exception) {
-			if (state.isOpened()) {
-				Log.d("FacebookSampleActivity", "Facebook session opened");
-			} else if (state.isClosed()) {
-				Log.d("FacebookSampleActivity", "Facebook session closed");
-			}
-		}
-	};
-
-	public void postImage() {
-		if (checkPermissions()) {
-			CanvasExporter export = new CanvasExporter();
-			export.export(workspace.canvas.getModel(), CompressFormat.PNG,
-					false, false);
-			File image = export.getResultFile();
-
-			Bitmap img = BitmapFactory.decodeFile(image.getPath());
-
-			Request uploadRequest = Request.newUploadPhotoRequest(
-					Session.getActiveSession(), img, new Request.Callback() {
-						@Override
-						public void onCompleted(Response response) {
-							Toast.makeText(workspace,
-									"Photo uploaded successfully",
-									Toast.LENGTH_LONG).show();
-						}
-					});
-			uploadRequest.executeAsync();
-			if (Session.getActiveSession() != null) {
-				Session.getActiveSession().closeAndClearTokenInformation();
-			}
-
-			Session.setActiveSession(null);
-		} else {
-			requestPermissions();
-		}
-
-	}
-
-	public boolean checkPermissions() {
-		Session s = Session.getActiveSession();
-		if (s != null) {
-			return s.getPermissions().contains("publish_actions");
-		} else
-			return false;
-	}
-
-	public void requestPermissions() {
-		Session s = Session.getActiveSession();
-		if (s != null)
-			s.requestNewPublishPermissions(new Session.NewPermissionsRequest(
-					workspace, PERMISSIONS));
-	}
-
-	void onResume() {
-		uiHelper.onResume();
-	}
-
-	void onPause() {
-		uiHelper.onPause();
-	}
-
-	void onDestroy() {
-		uiHelper.onDestroy();
-	}
-
-	void onActivityResult(int requestCode, int resultCode, Intent data) {
-		uiHelper.onActivityResult(requestCode, resultCode, data);
-	}
-
-	void onSaveInstanceState(Bundle savedState) {
-		uiHelper.onSaveInstanceState(savedState);
-	}
-
+	
+	//======================SHARE=========================================== 
+    
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() { 
+        @Override
+        public void call(Session session, SessionState state, 
+                Exception exception) { 
+            if (state.isOpened()) { 
+                Log.d("FacebookSampleActivity", "Facebook session opened"); 
+            } else if (state.isClosed()) { 
+                Log.d("FacebookSampleActivity", "Facebook session closed"); 
+            } 
+        } 
+    }; 
+      
+    public void postImage() { 
+        if (checkPermissions()) { 
+            CanvasExporter export=new CanvasExporter(); 
+            export.export(workspace.canvas.getModel(), CompressFormat.PNG, false, false); 
+            File image= export.getResultFile(); 
+              
+            Bitmap img = BitmapFactory.decodeFile(image.getPath()); 
+              
+            Request uploadRequest = Request.newUploadPhotoRequest( 
+                    Session.getActiveSession(), img, new Request.Callback() { 
+                        @Override
+                        public void onCompleted(Response response) { 
+                            Toast.makeText(workspace, 
+                                    "Photo uploaded successfully", 
+                                    Toast.LENGTH_LONG).show(); 
+                        } 
+                    }); 
+            uploadRequest.executeAsync(); 
+            if (Session.getActiveSession() != null) { 
+                Session.getActiveSession().closeAndClearTokenInformation(); 
+            } 
+  
+            Session.setActiveSession(null); 
+        } else { 
+            requestPermissions();} 
+          
+   } 
+      
+    public boolean checkPermissions() { 
+        Session s = Session.getActiveSession(); 
+        if (s != null) { 
+            return s.getPermissions().contains("publish_actions"); 
+        } else
+            return false; 
+    } 
+   
+    public void requestPermissions() { 
+        Session s = Session.getActiveSession(); 
+        if (s != null) 
+            s.requestNewPublishPermissions(new Session.NewPermissionsRequest( 
+                    workspace, PERMISSIONS)); 
+    } 
+      
+    void onResume() { 
+        uiHelper.onResume(); 
+    } 
+   
+    void onPause() { 
+        uiHelper.onPause(); 
+    } 
+   
+    void onDestroy() {  
+        uiHelper.onDestroy(); 
+    } 
+   
+	void onActivityResult(int requestCode, int resultCode, Intent data) { 
+        uiHelper.onActivityResult(requestCode, resultCode, data); 
+    } 
+   
+	void onSaveInstanceState(Bundle savedState) { 
+        uiHelper.onSaveInstanceState(savedState); 
+    } 
+	
+	
 }
