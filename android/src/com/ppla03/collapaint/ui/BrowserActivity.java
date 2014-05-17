@@ -154,17 +154,17 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		listText.setText(getResources().getString(R.string.bcl_loading));
 		listProgress.setVisibility(View.VISIBLE);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		//TODO close
+		// TODO close
 		finish();
 	}
 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.d_parti_reload:
-			//TODO warning signout
+			// TODO warning signout
 			AuthenticationActivity.TERM = true;
 			finish();
 			break;
@@ -308,15 +308,31 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 	@Override
 	public void onDeleted(CanvasModel model, int status) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
 	 * Meresponse terhadap suatu undangan.
 	 * @param model
 	 * @param response
 	 */
-	void responseInvitation(CanvasModel model, InviteResponse response){
-		//TODO 
+	void responseInvitation(CanvasModel model, InviteResponse response) {
+		// TODO response invitation
+	}
+
+	/**
+	 * Menghapus kanvas yang dimiliki seorang user
+	 * @param model kanvas milik user yang mau dihapus
+	 */
+	void deleteCanvas(CanvasModel model) {
+		// TODO delete canvas
+	}
+
+	/**
+	 * Menghapus partisiasi user pada suatu kanvas
+	 * @param model kanvas yang dimaksud
+	 */
+	void removeParticipation(CanvasModel model) {
+		// TODO remove participation
 	}
 }
