@@ -13,6 +13,8 @@ import com.ppla03.collapaint.model.object.CanvasObject;
 import com.ppla03.collapaint.model.object.PolygonObject;
 import com.ppla03.collapaint.ui.ColorPane.ColorChangeListener;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
@@ -47,7 +50,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
 		OnCheckedChangeListener, OnEditorActionListener, AnimationListener,
-		CanvasCloseListener, AnimatorUpdateListener {
+		CanvasCloseListener, AnimatorUpdateListener, AnimatorListener {
 
 	// --------- top bar ---------
 	private View topbar;
@@ -62,6 +65,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private CheckBox showDash;
 	private View dashboardView;
 	Dashboard dashboard;
+	private ValueAnimator animDash;
 
 	// --------- property --------
 	private CheckBox showProp;
@@ -235,6 +239,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		dashboardView = findViewById(R.id.dashboard);
 		dashboardView.setVisibility(View.GONE);
 		dashboard = new Dashboard(savedInstanceState, this, dashboardView);
+		animDash = new ValueAnimator();
+		animDash.setDuration(300);
+		animDash.addUpdateListener(this);
+		animDash.addListener(this);
 
 		// --- load ---
 		canvasTitle.setText(canvas.getModel().name);
@@ -361,12 +369,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == showDash) {
 			if (showDash.isChecked()) {
 				// munculkan
-				dashboard.show();
-				// dashboard.startAnimation(animDashShow);
+				animDash.setFloatValues(dashboardView.getY(),
+						topbar.getHeight());
 			} else {
 				// sembunyikan
-				dashboard.hide();
+				animDash.setFloatValues(dashboardView.getY(),
+						-dashboardView.getY());
 			}
+			animDash.start();
 		} else if (v == showProp) {
 			setPropPaneVisibility(showProp.isChecked());
 		}
@@ -650,6 +660,39 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onAnimationUpdate(ValueAnimator animation) {}
+	public void onAnimationUpdate(ValueAnimator animation) {
+		if (animation == animDash) {
+			Float f = (Float) animDash.getAnimatedValue();
+			dashboardView.setY(f);
+		}
+	}
+
+	@Override
+	public void onAnimationStart(Animator animation) {
+		if (showDash.isChecked()) {
+			// memulai animasi show dashboard
+			dashboard.show();
+		}
+	}
+
+	@Override
+	public void onAnimationEnd(Animator animation) {
+		if (showDash.isChecked()) {
+			// selesai animasi hide dashboard
+			dashboard.hide();
+		}
+	}
+
+	@Override
+	public void onAnimationCancel(Animator animation) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onAnimationRepeat(Animator animation) {
+		// TODO Auto-generated method stub
+
+	}
 
 }
