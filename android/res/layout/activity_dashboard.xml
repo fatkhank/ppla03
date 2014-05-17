@@ -264,17 +264,34 @@
                 android:layout_centerHorizontal="true"
                 android:gravity="center_vertical|start"
                 android:text="cropped" />
-            
-                    <com.facebook.widget.LoginButton
-        android:id="@+id/fb_login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        facebook:confirm_logout="true"
-        facebook:fetch_user_info="true" />
 
         </RelativeLayout>
-
+        
+        <RelativeLayout
+            android:id="@+id/d_download_pane"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/d_second_button"
+            android:visibility="visible" >
+            
+            <ImageButton
+                android:id="@+id/d_share_fb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_round"
+                android:src="@drawable/ic_action_cancel" />
+            
+            <com.facebook.widget.LoginButton
+        		android:id="@+id/fb_login_button"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:layout_marginTop="5dp"
+        		facebook:confirm_logout="true"
+        		facebook:fetch_user_info="true" />
+		</RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>
