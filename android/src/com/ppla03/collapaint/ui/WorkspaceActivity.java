@@ -1,10 +1,5 @@
 package com.ppla03.collapaint.ui;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
-import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
 import com.ppla03.collapaint.CanvasSynchronizer.CanvasCloseListener;
@@ -16,20 +11,13 @@ import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.FontManager.Font;
 import com.ppla03.collapaint.model.object.CanvasObject;
 import com.ppla03.collapaint.model.object.PolygonObject;
-import com.ppla03.collapaint.model.object.StrokeStyle;
-import com.ppla03.collapaint.model.object.TextObject;
 import com.ppla03.collapaint.ui.ColorPane.ColorChangeListener;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -38,11 +26,8 @@ import android.view.View.OnLongClickListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -63,7 +48,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
 		OnCheckedChangeListener, OnEditorActionListener, AnimationListener,
 		CanvasCloseListener, AnimatorUpdateListener {
-	
+
 	// --------- top bar ---------
 	private View topbar;
 	private CheckBox select, hand;
@@ -254,7 +239,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// --- load ---
 		canvasTitle.setText(canvas.getModel().name);
 		onClick(select);
-		
+
 	}
 
 	@Override
@@ -665,6 +650,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
-	public void onAnimationUpdate(ValueAnimator animation) {}	
-	
+	public void onAnimationUpdate(ValueAnimator animation) {}
+
 }

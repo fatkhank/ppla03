@@ -24,4 +24,10 @@
         android:layout_marginRight="30dp"
         android:text="username" />
 
+    <ImageButton
+        android:id="@+id/imageButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/btn_star" />
+
 </RelativeLayout>

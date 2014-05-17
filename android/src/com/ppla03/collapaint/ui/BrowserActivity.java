@@ -15,10 +15,8 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -39,6 +37,8 @@ import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
 import com.ppla03.collapaint.conn.CanvasCreationListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
+import com.ppla03.collapaint.conn.ParticipantManager;
+import com.ppla03.collapaint.conn.ParticipantManager.InviteResponse;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
@@ -305,71 +305,18 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		}
 	}
 
-	class CanvasListAdapter extends BaseAdapter {
-		private BrowserActivity activity;
-		private ArrayList<CanvasModel> models;
-
-		private class ViewHolder {
-			TextView canvasName;
-			TextView userName;
-		}
-
-		public CanvasListAdapter(BrowserActivity context) {
-			this.activity = context;
-			models = new ArrayList<CanvasModel>();
-		}
-
-		public void addAll(ArrayList<CanvasModel> list) {
-			models.addAll(list);
-		}
-
-		public void clear() {
-			models.clear();
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View view = convertView;
-			if (view == null) {
-				view = activity.getLayoutInflater().inflate(
-						R.layout.list_item_canvas, null);
-				ViewHolder holder = new ViewHolder();
-				holder.canvasName = (TextView) view
-						.findViewById(R.id.lc_canvas);
-				holder.userName = (TextView) view.findViewById(R.id.lc_user);
-				view.setTag(holder);
-			}
-
-			ViewHolder holder = (ViewHolder) view.getTag();
-			CanvasModel model = models.get(position);
-			holder.canvasName.setText(model.name);
-			if (model.owner.equals(CollaUserManager.getCurrentUser()))
-				holder.userName.setText("You");
-			else
-				holder.userName.setText(model.owner.name);
-			return view;
-		}
-
-		@Override
-		public int getCount() {
-			return models.size();
-		}
-
-		@Override
-		public CanvasModel getItem(int position) {
-			return models.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-	}
-
 	@Override
 	public void onDeleted(CanvasModel model, int status) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * Meresponse terhadap suatu undangan.
+	 * @param model
+	 * @param response
+	 */
+	void responseInvitation(CanvasModel model, InviteResponse response){
+		//TODO 
 	}
 }
