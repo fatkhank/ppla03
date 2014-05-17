@@ -332,7 +332,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 			View view = convertView;
 			if (view == null) {
 				view = activity.getLayoutInflater().inflate(
-						R.layout.list_canvas, null);
+						R.layout.list_item_canvas, null);
 				ViewHolder holder = new ViewHolder();
 				holder.canvasName = (TextView) view
 						.findViewById(R.id.lc_canvas);
