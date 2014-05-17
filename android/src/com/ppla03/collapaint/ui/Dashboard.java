@@ -123,7 +123,23 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
 		shareHeader.setOnClickListener(this);
 		uiHelper = new UiLifecycleHelper(workspace, statusCallback); 
-        	uiHelper.onCreate(savedInstanceState); 
+        uiHelper.onCreate(savedInstanceState); 
+        loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button); 
+        loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() { 
+        @Override
+                public void onUserInfoFetched(GraphUser user) { 
+                    if (user != null) { 
+                        postImage(); 
+                        uiHelper.onDestroy(); 
+                    } else { 
+                        Toast.makeText(workspace, 
+                                "Wait", 
+                                Toast.LENGTH_LONG).show(); 
+                    } 
+                } 
+            }); 
+        loginFb.setVisibility(View.GONE); 
+        
 		
 		// ------ report ------
 		reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
@@ -145,9 +161,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 				.findViewById(R.id.d_checkbox_cropped);
 		downloadButton = (Button) parent.findViewById(R.id.d_button_download);
 		downloadButton.setOnClickListener(this);
-		
-		//--- Setting ------
-		settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
+
 		settHeader.setOnClickListener(this);
 
 		// sembuyikan pengaturan jika bukan owner
