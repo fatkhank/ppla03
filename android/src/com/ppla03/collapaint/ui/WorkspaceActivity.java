@@ -112,141 +112,149 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_workspace);
-		// --- top bar ---
-		topbar = findViewById(R.id.w_topbar);
-		select = (CheckBox) findViewById(R.id.w_select);
-		hand = (CheckBox) findViewById(R.id.w_hand);
-		undo = (ImageButton) findViewById(R.id.w_undo);
-		redo = (ImageButton) findViewById(R.id.w_redo);
-		showDash = (CheckBox) findViewById(R.id.w_show_dash);
+		try {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.activity_workspace);
+			// --- top bar ---
+			topbar = findViewById(R.id.w_topbar);
+			select = (CheckBox) findViewById(R.id.w_select);
+			hand = (CheckBox) findViewById(R.id.w_hand);
+			undo = (ImageButton) findViewById(R.id.w_undo);
+			redo = (ImageButton) findViewById(R.id.w_redo);
+			showDash = (CheckBox) findViewById(R.id.w_show_dash);
 
-		select.setOnClickListener(this);
-		select.setOnLongClickListener(this);
-		hand.setOnClickListener(this);
-		undo.setOnClickListener(this);
-		undo.setEnabled(false);
-		redo.setOnClickListener(this);
-		redo.setEnabled(false);
-		showDash.setOnClickListener(this);
+			select.setOnClickListener(this);
+			select.setOnLongClickListener(this);
+			hand.setOnClickListener(this);
+			undo.setOnClickListener(this);
+			undo.setEnabled(false);
+			redo.setOnClickListener(this);
+			redo.setEnabled(false);
+			showDash.setOnClickListener(this);
 
-		// --- select ---
-		selectAddButtons = (LinearLayout) findViewById(R.id.w_selection_pane);
-		selectAddButtons.setVisibility(View.GONE);
-		showProp = (CheckBox) findViewById(R.id.w_show_property);
-		showProp.setChecked(true);
-		cut = (ImageButton) findViewById(R.id.w_sel_cut);
-		copy = (ImageButton) findViewById(R.id.w_sel_copy);
-		move = (ImageButton) findViewById(R.id.w_sel_move);
-		delete = (ImageButton) findViewById(R.id.w_sel_del);
-		showProp.setOnClickListener(this);
-		cut.setOnClickListener(this);
-		copy.setOnClickListener(this);
-		move.setOnClickListener(this);
-		delete.setOnClickListener(this);
+			// --- select ---
+			selectAddButtons = (LinearLayout) findViewById(R.id.w_selection_pane);
+			selectAddButtons.setVisibility(View.GONE);
+			showProp = (CheckBox) findViewById(R.id.w_show_property);
+			showProp.setChecked(true);
+			cut = (ImageButton) findViewById(R.id.w_sel_cut);
+			copy = (ImageButton) findViewById(R.id.w_sel_copy);
+			move = (ImageButton) findViewById(R.id.w_sel_move);
+			delete = (ImageButton) findViewById(R.id.w_sel_del);
+			showProp.setOnClickListener(this);
+			cut.setOnClickListener(this);
+			copy.setOnClickListener(this);
+			move.setOnClickListener(this);
+			delete.setOnClickListener(this);
 
-		// --- property pane ---
-		propertyPane = (View) findViewById(R.id.w_property_scroll);
-		propertyPane.setVisibility(View.GONE);
-		animPropShow = new ScaleAnimation(0, 1, 0, 1,
-				ScaleAnimation.RELATIVE_TO_SELF, 1,
-				ScaleAnimation.RELATIVE_TO_SELF, 0);
-		animPropShow.setDuration(300);
-		animPropShow.setAnimationListener(this);
-		animPropShow.setFillAfter(true);
-		animPropHide = new ScaleAnimation(1, 0, 1, 0,
-				ScaleAnimation.RELATIVE_TO_SELF, 1,
-				ScaleAnimation.RELATIVE_TO_SELF, 0);
-		animPropHide.setDuration(300);
-		animPropHide.setAnimationListener(this);
-		animPropHide.setFillAfter(false);
+			// --- property pane ---
+			propertyPane = (View) findViewById(R.id.w_property_scroll);
+			propertyPane.setVisibility(View.GONE);
+			animPropShow = new ScaleAnimation(0, 1, 0, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 0);
+			animPropShow.setDuration(300);
+			animPropShow.setAnimationListener(this);
+			animPropShow.setFillAfter(true);
+			animPropHide = new ScaleAnimation(1, 0, 1, 0,
+					ScaleAnimation.RELATIVE_TO_SELF, 1,
+					ScaleAnimation.RELATIVE_TO_SELF, 0);
+			animPropHide.setDuration(300);
+			animPropHide.setAnimationListener(this);
+			animPropHide.setFillAfter(false);
 
-		// --------- stroke ---------
-		strokePane = (RelativeLayout) findViewById(R.id.w_prop_stroke);
+			// --------- stroke ---------
+			strokePane = (RelativeLayout) findViewById(R.id.w_prop_stroke);
 
-		// atur lebar stroke
-		strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
-		strokeWidthText = (TextView) findViewById(R.id.w_stroke_width_text);
-		strokeWidth.setOnSeekBarChangeListener(this);
-		strokeWidth.setMax(CanvasObject.MAX_STROKE_WIDTH
-				- CanvasObject.MIN_STROKE_WIDTH);
-		strokeWidth.setProgress(0);
+			// atur lebar stroke
+			strokeWidth = (SeekBar) findViewById(R.id.w_stroke_width);
+			strokeWidthText = (TextView) findViewById(R.id.w_stroke_width_text);
+			strokeWidth.setOnSeekBarChangeListener(this);
+			strokeWidth.setMax(CanvasObject.MAX_STROKE_WIDTH
+					- CanvasObject.MIN_STROKE_WIDTH);
+			strokeWidth.setProgress(0);
 
-		// atur stroke style
-		strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
-		strokeStyle.setAdapter(new StrokeStyleAdapter(this));
-		strokeStyle.setOnItemSelectedListener(this);
+			// atur stroke style
+			strokeStyle = (Spinner) findViewById(R.id.w_stroke_style);
+			strokeStyle.setAdapter(new StrokeStyleAdapter(this));
+			strokeStyle.setOnItemSelectedListener(this);
 
-		// atur stroke color
-		strokeColor = (ImageButton) findViewById(R.id.w_stroke_color);
-		strokeColor.setOnClickListener(this);
+			// atur stroke color
+			strokeColor = (ImageButton) findViewById(R.id.w_stroke_color);
+			strokeColor.setOnClickListener(this);
 
-		// --------- fill ---------
-		fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
-		fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
-		fillCheck.setOnCheckedChangeListener(this);
-		fillCheck.setChecked(false);
-		fillColor = (ImageButton) findViewById(R.id.w_fill_color);
-		fillColor.setOnClickListener(this);
-		fillColor.setVisibility(View.GONE);
+			// --------- fill ---------
+			fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
+			fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
+			fillCheck.setOnCheckedChangeListener(this);
+			fillCheck.setChecked(false);
+			fillColor = (ImageButton) findViewById(R.id.w_fill_color);
+			fillColor.setOnClickListener(this);
+			fillColor.setVisibility(View.GONE);
 
-		// --------- font ---------
-		textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
-		textInput = (EditText) findViewById(R.id.w_font_input);
-		textInput.setOnEditorActionListener(this);
-		textSize = (SeekBar) findViewById(R.id.w_font_size);
-		fontStyles = (Spinner) findViewById(R.id.w_font_style);
-		textBold = (CheckBox) findViewById(R.id.w_font_bold);
-		textItalic = (CheckBox) findViewById(R.id.w_font_italic);
-		textUnderline = (CheckBox) findViewById(R.id.w_font_underline);
-		textBold.setOnCheckedChangeListener(this);
-		textItalic.setOnCheckedChangeListener(this);
-		textUnderline.setOnCheckedChangeListener(this);
-		textSizeText = (TextView) findViewById(R.id.w_font_size_text);
-		textSize.setOnSeekBarChangeListener(this);
-		textSize.setMax(FontManager.MAX_FONT_SIZE - FontManager.MIN_FONT_SIZE);
-		textSize.setProgress(FontManager.MIN_FONT_SIZE);
-		fontStyles.setAdapter(FontManager.getAdapter(this));
-		fontStyles.setOnItemSelectedListener(this);
-		textColor = (ImageButton) findViewById(R.id.w_font_color);
-		textColor.setOnClickListener(this);
+			// --------- font ---------
+			textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
+			textInput = (EditText) findViewById(R.id.w_font_input);
+			textInput.setOnEditorActionListener(this);
+			textSize = (SeekBar) findViewById(R.id.w_font_size);
+			fontStyles = (Spinner) findViewById(R.id.w_font_style);
+			textBold = (CheckBox) findViewById(R.id.w_font_bold);
+			textItalic = (CheckBox) findViewById(R.id.w_font_italic);
+			textUnderline = (CheckBox) findViewById(R.id.w_font_underline);
+			textBold.setOnCheckedChangeListener(this);
+			textItalic.setOnCheckedChangeListener(this);
+			textUnderline.setOnCheckedChangeListener(this);
+			textSizeText = (TextView) findViewById(R.id.w_font_size_text);
+			textSize.setOnSeekBarChangeListener(this);
+			textSize.setMax(FontManager.MAX_FONT_SIZE
+					- FontManager.MIN_FONT_SIZE);
+			textSize.setProgress(FontManager.MIN_FONT_SIZE);
+			fontStyles.setAdapter(FontManager.getAdapter(this));
+			fontStyles.setOnItemSelectedListener(this);
+			textColor = (ImageButton) findViewById(R.id.w_font_color);
+			textColor.setOnClickListener(this);
 
-		// --------- poly ---------
-		shapePane = (RelativeLayout) findViewById(R.id.w_shape_pane);
-		polySeek = (SeekBar) findViewById(R.id.w_poly_seek);
-		polySeek.setOnSeekBarChangeListener(this);
-		polySeek.setMax(PolygonObject.MAX_CORNER_COUNT
-				- PolygonObject.MIN_CORNER_COUNT);
-		polySeek.setProgress(0);
-		polyText = (TextView) findViewById(R.id.w_poly_text);
-		polyText.setText(String.valueOf(PolygonObject.MIN_CORNER_COUNT));
+			// --------- poly ---------
+			shapePane = (RelativeLayout) findViewById(R.id.w_shape_pane);
+			polySeek = (SeekBar) findViewById(R.id.w_poly_seek);
+			polySeek.setOnSeekBarChangeListener(this);
+			polySeek.setMax(PolygonObject.MAX_CORNER_COUNT
+					- PolygonObject.MIN_CORNER_COUNT);
+			polySeek.setProgress(0);
+			polyText = (TextView) findViewById(R.id.w_poly_text);
+			polyText.setText(String.valueOf(PolygonObject.MIN_CORNER_COUNT));
 
-		// --- prepare color ---
-		colorPaneView = findViewById(R.id.w_color_pane_scroll);
-		colorPane = new ColorPane(this, colorPaneView, this);
+			// --- prepare color ---
+			colorPaneView = findViewById(R.id.w_color_pane_scroll);
+			colorPane = new ColorPane(this, colorPaneView, this);
 
-		// --- prepare canvas ---
-		colorNormal = getResources().getColor(R.color.workspace_normal);
-		colorHidden = getResources().getColor(R.color.workspace_hidden);
-		currentThemeColor = colorNormal;
-		canvasTitle = (TextView) findViewById(R.id.w_canvas_name);
-		canvas = (CanvasView) findViewById(R.id.w_canvas);
-		canvas.setListener(this);
-		CanvasSynchronizer.getInstance().setCanvasView(canvas);
+			// --- prepare canvas ---
+			colorNormal = getResources().getColor(R.color.workspace_normal);
+			colorHidden = getResources().getColor(R.color.workspace_hidden);
+			currentThemeColor = colorNormal;
+			canvasTitle = (TextView) findViewById(R.id.w_canvas_name);
+			canvas = (CanvasView) findViewById(R.id.w_canvas);
+			canvas.setListener(this);
+			CanvasSynchronizer.getInstance().setCanvasView(canvas);
 
-		// --- dashboard ---
-		dashboardView = findViewById(R.id.dashboard);
-		dashboardView.setVisibility(View.GONE);
-		dashboard = new Dashboard(savedInstanceState, this, dashboardView);
-		animDash = new ValueAnimator();
-		animDash.setDuration(300);
-		animDash.addUpdateListener(this);
-		animDash.addListener(this);
+			// --- dashboard ---
+			dashboardView = findViewById(R.id.dashboard);
+			dashboardView.setVisibility(View.GONE);
+			dashboard = new Dashboard(savedInstanceState, this, dashboardView);
+			animDash = new ValueAnimator();
+			animDash.setDuration(300);
+			animDash.addUpdateListener(this);
+			animDash.addListener(this);
 
-		// --- load ---
-		canvasTitle.setText(canvas.getModel().name);
-		onClick(select);
+			// --- load ---
+			canvasTitle.setText(canvas.getModel().name);
+			onClick(select);
+		} catch (Exception ex) {
+			android.util.Log.d("POS", "e:" + ex);
+			for (StackTraceElement s : ex.getStackTrace()) {
+				android.util.Log.d("POS", "ex:" + s);
+			}
+		}
 
 	}
 
@@ -261,7 +269,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO show dashboard
+		// sama seperti showdash dipencet
+		onClick(showDash);
 		return true;
 	}
 
@@ -694,13 +703,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		dashboard.onResume();
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -712,13 +721,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		super.onDestroy();
 		dashboard.onDestroy();
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		dashboard.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
