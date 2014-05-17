@@ -122,7 +122,8 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// ------ share -------
 		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
 		shareHeader.setOnClickListener(this);
-		
+		uiHelper = new UiLifecycleHelper(workspace, statusCallback); 
+        	uiHelper.onCreate(savedInstanceState); 
 		
 		// ------ report ------
 		reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
