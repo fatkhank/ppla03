@@ -171,7 +171,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
-        android:visibility="gone" />
-
+        android:background="@drawable/bg_dialog"
+        android:visibility="visible" />
 
 </RelativeLayout>

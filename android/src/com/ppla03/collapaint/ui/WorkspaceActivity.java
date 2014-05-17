@@ -242,9 +242,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			dashboardView.setVisibility(View.GONE);
 			dashboard = new Dashboard(savedInstanceState, this, dashboardView);
 			animDash = new ValueAnimator();
-			animDash.setDuration(300);
+			animDash.setDuration(500);
 			animDash.addUpdateListener(this);
 			animDash.addListener(this);
+			topbar.bringToFront();
 
 			// --- load ---
 			canvasTitle.setText(canvas.getModel().name);
@@ -270,7 +271,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// sama seperti showdash dipencet
-		onClick(showDash);
+		showDash.performClick();
 		return true;
 	}
 
@@ -293,7 +294,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (hidden) {
 			canvasTitle.setText(canvas.getModel().name + " (hide mode)");
 			currentThemeColor = colorHidden;
-			propertyPane.setBackgroundResource(R.drawable.w_property_hidden);
 		} else {
 			canvasTitle.setText(canvas.getModel().name);
 			currentThemeColor = colorNormal;
@@ -378,12 +378,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == showDash) {
 			if (showDash.isChecked()) {
 				// munculkan
+				if (dashboardView.getVisibility() == View.GONE)
+					dashboardView.setY(-dashboardView.getHeight());
 				animDash.setFloatValues(dashboardView.getY(),
 						topbar.getHeight());
 			} else {
 				// sembunyikan
 				animDash.setFloatValues(dashboardView.getY(),
-						-dashboardView.getY());
+						-dashboardView.getHeight());
 			}
 			animDash.start();
 		} else if (v == showProp) {
@@ -678,17 +680,21 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-		if (showDash.isChecked()) {
-			// memulai animasi show dashboard
-			dashboard.show();
+		if (animation == animDash) {
+			if (showDash.isChecked()) {
+				// memulai animasi show dashboard
+				dashboard.show();
+			}
 		}
 	}
 
 	@Override
 	public void onAnimationEnd(Animator animation) {
-		if (showDash.isChecked()) {
-			// selesai animasi hide dashboard
-			dashboard.hide();
+		if (animation == animDash) {
+			if (!showDash.isChecked()) {
+				// selesai animasi hide dashboard
+				dashboard.hide();
+			}
 		}
 	}
 
