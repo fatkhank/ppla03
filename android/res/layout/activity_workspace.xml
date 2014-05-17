@@ -156,6 +156,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/w_topbar"
+        android:layout_margin="3dp"
         android:layout_toLeftOf="@+id/w_property_scroll"
         android:background="@drawable/bg_dialog"
         android:padding="5dp"
@@ -171,5 +172,6 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:visibility="gone" />
+
 
 </RelativeLayout>

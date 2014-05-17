@@ -35,4 +35,5 @@
         android:gravity="center_vertical"
         android:text="canvas name" />
 
+
 </RelativeLayout>
