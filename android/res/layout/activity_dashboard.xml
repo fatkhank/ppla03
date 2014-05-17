@@ -211,7 +211,7 @@
 
             <CheckBox
                 android:id="@+id/d_report_header"
-                android:button="drawable/bug"
+                android:button="@drawable/bug"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
