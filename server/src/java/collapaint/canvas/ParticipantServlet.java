@@ -9,7 +9,6 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -180,9 +179,9 @@ public class ParticipantServlet extends HttpServlet {
 
             //data kanvas ada -> periksa apakah user berwenang mengkick atau tidak
             int ownerId = authResult.getInt(DB.Canvas.Q.Select.OwnerOf.Column.OWNER_ID);
-            if (ownerId != kickerID //user selain owner tidak berwenang
-                    || kickerID == userId) {//user tidak bisa me-kick dirinya sendiri
-                reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.NOT_AUTHORIZED);
+
+            if ((ownerId != kickerID && kickerID != userId) ||//selain owner han yaboleh me-kick dirinya sendiri
+                    (ownerId == kickerID && userId == kickerID)) {//owner boleh me-kick selain dirinya                reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.NOT_AUTHORIZED);
                 return;
             }
 
@@ -282,7 +281,7 @@ public class ParticipantServlet extends HttpServlet {
             //masukkan data request
             reply.add(Reply.USER_ID, userId);
             reply.add(Reply.CANVAS_ID, canvasId);
-            
+
             ResultSet checkResult = check.executeQuery();
             if (!checkResult.next()) {
                 //jika user tidak diinvite atau kanvas tidak ada, maka tidak berhak meresponse
