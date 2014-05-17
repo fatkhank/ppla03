@@ -94,14 +94,99 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity, View parent) {
-		this.workspace = activity;
-		this.parent = parent;
+	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity,
+			View parent) {
+		try {
+			this.workspace = activity;
+			this.parent = parent;
 
-		close = (ImageButton) parent.findViewById(R.id.d_button_close);
-		close.setOnClickListener(this);
-		hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
-		hide.setOnClickListener(this);
+			close = (ImageButton) parent.findViewById(R.id.d_button_close);
+			close.setOnClickListener(this);
+			hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
+			hide.setOnClickListener(this);
+
+			// ------ participant list ------
+			adapter = new ParticipantAdapter(this);
+			partiList = (ListView) parent.findViewById(R.id.d_parti_list);
+			partiList.setVisibility(View.GONE);
+			partiList.setAdapter(adapter);
+			partiLoader = (ProgressBar) parent
+					.findViewById(R.id.d_participant_loader);
+			partiReload = (Button) parent.findViewById(R.id.d_parti_reload);
+			partiReload.setVisibility(View.GONE);
+			partiReload.setOnClickListener(this);
+			partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
+			partiFailed.setVisibility(View.GONE);
+			invite = (ImageButton) parent.findViewById(R.id.d_add_user);
+			email = (EditText) parent.findViewById(R.id.d_insert_email);
+			invite.setOnClickListener(this);
+
+			// ------ share -------
+			shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
+			shareHeader.setOnClickListener(this);
+			uiHelper = new UiLifecycleHelper(workspace, statusCallback);
+			uiHelper.onCreate(savedInstanceState);
+			loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button);
+			loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() {
+				@Override
+				public void onUserInfoFetched(GraphUser user) {
+					if (user != null) {
+						postImage();
+						uiHelper.onDestroy();
+					} else {
+						Toast.makeText(workspace, "Wait", Toast.LENGTH_LONG)
+								.show();
+					}
+				}
+			});
+			loginFb.setVisibility(View.GONE);
+
+			// ------ report ------
+			reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
+			reportHeader.setOnClickListener(this);
+
+			// ------ download ------
+			downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
+			downHeader.setOnClickListener(this);
+			downContainer = parent.findViewById(R.id.d_download_pane);
+			downContainer.setVisibility(View.VISIBLE);
+			downloadFormat = (Spinner) parent
+					.findViewById(R.id.d_download_format);
+			formatAdapter = new ArrayAdapter<>(activity,
+					android.R.layout.simple_list_item_1);
+			formatAdapter.add("PNG");
+			formatAdapter.add("JPG");
+			downloadFormat.setSelection(0);
+			downloadFormat.setAdapter(formatAdapter);
+			downloadCropped = (CheckBox) parent
+					.findViewById(R.id.d_checkbox_cropped);
+			downloadButton = (Button) parent
+					.findViewById(R.id.d_button_download);
+			downloadButton.setOnClickListener(this);
+
+			// ------ setting ------
+			settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
+			settHeader.setOnClickListener(this);
+
+			// sembuyikan pengaturan jika bukan owner
+			if (!workspace.canvas.getModel().owner.equals(CollaUserManager
+					.getCurrentUser())) {
+				settHeader.setVisibility(View.GONE);
+			}
+			settCont = parent.findViewById(R.id.d_setting_pane);
+			settCont.setVisibility(View.GONE);
+			settWidth = (EditText) parent.findViewById(R.id.d_width_input);
+			settHeight = (EditText) parent.findViewById(R.id.d_height_input);
+			settOK = (Button) parent.findViewById(R.id.d_button_resize);
+			settOK.setOnClickListener(this);
+
+			manager = ParticipantManager.getInstance().setListener(this);
+		} catch (Exception ex) {
+			android.util.Log.d("POS", "e:" + ex);
+			for (StackTraceElement s : ex.getStackTrace()) {
+				android.util.Log.d("POS", "ex:" + s);
+			}
+		}
 
 		// ------ participant list ------
 		adapter = new ParticipantAdapter(this);
