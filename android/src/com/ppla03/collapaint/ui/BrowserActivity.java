@@ -60,7 +60,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 
 	// --- canvas list ---
 	private ListView canvasList;
-	private TextView listText, listTitleCanvas, listTitleOwner;
+	private TextView listText;
 	private ProgressBar listProgress;
 	private Button listReload;
 	private CanvasListAdapter canvasAdapter;
@@ -120,7 +120,7 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		reloader = new Handler();
 
 		// ---- canvas list ---
-		canvasList = (ListView) findViewById(R.id.b_list_view);
+		canvasList = (ListView) findViewById(R.id.b_canvas_list);
 		canvasAdapter = new CanvasListAdapter(this);
 		canvasList.setAdapter(canvasAdapter);
 		canvasList.setVisibility(View.INVISIBLE);
@@ -129,8 +129,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		listReload.setVisibility(View.GONE);
 		listReload.setOnClickListener(this);
 		listText = (TextView) findViewById(R.id.b_list_text);
-		listTitleCanvas = (TextView) findViewById(R.id.b_title_canvas);
-		listTitleOwner = (TextView) findViewById(R.id.b_title_owner);
 		listProgress = (ProgressBar) findViewById(R.id.b_list_progress);
 
 		loadCanvasList();
@@ -149,8 +147,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 		BrowserConnector.getInstance().setListFetchListener(this)
 				.getCanvasList(CollaUserManager.getCurrentUser());
 		listReload.setVisibility(View.GONE);
-		listTitleCanvas.setVisibility(View.GONE);
-		listTitleOwner.setVisibility(View.GONE);
 		listText.setText(getResources().getString(R.string.bcl_loading));
 		listProgress.setVisibility(View.VISIBLE);
 	}
@@ -288,8 +284,6 @@ public class BrowserActivity extends Activity implements View.OnClickListener,
 				listText.setVisibility(View.GONE);
 				listProgress.setVisibility(View.INVISIBLE);
 				canvasList.setVisibility(View.VISIBLE);
-				listTitleCanvas.setVisibility(View.VISIBLE);
-				listTitleOwner.setVisibility(View.VISIBLE);
 			}
 		} else {
 			listProgress.setVisibility(View.GONE);
