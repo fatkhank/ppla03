@@ -211,10 +211,10 @@
 
             <CheckBox
                 android:id="@+id/d_report_header"
-                android:button="@drawable/bug"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:button="@drawable/bug"
                 android:text="@string/emptyString2" />
 
         </LinearLayout>
@@ -269,7 +269,7 @@
         </RelativeLayout>
         
         <RelativeLayout
-            android:id="@+id/d_download_pane"
+            android:id="@+id/d_share_pane"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

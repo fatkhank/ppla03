@@ -78,7 +78,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	
 	// --- share ---
 	CheckBox shareHeader;
-	View shareContainter;
+	View shareContainer;
 	LoginButton loginFb;
 	ImageButton shareFb;
 	private String TAG="Share";
@@ -122,10 +122,13 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// ------ share -------
 		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
 		shareHeader.setOnClickListener(this);
+		shareContainer = parent.findViewById(R.id.d_share_pane);
+		shareContainer.setVisibility(View.GONE);
 		uiHelper = new UiLifecycleHelper(workspace, statusCallback); 
         uiHelper.onCreate(savedInstanceState); 
         shareFb= (ImageButton) parent.findViewById(R.id.d_share_fb);
         shareFb.setOnClickListener(this);
+        shareFb.setVisibility(View.GONE);
         loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button); 
         loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() { 
         @Override
@@ -134,9 +137,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
                         postImage(); 
                         uiHelper.onDestroy(); 
                     } else { 
-                        Toast.makeText(workspace, 
-                                "Wait", 
-                                Toast.LENGTH_LONG).show(); 
                     } 
                 } 
             }); 
@@ -187,11 +187,19 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// main button
 		if (v == close) {
 			workspace.closeCanvas();
-		} else if (v == reportHeader) {
-			reportWork();
 		} else if (v == shareHeader) {
+			settHeader.setChecked(false);
+			downHeader.setChecked(false);
+			settCont.setVisibility(View.GONE);
+			downContainer.setVisibility(View.GONE);
+			shareHeader.setChecked(true);
+			shareContainer.setVisibility(View.VISIBLE);
+			shareFb.setVisibility(View.VISIBLE);
+			reportHeader.setChecked(false);
+		} else if (v == shareFb){
 			loginFb.performClick();
-		} else if (v == hide) {
+		}
+		else if (v == hide) {
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
 
 			// participant
@@ -212,9 +220,22 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 			settCont.setVisibility(View.GONE);
 			downHeader.setChecked(true);
 			downContainer.setVisibility(View.VISIBLE);
-
-			// setting
-		} else if (v == settHeader) {
+			shareHeader.setChecked(true);
+			shareContainer.setVisibility(View.GONE);
+			shareFb.setVisibility(View.GONE);
+			reportHeader.setChecked(false);
+		} else if(v== reportHeader){
+			settHeader.setChecked(false);
+			downHeader.setChecked(false);
+			settCont.setVisibility(View.GONE);
+			downContainer.setVisibility(View.GONE);
+			shareHeader.setChecked(false);
+			shareContainer.setVisibility(View.GONE);
+			shareFb.setVisibility(View.GONE);
+			reportHeader.setChecked(true);
+			reportWork();
+		}// setting
+			else if (v == settHeader) {
 			downHeader.setChecked(false);
 			downContainer.setVisibility(View.GONE);
 			settHeader.setChecked(true);
@@ -223,6 +244,10 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 					.getWidth()));
 			settHeight.setText(String.valueOf(workspace.canvas.getModel()
 					.getHeight()));
+			shareHeader.setChecked(false);
+			shareContainer.setVisibility(View.GONE);
+			shareFb.setVisibility(View.GONE);
+			reportHeader.setChecked(false);
 		} else if (v == settOK) {
 			// ubah ukuran kanvas
 			int width = Integer.parseInt(settWidth.getText().toString());
