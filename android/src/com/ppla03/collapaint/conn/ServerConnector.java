@@ -22,7 +22,8 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 public abstract class ServerConnector {
-	public static String HOST = "http://192.168.43.64:8080/collapaint/";
+//	public static String HOST = "http://192.168.43.64:8080/collapaint/";
+	public static String HOST = "http://10.5.134.128:8080/collapaint/";
 
 	protected abstract void onHostAddressChange(String host);
 
