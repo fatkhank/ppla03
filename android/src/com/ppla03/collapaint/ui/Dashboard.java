@@ -376,17 +376,17 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	
 	//======================SHARE=========================================== 
     
-    private Session.StatusCallback statusCallback = new Session.StatusCallback() { 
-        @Override
-        public void call(Session session, SessionState state, 
-                Exception exception) { 
-            if (state.isOpened()) { 
-                Log.d("FacebookSampleActivity", "Facebook session opened"); 
-            } else if (state.isClosed()) { 
-                Log.d("FacebookSampleActivity", "Facebook session closed"); 
-            } 
-        } 
-    }; 
+//    private Session.StatusCallback statusCallback = new Session.StatusCallback() { 
+//        @Override
+//        public void call(Session session, SessionState state, 
+//                Exception exception) { 
+//            if (state.isOpened()) { 
+//                Log.d("FacebookSampleActivity", "Facebook session opened"); 
+//            } else if (state.isClosed()) { 
+//                Log.d("FacebookSampleActivity", "Facebook session closed"); 
+//            } 
+//        } 
+//    }; 
       
     public void postImage() { 
         if (checkPermissions()) { 
