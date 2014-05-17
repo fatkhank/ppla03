@@ -87,7 +87,6 @@ public class CanvasServlet extends HttpServlet {
             } catch (SQLException ex) {
                 reply.add(CanvasJCode.ERROR, CanvasJCode.Error.SERVER_ERROR);
             }
-
             out.println(reply.build().toString());
         }
     }

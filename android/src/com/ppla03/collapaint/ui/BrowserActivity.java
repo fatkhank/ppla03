@@ -91,26 +91,21 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_list);
 
-			// Get the message from the intent
-			Intent intent = getIntent();
-			String message = intent
-					.getStringExtra(AuthenticationActivity.EXTRA_MESSAGE);
-
-			mSignOutButton = (Button) findViewById(R.id.d_parti_reload);
+			mSignOutButton = (Button) findViewById(R.id.b_signout);
 			mSignOutButton.setOnClickListener(this);
 			mCreateButton = (Button) findViewById(R.id.b_create_show);
 			mCreateButton.setOnClickListener(this);
 
 			// Create the text view
-			username = (TextView) findViewById(R.id.w_stroke_label);
-			username.setText("Hello, " + message);
+			username = (TextView) findViewById(R.id.b_username);
+			username.setText("Hello, " + CollaUserManager.getCurrentUser().name);
 			mGoogleApiClient = buildGoogleApiClient();
 
 			// --- setup ---
 			BrowserConnector.getInstance().setCreateListener(this);
 
 			// --- create canvas ---
-			createView = findViewById(R.id.b_create_pane);
+			createView = findViewById(R.id.b_create_view);
 			createView.setVisibility(View.GONE);
 
 			nameInput = (EditText) createView.findViewById(R.id.b_create_name);
@@ -134,6 +129,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			// ---- canvas list ---
 			reloadButton = (ImageButton) findViewById(R.id.b_list_reload);
 			reloadButton.setOnClickListener(this);
+			reloadProgress = (ProgressBar) findViewById(R.id.b_list_loader_progress);
 			listInfo = (TextView) findViewById(R.id.b_list_info);
 
 			canvasAdapter = new CanvasListAdapter(this);
@@ -144,8 +140,10 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 			// --- invitation list ---
 			inviteHeader = (TextView) findViewById(R.id.b_invitation_header);
-			inviteList = (ListView) findViewById(R.id.b_invitation_list);
 			inviteAdapter = new InvitationAdapter(this);
+			inviteList = (ListView) findViewById(R.id.b_invitation_list);
+			inviteList.setAdapter(inviteAdapter);
+			inviteList.setOnItemClickListener(this);
 
 			loadCanvasList();
 		} catch (Exception ex) {
@@ -182,15 +180,15 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onBackPressed() {
-		// TODO close
 		finish();
 	}
 
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.d_parti_reload:
-			// TODO warning signout
+		case R.id.b_signout:
 			AuthenticationActivity.TERM = true;
+			Intent intent = new Intent(this, AuthenticationActivity.class);
+			startActivity(intent);
 			finish();
 			break;
 		case R.id.b_create_show:
@@ -227,6 +225,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			CanvasSynchronizer.getInstance().setCanvas(newCanvas);
 			Intent intent = new Intent(this, LoaderActivity.class);
 			startActivity(intent);
+			finish();
 		} else {
 			String msg;
 			if (status == CanvasCreationListener.DUPLICATE_NAME) {
@@ -280,18 +279,23 @@ public class BrowserActivity extends Activity implements OnClickListener,
 					canvasAdapter.getItem(position));
 			Intent intent = new Intent(this, LoaderActivity.class);
 			startActivity(intent);
+			finish();
+		} else if (parent == inviteList) {
+
 		}
 	}
 
 	@Override
-	public void onListFethed(UserModel asker, int status,
+	public void onListFetched(UserModel asker, int status,
 			ArrayList<CanvasModel> owned, ArrayList<CanvasModel> oldList,
 			ArrayList<CanvasModel> invited) {
 		if (status == ServerConnector.SUCCESS) {
-			inviteAdapter.clear();
-			inviteAdapter.addAll(invited);
-			inviteHeader.setVisibility(View.VISIBLE);
-			inviteList.setVisibility(View.VISIBLE);
+			if (!invited.isEmpty()) {
+				inviteAdapter.clear();
+				inviteAdapter.addAll(invited);
+				inviteHeader.setVisibility(View.VISIBLE);
+				inviteList.setVisibility(View.VISIBLE);
+			}
 
 			canvasAdapter.clear();
 			canvasAdapter.addAll(owned);
@@ -311,9 +315,8 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			// canvasList.setVisibility(View.VISIBLE);
 			// }
 		} else {
-			// listProgress.setVisibility(View.GONE);
-			// listReload.setVisibility(View.VISIBLE);
-			// listText.setText(getResources().getString(R.string.bcl_failed));
+			reloadProgress.setVisibility(View.GONE);
+			listInfo.setText(getResources().getString(R.string.bcl_failed));
 			String msg;
 			if (status == ServerConnector.CONNECTION_PROBLEM) {
 				msg = "Connection problem.";

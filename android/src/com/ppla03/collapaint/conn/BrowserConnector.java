@@ -190,14 +190,14 @@ public class BrowserConnector extends ServerConnector {
 						newList.add(model);
 					}
 
-					listFetchListener.onListFethed(asker, SUCCESS, ownList,
+					listFetchListener.onListFetched(asker, SUCCESS, ownList,
 							oldList, newList);
 				} catch (JSONException e) {
-					listFetchListener.onListFethed(asker, UNKNOWN_REPLY,
+					listFetchListener.onListFetched(asker, UNKNOWN_REPLY,
 							oldList, oldList, newList);
 				}
 			} else
-				listFetchListener.onListFethed(asker, status, ownList, oldList,
+				listFetchListener.onListFetched(asker, status, ownList, oldList,
 						newList);
 		}
 	};

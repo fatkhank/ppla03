@@ -667,6 +667,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onCanvasClosed(int status) {
 		Intent intent = new Intent(this, BrowserActivity.class);
 		startActivity(intent);
+		finish();
 	}
 
 	@Override

@@ -90,7 +90,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 	private ArrayList<String> mCirclesList;
 
 	public final static String EXTRA_MESSAGE = "Gw berpindah secara ajaib";
-	public static boolean TERM = false;
+	static boolean TERM = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -168,11 +168,9 @@ public class AuthenticationActivity extends FragmentActivity implements
 		// Indicate that the sign in process is complete.
 		mSignInProgress = STATE_DEFAULT;
 		currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-		Log.d("POS", "auth check");
-		String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-		CollaUserManager.check(email, "nama asal", this);
 		if (!TERM) {
-			Log.d("POS", "auth check 22222");
+			String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+			CollaUserManager.check(email, currentUser.getDisplayName(), this);
 		} else {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			// Our sample has caches no user data from Google+, however we
@@ -347,12 +345,11 @@ public class AuthenticationActivity extends FragmentActivity implements
 	@Override
 	public void onAccountChecked(int status) {
 		if (status == CollaUserManager.SUCCESS) {
-			// TODO Auto-generated method stub
-			Log.d("POS", "Check auth 3");
 			Intent intent = new Intent(this, BrowserActivity.class);
 			String message = currentUser.getDisplayName();
 			intent.putExtra(EXTRA_MESSAGE, message);
 			startActivity(intent);
+			finish();
 		} else
 			Toast.makeText(this, "Database Error", Toast.LENGTH_SHORT).show();
 	}

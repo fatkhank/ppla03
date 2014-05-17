@@ -33,7 +33,7 @@ public interface OnFetchListListener {
 	 * @param invited daftar kanvas yang {@code asker} diundang sebagai
 	 *            pertisipan, namun belum pernah dibuka
 	 */
-	void onListFethed(UserModel asker, int status,
+	void onListFetched(UserModel asker, int status,
 			ArrayList<CanvasModel> owned, ArrayList<CanvasModel> oldList,
 			ArrayList<CanvasModel> invited);
 }
