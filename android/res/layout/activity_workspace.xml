@@ -32,12 +32,21 @@
             android:contentDescription="@string/emptyString2"
             android:text="@string/emptyString2" />
 
+        <View
+            android:id="@+id/w_divider1"
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="4dp"
+            android:layout_toRightOf="@+id/w_show_dash"
+            android:background="@color/black_transparent" />
+
         <CheckBox
             android:id="@+id/w_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:layout_toRightOf="@+id/w_show_dash"
+            android:layout_toRightOf="@+id/w_divider1"
             android:background="@drawable/checkbox_topbar"
             android:button="@drawable/ic_action_select_all"
             android:checked="true"
@@ -83,10 +92,11 @@
             android:layout_alignParentTop="true"
             android:layout_toLeftOf="@+id/w_selection_pane"
             android:layout_toRightOf="@+id/w_redo"
-            android:gravity="center_vertical"
-            
+            android:gravity="center_vertical|center_horizontal"
             android:text="Untitled (hide mode)"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/w_selection_pane"
@@ -156,7 +166,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/w_topbar"
-        android:layout_margin="3dp"
         android:layout_toLeftOf="@+id/w_property_scroll"
         android:background="@drawable/bg_dialog"
         android:padding="5dp"
@@ -164,7 +173,7 @@
 
         <include layout="@layout/w_color_pane" />
     </ScrollView>
-
+    
     <include
         android:id="@+id/dashboard"
         android:layout_width="wrap_content"
@@ -173,5 +182,6 @@
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
         android:visibility="visible" />
+    
 
 </RelativeLayout>

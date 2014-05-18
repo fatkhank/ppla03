@@ -13,7 +13,8 @@
         android:layout_marginRight="5dp"
         android:gravity="center_vertical"
         android:text="@string/cp_r"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <EditText
         android:id="@+id/cp_r_input"
@@ -45,7 +46,8 @@
         android:layout_marginRight="5dp"
         android:gravity="center_vertical"
         android:text="@string/cp_g"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <EditText
         android:id="@+id/cp_g_input"
@@ -76,7 +78,8 @@
         android:layout_marginRight="5dp"
         android:gravity="center_vertical"
         android:text="@string/cp_b"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <EditText
         android:id="@+id/cp_b_input"
@@ -105,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/cp_cancel"
         android:layout_alignTop="@+id/cp_cancel"
-        android:layout_margin="3dp"
+        android:layout_margin="4dp"
         android:layout_toLeftOf="@+id/cp_ok"
         android:layout_toRightOf="@+id/cp_cancel"
         android:background="@android:color/holo_blue_dark" />
@@ -119,7 +122,8 @@
         android:layout_below="@id/cp_b_label"
         android:gravity="center_horizontal"
         android:text="@string/cp_a"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <EditText
         android:id="@+id/cp_a_input"
@@ -127,8 +131,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/cp_a_label"
+        android:layout_marginBottom="24dp"
         android:ems="10"
-        android:inputType="number" >
+        android:inputType="number"
+        android:textColor="@color/dark" >
+
     </EditText>
 
     <SeekBar
@@ -147,6 +154,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/cp_a_slider"
         android:layout_alignTop="@+id/cp_ok"
+        android:layout_margin="4dp"
         android:background="@drawable/button_round"
         android:src="@drawable/ic_action_cancel" />
 
@@ -156,7 +164,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/cp_a_input"
-        android:layout_marginTop="17dp"
+        android:layout_margin="4dp"
         android:background="@drawable/button_round"
         android:src="@drawable/ic_action_accept" />
 

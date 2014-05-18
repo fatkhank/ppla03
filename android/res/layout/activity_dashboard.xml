@@ -19,7 +19,9 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:text="Participant"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/dark"
+            android:textStyle="bold" />
 
         <ListView
             android:id="@+id/d_parti_list"
@@ -39,7 +41,8 @@
             android:layout_alignTop="@+id/d_add_user"
             android:layout_toLeftOf="@+id/d_add_user"
             android:inputType="textEmailAddress"
-            android:text="Insert Email Here" />
+            android:text="Insert Email Here"
+            android:textColor="@color/dark" />
 
         <ImageButton
             android:id="@+id/d_add_user"
@@ -99,7 +102,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp"
-                android:layout_weight="1"
                 android:text="Resize canvas"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -128,7 +130,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@+id/d_setting_x"
-                android:layout_weight="0.85"
                 android:ems="10"
                 android:imeOptions="actionDone|flagNoFullscreen"
                 android:inputType="number" />
@@ -141,11 +142,9 @@
                 android:layout_alignBottom="@+id/d_width_input"
                 android:layout_alignParentRight="true"
                 android:layout_toRightOf="@+id/d_setting_x"
-                android:layout_weight="0.47"
                 android:ems="10"
                 android:imeOptions="actionDone|flagNoFullscreen"
                 android:inputType="number" />
-
         </RelativeLayout>
 
         <LinearLayout
@@ -216,7 +215,6 @@
                 android:layout_weight="1"
                 android:button="@drawable/bug"
                 android:text="@string/emptyString2" />
-
         </LinearLayout>
 
         <RelativeLayout
@@ -265,9 +263,8 @@
                 android:layout_centerHorizontal="true"
                 android:gravity="center_vertical|start"
                 android:text="cropped" />
-
         </RelativeLayout>
-        
+
         <RelativeLayout
             android:id="@+id/d_share_pane"
             android:layout_width="match_parent"
@@ -276,14 +273,15 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/d_second_button"
             android:visibility="visible" >
-            
+
             <ImageButton
                 android:id="@+id/d_share_fb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/share_facebook"
-                android:src="@drawable/ic_action_cancel" />
+                android:src="@android:color/transparent" />
+
             
             <com.facebook.widget.LoginButton
         		android:id="@+id/fb_login_button"
@@ -292,7 +290,8 @@
         		android:layout_marginTop="5dp"
         		facebook:confirm_logout="true"
         		facebook:fetch_user_info="true" />
-		</RelativeLayout>
+            
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>
