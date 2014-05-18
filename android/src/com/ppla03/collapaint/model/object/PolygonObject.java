@@ -24,7 +24,7 @@ public class PolygonObject extends BasicObject {
 	/**
 	 * Jumlah sudut maksimal poligon
 	 */
-	public static final int MAX_CORNER_COUNT = 24;
+	public static final int MAX_CORNER_COUNT = 16;
 	/**
 	 * Minimal radius awal poigon.
 	 */
@@ -206,7 +206,7 @@ public class PolygonObject extends BasicObject {
 	public int geomParamLength() {
 		// parameter pertama adalah jumlah corner, berikutnya adalah xlocs,
 		// kemudian ylocs
-		return corner << 1 + 1;
+		return MAX_CORNER_COUNT << 1 + 1;
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class PolygonObject extends BasicObject {
 		data[start++] = Float.intBitsToFloat(corner);
 		System.arraycopy(xLocs, 0, data, start, corner);
 		System.arraycopy(yLocs, 0, data, start + corner, corner);
-		return corner << 1 + 1;
+		return MAX_CORNER_COUNT << 1 + 1;
 	}
 
 	@Override
