@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 //--share---
 import com.facebook.Request;
 import com.facebook.Response;
@@ -15,8 +14,6 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.UserInfoChangedCallback;
-
-
 
 import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
@@ -57,12 +54,12 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	ParticipantManager manager;
 
 	ImageButton close;
-	ImageButton hide;
+	CheckBox hide;
 
 	// --- participant list ---
 	ListView partiList;
 	ProgressBar partiLoader;
-	Button partiReload;
+	ImageButton partiReload;
 	TextView partiFailed;
 	ParticipantAdapter adapter;
 	ImageButton invite;
@@ -75,18 +72,22 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	CheckBox downloadCropped;
 	Button downloadButton;
 	ArrayAdapter<String> formatAdapter;
-	
+
 	// --- share ---
 	CheckBox shareHeader;
 	View shareContainer;
 	LoginButton loginFb;
 	ImageButton shareFb;
-	private String TAG="Share";
+	private String TAG = "Share";
 	private UiLifecycleHelper uiHelper;
-	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");;
-	
+	private static final List<String> PERMISSIONS = Arrays
+			.asList("publish_actions");;
+
 	// --- report ---
 	CheckBox reportHeader;
+	View reportCont;
+	Button reportSend;
+	EditText reportInput;
 
 	// --- setting ---
 	View settCont;
@@ -94,92 +95,108 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	EditText settWidth, settHeight;
 	Button settOK;
 
-	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity, View parent) {
-		this.workspace = activity;
-		this.parent = parent;
+	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity,
+			View parent) {
 
-		close = (ImageButton) parent.findViewById(R.id.d_button_close);
-		close.setOnClickListener(this);
-		hide = (ImageButton) parent.findViewById(R.id.d_button_hide);
-		hide.setOnClickListener(this);
+		try {
+			this.workspace = activity;
+			this.parent = parent;
 
-		// ------ participant list ------
-		adapter = new ParticipantAdapter(this);
-		partiList = (ListView) parent.findViewById(R.id.d_parti_list);
-		partiList.setVisibility(View.GONE);
-		partiList.setAdapter(adapter);
-		partiLoader = (ProgressBar) parent
-				.findViewById(R.id.d_participant_loader);
-		partiReload = (Button) parent.findViewById(R.id.d_parti_reload);
-		partiReload.setVisibility(View.GONE);
-		partiReload.setOnClickListener(this);
-		partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
-		partiFailed.setVisibility(View.GONE);
-		invite = (ImageButton) parent.findViewById(R.id.d_add_user);
-		email = (EditText) parent.findViewById(R.id.d_insert_email);
-		invite.setOnClickListener(this);
+			close = (ImageButton) parent.findViewById(R.id.d_button_close);
+			close.setOnClickListener(this);
+			hide = (CheckBox) parent.findViewById(R.id.d_button_hide);
+			hide.setOnClickListener(this);
 
-		// ------ share -------
-		shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
-		shareHeader.setOnClickListener(this);
-		shareContainer = parent.findViewById(R.id.d_share_pane);
-		shareContainer.setVisibility(View.GONE);
-		uiHelper = new UiLifecycleHelper(workspace, statusCallback); 
-        uiHelper.onCreate(savedInstanceState); 
-        shareFb= (ImageButton) parent.findViewById(R.id.d_share_fb);
-        shareFb.setOnClickListener(this);
-        shareFb.setVisibility(View.GONE);
-        loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button); 
-        loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() { 
-        @Override
-                public void onUserInfoFetched(GraphUser user) { 
-                    if (user != null) { 
-                        postImage(); 
-                        uiHelper.onDestroy(); 
-                    } else { 
-                    } 
-                } 
-            }); 
-        loginFb.setVisibility(View.GONE); 
-        
-		
-		// ------ report ------
-		reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
-		reportHeader.setOnClickListener(this);
-		
-		// ------ download ------
-		downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
-		downHeader.setOnClickListener(this);
-		downContainer = parent.findViewById(R.id.d_download_pane);
-		downContainer.setVisibility(View.VISIBLE);
-		downloadFormat = (Spinner) parent.findViewById(R.id.d_download_format);
-		formatAdapter = new ArrayAdapter<>(activity,
-				android.R.layout.simple_list_item_1);
-		formatAdapter.add("PNG");
-		formatAdapter.add("JPG");
-		downloadFormat.setSelection(0);
-		downloadFormat.setAdapter(formatAdapter);
-		downloadCropped = (CheckBox) parent
-				.findViewById(R.id.d_checkbox_cropped);
-		downloadButton = (Button) parent.findViewById(R.id.d_button_download);
-		downloadButton.setOnClickListener(this);
+			// ------ participant list ------
+			adapter = new ParticipantAdapter(this);
+			partiList = (ListView) parent.findViewById(R.id.d_parti_list);
+			partiList.setVisibility(View.GONE);
+			partiList.setAdapter(adapter);
+			partiLoader = (ProgressBar) parent
+					.findViewById(R.id.d_participant_loader);
+			partiReload = (ImageButton) parent.findViewById(R.id.d_parti_reload);
+			partiReload.setVisibility(View.GONE);
+			partiReload.setOnClickListener(this);
+			partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
+			partiFailed.setVisibility(View.GONE);
+			invite = (ImageButton) parent.findViewById(R.id.d_add_user);
+			email = (EditText) parent.findViewById(R.id.d_insert_email);
+			invite.setOnClickListener(this);
 
-		settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
-		settHeader.setOnClickListener(this);
+			// ------ share -------
+			shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
+			shareHeader.setOnClickListener(this);
+			shareContainer = parent.findViewById(R.id.d_share_pane);
+			shareContainer.setVisibility(View.GONE);
+			uiHelper = new UiLifecycleHelper(workspace, statusCallback);
+			uiHelper.onCreate(savedInstanceState);
+			shareFb = (ImageButton) parent.findViewById(R.id.d_share_fb);
+			shareFb.setOnClickListener(this);
+			shareFb.setVisibility(View.GONE);
+			loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button);
+			loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() {
+				@Override
+				public void onUserInfoFetched(GraphUser user) {
+					if (user != null) {
+						postImage();
+						uiHelper.onDestroy();
+					} else {}
+				}
+			});
+			loginFb.setVisibility(View.GONE);
 
-		// sembuyikan pengaturan jika bukan owner
-		if (!workspace.canvas.getModel().owner.equals(CollaUserManager
-				.getCurrentUser())) {
-			settHeader.setVisibility(View.GONE);
+			// ------ report ------
+			reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
+			reportHeader.setOnClickListener(this);
+			reportCont = parent.findViewById(R.id.d_report_pane);
+			reportSend = (Button) parent.findViewById(R.id.d_report_send);
+			reportSend.setOnClickListener(this);
+			reportInput = (EditText) parent.findViewById(R.id.d_report_input);
+
+			// ------ download ------
+			downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
+			downHeader.setOnClickListener(this);
+			downContainer = parent.findViewById(R.id.d_download_pane);
+			downContainer.setVisibility(View.VISIBLE);
+			downloadFormat = (Spinner) parent
+					.findViewById(R.id.d_download_format);
+			formatAdapter = new ArrayAdapter<>(activity,
+					android.R.layout.simple_list_item_1);
+			formatAdapter.add("PNG");
+			formatAdapter.add("JPG");
+			downloadFormat.setSelection(0);
+			downloadFormat.setAdapter(formatAdapter);
+			downloadCropped = (CheckBox) parent
+					.findViewById(R.id.d_checkbox_cropped);
+			downloadButton = (Button) parent
+					.findViewById(R.id.d_button_download);
+			downloadButton.setOnClickListener(this);
+
+			settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
+			settHeader.setOnClickListener(this);
+
+			// sembuyikan pengaturan jika bukan owner
+			if (!workspace.canvas.getModel().owner.equals(CollaUserManager
+					.getCurrentUser())) {
+				settHeader.setVisibility(View.GONE);
+			}
+			settCont = parent.findViewById(R.id.d_setting_pane);
+			settCont.setVisibility(View.GONE);
+			settWidth = (EditText) parent.findViewById(R.id.d_width_input);
+			settHeight = (EditText) parent.findViewById(R.id.d_height_input);
+			settOK = (Button) parent.findViewById(R.id.d_button_resize);
+			settOK.setOnClickListener(this);
+
+			manager = ParticipantManager.getInstance().setListener(this);
+			
+			setCurrentTab(downHeader, downContainer);
+		} catch (Exception ex) {
+			android.util.Log.d("POS", "e:" + ex);
+			for (StackTraceElement s : ex.getStackTrace()) {
+				android.util.Log.d("POS", "ex:" + s);
+			}
 		}
-		settCont = parent.findViewById(R.id.d_setting_pane);
-		settCont.setVisibility(View.GONE);
-		settWidth = (EditText) parent.findViewById(R.id.d_width_input);
-		settHeight = (EditText) parent.findViewById(R.id.d_height_input);
-		settOK = (Button) parent.findViewById(R.id.d_button_resize);
-		settOK.setOnClickListener(this);
 
-		manager = ParticipantManager.getInstance().setListener(this);
 	}
 
 	@Override
@@ -187,67 +204,43 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		// main button
 		if (v == close) {
 			workspace.closeCanvas();
+
+			// --- share
 		} else if (v == shareHeader) {
-			settHeader.setChecked(false);
-			downHeader.setChecked(false);
-			settCont.setVisibility(View.GONE);
-			downContainer.setVisibility(View.GONE);
-			shareHeader.setChecked(true);
-			shareContainer.setVisibility(View.VISIBLE);
-			shareFb.setVisibility(View.VISIBLE);
-			reportHeader.setChecked(false);
-		} else if (v == shareFb){
+			setCurrentTab(shareHeader, shareContainer);
+		} else if (v == shareFb) {
 			loginFb.performClick();
-		}
-		else if (v == hide) {
+		} else if (v == hide) {
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
 
-			// participant
+			// --- participant
 		} else if (v == partiReload) {
 			reloadList();
-
 		} else if (v == invite) {
 			if (email.getText() == null) {} else {
 				manager.inviteUser(email.getText().toString(),
 						workspace.canvas.getModel());
 			}
-		}
-		// download
-		else if (v == downloadButton) {
+
+			// --- download
+		} else if (v == downloadButton) {
 			downloadCanvas();
 		} else if (v == downHeader) {
-			settHeader.setChecked(false);
-			settCont.setVisibility(View.GONE);
-			downHeader.setChecked(true);
-			downContainer.setVisibility(View.VISIBLE);
-			shareHeader.setChecked(true);
-			shareContainer.setVisibility(View.GONE);
-			shareFb.setVisibility(View.GONE);
-			reportHeader.setChecked(false);
-		} else if(v== reportHeader){
-			settHeader.setChecked(false);
-			downHeader.setChecked(false);
-			settCont.setVisibility(View.GONE);
-			downContainer.setVisibility(View.GONE);
-			shareHeader.setChecked(false);
-			shareContainer.setVisibility(View.GONE);
-			shareFb.setVisibility(View.GONE);
-			reportHeader.setChecked(true);
-			reportWork();
-		}// setting
-			else if (v == settHeader) {
-			downHeader.setChecked(false);
-			downContainer.setVisibility(View.GONE);
-			settHeader.setChecked(true);
-			settCont.setVisibility(View.VISIBLE);
+			setCurrentTab(downHeader, downContainer);
+
+			// --- report
+		} else if (v == reportHeader) {
+			setCurrentTab(reportHeader, reportCont);
+		} else if (v == reportSend) {
+			reportBug();
+
+			// --- setting
+		} else if (v == settHeader) {
+			setCurrentTab(settHeader, settCont);
 			settWidth.setText(String.valueOf(workspace.canvas.getModel()
 					.getWidth()));
 			settHeight.setText(String.valueOf(workspace.canvas.getModel()
 					.getHeight()));
-			shareHeader.setChecked(false);
-			shareContainer.setVisibility(View.GONE);
-			shareFb.setVisibility(View.GONE);
-			reportHeader.setChecked(false);
 		} else if (v == settOK) {
 			// ubah ukuran kanvas
 			int width = Integer.parseInt(settWidth.getText().toString());
@@ -256,9 +249,24 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		}
 	}
 
-	private void reportWork() {
-		// TODO
-		createDialog("report");
+	/**
+	 * Menampilkan sebuah tab, dan menutup tab lain.
+	 * @param header
+	 * @param content
+	 */
+	void setCurrentTab(CheckBox header, View content) {
+		settHeader.setChecked(false);
+		downHeader.setChecked(false);
+		shareHeader.setChecked(false);
+		reportHeader.setChecked(false);
+		settCont.setVisibility(View.GONE);
+		downContainer.setVisibility(View.GONE);
+		shareContainer.setVisibility(View.GONE);
+		reportCont.setVisibility(View.GONE);
+
+		header.setChecked(true);
+		content.setVisibility(View.VISIBLE);
+
 	}
 
 	private void downloadCanvas() {
@@ -352,148 +360,106 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 		manager.kickUser(part.user, part.canvas);
 	}
 
-	private void createDialog(String what) {
-		LayoutInflater li = workspace.getLayoutInflater();
-		View promptsView;
+	private void reportBug() {
+		// get user input and set it to result
+		// edit text
+		String to = "darwinmdn12@gmail.com";
+		String subject = "report bug 3:)";
+		String message = reportInput.getText().toString();
 
-		promptsView = li.inflate(R.layout.dialog_report, null);
+		Intent email = new Intent(Intent.ACTION_SEND);
+		email.putExtra(Intent.EXTRA_EMAIL, new String[] { to });
+		// email.putExtra(Intent.EXTRA_CC, new
+		// String[]{ to});
+		// email.putExtra(Intent.EXTRA_BCC, new
+		// String[]{to});
+		email.putExtra(Intent.EXTRA_SUBJECT, subject);
+		email.putExtra(Intent.EXTRA_TEXT, message);
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-				workspace);
+		// need this to prompts email client only
+		email.setType("message/rfc822");
 
-		alertDialogBuilder.setView(promptsView);
+		workspace.startActivity(Intent.createChooser(email,
+				"Choose an Email client :"));
+	}
 
-		// Report Here
-		if (what.equals("report")) {
-			final EditText userInput = (EditText) promptsView
-					.findViewById(R.id.editTextDialogUserInput);
+	// ======================SHARE===========================================
 
-			// set dialog message
-			alertDialogBuilder
-					.setCancelable(false)
-					.setPositiveButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// get user input and set it to result
-									// edit text
-									String to = "darwinmdn12@gmail.com";
-									String subject = "report bug 3:)";
-									String message = userInput.getText()
-											.toString();
+	private Session.StatusCallback statusCallback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state,
+				Exception exception) {
+			if (state.isOpened()) {
+				Log.d("FacebookSampleActivity", "Facebook session opened");
+			} else if (state.isClosed()) {
+				Log.d("FacebookSampleActivity", "Facebook session closed");
+			}
+		}
+	};
 
-									Intent email = new Intent(
-											Intent.ACTION_SEND);
-									email.putExtra(Intent.EXTRA_EMAIL,
-											new String[] { to });
-									// email.putExtra(Intent.EXTRA_CC, new
-									// String[]{ to});
-									// email.putExtra(Intent.EXTRA_BCC, new
-									// String[]{to});
-									email.putExtra(Intent.EXTRA_SUBJECT,
-											subject);
-									email.putExtra(Intent.EXTRA_TEXT, message);
+	public void postImage() {
+		if (checkPermissions()) {
+			CanvasExporter export = new CanvasExporter();
+			export.export(workspace.canvas.getModel(), CompressFormat.PNG,
+					false, false);
+			File image = export.getResultFile();
 
-									// need this to prompts email client only
-									email.setType("message/rfc822");
+			Bitmap img = BitmapFactory.decodeFile(image.getPath());
 
-									workspace.startActivity(Intent
-											.createChooser(email,
-													"Choose an Email client :"));
-								}
-							})
-					.setNegativeButton("Cancel",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.cancel();
-								}
-							});
+			Request uploadRequest = Request.newUploadPhotoRequest(
+					Session.getActiveSession(), img, new Request.Callback() {
+						@Override
+						public void onCompleted(Response response) {
+							Toast.makeText(workspace,
+									"Photo uploaded successfully",
+									Toast.LENGTH_LONG).show();
+						}
+					});
+			uploadRequest.executeAsync();
+			if (Session.getActiveSession() != null) {
+				Session.getActiveSession().closeAndClearTokenInformation();
+			}
+
+			Session.setActiveSession(null);
+		} else {
+			requestPermissions();
 		}
 
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
 	}
-	
-	//======================SHARE=========================================== 
-    
-    private Session.StatusCallback statusCallback = new Session.StatusCallback() { 
-        @Override
-        public void call(Session session, SessionState state, 
-                Exception exception) { 
-            if (state.isOpened()) { 
-                Log.d("FacebookSampleActivity", "Facebook session opened"); 
-            } else if (state.isClosed()) { 
-                Log.d("FacebookSampleActivity", "Facebook session closed"); 
-            } 
-        } 
-    }; 
-      
-    public void postImage() { 
-        if (checkPermissions()) { 
-            CanvasExporter export=new CanvasExporter(); 
-            export.export(workspace.canvas.getModel(), CompressFormat.PNG, false, false); 
-            File image= export.getResultFile(); 
-              
-            Bitmap img = BitmapFactory.decodeFile(image.getPath()); 
-              
-            Request uploadRequest = Request.newUploadPhotoRequest( 
-                    Session.getActiveSession(), img, new Request.Callback() { 
-                        @Override
-                        public void onCompleted(Response response) { 
-                            Toast.makeText(workspace, 
-                                    "Photo uploaded successfully", 
-                                    Toast.LENGTH_LONG).show(); 
-                        } 
-                    }); 
-            uploadRequest.executeAsync(); 
-            if (Session.getActiveSession() != null) { 
-                Session.getActiveSession().closeAndClearTokenInformation(); 
-            } 
-  
-            Session.setActiveSession(null); 
-        } else { 
-            requestPermissions();} 
-          
-   } 
-      
-    public boolean checkPermissions() { 
-        Session s = Session.getActiveSession(); 
-        if (s != null) { 
-            return s.getPermissions().contains("publish_actions"); 
-        } else
-            return false; 
-    } 
-   
-    public void requestPermissions() { 
-        Session s = Session.getActiveSession(); 
-        if (s != null) 
-            s.requestNewPublishPermissions(new Session.NewPermissionsRequest( 
-                    workspace, PERMISSIONS)); 
-    } 
-      
-    void onResume() { 
-        uiHelper.onResume(); 
-    } 
-   
-    void onPause() { 
-        uiHelper.onPause(); 
-    } 
-   
-    void onDestroy() {  
-        uiHelper.onDestroy(); 
-    } 
-   
-	void onActivityResult(int requestCode, int resultCode, Intent data) { 
-        uiHelper.onActivityResult(requestCode, resultCode, data); 
-    } 
-   
-	void onSaveInstanceState(Bundle savedState) { 
-        uiHelper.onSaveInstanceState(savedState); 
-    } 
-	
-	
+
+	public boolean checkPermissions() {
+		Session s = Session.getActiveSession();
+		if (s != null) {
+			return s.getPermissions().contains("publish_actions");
+		} else
+			return false;
+	}
+
+	public void requestPermissions() {
+		Session s = Session.getActiveSession();
+		if (s != null)
+			s.requestNewPublishPermissions(new Session.NewPermissionsRequest(
+					workspace, PERMISSIONS));
+	}
+
+	void onResume() {
+		uiHelper.onResume();
+	}
+
+	void onPause() {
+		uiHelper.onPause();
+	}
+
+	void onDestroy() {
+		uiHelper.onDestroy();
+	}
+
+	void onActivityResult(int requestCode, int resultCode, Intent data) {
+		uiHelper.onActivityResult(requestCode, resultCode, data);
+	}
+
+	void onSaveInstanceState(Bundle savedState) {
+		uiHelper.onSaveInstanceState(savedState);
+	}
+
 }

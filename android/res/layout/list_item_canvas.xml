@@ -6,15 +6,13 @@
     android:orientation="horizontal"
     android:padding="5dp" >
 
-    <ImageButton
-        android:id="@+id/lc_delete"
+    <TextView
+        android:id="@+id/lc_canvas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="8dp"
-        android:background="@drawable/button_round"
-        android:src="@drawable/ic_action_cancel" />
+        android:gravity="center_vertical"
+        android:text="canvas name"
+        android:textColor="@color/dark" />
 
     <TextView
         android:id="@+id/lc_user"
@@ -24,16 +22,15 @@
         android:layout_alignTop="@+id/lc_delete"
         android:layout_toLeftOf="@+id/lc_delete"
         android:gravity="center_vertical"
-        android:text="username" />
+        android:text="username"
+        android:textColor="@color/dark" />
 
-    <TextView
-        android:id="@+id/lc_canvas"
+    <ImageButton
+        android:id="@+id/lc_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/lc_user"
-        android:layout_alignParentLeft="true"
-        android:layout_alignTop="@+id/lc_user"
-        android:gravity="center_vertical"
-        android:text="canvas name" />
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/button_round"
+        android:src="@drawable/ic_action_cancel" />
 
 </LinearLayout>
