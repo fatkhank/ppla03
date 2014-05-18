@@ -18,6 +18,7 @@ import android.text.LoginFilter;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -289,8 +290,6 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			Intent intent = new Intent(this, LoaderActivity.class);
 			startActivity(intent);
 			finish();
-		} else if (parent == inviteList) {
-
 		}
 	}
 
@@ -337,7 +336,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	@Override
 	public void onDeleted(CanvasModel model, int status) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	/**
@@ -347,7 +346,45 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	 */
 	void responseInvitation(CanvasModel model, InviteResponse response) {
 		// TODO response invitation
+		LayoutInflater li = this.getLayoutInflater();
+		View promptsView;
+		final InviteResponse hola = response;
+		final CanvasModel model2 = model;
+
+		promptsView = li.inflate(R.layout.dialog_sure, null);
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		alertDialogBuilder.setView(promptsView);
+
+			// set dialog message
+			alertDialogBuilder
+					.setCancelable(false)
+					.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									final ParticipantManager hoho = new ParticipantManager();
+									hoho.responseInvitation(model2, CollaUserManager.getCurrentUser(), hola);
+									loadCanvasList();
+								}
+							})
+					.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
+		
 	}
+
 
 	/**
 	 * Menghapus kanvas yang dimiliki seorang user
@@ -355,6 +392,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	 */
 	void deleteCanvas(CanvasModel model) {
 		// TODO delete canvas
+		
 	}
 
 	/**
@@ -391,4 +429,5 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onAnimationRepeat(Animator animation) {}
+	
 }
