@@ -75,7 +75,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/button_box_dark"
+        android:background="@drawable/button_textbox_dark"
         android:text="Create"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/dark" />

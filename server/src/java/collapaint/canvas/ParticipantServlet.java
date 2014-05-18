@@ -59,7 +59,6 @@ public class ParticipantServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
-                System.out.println("q:" + request);
                 int action = request.getInt(Request.ACTION);
                 int canvasId = request.getInt(Request.CANVAS_ID);
                 int userId = request.getInt(Request.USER_ID);
@@ -78,7 +77,6 @@ public class ParticipantServlet extends HttpServlet {
             } catch (NullPointerException | ClassCastException | SQLException ex) {
                 reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.BAD_REQUEST);
             }
-            System.out.println("p:" + reply.build());
             out.println(reply.build());
         }
     }

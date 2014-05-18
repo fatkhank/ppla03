@@ -24,10 +24,11 @@
         <CheckBox
             android:id="@+id/w_show_dash"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
             android:background="@drawable/checkbox_topbar"
             android:button="@drawable/ic_action_overflow"
             android:contentDescription="@string/emptyString2"
@@ -40,14 +41,14 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="4dp"
             android:layout_toRightOf="@+id/w_show_dash"
-            android:background="@color/black_transparent" />
+            android:background="@android:color/white" />
 
         <CheckBox
             android:id="@+id/w_select"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp"
+            android:layout_marginLeft="4dp"
             android:layout_toRightOf="@+id/w_divider1"
             android:background="@drawable/checkbox_topbar"
             android:button="@drawable/ic_action_select_all"
@@ -57,9 +58,9 @@
         <CheckBox
             android:id="@+id/w_hand"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp"
+            android:layout_marginLeft="8dp"
             android:layout_toRightOf="@+id/w_select"
             android:background="@drawable/checkbox_topbar"
             android:button="@drawable/ic_hand"
@@ -69,9 +70,9 @@
         <ImageButton
             android:id="@+id/w_undo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp"
+            android:layout_marginLeft="8dp"
             android:layout_toRightOf="@+id/w_hand"
             android:background="@drawable/button_round"
             android:contentDescription="@string/emptyString2"
@@ -80,9 +81,9 @@
         <ImageButton
             android:id="@+id/w_redo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp"
+            android:layout_marginLeft="4dp"
             android:layout_toRightOf="@+id/w_undo"
             android:background="@drawable/button_round"
             android:contentDescription="@string/emptyString2"
@@ -93,13 +94,12 @@
             android:id="@+id/w_canvas_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/w_redo"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/w_selection_pane"
             android:layout_toRightOf="@+id/w_redo"
+            android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
             android:lines="1"
-            android:ellipsize="end"
             android:text="Untitled (hide mode)"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
@@ -108,7 +108,7 @@
         <LinearLayout
             android:id="@+id/w_selection_pane"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:orientation="horizontal" >
@@ -116,42 +116,43 @@
             <ImageButton
                 android:id="@+id/w_sel_cut"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:background="@drawable/button_round"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_cut" />
 
             <ImageButton
                 android:id="@+id/w_sel_copy"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:background="@drawable/button_round"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_copy" />
 
             <ImageButton
                 android:id="@+id/w_sel_move"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:background="@drawable/button_round"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_move" />
 
             <ImageButton
                 android:id="@+id/w_sel_del"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:background="@drawable/button_round"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_discard" />
 
             <CheckBox
                 android:id="@+id/w_show_property"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_dark_onpress"
                 android:button="@drawable/icon_property"
                 android:text="@string/emptyString2" />
+
         </LinearLayout>
     </RelativeLayout>
 
@@ -188,7 +189,7 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
-        android:visibility="visible" />
+        android:visibility="gone" />
     
 
 </RelativeLayout>

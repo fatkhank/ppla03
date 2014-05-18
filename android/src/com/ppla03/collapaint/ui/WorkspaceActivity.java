@@ -48,8 +48,8 @@ import android.widget.ToggleButton;
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
-		OnCheckedChangeListener, OnEditorActionListener, AnimationListener,
-		CanvasCloseListener, AnimatorUpdateListener, AnimatorListener {
+		OnCheckedChangeListener, OnEditorActionListener, CanvasCloseListener,
+		AnimatorUpdateListener, AnimatorListener {
 
 	// --------- top bar ---------
 	private View topbar;
@@ -77,8 +77,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private View colorPaneView;
 	private View propertyPane;
 
-	private ScaleAnimation animPropShow;
-	private ScaleAnimation animPropHide;
+	private ValueAnimator animProp;
 
 	// --------- stroke setting ---------
 	private RelativeLayout strokePane;
@@ -149,18 +148,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- property pane ---
 			propertyPane = (View) findViewById(R.id.w_property_scroll);
 			propertyPane.setVisibility(View.GONE);
-			animPropShow = new ScaleAnimation(0, 1, 0, 1,
-					ScaleAnimation.RELATIVE_TO_SELF, 1,
-					ScaleAnimation.RELATIVE_TO_SELF, 0);
-			animPropShow.setDuration(300);
-			animPropShow.setAnimationListener(this);
-			animPropShow.setFillAfter(true);
-			animPropHide = new ScaleAnimation(1, 0, 1, 0,
-					ScaleAnimation.RELATIVE_TO_SELF, 1,
-					ScaleAnimation.RELATIVE_TO_SELF, 0);
-			animPropHide.setDuration(300);
-			animPropHide.setAnimationListener(this);
-			animPropHide.setFillAfter(false);
+			animProp = new ValueAnimator();
+			animProp.addListener(this);
+			animProp.addUpdateListener(this);
+			animProp.setDuration(500);
 
 			// --------- stroke ---------
 			strokePane = (RelativeLayout) findViewById(R.id.w_prop_stroke);
@@ -270,7 +261,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// sama seperti showdash dipencet
-		showDash.performClick();
+		onClick(showDash);
 		return true;
 	}
 
@@ -381,19 +372,19 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					dashboardView.setY(-dashboardView.getHeight());
 				animDash.setFloatValues(dashboardView.getY(),
 						topbar.getHeight());
-				
+
 				canvas.approveAction();
-				
+
 				hand.setVisibility(View.GONE);
 				select.setVisibility(View.GONE);
 				undo.setVisibility(View.GONE);
 				redo.setVisibility(View.GONE);
-				
+
 			} else {
 				// sembunyikan
 				animDash.setFloatValues(dashboardView.getY(),
 						-dashboardView.getHeight());
-				
+
 				hand.setVisibility(View.VISIBLE);
 				select.setVisibility(View.VISIBLE);
 				undo.setVisibility(View.VISIBLE);
@@ -401,6 +392,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			}
 			animDash.start();
 		} else if (v == showProp) {
+
 			setPropPaneVisibility(showProp.isChecked());
 		}
 
@@ -539,146 +531,131 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private void setPropPaneVisibility(boolean visible) {
 		int vis = propertyPane.getVisibility();
 		if (visible) {
-			if (vis == View.GONE) {
-				propertyPane.startAnimation(animPropShow);
+			// animasikan proppane
+			if (vis == View.GONE)
+				propertyPane.setY(-propertyPane.getHeight());
+			animProp.setFloatValues(propertyPane.getY(), topbar.getHeight());
 
-				if (strokePane.getVisibility() == View.VISIBLE) {
-					// warna stroke
-					Integer strColor = (Integer) canvas
-							.getObjectParam(Param.strokeColor);
-					if (strokeColor != null)
-						strokeColor.setBackgroundColor(strColor.intValue());
-					else
-						strokeColor.setBackgroundColor((int) canvas
-								.getState(Param.strokeColor));
+			// atur nilai pengaturan stroke
+			if (strokePane.getVisibility() == View.VISIBLE) {
+				// warna stroke
+				Integer strColor = (Integer) canvas
+						.getObjectParam(Param.strokeColor);
+				if (strokeColor != null)
+					strokeColor.setBackgroundColor(strColor.intValue());
+				else
+					strokeColor.setBackgroundColor((int) canvas
+							.getState(Param.strokeColor));
 
-					// tebal stroke
-					Integer strWidth = (Integer) canvas
-							.getObjectParam(Param.strokeWidth);
-					if (strWidth == null)
-						strWidth = (int) canvas.getState(Param.strokeWidth);
-					strokeWidth.setProgress(strWidth.intValue()
-							- CanvasObject.MIN_STROKE_WIDTH);
-					strokeWidthText.setText(String.valueOf(strWidth));
+				// tebal stroke
+				Integer strWidth = (Integer) canvas
+						.getObjectParam(Param.strokeWidth);
+				if (strWidth == null)
+					strWidth = (int) canvas.getState(Param.strokeWidth);
+				strokeWidth.setProgress(strWidth.intValue()
+						- CanvasObject.MIN_STROKE_WIDTH);
+				strokeWidthText.setText(String.valueOf(strWidth));
 
-					// style stroke
-					Integer strStyle = (Integer) canvas
-							.getObjectParam(Param.strokeStyle);
-					if (strStyle != null)
-						strokeStyle.setSelection(strStyle.intValue());
-					else
-						strokeStyle.setSelection((int) canvas
-								.getState(Param.strokeStyle));
-				}
+				// style stroke
+				Integer strStyle = (Integer) canvas
+						.getObjectParam(Param.strokeStyle);
+				if (strStyle != null)
+					strokeStyle.setSelection(strStyle.intValue());
+				else
+					strokeStyle.setSelection((int) canvas
+							.getState(Param.strokeStyle));
+			}
 
-				if (textPane.getVisibility() == View.VISIBLE) {
-					// isi teks
-					String textContent = (String) canvas
-							.getObjectParam(Param.textContent);
-					if (textContent != null)
-						textInput.setText(textContent);
+			// atur nilai pengaturan teks
+			if (textPane.getVisibility() == View.VISIBLE) {
+				// isi teks
+				String textContent = (String) canvas
+						.getObjectParam(Param.textContent);
+				if (textContent != null)
+					textInput.setText(textContent);
 
-					// warna teks
-					Integer txtColor = (Integer) canvas
-							.getObjectParam(Param.textColor);
-					if (txtColor != null)
-						textColor.setBackgroundColor(txtColor.intValue());
-					else
-						textColor.setBackgroundColor((int) canvas
-								.getState(Param.textColor));
+				// warna teks
+				Integer txtColor = (Integer) canvas
+						.getObjectParam(Param.textColor);
+				if (txtColor != null)
+					textColor.setBackgroundColor(txtColor.intValue());
+				else
+					textColor.setBackgroundColor((int) canvas
+							.getState(Param.textColor));
 
-					// ukuran teks
-					Integer txtSize = (Integer) canvas
-							.getObjectParam(Param.textSize);
-					if (txtSize == null)
-						txtSize = (Integer) canvas.getState(Param.textSize);
-					textSize.setProgress(txtSize.intValue()
-							- FontManager.MIN_FONT_SIZE);
-					textSizeText.setText(String.valueOf(txtSize));
+				// ukuran teks
+				Integer txtSize = (Integer) canvas
+						.getObjectParam(Param.textSize);
+				if (txtSize == null)
+					txtSize = (Integer) canvas.getState(Param.textSize);
+				textSize.setProgress(txtSize.intValue()
+						- FontManager.MIN_FONT_SIZE);
+				textSizeText.setText(String.valueOf(txtSize));
 
-					// teks bold
-					Boolean txtBold = (Boolean) canvas
-							.getObjectParam(Param.fontBold);
-					if (txtBold != null)
-						textBold.setChecked(txtBold.booleanValue());
-					else
-						textBold.setChecked((boolean) canvas
-								.getState(Param.fontBold));
+				// teks bold
+				Boolean txtBold = (Boolean) canvas
+						.getObjectParam(Param.fontBold);
+				if (txtBold != null)
+					textBold.setChecked(txtBold.booleanValue());
+				else
+					textBold.setChecked((boolean) canvas
+							.getState(Param.fontBold));
 
-					// teks italic
-					Boolean txtItalic = (Boolean) canvas
-							.getObjectParam(Param.fontItalic);
-					if (txtItalic != null)
-						textItalic.setChecked(txtItalic.booleanValue());
-					else
-						textItalic.setChecked((boolean) canvas
-								.getState(Param.fontItalic));
+				// teks italic
+				Boolean txtItalic = (Boolean) canvas
+						.getObjectParam(Param.fontItalic);
+				if (txtItalic != null)
+					textItalic.setChecked(txtItalic.booleanValue());
+				else
+					textItalic.setChecked((boolean) canvas
+							.getState(Param.fontItalic));
 
-					// teks bergaris bawah
-					Boolean txtUline = (Boolean) canvas
-							.getObjectParam(Param.textUnderline);
-					if (txtUline != null)
-						textUnderline.setChecked(txtUline.booleanValue());
-					else
-						textUnderline.setChecked((boolean) canvas
-								.getState(Param.textUnderline));
-				}
+				// teks bergaris bawah
+				Boolean txtUline = (Boolean) canvas
+						.getObjectParam(Param.textUnderline);
+				if (txtUline != null)
+					textUnderline.setChecked(txtUline.booleanValue());
+				else
+					textUnderline.setChecked((boolean) canvas
+							.getState(Param.textUnderline));
+			}
 
-				if (fillPane.getVisibility() == View.VISIBLE) {
-					Boolean filled = (Boolean) canvas
-							.getObjectParam(Param.filled);
-					if (filled != null)
-						fillCheck.setChecked(true);
-					else
-						fillCheck.setChecked(false);
+			// atur nilai pengaturan fill
+			if (fillPane.getVisibility() == View.VISIBLE) {
+				Boolean filled = (Boolean) canvas.getObjectParam(Param.filled);
+				if (filled != null)
+					fillCheck.setChecked(true);
+				else
+					fillCheck.setChecked(false);
 
-					Integer fColor = (Integer) canvas
-							.getObjectParam(Param.fillColor);
-					if (fColor != null)
-						fillColor.setBackgroundColor(fColor.intValue());
-					else
-						fillColor.setBackgroundColor((int) canvas
-								.getState(Param.fillColor));
+				Integer fColor = (Integer) canvas
+						.getObjectParam(Param.fillColor);
+				if (fColor != null)
+					fillColor.setBackgroundColor(fColor.intValue());
+				else
+					fillColor.setBackgroundColor((int) canvas
+							.getState(Param.fillColor));
 
-				}
+			}
 
-				if (shapePane.getVisibility() == View.VISIBLE) {
-					Integer polyCount = (Integer) canvas
-							.getObjectParam(Param.polygonCorner);
-					if (polyCount == null)
-						polyCount = (int) canvas.getState(Param.polygonCorner);
+			// atur nilai pengaturan bentuk poligon
+			if (shapePane.getVisibility() == View.VISIBLE) {
+				Integer polyCount = (Integer) canvas
+						.getObjectParam(Param.polygonCorner);
+				if (polyCount == null)
+					polyCount = (int) canvas.getState(Param.polygonCorner);
 
-					polySeek.setProgress(polyCount.intValue()
-							- PolygonObject.MIN_CORNER_COUNT);
-					polyText.setText(String.valueOf(polyCount));
-				}
+				polySeek.setProgress(polyCount.intValue()
+						- PolygonObject.MIN_CORNER_COUNT);
+				polyText.setText(String.valueOf(polyCount));
 			}
 		} else {
-			if (vis == View.VISIBLE)
-				propertyPane.startAnimation(animPropHide);
+			// sembunyikan proppane
+			animProp.setFloatValues(propertyPane.getY(),
+					-propertyPane.getHeight());
 		}
+		animProp.start();
 	}
-
-	@Override
-	public void onAnimationStart(Animation animation) {
-		if (animation == animPropShow) {
-			propertyPane.setVisibility(View.VISIBLE);
-		}
-	}
-
-	@Override
-	public void onAnimationEnd(Animation animation) {
-		if (animation == animPropHide) {
-			propertyPane.setVisibility(View.GONE);
-			hand.setVisibility(View.VISIBLE);
-			select.setVisibility(View.VISIBLE);
-			undo.setVisibility(View.VISIBLE);
-			redo.setVisibility(View.VISIBLE);
-		}
-	}
-
-	@Override
-	public void onAnimationRepeat(Animation animation) {}
 
 	@Override
 	public void onCanvasClosed(int status) {
@@ -692,6 +669,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (animation == animDash) {
 			Float f = (Float) animDash.getAnimatedValue();
 			dashboardView.setY(f);
+		} else if (animation == animProp) {
+			Float f = (Float) animProp.getAnimatedValue();
+			propertyPane.setY(f);
 		}
 	}
 
@@ -702,6 +682,11 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				// memulai animasi show dashboard
 				dashboard.show();
 			}
+		} else if (animation == animProp) {
+			if (showProp.isChecked()) {
+				// memulai animasi show proppane
+				propertyPane.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
@@ -711,6 +696,11 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (!showDash.isChecked()) {
 				// selesai animasi hide dashboard
 				dashboard.hide();
+			}
+		} else if (animation == animProp) {
+			if (!showProp.isChecked()) {
+				// selesai animasi hide proppane
+				propertyPane.setVisibility(View.GONE);
 			}
 		}
 	}
