@@ -4,7 +4,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
-    android:padding="5dp"
     android:textAlignment="center" >
 
     <RelativeLayout
@@ -62,14 +61,15 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
 
-        <Button
+        <ImageButton
             android:id="@+id/d_parti_reload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_round"
-            android:text="Reload" />
+            android:src="@drawable/ic_action_refresh"
+            android:textColor="@color/dark" />
 
         <TextView
             android:id="@+id/d_parti_failed"
@@ -83,16 +83,55 @@
 
     <RelativeLayout
         android:id="@+id/d_title"
-        android:layout_width="200dp"
+        android:layout_width="@dimen/d_options_width"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:background="#eeeeee"
+        android:padding="8dp" >
+
+        <RelativeLayout
+            android:id="@+id/d_report_pane"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/d_divider_second_content" >
+
+            <TextView
+                android:id="@+id/d_report_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:gravity="center_horizontal"
+                android:text="State the bug : "
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark" />
+
+            <EditText
+                android:id="@+id/d_report_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/d_report_send"
+                android:layout_below="@+id/d_report_title"
+                android:layout_margin="4dp"
+                android:inputType="textMultiLine" />
+
+            <Button
+                android:id="@+id/d_report_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/button_box_dark"
+                android:padding="4dp"
+                android:text="Send"
+                android:textColor="@color/dark" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/d_setting_pane"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/d_second_button"
+            android:layout_below="@+id/d_divider_second_content"
             android:orientation="vertical"
             android:visibility="gone" >
 
@@ -100,10 +139,11 @@
                 android:id="@+id/d_setting_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
                 android:text="Resize canvas"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark" />
 
             <TextView
                 android:id="@+id/d_setting_x"
@@ -112,7 +152,8 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:text="x"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/dark" />
 
             <Button
                 android:id="@+id/d_button_resize"
@@ -120,9 +161,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/button_round"
+                android:background="@drawable/button_box_dark"
                 android:gravity="center_vertical|center_horizontal|start"
-                android:text="Resize" />
+                android:padding="4dp"
+                android:text="Resize"
+                android:textColor="@color/dark" />
 
             <EditText
                 android:id="@+id/d_width_input"
@@ -132,7 +175,8 @@
                 android:layout_toLeftOf="@+id/d_setting_x"
                 android:ems="10"
                 android:imeOptions="actionDone|flagNoFullscreen"
-                android:inputType="number" />
+                android:inputType="number"
+                android:textColor="@color/dark" />
 
             <EditText
                 android:id="@+id/d_height_input"
@@ -144,7 +188,8 @@
                 android:layout_toRightOf="@+id/d_setting_x"
                 android:ems="10"
                 android:imeOptions="actionDone|flagNoFullscreen"
-                android:inputType="number" />
+                android:inputType="number"
+                android:textColor="@color/dark" />
         </RelativeLayout>
 
         <LinearLayout
@@ -152,15 +197,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" >
+            android:layout_alignParentRight="true"
+            android:padding="4dp" >
 
-            <ImageButton
+            <CheckBox
                 android:id="@+id/d_button_hide"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.03"
                 android:background="@drawable/button_round"
-                android:src="@drawable/unhide" />
+                android:button="@drawable/icon_hide"
+                android:padding="5dp"
+                android:text="Hide"
+                android:textColor="@color/dark" />
 
             <ImageButton
                 android:id="@+id/d_button_close"
@@ -171,13 +220,20 @@
                 android:src="@drawable/ic_action_cancel" />
         </LinearLayout>
 
+        <View
+            android:id="@+id/d_divider_main_second"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/d_main_button"
+            android:background="@color/black_transparent" />
+
         <LinearLayout
             android:id="@+id/d_second_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/d_main_button"
+            android:layout_below="@+id/d_divider_main_second"
             android:layout_marginTop="10dp"
             android:orientation="horizontal" >
 
@@ -186,26 +242,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/checkbox_topbar"
+                android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_download"
-                android:checked="true" />
+                android:checked="true"
+                android:text="@string/emptyString2" />
 
             <CheckBox
                 android:id="@+id/d_setting_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/checkbox_topbar"
+                android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_settings"
-                android:checked="true" />
+                android:checked="true"
+                android:text="@string/emptyString2" />
 
             <CheckBox
                 android:id="@+id/d_share_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_share"
-                android:checked="false"
+                android:checked="true"
                 android:text="@string/emptyString2" />
 
             <CheckBox
@@ -213,9 +272,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:button="@drawable/bug"
+                android:background="@drawable/d_tab_header"
+                android:button="@drawable/ic_bug"
+                android:checked="true"
                 android:text="@string/emptyString2" />
         </LinearLayout>
+
+        <View
+            android:id="@+id/d_divider_second_content"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/d_second_button"
+            android:background="@color/black_transparent" />
 
         <RelativeLayout
             android:id="@+id/d_download_pane"
@@ -223,8 +291,17 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/d_second_button"
-            android:visibility="visible" >
+            android:layout_below="@+id/d_divider_second_content"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/d_download_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="Download canvas"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark" />
 
             <TextView
                 android:id="@+id/d_text_format"
@@ -232,10 +309,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/d_download_format"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
+                android:layout_below="@+id/d_download_title"
                 android:gravity="center_vertical"
                 android:text="Format"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark" />
 
             <Spinner
                 android:id="@+id/d_download_format"
@@ -250,10 +328,12 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/button_round"
+                android:background="@drawable/button_box_dark"
                 android:gravity="center_vertical|center_horizontal|start"
+                android:padding="4dp"
                 android:text="Download"
-                android:textAlignment="gravity" />
+                android:textAlignment="gravity"
+                android:textColor="@color/dark" />
 
             <CheckBox
                 android:id="@+id/d_checkbox_cropped"
@@ -262,7 +342,8 @@
                 android:layout_below="@+id/d_download_format"
                 android:layout_centerHorizontal="true"
                 android:gravity="center_vertical|start"
-                android:text="cropped" />
+                android:text="cropped"
+                android:textColor="@color/dark" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -271,26 +352,37 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/d_second_button"
-            android:visibility="visible" >
+            android:layout_below="@+id/d_divider_second_content"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/d_share_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:text="Share canvas"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark" />
 
             <ImageButton
                 android:id="@+id/d_share_fb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/d_share_title"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="32dp"
                 android:layout_weight="1"
                 android:background="@drawable/share_facebook"
                 android:src="@android:color/transparent" />
 
-            
             <com.facebook.widget.LoginButton
-        		android:id="@+id/fb_login_button"
-        		android:layout_width="wrap_content"
-        		android:layout_height="wrap_content"
-        		android:layout_marginTop="5dp"
-        		facebook:confirm_logout="true"
-        		facebook:fetch_user_info="true" />
-            
+                android:id="@+id/fb_login_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                facebook:confirm_logout="true"
+                facebook:fetch_user_info="true" />
         </RelativeLayout>
     </RelativeLayout>
 

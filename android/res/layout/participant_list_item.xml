@@ -10,7 +10,8 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/p_list_close"
-        android:text="erdefd" />
+        android:text="erdefd"
+        android:textColor="@color/dark" />
 
     <ImageButton
         android:id="@+id/p_list_close"

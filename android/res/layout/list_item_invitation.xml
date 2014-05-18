@@ -11,7 +11,8 @@
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:text="Canvas name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <ImageButton
         android:id="@+id/b_invite_decline"
@@ -32,7 +33,8 @@
         android:layout_toLeftOf="@+id/b_invite_accept"
         android:gravity="center_vertical"
         android:text="owner name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
     <ImageButton
         android:id="@+id/b_invite_accept"
