@@ -197,17 +197,45 @@ public class BrowserConnector extends ServerConnector {
 							oldList, oldList, newList);
 				}
 			} else
-				listFetchListener.onListFetched(asker, status, ownList, oldList,
-						newList);
+				listFetchListener.onListFetched(asker, status, ownList,
+						oldList, newList);
 		}
 	};
+
+	CanvasModel deletedModel;
 
 	/**
 	 * Menghapus suatu kanvas
 	 * @param model
 	 */
 	public void deleteCanvas(UserModel user, CanvasModel model) {
-		// TODO delete canvas
+		JSONObject request = new JSONObject();
+		try {
+			deletedModel = model;
 
+			request.put(Request.ACTION, Request.Action.DELETE);
+			request.put(Request.CANVAS_ID, model.getId());
+			request.put(Request.USER_ID, user.collaID);
+
+			new Client(CANVAS_URL, replisDelete).execute(request);
+		} catch (JSONException e) {
+			createListener.onDeleted(model, INTERNAL_PROBLEM);
+		}
 	}
+
+	private final ReplyListener replisDelete = new ReplyListener() {
+
+		@Override
+		public void process(int status, JSONObject reply) {
+			if (status != SUCCESS) {
+				createListener.onDeleted(deletedModel, status);
+				return;
+			}
+			if (reply.has(CanvasJCode.ERROR)) {
+				createListener.onDeleted(deletedModel, SERVER_PROBLEM);
+				return;
+			}
+			createListener.onDeleted(deletedModel, SUCCESS);
+		}
+	};
 }
