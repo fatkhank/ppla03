@@ -23,7 +23,8 @@
         android:layout_alignTop="@id/cp_r_label"
         android:ems="10"
         android:inputType="number"
-        android:text="255" />
+        android:text="255"
+        android:textColor="@color/dark" />
 
     <SeekBar
         android:id="@+id/cp_r_slider"
@@ -54,7 +55,8 @@
         android:layout_alignTop="@id/cp_g_label"
         android:ems="10"
         android:inputType="number"
-        android:text="255" />
+        android:text="255"
+        android:textColor="@color/dark" />
 
     <SeekBar
         android:id="@+id/cp_g_slider"
@@ -84,7 +86,8 @@
         android:layout_alignTop="@id/cp_b_label"
         android:ems="10"
         android:inputType="number"
-        android:text="255" />
+        android:text="255"
+        android:textColor="@color/dark" />
 
     <SeekBar
         android:id="@+id/cp_b_slider"
@@ -122,7 +125,6 @@
         android:id="@+id/cp_a_input"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/cp_a_slider"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/cp_a_label"
         android:ems="10"

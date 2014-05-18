@@ -7,5 +7,6 @@
     <dimen name="w_topbar_height">50dp</dimen>
     <dimen name="w_property_pane_width">200dp</dimen>
     <dimen name="b_create_pane_width">200dp</dimen>
+    <dimen name="b_header_size">32dp</dimen>
 
 </resources>

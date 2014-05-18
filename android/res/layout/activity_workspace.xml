@@ -84,7 +84,7 @@
             android:layout_toLeftOf="@+id/w_selection_pane"
             android:layout_toRightOf="@+id/w_redo"
             android:gravity="center_vertical"
-            android:inputType="text"
+            
             android:text="Untitled (hide mode)"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 

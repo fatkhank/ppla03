@@ -23,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -54,13 +55,13 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		CanvasCreationListener, OnFetchListListener, AnimatorListener,
 		AnimatorUpdateListener {
 	private Button mSignOutButton;
-	private Button mCreateButton;
 	private TextView username;
 	private GoogleApiClient mGoogleApiClient;
 
 	// --- create ---
 	private View createView;
-	private Button showCreate, createButton;
+	private CheckBox showCreate;
+	private Button createButton;
 	private EditText nameInput, widthInput, heightInput;
 	private ValueAnimator animCreate;
 
@@ -93,11 +94,9 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 			mSignOutButton = (Button) findViewById(R.id.b_signout);
 			mSignOutButton.setOnClickListener(this);
-			mCreateButton = (Button) findViewById(R.id.b_create_show);
-			mCreateButton.setOnClickListener(this);
 
 			// Create the text view
-			username = (TextView) findViewById(R.id.b_username);
+			username = (TextView) findViewById(R.id.b_user_name);
 			username.setText("Hello, " + CollaUserManager.getCurrentUser().name);
 			mGoogleApiClient = buildGoogleApiClient();
 
@@ -105,6 +104,10 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			BrowserConnector.getInstance().setCreateListener(this);
 
 			// --- create canvas ---
+			showCreate = (CheckBox) findViewById(R.id.b_create_show);
+			showCreate.setOnClickListener(this);
+			showCreate.setChecked(false);
+
 			createView = findViewById(R.id.b_create_view);
 			createView.setVisibility(View.GONE);
 
@@ -121,8 +124,12 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			heightInput.setText(String.valueOf(DEFAULT_HEIGHT));
 
 			createButton = (Button) findViewById(R.id.b_create);
+			createButton.setOnClickListener(this);
 
 			animCreate = new ValueAnimator();
+			animCreate.setDuration(500);
+			animCreate.addUpdateListener(this);
+			animCreate.addListener(this);
 
 			reloader = new Handler();
 
@@ -175,6 +182,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		inviteHeader.setVisibility(View.GONE);
 		inviteList.setVisibility(View.GONE);
 		reloadProgress.setVisibility(View.VISIBLE);
+		reloadButton.setVisibility(View.GONE);
 		listInfo.setText("Get canvas list");
 	}
 
@@ -184,26 +192,27 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	}
 
 	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.b_signout:
+		if (v == mSignOutButton) {
 			AuthenticationActivity.TERM = true;
 			Intent intent = new Intent(this, AuthenticationActivity.class);
 			startActivity(intent);
 			finish();
-			break;
-		case R.id.b_create_show:
-			if (createView.getVisibility() == View.VISIBLE) {
-				// hide
-				createView.setVisibility(View.GONE);
-			} else {
+		} else if (v == showCreate) {
+			if (showCreate.isChecked()) {
 				// show
-				createView.setVisibility(View.VISIBLE);
-				nameInput.setText(DEFAULT_NAME);
+				if (createView.getVisibility() == View.GONE)
+					createView.setX(-createView.getWidth());
+				animCreate.setFloatValues(createView.getX(), 0);
+			} else {
+				// hide
+				animCreate.setFloatValues(createView.getX(),
+						-createView.getWidth());
 			}
-			break;
-		case R.id.b_list_reload:
+			animCreate.start();
+		} else if (v == reloadButton) {
 			loadCanvasList();
-			break;
+		} else if (v == createButton) {
+
 		}
 	}
 
@@ -289,6 +298,10 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	public void onListFetched(UserModel asker, int status,
 			ArrayList<CanvasModel> owned, ArrayList<CanvasModel> oldList,
 			ArrayList<CanvasModel> invited) {
+
+		reloadButton.setVisibility(View.VISIBLE);
+		reloadProgress.setVisibility(View.GONE);
+
 		if (status == ServerConnector.SUCCESS) {
 			if (!invited.isEmpty()) {
 				inviteAdapter.clear();
@@ -303,27 +316,21 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			canvasHeader.setVisibility(View.VISIBLE);
 			canvasList.setVisibility(View.VISIBLE);
 
-			reloadProgress.setVisibility(View.GONE);
 			listInfo.setVisibility(View.GONE);
 
-			// listProgress.setVisibility(View.GONE);
-			// if (canvasAdapter.isEmpty())
-			// listText.setText("You have no canvas.");
-			// else {
-			// listText.setVisibility(View.GONE);
-			// listProgress.setVisibility(View.INVISIBLE);
-			// canvasList.setVisibility(View.VISIBLE);
-			// }
+			if (canvasAdapter.isEmpty())
+				listInfo.setText("You have no canvas.");
+
 		} else {
-			reloadProgress.setVisibility(View.GONE);
+
 			listInfo.setText(getResources().getString(R.string.bcl_failed));
 			String msg;
 			if (status == ServerConnector.CONNECTION_PROBLEM) {
 				msg = "Connection problem.";
 			} else
 				msg = "System error.";
-			Log.d("POS", "fetch:" + status);
-			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+			listInfo.setText(msg);
+//			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -360,31 +367,28 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onAnimationUpdate(ValueAnimator animation) {
-		// TODO Auto-generated method stub
-
+		Float value = (Float) animation.getAnimatedValue();
+		createView.setX(value);
 	}
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-		// TODO Auto-generated method stub
-
+		if (showCreate.isChecked()) {
+			createView.setVisibility(View.VISIBLE);
+		}
 	}
 
 	@Override
 	public void onAnimationEnd(Animator animation) {
-		// TODO Auto-generated method stub
-
+		if (showCreate.isChecked()) {
+			nameInput.setText(DEFAULT_NAME);
+		} else
+			createView.setVisibility(View.GONE);
 	}
 
 	@Override
-	public void onAnimationCancel(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onAnimationCancel(Animator animation) {}
 
 	@Override
-	public void onAnimationRepeat(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onAnimationRepeat(Animator animation) {}
 }
