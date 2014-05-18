@@ -1405,12 +1405,16 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		CanvasView.polyCorner = corner;
 		protoPoly.changeShape(corner, defaultPolyRadius);
 		if (currentObject != null && currentObject == currentPoly) {
+			if ((mode & Mode.DRAW) != Mode.DRAW && protaReshape == null)
+				protaReshape = new ReshapeAction(currentObject, true);
 			currentPoly.changeShape(corner, defaultPolyRadius);
 			if (save) {
 				if (handler != null && grabbedCPoint != null)
 					handler.releasePoint(grabbedCPoint);
 				handler = currentPoly.getHandler(ShapeHandler.ALL);
 				handler.init();
+				if ((mode & Mode.DRAW) != Mode.DRAW)
+					pushToUAStack(protaReshape.capture(), false);
 			} else
 				handler = null;
 		}
