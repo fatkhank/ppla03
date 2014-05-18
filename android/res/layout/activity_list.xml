@@ -7,7 +7,7 @@
         android:id="@+id/b_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/b_header_size"
-        android:background="@android:color/holo_blue_light"
+        android:background="@android:color/holo_orange_light"
         android:paddingLeft="8dp"
         android:paddingRight="8dp" >
 
@@ -74,6 +74,13 @@
         android:layout_below="@+id/b_header"
         layout="@layout/dialog_create_canvas" />
 
+    <View
+        android:id="@+id/b_divider_header"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/b_header"
+        android:background="@android:color/holo_orange_dark" />
+
     <LinearLayout
         android:id="@+id/b_list_scroll"
         android:layout_width="wrap_content"
@@ -81,7 +88,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@+id/b_header"
+        android:layout_below="@+id/b_divider_header"
         android:layout_toRightOf="@+id/b_create_view"
         android:orientation="vertical" >
 
@@ -89,7 +96,7 @@
             android:id="@+id/b_invitation_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/workspace_normal"
+            android:background="@android:color/holo_orange_light"
             android:padding="2dp"
             android:text="You have invitations"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -106,7 +113,7 @@
             android:id="@+id/b_canvas_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/workspace_normal"
+            android:background="@android:color/holo_orange_light"
             android:padding="2dp"
             android:text="Canvas List"
             android:textAppearance="?android:attr/textAppearanceMedium"

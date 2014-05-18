@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import collapaint.code.ParticipantJCode;
 import collapaint.code.ParticipantJCode.Reply;
+import collapaint.code.ParticipantJCode.Reply.KickStatus;
 import collapaint.code.ParticipantJCode.Request;
 
 import com.ppla03.collapaint.CollaUserManager;
@@ -20,6 +21,7 @@ import com.ppla03.collapaint.model.Participation.Role;
 public class ParticipantManager extends ServerConnector {
 	private static ParticipantManager instance;
 	private static ManageParticipantListener listener;
+	private static OnKickUserListener kickListener;
 	private InvitationResponseListener responseListener;
 	private static String PARTICIPANT_SERVLET_URL = HOST + "participant";
 
@@ -191,11 +193,13 @@ public class ParticipantManager extends ServerConnector {
 	private UserModel victim;
 	private CanvasModel kickCanvas;
 
-	public void kickUser(UserModel user, CanvasModel canvas) {
+	public void kickUser(UserModel user, CanvasModel canvas,
+			OnKickUserListener klistener) {
 		JSONObject request = new JSONObject();
 		try {
 			this.victim = user;
 			this.kickCanvas = canvas;
+			kickListener = klistener;
 			request.put(Request.ACTION, Request.Action.KICK);
 			request.put(Request.CANVAS_ID, canvas.getId());
 			// id yang akan dikick
@@ -215,22 +219,22 @@ public class ParticipantManager extends ServerConnector {
 		@Override
 		public void process(int status, JSONObject reply) {
 			if (status != SUCCESS) {
-				listener.onKickUser(victim, kickCanvas, status);
+				kickListener.onKickUser(victim, kickCanvas, status);
 				return;
 			}
 			if (reply.has(ParticipantJCode.ERROR)) {
-				listener.onKickUser(victim, kickCanvas, SERVER_PROBLEM);
+				kickListener.onKickUser(victim, kickCanvas, SERVER_PROBLEM);
 				return;
 			}
 			try {
 				String result = reply.getString(Reply.KICK_STATUS);
 				if (result.equals(Reply.KickStatus.NOT_A_MEMBER))
-					listener.onKickUser(victim, kickCanvas,
+					kickListener.onKickUser(victim, kickCanvas,
 							ManageParticipantListener.NOT_A_MEMBER);
 				else
-					listener.onKickUser(victim, kickCanvas, SUCCESS);
+					kickListener.onKickUser(victim, kickCanvas, SUCCESS);
 			} catch (JSONException e) {
-				listener.onKickUser(victim, kickCanvas, UNKNOWN_REPLY);
+				kickListener.onKickUser(victim, kickCanvas, UNKNOWN_REPLY);
 			}
 		}
 	};

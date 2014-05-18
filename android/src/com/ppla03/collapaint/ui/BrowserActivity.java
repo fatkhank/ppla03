@@ -45,6 +45,7 @@ import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
 import com.ppla03.collapaint.conn.CanvasCreationListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
+import com.ppla03.collapaint.conn.OnKickUserListener;
 import com.ppla03.collapaint.conn.ParticipantManager;
 import com.ppla03.collapaint.conn.ParticipantManager.InviteResponse;
 import com.ppla03.collapaint.conn.ServerConnector;
@@ -53,8 +54,8 @@ import com.ppla03.collapaint.model.UserModel;
 
 public class BrowserActivity extends Activity implements OnClickListener,
 		OnItemClickListener, ConnectionCallbacks, OnConnectionFailedListener,
-		CanvasCreationListener, OnFetchListListener, AnimatorListener,
-		AnimatorUpdateListener {
+		CanvasCreationListener, OnFetchListListener, OnKickUserListener,
+		AnimatorListener, AnimatorUpdateListener {
 	private Button mSignOutButton;
 	private TextView username;
 	private GoogleApiClient mGoogleApiClient;
@@ -63,6 +64,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	private View createView;
 	private CheckBox showCreate;
 	private Button createButton;
+	private ProgressBar createProggress;
 	private EditText nameInput, widthInput, heightInput;
 	private ValueAnimator animCreate;
 
@@ -111,6 +113,9 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 			createView = findViewById(R.id.b_create_view);
 			createView.setVisibility(View.GONE);
+
+			createProggress = (ProgressBar) findViewById(R.id.b_create_progress);
+			createProggress.setVisibility(View.GONE);
 
 			nameInput = (EditText) createView.findViewById(R.id.b_create_name);
 
@@ -213,15 +218,17 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		} else if (v == reloadButton) {
 			loadCanvasList();
 		} else if (v == createButton) {
-
+			String canvasName = nameInput.getText().toString();
+			int width = Integer.parseInt(widthInput.getText().toString());
+			int height = Integer.parseInt(heightInput.getText().toString());
+			BrowserConnector.getInstance().createCanvas(
+					CollaUserManager.getCurrentUser(), canvasName, width,
+					height);
 		}
 	}
 
 	@Override
-	public void onConnected(Bundle arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onConnected(Bundle arg0) {}
 
 	@Override
 	public void onConnectionSuspended(int arg0) {}
@@ -250,36 +257,6 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		}
 	}
-
-	//
-	// @Override
-	// public void onClick(DialogInterface dialog, int which) {
-	// if (dialog == createDialog) {
-	// if (which == DialogInterface.BUTTON_POSITIVE) {
-	// String name = nameInput.getText().toString();
-	// int width = Integer.parseInt(widthInput.getText().toString());
-	// int height = Integer.parseInt(heightInput.getText().toString());
-	//
-	// String msg = null;
-	// if (width <= 0)
-	// msg = "Canvas width cannot be zero";
-	// else if (height <= 0)
-	// msg = "Canvas height cannot be zero";
-	// else if (name.isEmpty())
-	// msg = "Canvas name cannot be empty";
-	//
-	// if (msg != null) {
-	// Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-	// reloader.postDelayed(showCreateDialog, 500);
-	// } else {
-	// BrowserConnector.getInstance().createCanvas(
-	// CollaUserManager.getCurrentUser(), name, width,
-	// height);
-	// loaderCover.setVisibility(View.VISIBLE);
-	// }
-	// }
-	// }
-	// }
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -329,14 +306,13 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			} else
 				msg = "System error.";
 			listInfo.setText(msg);
-//			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+			// Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	@Override
 	public void onDeleted(CanvasModel model, int status) {
-		// TODO Auto-generated method stub
-		
+		loadCanvasList();
 	}
 
 	/**
@@ -357,42 +333,39 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 		alertDialogBuilder.setView(promptsView);
 
-			// set dialog message
-			alertDialogBuilder
-					.setCancelable(false)
-					.setPositiveButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									final ParticipantManager hoho = new ParticipantManager();
-									hoho.responseInvitation(model2, CollaUserManager.getCurrentUser(), hola);
-									loadCanvasList();
-								}
-							})
-					.setNegativeButton("Cancel",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.cancel();
-								}
-							});
+		// set dialog message
+		alertDialogBuilder
+				.setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						final ParticipantManager hoho = new ParticipantManager();
+						hoho.responseInvitation(model2,
+								CollaUserManager.getCurrentUser(), hola);
+						loadCanvasList();
+					}
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
 
 		// create alert dialog
 		AlertDialog alertDialog = alertDialogBuilder.create();
 
 		// show it
 		alertDialog.show();
-		
-	}
 
+	}
 
 	/**
 	 * Menghapus kanvas yang dimiliki seorang user
 	 * @param model kanvas milik user yang mau dihapus
 	 */
 	void deleteCanvas(CanvasModel model) {
-		// TODO delete canvas
-		
+		BrowserConnector.getInstance().deleteCanvas(
+				CollaUserManager.getCurrentUser(), model);
 	}
 
 	/**
@@ -400,7 +373,8 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	 * @param model kanvas yang dimaksud
 	 */
 	void removeParticipation(CanvasModel model) {
-		// TODO remove participation
+		ParticipantManager.getInstance().kickUser(
+				CollaUserManager.getCurrentUser(), model, this);
 	}
 
 	@Override
@@ -429,5 +403,10 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onAnimationRepeat(Animator animation) {}
-	
+
+	@Override
+	public void onKickUser(UserModel user, CanvasModel model, int status) {
+		loadCanvasList();
+	}
+
 }

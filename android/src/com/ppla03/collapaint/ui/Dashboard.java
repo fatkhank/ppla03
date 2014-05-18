@@ -19,6 +19,7 @@ import com.ppla03.collapaint.CanvasExporter;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.ManageParticipantListener;
+import com.ppla03.collapaint.conn.OnKickUserListener;
 import com.ppla03.collapaint.conn.ParticipantManager;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
@@ -48,7 +49,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Dashboard implements OnClickListener, ManageParticipantListener {
+public class Dashboard implements OnClickListener, ManageParticipantListener, OnKickUserListener {
 	View parent;
 	WorkspaceActivity workspace;
 	ParticipantManager manager;
@@ -357,7 +358,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener {
 	}
 
 	public void kick(Participation part) {
-		manager.kickUser(part.user, part.canvas);
+		manager.kickUser(part.user, part.canvas, this);
 	}
 
 	private void reportBug() {

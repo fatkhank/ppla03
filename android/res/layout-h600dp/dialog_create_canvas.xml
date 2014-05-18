@@ -80,4 +80,11 @@
         android:text="Create"
         android:textColor="@color/dark" />
 
+    <ProgressBar
+        android:id="@+id/b_create_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
 </RelativeLayout>
