@@ -63,8 +63,9 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener{
 			v = dashboard.workspace.getLayoutInflater().inflate(
 					R.layout.participant_list_item, null);
 			ItemView iv = new ItemView();
-			iv.name = (TextView) v.findViewById(R.id.p_list_name);
+			
 			iv.participation = participants.get(position);
+			iv.name = (TextView) v.findViewById(R.id.p_list_name);
 			iv.close = (ImageButton) v.findViewById(R.id.p_list_close);
 			iv.close.setOnClickListener(ParticipantAdapter.this);
 			iv.close.setTag(iv);
@@ -77,8 +78,9 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener{
 			v.setTag(iv);
 		}
 		ItemView iv = ((ItemView) v.getTag());
+		iv.participation = participants.get(position);
 		String name = iv.participation.user.name;
-		iv.name.setText(name == null || name.isEmpty() ? NAME_IF_NULL : name);
+		iv.name.setText((name == null || name.isEmpty()) ? NAME_IF_NULL : name);
 		return v;
 	}
 

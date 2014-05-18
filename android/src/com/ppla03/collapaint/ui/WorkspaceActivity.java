@@ -381,6 +381,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					dashboardView.setY(-dashboardView.getHeight());
 				animDash.setFloatValues(dashboardView.getY(),
 						topbar.getHeight());
+				
+				canvas.approveAction();
+				
+				hand.setVisibility(View.GONE);
+				select.setVisibility(View.GONE);
+				undo.setVisibility(View.GONE);
+				redo.setVisibility(View.GONE);
+				
 			} else {
 				// sembunyikan
 				animDash.setFloatValues(dashboardView.getY(),
@@ -657,6 +665,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onAnimationEnd(Animation animation) {
 		if (animation == animPropHide) {
 			propertyPane.setVisibility(View.GONE);
+			hand.setVisibility(View.VISIBLE);
+			select.setVisibility(View.VISIBLE);
+			undo.setVisibility(View.VISIBLE);
+			redo.setVisibility(View.VISIBLE);
 		}
 	}
 

@@ -177,6 +177,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	private static boolean fontItalic;
 	private static int polyCorner;
 	private static boolean hide_mode;
+	private boolean continueDraw;
 
 	// Bitmap untuk menyimpan gambaran yang ada di kanvas, untuk mempercepat
 	// proses refresh, tanpa harus menggambar tiap objek satu-persatu.
@@ -444,17 +445,14 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			PROTO_AREA_TOP_MARGIN = (int) context.getResources().getDimension(
 					R.dimen.w_topbar_height);
 			iconBin = context.getResources().getDrawable(
-					R.drawable.ic_action_discard);
-			iconBin.setColorFilter(Color.DKGRAY,
-					android.graphics.PorterDuff.Mode.CLEAR);
+					R.drawable.ic_action_discard_dark);
 			COLOR_THEME_NORMAL = context.getResources().getColor(
 					R.color.workspace_normal);
 			COLOR_THEME_HIDDEN = context.getResources().getColor(
 					R.color.workspace_hidden);
 		}
 
-		// TODO
-		// setOnLongClickListener(this);
+		setOnLongClickListener(this);
 	}
 
 	/**
@@ -551,20 +549,21 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(), selectPaint);
 		if ((dragStatus & DS_DRAG) != DS_DRAG) {
 			// tampilkan highligh kalau diklik
-			if (((dragStatus & DS_DRAW) == DS_DRAW)
-					&& protoY > PROTO_AREA_TOP_MARGIN) {
-				selectPaint.setColor(hide_mode ? COLOR_THEME_HIDDEN
-						: COLOR_THEME_NORMAL);
-				// bawa ke posisi ikon yang sedang menggambar
-				canvas.translate(0, protoY);
-				canvas.drawPath(protoHighLight, selectPaint);
-				canvas.translate(0, -protoY);
-			}
-			if ((dragStatus & DS_CLICK) == DS_CLICK) {
-				selectPaint.setColor(COLOR_HIGHLIGHT);
-				canvas.translate(0, protoY);
-				canvas.drawPath(protoHighLight, selectPaint);
-				canvas.translate(0, -protoY);
+			if (protoY > PROTO_AREA_TOP_MARGIN || continueDraw) {
+				if ((dragStatus & DS_DRAW) == DS_DRAW) {
+					selectPaint.setColor(hide_mode ? COLOR_THEME_HIDDEN
+							: COLOR_THEME_NORMAL);
+					// bawa ke posisi ikon yang sedang menggambar
+					canvas.translate(0, protoY);
+					canvas.drawPath(protoHighLight, selectPaint);
+					canvas.translate(0, -protoY);
+				}
+				if ((dragStatus & DS_CLICK) == DS_CLICK) {
+					selectPaint.setColor(COLOR_HIGHLIGHT);
+					canvas.translate(0, protoY);
+					canvas.drawPath(protoHighLight, selectPaint);
+					canvas.translate(0, -protoY);
+				}
 			}
 			// tampilkan ikon objek
 			captureLine.draw(canvas);
@@ -863,6 +862,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			// jika user memasuki area mainbar -> kemungkinan akan menggambar
 			if (x < PROTO_AREA_WIDTH && y > PROTO_AREA_TOP_MARGIN) {
 				approveAction();// setujui semua aksinya dulu
+
+				continueDraw = false;
 				mode = Mode.SELECT;
 				anchorX = x;
 				anchorY = y;
@@ -987,6 +988,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 							Toast.makeText(getContext(), "Drag to make path",
 									Toast.LENGTH_SHORT).show();
 							dragStatus = DS_DRAW_FREE;
+							continueDraw = true;
 						} else if (protoObject instanceof LineObject) {
 							insertPrimitive(ObjectType.LINE);
 							Toast.makeText(getContext(), "Drag to make line",
@@ -1172,7 +1174,12 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					}
 					redoStack.clear();
 					listener.onURStatusChange(true, false);
-					editObject(currentObject, ShapeHandler.ALL);
+					if (!continueDraw)
+						editObject(currentObject, ShapeHandler.ALL);
+					else {
+						model.objects.add(currentObject);
+						reloadCache();
+					}
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (grabbedCPoint != null) {
@@ -2117,6 +2124,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			}
 		} else if (hide_mode) {
 			synczer.revert();
+			synczer.start();
 			execute(revertList, false);
 		}
 		hide_mode = hidden;
@@ -2233,8 +2241,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 	@Override
 	public boolean onLongClick(View v) {
-		// TODO Auto-generated method stub
-
+		if ((dragStatus & DS_CLICK) == DS_CLICK) {
+			continueDraw = true;
+		}
 		return false;
 	}
 }

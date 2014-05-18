@@ -49,13 +49,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Dashboard implements OnClickListener, ManageParticipantListener, OnKickUserListener {
+public class Dashboard implements OnClickListener, ManageParticipantListener,
+		OnKickUserListener {
 	View parent;
 	WorkspaceActivity workspace;
 	ParticipantManager manager;
 
 	ImageButton close;
+
+	// --- hide ---
 	CheckBox hide;
+	static final String HIDE_TEXT = "Hidden", NOHIDE_TEXT = "Visible",
+			HIDE_MSG = "Collaboration is off",
+			NOHIDE_MSG = "Collaboration is on";
 
 	// --- participant list ---
 	ListView partiList;
@@ -115,7 +121,8 @@ public class Dashboard implements OnClickListener, ManageParticipantListener, On
 			partiList.setAdapter(adapter);
 			partiLoader = (ProgressBar) parent
 					.findViewById(R.id.d_participant_loader);
-			partiReload = (ImageButton) parent.findViewById(R.id.d_parti_reload);
+			partiReload = (ImageButton) parent
+					.findViewById(R.id.d_parti_reload);
 			partiReload.setVisibility(View.GONE);
 			partiReload.setOnClickListener(this);
 			partiFailed = (TextView) parent.findViewById(R.id.d_parti_failed);
@@ -133,7 +140,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener, On
 			uiHelper.onCreate(savedInstanceState);
 			shareFb = (ImageButton) parent.findViewById(R.id.d_share_fb);
 			shareFb.setOnClickListener(this);
-			shareFb.setVisibility(View.GONE);
 			loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button);
 			loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() {
 				@Override
@@ -189,7 +195,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener, On
 			settOK.setOnClickListener(this);
 
 			manager = ParticipantManager.getInstance().setListener(this);
-			
+
 			setCurrentTab(downHeader, downContainer);
 		} catch (Exception ex) {
 			android.util.Log.d("POS", "e:" + ex);
@@ -211,7 +217,18 @@ public class Dashboard implements OnClickListener, ManageParticipantListener, On
 			setCurrentTab(shareHeader, shareContainer);
 		} else if (v == shareFb) {
 			loginFb.performClick();
+
+			// --- hide
 		} else if (v == hide) {
+			if (hide.isChecked()) {
+				hide.setText(HIDE_TEXT);
+				Toast.makeText(workspace, HIDE_MSG, Toast.LENGTH_SHORT).show();
+			} else {
+				hide.setText(NOHIDE_TEXT);
+				Toast.makeText(workspace, NOHIDE_MSG, Toast.LENGTH_SHORT)
+						.show();
+			}
+
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
 
 			// --- participant

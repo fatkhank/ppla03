@@ -45,10 +45,12 @@ class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 					R.layout.list_item_canvas, null);
 			ViewHolder holder = new ViewHolder();
 			holder.canvasName = (TextView) view.findViewById(R.id.lc_canvas);
+			holder.canvasName.setOnClickListener(openClick);
 			holder.userName = (TextView) view.findViewById(R.id.lc_user);
 			holder.delete = (ImageButton) view.findViewById(R.id.lc_delete);
 			holder.delete.setOnClickListener(this);
 			view.setTag(holder);
+			view.setOnClickListener(openClick);
 		}
 
 		ViewHolder holder = (ViewHolder) view.getTag();
@@ -78,15 +80,23 @@ class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 		return position;
 	}
 
+	private final OnClickListener openClick = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ViewHolder holder = (ViewHolder) v.getTag();
+			activity.openCanvas(((CanvasModel) holder.delete.getTag()));
+		}
+	};
+
 	@Override
 	public void onClick(View v) {
 		CanvasModel model = (CanvasModel) v.getTag();
-		UserModel owner = model.owner;
 		if (model.owner.equals(CollaUserManager.getCurrentUser())) {
-			//kanvas adalah milik user
+			// kanvas adalah milik user
 			activity.deleteCanvas(model);
-		}else{
-			//user hanya sebagai member
+		} else {
+			// user hanya sebagai member
 			activity.removeParticipation(model);
 		}
 	}

@@ -11,13 +11,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.text.InputFilter;
-import android.text.LoginFilter;
-import android.text.Spanned;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,7 +48,7 @@ import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 
 public class BrowserActivity extends Activity implements OnClickListener,
-		OnItemClickListener, ConnectionCallbacks, OnConnectionFailedListener,
+		ConnectionCallbacks, OnConnectionFailedListener,
 		CanvasCreationListener, OnFetchListListener, OnKickUserListener,
 		AnimatorListener, AnimatorUpdateListener {
 	private Button mSignOutButton;
@@ -65,6 +60,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	private CheckBox showCreate;
 	private Button createButton;
 	private ProgressBar createProggress;
+	private TextView nameLabel, widthLabel, heightLabel;
 	private EditText nameInput, widthInput, heightInput;
 	private ValueAnimator animCreate;
 
@@ -117,13 +113,20 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			createProggress = (ProgressBar) findViewById(R.id.b_create_progress);
 			createProggress.setVisibility(View.GONE);
 
+			// form
+			nameLabel = (TextView) createView
+					.findViewById(R.id.b_create_name_label);
 			nameInput = (EditText) createView.findViewById(R.id.b_create_name);
-
+			
+			widthLabel = (TextView) createView
+					.findViewById(R.id.b_create_width_label);
 			widthInput = (EditText) createView
 					.findViewById(R.id.b_create_width);
 			widthInput.setFilters(canvasDimFilter);
 			widthInput.setText(String.valueOf(DEFAULT_WIDTH));
-
+			
+			heightLabel = (TextView) createView
+					.findViewById(R.id.b_create_height_label);
 			heightInput = (EditText) createView
 					.findViewById(R.id.b_create_height);
 			heightInput.setFilters(canvasDimFilter);
@@ -149,14 +152,12 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			canvasHeader = (TextView) findViewById(R.id.b_canvas_header);
 			canvasList = (ListView) findViewById(R.id.b_canvas_list);
 			canvasList.setAdapter(canvasAdapter);
-			canvasList.setOnItemClickListener(this);
 
 			// --- invitation list ---
 			inviteHeader = (TextView) findViewById(R.id.b_invitation_header);
 			inviteAdapter = new InvitationAdapter(this);
 			inviteList = (ListView) findViewById(R.id.b_invitation_list);
 			inviteList.setAdapter(inviteAdapter);
-			inviteList.setOnItemClickListener(this);
 
 			loadCanvasList();
 		} catch (Exception ex) {
@@ -224,6 +225,28 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			BrowserConnector.getInstance().createCanvas(
 					CollaUserManager.getCurrentUser(), canvasName, width,
 					height);
+
+			showCreateLoader(true);
+		}
+	}
+
+	private void showCreateLoader(boolean show) {
+		if (show) {
+			nameLabel.setVisibility(View.GONE);
+			nameInput.setVisibility(View.GONE);
+			widthLabel.setVisibility(View.GONE);
+			widthInput.setVisibility(View.GONE);
+			heightLabel.setVisibility(View.GONE);
+			heightInput.setVisibility(View.GONE);
+			createProggress.setVisibility(View.VISIBLE);
+		} else {
+			nameLabel.setVisibility(View.VISIBLE);
+			nameInput.setVisibility(View.VISIBLE);
+			widthLabel.setVisibility(View.VISIBLE);
+			widthInput.setVisibility(View.VISIBLE);
+			heightLabel.setVisibility(View.VISIBLE);
+			heightInput.setVisibility(View.VISIBLE);
+			createProggress.setVisibility(View.GONE);
 		}
 	}
 
@@ -255,19 +278,20 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			} else
 				msg = "System error.";
 			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+			showCreateLoader(false);
 		}
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
-		if (parent == canvasList) {
-			CanvasSynchronizer.getInstance().setCanvas(
-					canvasAdapter.getItem(position));
-			Intent intent = new Intent(this, LoaderActivity.class);
-			startActivity(intent);
-			finish();
-		}
+	/**
+	 * Membuka suatu kanvas.
+	 * @param canvas
+	 */
+	void openCanvas(CanvasModel canvas) {
+		CanvasSynchronizer.getInstance().setCanvas(canvas);
+		Intent intent = new Intent(this, LoaderActivity.class);
+		startActivity(intent);
+		finish();
 	}
 
 	@Override

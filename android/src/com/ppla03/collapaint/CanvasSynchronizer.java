@@ -163,15 +163,21 @@ public class CanvasSynchronizer implements SyncEventListener,
 		canvas.execute(actionBuffer);
 		actionBuffer.clear();
 		if (!canvas.isInHideMode()) {
-			Log.d("POS", "----- synchronizer started ------");
-			handler.postDelayed(updater, sync_time);
+			start();
 		}
+	}
+
+	public void start() {
+		Log.d("POS", "----- synchronizer started ------");
+		mode = IDLE;
+		handler.postDelayed(updater, sync_time);
 	}
 
 	/**
 	 * Memberhentikan proses sinkronisasi
 	 */
 	public void stop() {
+		Log.d("POS", "----- synchronizer stopped ------");
 		mode |= STOP;
 	}
 
@@ -291,5 +297,5 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void onCanvasClosed(int status) {
 		closeListener.onCanvasClosed(status);
 	}
-	
+
 }

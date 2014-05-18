@@ -2,5 +2,6 @@
 <resources>
 
     <dimen name="b_header_size">64dp</dimen>
+    <dimen name="w_topbar_height">72dp</dimen>
 
 </resources>

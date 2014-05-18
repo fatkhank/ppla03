@@ -21,7 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/b_create_name_label"
         android:imeOptions="flagNoFullscreen"
-        android:inputType="text" />
+        android:inputType="text"
+        android:textColor="@color/dark" />
 
     <TextView
         android:id="@+id/b_create_width_label"
@@ -42,7 +43,8 @@
         android:layout_below="@+id/b_create_name"
         android:layout_toRightOf="@+id/b_create_width_label"
         android:imeOptions="flagNoFullscreen"
-        android:inputType="number" />
+        android:inputType="number"
+        android:textColor="@color/dark" />
 
     <TextView
         android:id="@+id/b_create_height_label"
@@ -63,7 +65,8 @@
         android:layout_below="@+id/b_create_width"
         android:layout_toRightOf="@+id/b_create_height_label"
         android:imeOptions="flagNoFullscreen"
-        android:inputType="number" />
+        android:inputType="number"
+        android:textColor="@color/dark" />
 
     <Button
         android:id="@+id/b_create"
