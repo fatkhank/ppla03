@@ -47,7 +47,7 @@ public class InvitationAdapter extends BaseAdapter {
 			ViewHolder holder = new ViewHolder();
 			holder.canvasName = (TextView) view
 					.findViewById(R.id.b_invite_name);
-			holder.ownerName = (TextView) view.findViewById(R.id.b_invite_name);
+			holder.ownerName = (TextView) view.findViewById(R.id.b_invite_owner);
 			holder.accept = (ImageButton) view
 					.findViewById(R.id.b_invite_accept);
 			holder.accept.setOnClickListener(acceptInvitation);

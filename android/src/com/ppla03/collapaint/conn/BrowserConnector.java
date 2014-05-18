@@ -176,7 +176,7 @@ public class BrowserConnector extends ServerConnector {
 					// -------- process invited -----
 					JSONArray news = reply.getJSONArray(Reply.INVITATION_LIST);
 					newList.clear();
-					for (int i = 0; i < olds.length(); i++) {
+					for (int i = 0; i < news.length(); i++) {
 						JSONObject canvas = news.getJSONObject(i);
 						UserModel owner = new UserModel();
 						owner.collaID = canvas.getInt(Reply.OWNER_ID);

@@ -62,7 +62,6 @@ public class CanvasServlet extends HttpServlet {
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
                 int userID = request.getInt(Request.USER_ID);
-
                 //putuskan penanganan request berdasar kode aksi
                 int action = request.getInt(Request.ACTION);
                 if (action == Request.Action.LIST) {

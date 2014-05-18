@@ -235,9 +235,9 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 		} else if (v == partiReload) {
 			reloadList();
 		} else if (v == invite) {
-			if (email.getText() == null) {} else {
-				manager.inviteUser(email.getText().toString(),
-						workspace.canvas.getModel());
+			String em = email.getText().toString();
+			if (!em.isEmpty()) {
+				manager.inviteUser(em, workspace.canvas.getModel());
 			}
 
 			// --- download
@@ -346,8 +346,8 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	@Override
 	public void onInviteUser(String accountId, CanvasModel model, int status) {
-		// TODO invite message
 		if (status == ServerConnector.SUCCESS) {
+			email.setText("");
 			Toast.makeText(workspace, "User is invited", Toast.LENGTH_SHORT)
 					.show();
 			reloadList();
@@ -365,7 +365,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	@Override
 	public void onKickUser(UserModel user, CanvasModel model, int status) {
-		// TODO kick
 		if (status == ServerConnector.SUCCESS) {
 			Toast.makeText(workspace, "User get kick :'(", Toast.LENGTH_SHORT)
 					.show();

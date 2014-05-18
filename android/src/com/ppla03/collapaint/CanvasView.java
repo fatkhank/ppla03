@@ -1074,16 +1074,15 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
 			if ((mode & Mode.HAND) == Mode.HAND) {
-				scrollX = x + anchorX;
-				if (scrollX > maxScrollX)
-					scrollX = maxScrollX;
-				else if (scrollX < minScrollX)
-					scrollX = minScrollX;
-				scrollY = y + anchorY;
-				if (scrollY > maxScrollY)
-					scrollY = maxScrollY;
-				else if (scrollY < minScrollY)
-					scrollY = minScrollY;
+				int nsx = x + anchorX;
+				if ((nsx > scrollX && nsx < maxScrollX)
+						|| (nsx <= scrollX && nsx > minScrollX))
+					scrollX = nsx;
+
+				int nsy = y + anchorY;
+				if ((nsy > scrollY && nsy < maxScrollY)
+						|| (nsy <= scrollY && nsy > minScrollY))
+					scrollY = nsy;
 			} else {
 				x -= scrollX;
 				y -= scrollY;

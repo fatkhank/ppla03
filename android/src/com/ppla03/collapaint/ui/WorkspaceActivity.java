@@ -393,6 +393,11 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				// sembunyikan
 				animDash.setFloatValues(dashboardView.getY(),
 						-dashboardView.getHeight());
+				
+				hand.setVisibility(View.VISIBLE);
+				select.setVisibility(View.VISIBLE);
+				undo.setVisibility(View.VISIBLE);
+				redo.setVisibility(View.VISIBLE);
 			}
 			animDash.start();
 		} else if (v == showProp) {

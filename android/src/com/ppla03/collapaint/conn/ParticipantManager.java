@@ -29,15 +29,11 @@ public class ParticipantManager extends ServerConnector {
 	protected void onHostAddressChange(String host) {
 		PARTICIPANT_SERVLET_URL = host + "participant";
 	}
+	
+	private ParticipantManager() {}
 
 	public ParticipantManager setListener(ManageParticipantListener mpl) {
 		listener = mpl;
-		return this;
-	}
-
-	public ParticipantManager setResponseListener(
-			InvitationResponseListener listener) {
-		this.responseListener = listener;
 		return this;
 	}
 
@@ -147,7 +143,7 @@ public class ParticipantManager extends ServerConnector {
 		JSONObject request = new JSONObject();
 		try {
 			this.inviteCanvas = canvas;
-			request.put(Request.ACTION, Request.Action.INTIVE);
+			request.put(Request.ACTION, Request.Action.INVITE);
 			request.put(Request.CANVAS_ID, canvas.getId());
 			int inviterId = CollaUserManager.getCurrentUser().collaID;
 			request.put(Request.USER_ID, inviterId);
@@ -258,11 +254,12 @@ public class ParticipantManager extends ServerConnector {
 	}
 
 	public void responseInvitation(CanvasModel model, UserModel user,
-			InviteResponse response) {
+			InviteResponse response, InvitationResponseListener irlist) {
 		JSONObject request = new JSONObject();
 		try {
 			Participation invitation = new Participation(user, model);
 			invitationList.add(invitation);
+			responseListener = irlist;
 			request.put(Request.ACTION, Request.Action.RESPONSE);
 			request.put(Request.USER_ID, invitation.user.collaID);
 			// terjemahkan response
@@ -271,8 +268,9 @@ public class ParticipantManager extends ServerConnector {
 				request.put(Request.RESPONSE, Request.Response.ACCEPT);
 			else
 				request.put(Request.RESPONSE, Request.Response.DECLINE);
+
 			// kirim request
-			new Client(PARTICIPANT_SERVLET_URL, replisResponseInvite);
+			new Client(PARTICIPANT_SERVLET_URL, replisResponseInvite).execute(request);
 		} catch (JSONException e) {
 			replisResponseInvite.process(INTERNAL_PROBLEM, null);
 		}

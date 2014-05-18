@@ -7,10 +7,32 @@
         android:id="@+id/b_invite_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/b_invite_owner"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/b_invite_by"
         android:gravity="center_vertical"
         android:text="Canvas name"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
+
+    <TextView
+        android:id="@+id/b_invite_by"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/b_invite_name"
+        android:layout_margin="4dp"
+        android:layout_toLeftOf="@+id/b_invite_owner"
+        android:text="by"
+        android:textColor="@color/dark" />
+
+    <TextView
+        android:id="@+id/b_invite_owner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/b_invite_name"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/b_invite_accept"
+        android:text="owner name"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark" />
 
@@ -19,29 +41,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_marginLeft="8dp"
+        android:layout_centerVertical="true"
         android:background="@drawable/button_round"
         android:src="@drawable/ic_action_cancel" />
-
-    <TextView
-        android:id="@+id/b_invite_owner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/b_invite_decline"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/b_invite_accept"
-        android:gravity="center_vertical"
-        android:text="owner name"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/dark" />
 
     <ImageButton
         android:id="@+id/b_invite_accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="8dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="24dp"
         android:layout_toLeftOf="@+id/b_invite_decline"
         android:background="@drawable/button_round"
         android:src="@drawable/ic_action_accept" />

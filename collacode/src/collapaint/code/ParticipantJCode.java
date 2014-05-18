@@ -36,7 +36,7 @@ public class ParticipantJCode {
             /**
              * Aksi untuk mengundang seorang user.
              */
-            public static final int INTIVE = 5;
+            public static final int INVITE = 5;
         }
 
         /**

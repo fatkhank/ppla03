@@ -59,10 +59,11 @@ public class ParticipantServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
+                System.out.println("q:" + request);
                 int action = request.getInt(Request.ACTION);
                 int canvasId = request.getInt(Request.CANVAS_ID);
                 int userId = request.getInt(Request.USER_ID);
-                if (action == Request.Action.INTIVE) {
+                if (action == Request.Action.INVITE) {
                     String email = request.getString(Request.USER_EMAIL);
                     invite(conn, reply, email, userId, canvasId);
                 } else if (action == Request.Action.KICK) {
@@ -77,7 +78,7 @@ public class ParticipantServlet extends HttpServlet {
             } catch (NullPointerException | ClassCastException | SQLException ex) {
                 reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.BAD_REQUEST);
             }
-
+            System.out.println("p:" + reply.build());
             out.println(reply.build());
         }
     }
@@ -291,7 +292,7 @@ public class ParticipantServlet extends HttpServlet {
 
             //user ada di tabel partisipan -> cek statusnya
             String status = checkResult.getString(Q.Select.CheckParticipation.Column.STATUS);
-            if (!status.equals(DB.Participation.Status.INVITATION)) {
+            if (status.equals(DB.Participation.Status.INVITATION)) {
                 //user memang sedang diundang -> jalankan response user
                 if (response == Request.Response.ACCEPT) {
                     //Jika user menyetujui undangan, maka ubah status partisipasi menjadi member

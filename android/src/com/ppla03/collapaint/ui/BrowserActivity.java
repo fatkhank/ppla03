@@ -39,18 +39,20 @@ import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.BrowserConnector;
 import com.ppla03.collapaint.conn.CanvasCreationListener;
+import com.ppla03.collapaint.conn.InvitationResponseListener;
 import com.ppla03.collapaint.conn.OnFetchListListener;
 import com.ppla03.collapaint.conn.OnKickUserListener;
 import com.ppla03.collapaint.conn.ParticipantManager;
 import com.ppla03.collapaint.conn.ParticipantManager.InviteResponse;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
+import com.ppla03.collapaint.model.Participation;
 import com.ppla03.collapaint.model.UserModel;
 
 public class BrowserActivity extends Activity implements OnClickListener,
 		ConnectionCallbacks, OnConnectionFailedListener,
 		CanvasCreationListener, OnFetchListListener, OnKickUserListener,
-		AnimatorListener, AnimatorUpdateListener {
+		AnimatorListener, AnimatorUpdateListener, InvitationResponseListener {
 	private Button mSignOutButton;
 	private TextView username;
 	private GoogleApiClient mGoogleApiClient;
@@ -117,14 +119,14 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			nameLabel = (TextView) createView
 					.findViewById(R.id.b_create_name_label);
 			nameInput = (EditText) createView.findViewById(R.id.b_create_name);
-			
+
 			widthLabel = (TextView) createView
 					.findViewById(R.id.b_create_width_label);
 			widthInput = (EditText) createView
 					.findViewById(R.id.b_create_width);
 			widthInput.setFilters(canvasDimFilter);
 			widthInput.setText(String.valueOf(DEFAULT_WIDTH));
-			
+
 			heightLabel = (TextView) createView
 					.findViewById(R.id.b_create_height_label);
 			heightInput = (EditText) createView
@@ -308,6 +310,9 @@ public class BrowserActivity extends Activity implements OnClickListener,
 				inviteAdapter.addAll(invited);
 				inviteHeader.setVisibility(View.VISIBLE);
 				inviteList.setVisibility(View.VISIBLE);
+			} else {
+				inviteHeader.setVisibility(View.GONE);
+				inviteList.setVisibility(View.GONE);
 			}
 
 			canvasAdapter.clear();
@@ -344,12 +349,16 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	 * @param model
 	 * @param response
 	 */
-	void responseInvitation(CanvasModel model, InviteResponse response) {
-		// TODO response invitation
+	void responseInvitation(final CanvasModel model,
+			final InviteResponse response) {
+
+		if (response == InviteResponse.ACCEPT) {
+			ParticipantManager.getInstance().responseInvitation(model,
+					CollaUserManager.getCurrentUser(), response, this);
+			return;
+		}
 		LayoutInflater li = this.getLayoutInflater();
 		View promptsView;
-		final InviteResponse hola = response;
-		final CanvasModel model2 = model;
 
 		promptsView = li.inflate(R.layout.dialog_sure, null);
 
@@ -362,10 +371,9 @@ public class BrowserActivity extends Activity implements OnClickListener,
 				.setCancelable(false)
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						final ParticipantManager hoho = new ParticipantManager();
-						hoho.responseInvitation(model2,
-								CollaUserManager.getCurrentUser(), hola);
-						loadCanvasList();
+						ParticipantManager.getInstance().responseInvitation(
+								model, CollaUserManager.getCurrentUser(),
+								response, BrowserActivity.this);
 					}
 				})
 				.setNegativeButton("Cancel",
@@ -380,7 +388,6 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 		// show it
 		alertDialog.show();
-
 	}
 
 	/**
@@ -430,6 +437,11 @@ public class BrowserActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onKickUser(UserModel user, CanvasModel model, int status) {
+		loadCanvasList();
+	}
+
+	@Override
+	public void onResponse(Participation invitation, int status) {
 		loadCanvasList();
 	}
 

@@ -118,6 +118,7 @@ public class TransformAction extends AtomicAction {
 	 */
 	private static void applyTransform(float[] param, CanvasObject object) {
 		object.offsetTo(param[OFFSET_X], param[OFFSET_Y]);
+		object.rotateTo(param[ROTATION]);
 	}
 
 	/**
@@ -154,9 +155,9 @@ public class TransformAction extends AtomicAction {
 		encByte[3] = (byte) (ofX);
 		int ofY = Float.floatToIntBits(param[OFFSET_Y]);
 		encByte[4] = (byte) (ofY >> 24);
-		encByte[5] = (byte) (ofX >> 16);
-		encByte[6] = (byte) (ofX >> 8);
-		encByte[7] = (byte) (ofX);
+		encByte[5] = (byte) (ofY >> 16);
+		encByte[6] = (byte) (ofY >> 8);
+		encByte[7] = (byte) (ofY);
 		int rot = Float.floatToIntBits(param[ROTATION]);
 		encByte[8] = (byte) (rot >> 24);
 		encByte[9] = (byte) (rot >> 16);
