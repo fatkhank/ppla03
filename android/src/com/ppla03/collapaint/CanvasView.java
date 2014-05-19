@@ -1324,7 +1324,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			return (currentObject == currentBasic)
 					&& (currentBasic != currentFree || currentFree.fillable());
 		case filled:
-			return fillColor != Color.TRANSPARENT;
+			return filled;
 		default:
 			return null;
 		}

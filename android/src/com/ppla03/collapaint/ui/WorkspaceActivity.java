@@ -261,6 +261,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// sama seperti showdash dipencet
+		showDash.setChecked(!showDash.isChecked());
 		onClick(showDash);
 		return true;
 	}
@@ -392,7 +393,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			}
 			animDash.start();
 		} else if (v == showProp) {
-
 			setPropPaneVisibility(showProp.isChecked());
 		}
 
@@ -429,7 +429,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			else
 				fillColor.setVisibility(View.GONE);
 			canvas.setFillParameter(fillCheck.isChecked(),
-					(int) canvas.getState(Param.fillColor), true);
+					((Integer) canvas.getState(Param.fillColor)).intValue(),
+					true);
 		} else if (v == textBold)
 			canvas.setFontBold(textBold.isChecked(), true);
 		else if (v == textItalic)
@@ -621,17 +622,20 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (fillPane.getVisibility() == View.VISIBLE) {
 				Boolean filled = (Boolean) canvas.getObjectParam(Param.filled);
 				if (filled != null) {
-					fillCheck.setChecked(true);
-					fillColor.setVisibility(View.VISIBLE);
+					fillCheck.setChecked(filled.booleanValue());
+					if (filled) {
+						fillColor.setVisibility(View.VISIBLE);
 
-					// atur warna isian
-					Integer fColor = (Integer) canvas
-							.getObjectParam(Param.fillColor);
-					if (fColor != null)
-						fillColor.setBackgroundColor(fColor.intValue());
-					else
-						fillColor.setBackgroundColor((int) canvas
-								.getState(Param.fillColor));
+						// atur warna isian
+						Integer fColor = (Integer) canvas
+								.getObjectParam(Param.fillColor);
+						if (fColor != null)
+							fillColor.setBackgroundColor(fColor.intValue());
+						else
+							fillColor.setBackgroundColor((int) canvas
+									.getState(Param.fillColor));
+					} else
+						fillColor.setVisibility(View.GONE);
 				} else {
 					fillCheck.setChecked(false);
 					fillColor.setVisibility(View.GONE);
