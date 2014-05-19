@@ -94,7 +94,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="#eeeeee"
+        android:background="#f0f0f0"
         android:paddingBottom="8dp" >
 
         <RelativeLayout
@@ -230,7 +230,7 @@
         <View
             android:id="@+id/d_divider_main_second"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="1px"
             android:layout_below="@+id/d_main_button"
             android:background="@color/black_transparent" />
 
@@ -246,49 +246,62 @@
 
             <CheckBox
                 android:id="@+id/d_download_header"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_download"
                 android:checked="true"
-                android:text="@string/emptyString2" />
+                android:ellipsize="marquee"
+                android:lines="1"
+                android:text="Download"
+                android:textColor="@color/dark" />
 
             <CheckBox
                 android:id="@+id/d_setting_header"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_settings"
                 android:checked="true"
-                android:text="@string/emptyString2" />
+                android:ellipsize="marquee"
+                android:lines="1"
+                android:text="Setting"
+                android:textColor="@color/dark" />
 
             <CheckBox
                 android:id="@+id/d_share_header"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_share"
                 android:checked="true"
-                android:text="@string/emptyString2" />
+                android:ellipsize="marquee"
+                android:lines="1"
+                android:text="Share"
+                android:textColor="@color/dark" />
 
             <CheckBox
                 android:id="@+id/d_report_header"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.99"
+                android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_bug"
                 android:checked="true"
-                android:text="@string/emptyString2" />
+                android:ellipsize="marquee"
+                android:lines="1"
+                android:text="Report bug"
+                android:textColor="@color/dark" />
+
         </LinearLayout>
 
         <View
             android:id="@+id/d_divider_second_content"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="1px"
             android:layout_below="@+id/d_second_button"
             android:background="@color/black_transparent" />
 

@@ -48,8 +48,8 @@ import android.widget.ToggleButton;
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, CanvasListener, ColorChangeListener,
 		OnSeekBarChangeListener, OnItemSelectedListener,
-		OnCheckedChangeListener, OnEditorActionListener, CanvasCloseListener,
-		AnimatorUpdateListener, AnimatorListener {
+		OnEditorActionListener, CanvasCloseListener, AnimatorUpdateListener,
+		AnimatorListener {
 
 	// --------- top bar ---------
 	private View topbar;
@@ -176,7 +176,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --------- fill ---------
 			fillPane = (RelativeLayout) findViewById(R.id.w_prop_fill);
 			fillCheck = (CheckBox) findViewById(R.id.w_fill_check);
-			fillCheck.setOnCheckedChangeListener(this);
+			fillCheck.setOnClickListener(this);
 			fillCheck.setChecked(false);
 			fillColor = (ImageButton) findViewById(R.id.w_fill_color);
 			fillColor.setOnClickListener(this);
@@ -191,9 +191,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			textBold = (CheckBox) findViewById(R.id.w_font_bold);
 			textItalic = (CheckBox) findViewById(R.id.w_font_italic);
 			textUnderline = (CheckBox) findViewById(R.id.w_font_underline);
-			textBold.setOnCheckedChangeListener(this);
-			textItalic.setOnCheckedChangeListener(this);
-			textUnderline.setOnCheckedChangeListener(this);
+			textBold.setOnClickListener(this);
+			textItalic.setOnClickListener(this);
+			textUnderline.setOnClickListener(this);
 			textSizeText = (TextView) findViewById(R.id.w_font_size_text);
 			textSize.setOnSeekBarChangeListener(this);
 			textSize.setMax(FontManager.MAX_FONT_SIZE
@@ -423,7 +423,20 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			colorConsumer = textColor;
 			colorPane.setColor((int) canvas.getObjectParam(Param.textColor));
 			colorPane.show();
-		}
+		} else if (v == fillCheck) {
+			if (fillCheck.isChecked())
+				fillColor.setVisibility(View.VISIBLE);
+			else
+				fillColor.setVisibility(View.GONE);
+			canvas.setFillParameter(fillCheck.isChecked(),
+					(int) canvas.getState(Param.fillColor), true);
+		} else if (v == textBold)
+			canvas.setFontBold(textBold.isChecked(), true);
+		else if (v == textItalic)
+			canvas.setFontItalic(textItalic.isChecked(), true);
+		else if (v == textUnderline)
+			canvas.setTextUnderline(textUnderline.isChecked(), true);
+
 	}
 
 	@Override
@@ -438,23 +451,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-		if (button == fillCheck) {
-			if (isChecked)
-				fillColor.setVisibility(View.VISIBLE);
-			else
-				fillColor.setVisibility(View.GONE);
-			canvas.setFillParameter(fillCheck.isChecked(),
-					(int) canvas.getState(Param.fillColor), true);
-		} else if (button == textBold)
-			canvas.setFontBold(isChecked, true);
-		else if (button == textItalic)
-			canvas.setFontItalic(isChecked, true);
-		else if (button == textUnderline)
-			canvas.setTextUnderline(isChecked, true);
 	}
 
 	@Override
@@ -623,19 +619,22 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// atur nilai pengaturan fill
 			if (fillPane.getVisibility() == View.VISIBLE) {
 				Boolean filled = (Boolean) canvas.getObjectParam(Param.filled);
-				if (filled != null)
+				if (filled != null) {
 					fillCheck.setChecked(true);
-				else
+					fillColor.setVisibility(View.VISIBLE);
+
+					// atur warna isian
+					Integer fColor = (Integer) canvas
+							.getObjectParam(Param.fillColor);
+					if (fColor != null)
+						fillColor.setBackgroundColor(fColor.intValue());
+					else
+						fillColor.setBackgroundColor((int) canvas
+								.getState(Param.fillColor));
+				} else {
 					fillCheck.setChecked(false);
-
-				Integer fColor = (Integer) canvas
-						.getObjectParam(Param.fillColor);
-				if (fColor != null)
-					fillColor.setBackgroundColor(fColor.intValue());
-				else
-					fillColor.setBackgroundColor((int) canvas
-							.getState(Param.fillColor));
-
+					fillColor.setVisibility(View.GONE);
+				}
 			}
 
 			// atur nilai pengaturan bentuk poligon
