@@ -47,7 +47,6 @@ public class ActionServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
-                System.out.println("q:"+request);
 
                 //*************************** SAVE REQUEST *************************
                 ArrayList<CanvasObject> objectPool = new ArrayList<>();
@@ -69,7 +68,6 @@ public class ActionServlet extends HttpServlet {
             } catch (SQLException ex) {
                 reply.add(ActionJCode.ERROR, ActionJCode.SERVER_ERROR);
             }
-            System.out.println("p:"+reply.build());
             out.println(reply.build());
         }
     }
@@ -160,6 +158,8 @@ public class ActionServlet extends HttpServlet {
 
             // ----- ambil aksi terakhir.
             int lastActionNumber = request.getInt(ActionJCode.LAST_ACTION_NUM);
+            //kembalikan ke user lan yang sedang diminta
+            reply.add(ActionJCode.OLD_ACTION_NUM, lastActionNumber);
             JsonArrayBuilder actionArray = Json.createArrayBuilder();
             lastestAction.setInt(DB.Action.Q.Select.Lastest.CANVAS_ID, canvasId);
             lastestAction.setInt(DB.Action.Q.Select.Lastest.LIMIT_MIN, lastActionNumber);

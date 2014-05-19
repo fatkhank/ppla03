@@ -32,4 +32,12 @@ public interface SyncEventListener {
 	 * @param status
 	 */
 	void onCanvasClosed(int status);
+
+	/**
+	 * Apakah menerima paket sinkronisasi dengan suatu lastActionNumber
+	 * tertentu.
+	 * @param oldLan lan yang tadi dikirimkan dari paket
+	 * @return
+	 */
+	boolean accept(int oldLan);
 }

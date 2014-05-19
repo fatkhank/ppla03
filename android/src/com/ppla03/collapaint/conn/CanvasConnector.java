@@ -213,6 +213,11 @@ public class CanvasConnector extends ServerConnector {
 					return;
 				}
 
+				// jika paket lan tidak sesuai -> abaikan paket
+				int oldLan = reply.getInt(ActionJCode.OLD_ACTION_NUM);
+				if (!syncListener.accept(oldLan))
+					return;
+
 				// ----------------------- parse objects ----------------------
 				replyObjects.clear();
 				JSONArray jarObj = reply.getJSONArray(ActionJCode.OBJECT_LIST);
@@ -417,7 +422,7 @@ public class CanvasConnector extends ServerConnector {
 						// masukkan idnya
 						int id = cob.getInt(Reply.OBJECT_ID);
 						co.setGlobaID(id);
-						//cek objek sudah didelete atau belum
+						// cek objek sudah didelete atau belum
 						boolean exist = cob.getBoolean(Reply.OBJECT_EXIST);
 						if (exist)
 							canvas.objects.add(co);

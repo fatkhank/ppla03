@@ -8,9 +8,14 @@ package collapaint.code;
 public class ActionJCode {
 
     /**
-     * Urutan aksi terakhir yang diketahui user
+     * Nomor aksi terakhir
      */
     public static final String LAST_ACTION_NUM = "lan";
+    
+    /**
+     * Nomor aksi terakhir yang diminta user
+     */
+    public static final String OLD_ACTION_NUM = "oan";
     /**
      * Id kanvas yang dipengaruhi aksi ini
      */

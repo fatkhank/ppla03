@@ -301,4 +301,9 @@ public class CanvasSynchronizer implements SyncEventListener,
 		closeListener.onCanvasClosed(status);
 	}
 
+	@Override
+	public boolean accept(int oldLan) {
+		return oldLan == lastActNum;
+	}
+
 }
