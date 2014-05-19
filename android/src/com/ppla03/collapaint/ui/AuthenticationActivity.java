@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.CollaUserManager.OnUserCheckListener;
+import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.R;
 
 public class AuthenticationActivity extends FragmentActivity implements
@@ -84,6 +86,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 	private SignInButton mSignInButton;
 	private Button mSignOutButton;
 	private Button mRevokeButton;
+	private ProgressBar mLoader;
 	private TextView mStatus;
 	private ListView mCirclesListView;
 	private ArrayAdapter<String> mCirclesAdapter;
@@ -99,6 +102,9 @@ public class AuthenticationActivity extends FragmentActivity implements
 
 		mSignInButton = (SignInButton) findViewById(R.id.a_signin);
 		mSignInButton.setOnClickListener(this);
+
+		mLoader = (ProgressBar) findViewById(R.id.a_progress);
+		mLoader.setVisibility(View.GONE);
 
 		if (savedInstanceState != null) {
 			mSignInProgress = savedInstanceState.getInt(SAVED_PROGRESS,
@@ -140,6 +146,8 @@ public class AuthenticationActivity extends FragmentActivity implements
 
 	@Override
 	public void onClick(View v) {
+		mSignInButton.setVisibility(View.GONE);
+		mLoader.setVisibility(View.VISIBLE);
 		if (!mGoogleApiClient.isConnecting()) {
 			// We only process button clicks when GoogleApiClient is not
 			// transitioning
@@ -197,6 +205,9 @@ public class AuthenticationActivity extends FragmentActivity implements
 		// be returned in onConnectionFailed.
 		Log.i(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
 				+ result.getErrorCode());
+		
+		mLoader.setVisibility(View.GONE);
+		mSignInButton.setVisibility(View.VISIBLE);
 
 		if (mSignInProgress != STATE_IN_PROGRESS) {
 			// We do not have an intent in progress so we should store the
@@ -289,9 +300,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onResult(LoadPeopleResult peopleData) {
-
-	}
+	public void onResult(LoadPeopleResult peopleData) {}
 
 	private void onSignedOut() {
 		// Update the UI to reflect that the user is signed out.
@@ -319,6 +328,8 @@ public class AuthenticationActivity extends FragmentActivity implements
 								Log.e(TAG,
 										"Google Play services resolution cancelled");
 								mSignInProgress = STATE_DEFAULT;
+								mLoader.setVisibility(View.GONE);
+								mSignInButton.setVisibility(View.VISIBLE);
 							}
 						});
 			} else {
@@ -334,9 +345,11 @@ public class AuthenticationActivity extends FragmentActivity implements
 														+ "resolved: "
 														+ mSignInError);
 										mSignInProgress = STATE_DEFAULT;
+										mLoader.setVisibility(View.GONE);
+										mSignInButton.setVisibility(View.VISIBLE);
 									}
 								}).create();
-			}
+			}			
 		default:
 			return super.onCreateDialog(id);
 		}
@@ -344,13 +357,19 @@ public class AuthenticationActivity extends FragmentActivity implements
 
 	@Override
 	public void onAccountChecked(int status) {
+		mLoader.setVisibility(View.GONE);
+		mSignInButton.setVisibility(View.VISIBLE);
 		if (status == CollaUserManager.SUCCESS) {
 			Intent intent = new Intent(this, BrowserActivity.class);
 			String message = currentUser.getDisplayName();
 			intent.putExtra(EXTRA_MESSAGE, message);
 			startActivity(intent);
 			finish();
-		} else
-			Toast.makeText(this, "Database Error", Toast.LENGTH_SHORT).show();
+		} else if (status == ServerConnector.CONNECTION_PROBLEM) {
+			Toast.makeText(
+					this,
+					"Cannot contact server. Please check your internet connection.",
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 }

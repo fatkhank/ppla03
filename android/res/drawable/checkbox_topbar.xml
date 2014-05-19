@@ -2,11 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:drawable="@drawable/round_black_transp_small" android:state_pressed="true"/>
-    <item android:state_checked="true"><layer-list>
-            <item android:top="24dp"><shape android:shape="line">
-                    <stroke android:width="4dp" android:color="#fff" />
-                </shape></item>
-        </layer-list></item>
+    <item android:state_checked="true" android:drawable="@color/white_transparent" />
     <item android:drawable="@android:color/transparent"/>
 
 </selector>

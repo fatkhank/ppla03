@@ -94,14 +94,16 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="#f0f0f0"
-        android:paddingBottom="8dp" >
+        android:background="@drawable/bg_dialog"
+        android:paddingBottom="8dp"
+        android:paddingLeft="2dp" >
 
         <RelativeLayout
             android:id="@+id/d_report_pane"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/d_divider_second_content" >
+            android:layout_below="@+id/d_divider_second_content"
+            android:background="@color/light_white" >
 
             <TextView
                 android:id="@+id/d_report_title"
@@ -139,6 +141,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/d_divider_second_content"
+            android:background="@color/light_white"
             android:orientation="vertical"
             android:visibility="gone" >
 
@@ -222,7 +225,6 @@
                 android:id="@+id/d_button_close"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/button_round"
                 android:src="@drawable/ic_action_cancel" />
         </LinearLayout>
@@ -264,7 +266,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_settings"
-                android:checked="true"
+                android:checked="false"
                 android:ellipsize="marquee"
                 android:lines="1"
                 android:text="Setting"
@@ -277,11 +279,12 @@
                 android:layout_weight="1"
                 android:background="@drawable/d_tab_header"
                 android:button="@drawable/ic_action_share"
-                android:checked="true"
+                android:checked="false"
                 android:ellipsize="marquee"
                 android:lines="1"
                 android:text="Share"
-                android:textColor="@color/dark" />
+                android:textColor="@color/dark"
+                android:visibility="visible" />
 
             <CheckBox
                 android:id="@+id/d_report_header"
@@ -312,6 +315,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/d_divider_second_content"
+            android:background="@color/light_white"
             android:visibility="gone" >
 
             <TextView
@@ -373,6 +377,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/d_divider_second_content"
+            android:background="@color/light_white"
             android:visibility="gone" >
 
             <TextView

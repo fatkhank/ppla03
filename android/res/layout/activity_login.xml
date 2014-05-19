@@ -46,7 +46,19 @@
                     android:text="@string/common_signin_button_text_long" >
 
                 </com.google.android.gms.common.SignInButton>
+
+                <ProgressBar
+                    android:id="@+id/a_progress"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_below="@+id/a_logo"
+                    android:layout_centerHorizontal="true"
+                    android:indeterminate="true"
+                    android:indeterminateDrawable="@drawable/progress_red"
+                    android:indeterminateDuration="1000" />
+
             </RelativeLayout>
+
         </RelativeLayout>
 
         <View

@@ -215,8 +215,10 @@ public class CanvasConnector extends ServerConnector {
 
 				// jika paket lan tidak sesuai -> abaikan paket
 				int oldLan = reply.getInt(ActionJCode.OLD_ACTION_NUM);
-				if (!syncListener.accept(oldLan))
+				if (!syncListener.accept(oldLan)) {
+					syncListener.onPacketDropped(oldLan);
 					return;
+				}
 
 				// ----------------------- parse objects ----------------------
 				replyObjects.clear();

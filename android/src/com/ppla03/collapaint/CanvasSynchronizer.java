@@ -60,12 +60,12 @@ public class CanvasSynchronizer implements SyncEventListener,
 
 	private CanvasLoadListener loadListener;
 	private CanvasCloseListener closeListener;
-	private CanvasModel currentModel;
+	private static CanvasModel currentModel;
 
 	private AlertDialog hideModeDialog;
 	private CanvasView view;
 	private CanvasConnector connector;
-	private int lastActNum;
+	private static int lastActNum;
 
 	private static CanvasSynchronizer instance;
 	/**
@@ -304,6 +304,12 @@ public class CanvasSynchronizer implements SyncEventListener,
 	@Override
 	public boolean accept(int oldLan) {
 		return oldLan == lastActNum;
+	}
+
+	@Override
+	public void onPacketDropped(int lan) {
+		if ((mode & SYNCING) != SYNCING)
+			updater.run();
 	}
 
 }

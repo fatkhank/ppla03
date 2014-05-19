@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#eeeeee" >
 
     <ProgressBar
         android:id="@+id/l_progress"
@@ -10,7 +11,9 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:indeterminate="true" />
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/progress_red"
+        android:indeterminateDuration="1000" />
 
     <TextView
         android:id="@+id/w_stroke_label"
@@ -20,6 +23,7 @@
         android:layout_centerHorizontal="true"
         android:text="Loading workspace"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/holo_green_dark" />
+        android:textColor="@android:color/holo_red_light"
+        android:textStyle="bold" />
 
 </RelativeLayout>

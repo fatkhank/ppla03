@@ -526,6 +526,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	private void setPropPaneVisibility(boolean visible) {
 		int vis = propertyPane.getVisibility();
+		showProp.setChecked(visible);
 		if (visible) {
 			// animasikan proppane
 			if (vis == View.GONE)

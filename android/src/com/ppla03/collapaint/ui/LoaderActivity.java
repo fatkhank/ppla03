@@ -38,7 +38,6 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 
 	@Override
 	public void onCanvasLoaded(CanvasModel model, int status) {
-		android.util.Log.d("POS", "canvas loaded:" + status);
 		if (status == ServerConnector.SUCCESS) {
 			Intent intent = new Intent(this, WorkspaceActivity.class);
 			startActivity(intent);

@@ -149,8 +149,9 @@
                 android:id="@+id/w_show_property"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@drawable/button_dark_onpress"
+                android:background="@drawable/checkbox_topbar"
                 android:button="@drawable/icon_property"
+                android:checked="true"
                 android:text="@string/emptyString2" />
 
         </LinearLayout>
@@ -189,7 +190,7 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
-        android:visibility="gone" />
+        android:visibility="visible" />
     
 
 </RelativeLayout>

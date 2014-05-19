@@ -113,6 +113,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 			close.setOnClickListener(this);
 			hide = (CheckBox) parent.findViewById(R.id.d_button_hide);
 			hide.setOnClickListener(this);
+			hide.setText(NOHIDE_TEXT);
 
 			// ------ participant list ------
 			adapter = new ParticipantAdapter(this);
@@ -317,6 +318,10 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 	}
 
 	public void show() {
+		if (workspace.canvas.isInHideMode())
+			hide.setText(HIDE_TEXT);
+		else
+			hide.setText(NOHIDE_TEXT);
 		parent.setVisibility(View.VISIBLE);
 		reloadList();
 	}

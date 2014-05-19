@@ -26,6 +26,12 @@ public interface SyncEventListener {
 	 */
 	void onActionUpdated(int lastActionNumber,
 			ArrayList<AtomicAction> replyActions);
+	
+	/**
+	 * Ada paket yang ditolak.
+	 * @param lan
+	 */
+	void onPacketDropped(int lan);
 
 	/**
 	 * Dipicu saat proses penutupan kanvas berhasil
