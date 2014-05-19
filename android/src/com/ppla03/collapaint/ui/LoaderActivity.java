@@ -42,6 +42,7 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 		if (status == ServerConnector.SUCCESS) {
 			Intent intent = new Intent(this, WorkspaceActivity.class);
 			startActivity(intent);
+			finish();
 		} else {
 			Toast.makeText(this, "Cannot load canvas", Toast.LENGTH_LONG)
 					.show();

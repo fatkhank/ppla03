@@ -1,16 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/RelativeLayout1"
+    android:id="@+id/a_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#eeeeee"
     android:orientation="vertical" >
 
-	<com.google.android.gms.common.SignInButton
-	    android:id="@+id/SignInButton01"
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_weight="0.5"
-	    android:text="@string/common_signin_button_text_long" >
-	</com.google.android.gms.common.SignInButton>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <View
+            android:id="@+id/a_logo_left"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true" >
+
+                <ImageView
+                    android:id="@+id/a_logo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/colla_logo" />
+
+                <com.google.android.gms.common.SignInButton
+                    android:id="@+id/a_signin"
+                    android:layout_width="@dimen/a_login_width"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/a_logo"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/common_signin_button_text_long" >
+
+                </com.google.android.gms.common.SignInButton>
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/a_logo_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
 
 </RelativeLayout>

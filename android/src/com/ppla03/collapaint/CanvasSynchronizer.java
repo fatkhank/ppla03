@@ -88,7 +88,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 
 	private Handler handler;
 
-	private int sync_time = 5000;
+	/**
+	 * Interval waktu untuk sinkronisasi
+	 */
+	private int sync_time = 3000;
 
 	private int mode;
 	private final int IDLE = 1;

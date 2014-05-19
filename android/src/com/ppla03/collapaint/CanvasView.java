@@ -300,7 +300,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	private PolygonObject protoPoly;
 	private TextObject protoText;
 
-	private static final Path protoHighLight = new Path();
+	private static final Path pathHighLight = new Path();
 
 	private static ValueAnimator animator = new ValueAnimator();
 	private static OvershootInterpolator interOvershoot = new OvershootInterpolator();
@@ -317,11 +317,20 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		int center = PROTO_AREA_WIDTH / 2;
 
 		// atur highligh ikon main bar
-		RectF fr = new RectF(4, 4, PROTO_AREA_WIDTH - 4, PROTO_AREA_WIDTH - 4);
-		protoHighLight.rewind();
-		protoHighLight.moveTo(4, 4);
-		protoHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
-				Direction.CCW);
+
+		pathHighLight.rewind();
+		pathHighLight.moveTo(0, 0);
+		pathHighLight.lineTo(PROTO_AREA_WIDTH, 0);
+		pathHighLight.lineTo(PROTO_AREA_WIDTH, PROTO_AREA_WIDTH);
+		pathHighLight.lineTo(0, PROTO_AREA_WIDTH);
+		pathHighLight.close();
+
+		// gambar lama
+		// RectF fr = new RectF(4, 4, PROTO_AREA_WIDTH - 4, PROTO_AREA_WIDTH -
+		// 4);
+		// pathHighLight.moveTo(4, 4);
+		// pathHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
+		// Direction.CCW);
 
 		int y = PROTO_AREA_TOP_MARGIN;
 		protoLine = new LineObject(icon_left, icon_left, strokeColor,
@@ -489,6 +498,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		cacheCanvas.setBitmap(cacheImage);
 
 		reloadCache();
+		calcScrollBounds(getWidth(), getHeight());
 	}
 
 	/**
@@ -514,27 +524,42 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		postInvalidate();
 	}
 
+	/**
+	 * Menghitung batas scroll.
+	 * @param w lebar layar
+	 * @param h tinggi layar
+	 */
+	void calcScrollBounds(int w, int h) {
+		// jika lebar kanvas lebih dari layar
+		if (model.getWidth() >= w) {
+			minScrollX = w - CANVAS_MARGIN - model.getWidth();
+			maxScrollX = CANVAS_MARGIN;
+
+			// jika lebar kanvas kurang dari layar
+		} else {
+			minScrollX = 0;
+			maxScrollX = w - model.getWidth();
+		}
+
+		// jika tinggi kanvas lebih dari layar
+		if (model.getHeight() >= h) {
+			minScrollY = h - CANVAS_MARGIN - model.getHeight();
+			maxScrollY = CANVAS_MARGIN;
+
+			// jika tinggi kanvas kurang dari layar
+		} else {
+			minScrollY = 0;
+			maxScrollY = h - model.getHeight();
+		}
+	}
+
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		centerX = (w >> 1) - scrollX;
 		centerY = (h >> 1) - scrollY;
-		if (model != null) {
-			if (model.getWidth() >= w) {
-				minScrollX = w - CANVAS_MARGIN - model.getWidth();
-				maxScrollX = CANVAS_MARGIN;
-			} else {
-				minScrollX = 0;
-				maxScrollX = w - model.getWidth();
-			}
-			if (model.getHeight() >= w) {
-				minScrollY = h - CANVAS_MARGIN - model.getHeight();
-				maxScrollY = CANVAS_MARGIN;
-			} else {
-				minScrollY = 0;
-				maxScrollY = h - model.getHeight();
-			}
-		}
+		if (model != null)
+			calcScrollBounds(w, h);
 
 		initProtoArea();
 	}
@@ -555,13 +580,13 @@ public class CanvasView extends View implements View.OnLongClickListener {
 							: COLOR_THEME_NORMAL);
 					// bawa ke posisi ikon yang sedang menggambar
 					canvas.translate(0, protoY);
-					canvas.drawPath(protoHighLight, selectPaint);
+					canvas.drawPath(pathHighLight, selectPaint);
 					canvas.translate(0, -protoY);
 				}
 				if ((dragStatus & DS_CLICK) == DS_CLICK) {
 					selectPaint.setColor(COLOR_HIGHLIGHT);
 					canvas.translate(0, protoY);
-					canvas.drawPath(protoHighLight, selectPaint);
+					canvas.drawPath(pathHighLight, selectPaint);
 					canvas.translate(0, -protoY);
 				}
 			}
@@ -912,7 +937,11 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					if (Math.abs(dx) > MIN_DRAG_DISTANCE
 							|| Math.abs(dy) > MIN_DRAG_DISTANCE) {
 						dragStatus &= ~DS_CLICK;// matikan klik
-						dragStatus |= DS_DRAG;// tandai drag
+
+						// hilangkan fitur drag saat paste
+						if ((dragStatus & DS_PASTE) != DS_PASTE)
+							dragStatus |= DS_DRAG;// tandai drag
+
 						if (dragStatus == DS_DRAG_PROTO) {
 							// sedang mendrag proto -> clone objek
 							protoObject = protoObject.cloneObject();
@@ -1003,12 +1032,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					dragStatus = DS_NONE;
 
 				} else if ((dragStatus & DS_ANIM_FINISH) == DS_ANIM_FINISH) {
-					android.util.Log.d("POS", "finish anim");
 					// jika proses animasi sudah selesai
 					if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
 						// objek sudah diklon
-						// TODO drag
-						android.util.Log.d("POS", "finish drag");
 						mode = Mode.DRAW;
 						editObject(currentObject, ShapeHandler.ALL);
 					} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE)
@@ -1073,6 +1099,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		} else if (act == MotionEvent.ACTION_MOVE) {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
+			// geser kanvas
 			if ((mode & Mode.HAND) == Mode.HAND) {
 				int nsx = x + anchorX;
 				if ((nsx > scrollX && nsx < maxScrollX)
@@ -1102,10 +1129,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					} else if (mode == Mode.DRAW) {
 						if (objectType == ObjectType.FREE) {
 							currentFree.penTo(x, y);
-							listener.onBeginDraw();
+							// listener.onBeginDraw();
 						} else if (objectType == ObjectType.LINE) {
 							currentLine.penTo(x, y);
-							listener.onBeginDraw();
+							// listener.onBeginDraw();
 						}
 					} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 						if (grabbedCPoint != null)
@@ -2083,7 +2110,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			if (inverse == null)
 				return;
 			execute(inverse, true);
-			// TODO meragukan
 			if (!hide_mode)
 				synczer.addToBuffer(inverse);
 			reloadCache();
@@ -2119,16 +2145,20 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * @param hidden
 	 */
 	public void setHideMode(boolean hidden) {
+
 		if (hidden) {
 			if (!hide_mode) {
+				// berubah dari tidak hide menjadi hide
 				synczer.markCheckpoint();
 				revertList.clear();
 				synczer.stop();
 			}
+
 		} else if (hide_mode) {
+			// kembalikan perubahan oleh user
 			synczer.revert();
 			synczer.start();
-			execute(revertList, false);
+			execute(revertList, true);
 		}
 		hide_mode = hidden;
 		postInvalidate();
@@ -2150,7 +2180,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * @param actions
 	 */
 	public void execute(ArrayList<UserAction> actions) {
-		execute(actions, true);
+		execute(actions, false);
 	}
 
 	/**
@@ -2160,13 +2190,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 * @param forced jika true berarti langsung dijalankan, jika false dan
 	 *            sedang hide mode, maka akan dimasukkan ke revertList
 	 */
-	private void execute(ArrayList<UserAction> actions, boolean revertable) {
-		int size = actions.size();
-		for (int i = 0; i < size; i++) {
+	private void execute(ArrayList<UserAction> actions, boolean forced) {
+		for (int i = 0; i < actions.size(); i++) {
 			UserAction ua = actions.get(i);
-			execute(ua, false);
-			if (hide_mode && revertable)
-				revertList.add(ua.getInverse());
+			execute(ua, forced);
 		}
 		reloadCache();
 		invalidate();
@@ -2214,10 +2241,13 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		} else if (action instanceof DeleteAction) {
 			// aksi delete tidak ditunda
 			DeleteAction da = (DeleteAction) action;
+			// jika objek sedang diedit -> batalkan editan
 			if (currentObject != null && currentObject.equals(da.object)) {
-				// jika objek sedang diedit -> batalkan editan
 				cancelAction();
 				cancelSelect();
+			} else if (selectedObjects.contains(da.object)) {
+				// jika diedit rame2 -> singkirkan objek
+				selectedObjects.remove(da.object);
 			}
 			model.objects.remove(da.object);
 		} else if (action instanceof MoveMultiple) {

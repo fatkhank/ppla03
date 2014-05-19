@@ -97,7 +97,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 
-		mSignInButton = (SignInButton) findViewById(R.id.SignInButton01);
+		mSignInButton = (SignInButton) findViewById(R.id.a_signin);
 		mSignInButton.setOnClickListener(this);
 
 		if (savedInstanceState != null) {
@@ -145,7 +145,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 			// transitioning
 			// between connected and not connected.
 			switch (v.getId()) {
-			case R.id.SignInButton01:
+			case R.id.a_signin:
 				TERM = false;
 				resolveSignInError();
 				break;

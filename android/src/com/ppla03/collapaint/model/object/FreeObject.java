@@ -107,7 +107,7 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public FreeObject penDown(float worldX, float worldY) {
-		if ((state & EDIT_MASK) != PERMANENT) {
+//		if ((state & EDIT_MASK) != PERMANENT) {
 			offsetX = worldX;
 			offsetY = worldY;
 			points.clear();
@@ -115,7 +115,7 @@ public class FreeObject extends BasicObject {
 			path.reset();
 			path.moveTo(0, 0);
 			path.lineTo(0, 0);
-		}
+//		}
 		return this;
 	}
 
@@ -126,14 +126,14 @@ public class FreeObject extends BasicObject {
 	 * @param worldY koordinat y titik (koordinat kanvas)
 	 * @return {@link FreeObject} this
 	 */
-	public FreeObject penTo(float worldX, float worldY) {
-		if ((state & EDIT_MASK) == EDITABLE) {
+	public void penTo(float worldX, float worldY) {
+//		if ((state & EDIT_MASK) == EDITABLE) {
 			worldX -= offsetX;
 			worldY -= offsetY;
 			path.lineTo(worldX, worldY);
 			points.add(new PointF(worldX, worldY));
-		}
-		return this;
+//		}
+//		return this;
 	}
 
 	/**

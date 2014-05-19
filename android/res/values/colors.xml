@@ -3,7 +3,7 @@
     <color name="loader_cover">#99001010</color>
     <color name="workspace_normal">#52ade7</color>
     <color name="workspace_hidden">#e064b7</color>
-    <color name="black_transparent">#44000000</color>
+    <color name="black_transparent">#33000000</color>
     <color name="dark">#666666</color>
     
 </resources>

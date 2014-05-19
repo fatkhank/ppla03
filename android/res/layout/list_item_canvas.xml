@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/button_round"
-    android:orientation="horizontal"
+    android:background="@drawable/button_dark_onpress"
     android:minHeight="50dp"
+    android:orientation="horizontal"
     android:padding="5dp" >
 
     <TextView
@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:text="canvas name"
+        android:text="Canvas name"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark" />
 
     <TextView
@@ -25,6 +26,7 @@
         android:layout_toLeftOf="@+id/lc_delete"
         android:gravity="center_vertical"
         android:text="username"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark" />
 
     <ImageButton
