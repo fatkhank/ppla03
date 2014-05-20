@@ -305,7 +305,9 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		reloadProgress.setVisibility(View.GONE);
 
 		if (status == ServerConnector.SUCCESS) {
+			
 			if (!invited.isEmpty()) {
+				inviteList.setVisibility(View.GONE);
 				inviteAdapter.clear();
 				inviteAdapter.addAll(invited);
 				inviteHeader.setVisibility(View.VISIBLE);
@@ -315,6 +317,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 				inviteList.setVisibility(View.GONE);
 			}
 
+			canvasList.setVisibility(View.GONE);
 			canvasAdapter.clear();
 			canvasAdapter.addAll(owned);
 			canvasAdapter.addAll(oldList);

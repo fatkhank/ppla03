@@ -162,6 +162,8 @@ public class ParticipantManager extends ServerConnector {
 			if (status == SUCCESS) {
 				// cek ada error atau tidak
 				if (reply.has(ParticipantJCode.ERROR)) {
+					//TODO user yang diundang tidak terdaftar
+//					String error = reply.getString(ParticipantJCode.Error.USER_UNREGISTERED)
 					listener.onInviteUser("", inviteCanvas, SERVER_PROBLEM);
 					return;
 				}

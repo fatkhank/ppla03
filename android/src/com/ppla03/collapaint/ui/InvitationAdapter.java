@@ -44,10 +44,14 @@ public class InvitationAdapter extends BaseAdapter {
 		if (view == null) {
 			view = activity.getLayoutInflater().inflate(
 					R.layout.list_item_invitation, null);
-			ViewHolder holder = new ViewHolder();
+		}
+		ViewHolder holder = (ViewHolder) view.getTag();
+		if (holder == null) {
+			holder = new ViewHolder();
 			holder.canvasName = (TextView) view
 					.findViewById(R.id.b_invite_name);
-			holder.ownerName = (TextView) view.findViewById(R.id.b_invite_owner);
+			holder.ownerName = (TextView) view
+					.findViewById(R.id.b_invite_owner);
 			holder.accept = (ImageButton) view
 					.findViewById(R.id.b_invite_accept);
 			holder.accept.setOnClickListener(acceptInvitation);
@@ -56,8 +60,6 @@ public class InvitationAdapter extends BaseAdapter {
 			holder.decline.setOnClickListener(declineInvitation);
 			view.setTag(holder);
 		}
-
-		ViewHolder holder = (ViewHolder) view.getTag();
 		CanvasModel model = models.get(position);
 		holder.canvasName.setText(model.name);
 		holder.ownerName.setText(model.owner.name);

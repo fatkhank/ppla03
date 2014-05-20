@@ -290,7 +290,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	private ScaledObject captureOval;
 	private ScaledObject capturePoly;
 	private ScaledObject captureText;
-	private ScaledBitmap capturePaste;
+	private static ScaledBitmap capturePaste;
 	private ScaledBitmap draggedPaste;
 	private CanvasObject protoObject;
 	private LineObject protoLine;
@@ -406,8 +406,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 		// atur objek paste
 		y += PROTO_AREA_WIDTH;
-		capturePaste = new ScaledBitmap(icon_left, y + icon_left, icon_width,
-				icon_width);
+		if (capturePaste == null)
+			capturePaste = new ScaledBitmap(icon_left, y + icon_left,
+					icon_width, icon_width);
 		draggedPaste = new ScaledBitmap(icon_left, y + icon_left, icon_width,
 				icon_width);
 
@@ -427,7 +428,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		mode = Mode.SELECT;
 
 		// default value
-		fillColor = Color.TRANSPARENT;
+		filled = true;
+		fillColor = Color.BLACK;
 		strokeColor = Color.BLACK;
 		strokeWidth = 5;
 		strokeStyle = StrokeStyle.SOLID;
@@ -1892,14 +1894,16 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * Mengubah warna isian dari {@link BasicObject}.
 	 * 
-	 * @param filled jika true berarti memiliki isian, jika false maka tidak
+	 * @param fill jika true berarti memiliki isian, jika false maka tidak
 	 *            memiliki isian dan nilai {@code color} diabaikan.
 	 * @param color warna isian, lihat {@link Color}
 	 * @param save jika true, aksi langsung disimpan ke stack, jika false, aksi
 	 *            hanya merubah parameter objek saja.
 	 */
-	public void setFillParameter(boolean filled, int color, boolean save) {
-		this.filled = filled;
+	public void setFillParameter(boolean fill, int color, boolean save) {
+		android.util.Log.d("POS", "setFill:" + fill + "," + color + "," + save);
+		filled = fill;
+		color += 0xff000000;// opacity dimaksimalkan
 		fillColorOri = color;
 		fillColor = (filled) ? color : Color.TRANSPARENT;
 		protoFree.setFillMode(filled, color);

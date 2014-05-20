@@ -13,7 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class ParticipantAdapter extends BaseAdapter implements OnClickListener{
+public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 	public static final String NAME_IF_NULL = "Anonym";
 	Dashboard dashboard;
 	ArrayList<Participation> participants;
@@ -62,8 +62,11 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener{
 		if (v == null) {
 			v = dashboard.workspace.getLayoutInflater().inflate(
 					R.layout.participant_list_item, null);
-			ItemView iv = new ItemView();
-			
+		}
+		ItemView iv = ((ItemView) v.getTag());
+		if (iv == null) {
+			iv = new ItemView();
+
 			iv.participation = participants.get(position);
 			iv.name = (TextView) v.findViewById(R.id.p_list_name);
 			iv.close = (ImageButton) v.findViewById(R.id.p_list_close);
@@ -77,7 +80,6 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener{
 				iv.close.setVisibility(View.GONE);
 			v.setTag(iv);
 		}
-		ItemView iv = ((ItemView) v.getTag());
 		iv.participation = participants.get(position);
 		String name = iv.participation.user.name;
 		iv.name.setText((name == null || name.isEmpty()) ? NAME_IF_NULL : name);

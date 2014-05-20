@@ -42,6 +42,9 @@ public class FreeObject extends BasicObject {
 	 * pertama.
 	 */
 	private static final ArrayList<PointF> points = new ArrayList<PointF>();
+	static {
+		points.ensureCapacity(128);
+	}
 
 	private static final int EDIT_MASK = 1, EDITABLE = 1, PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;
@@ -107,15 +110,15 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public FreeObject penDown(float worldX, float worldY) {
-//		if ((state & EDIT_MASK) != PERMANENT) {
-			offsetX = worldX;
-			offsetY = worldY;
-			points.clear();
-			points.add(new PointF(0, 0));
-			path.reset();
-			path.moveTo(0, 0);
-			path.lineTo(0, 0);
-//		}
+		// if ((state & EDIT_MASK) != PERMANENT) {
+		offsetX = worldX;
+		offsetY = worldY;
+		points.clear();
+		points.add(new PointF(0, 0));
+		path.reset();
+		path.moveTo(0, 0);
+		path.lineTo(0, 0);
+		// }
 		return this;
 	}
 
@@ -127,13 +130,13 @@ public class FreeObject extends BasicObject {
 	 * @return {@link FreeObject} this
 	 */
 	public void penTo(float worldX, float worldY) {
-//		if ((state & EDIT_MASK) == EDITABLE) {
-			worldX -= offsetX;
-			worldY -= offsetY;
-			path.lineTo(worldX, worldY);
-			points.add(new PointF(worldX, worldY));
-//		}
-//		return this;
+		// if ((state & EDIT_MASK) == EDITABLE) {
+		worldX -= offsetX;
+		worldY -= offsetY;
+		path.lineTo(worldX, worldY);
+		points.add(new PointF(worldX, worldY));
+		// }
+		// return this;
 	}
 
 	/**
@@ -237,7 +240,7 @@ public class FreeObject extends BasicObject {
 		if (bounds.contains(x, y)) {
 			if (fillPaint.getColor() == Color.TRANSPARENT) {
 				// jika tidak punya isian cek jarak titik ke titik-titik di path
-				int inc = 3;// (int) (radius * 0.5f);
+				int inc = 1;// (int) (radius * 0.5f);
 				float tol = strokePaint.getStrokeWidth() + radius;
 				for (int i = 0; i < xLocs.length; i += inc) {
 					if (Math.abs(xLocs[i] - x) < tol

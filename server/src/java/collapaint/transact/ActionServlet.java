@@ -47,7 +47,7 @@ public class ActionServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
-
+                System.out.println("q:"+request);
                 //*************************** SAVE REQUEST *************************
                 ArrayList<CanvasObject> objectPool = new ArrayList<>();
                 ArrayList<Action> userActions = new ArrayList<>();
@@ -68,6 +68,8 @@ public class ActionServlet extends HttpServlet {
             } catch (SQLException ex) {
                 reply.add(ActionJCode.ERROR, ActionJCode.SERVER_ERROR);
             }
+            
+            System.out.println("p:"+reply.build());
             out.println(reply.build());
         }
     }

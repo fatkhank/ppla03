@@ -362,6 +362,10 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 		} else if (status == ManageParticipantListener.ALREADY_JOINED) {
 			Toast.makeText(workspace, "The user has joined this canvas",
 					Toast.LENGTH_SHORT).show();
+
+			// TODO user yang diundang tidak terdaftar
+			// } else if(status == ManageParticipantListener.){
+
 		} else
 			Toast.makeText(workspace,
 					"Error,please check your connection problem",

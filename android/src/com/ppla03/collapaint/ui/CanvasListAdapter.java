@@ -43,7 +43,10 @@ class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 		if (view == null) {
 			view = activity.getLayoutInflater().inflate(
 					R.layout.list_item_canvas, null);
-			ViewHolder holder = new ViewHolder();
+		}
+		ViewHolder holder = (ViewHolder) view.getTag();
+		if (holder == null) {
+			holder = new ViewHolder();
 			holder.canvasName = (TextView) view.findViewById(R.id.lc_canvas);
 			holder.canvasName.setOnClickListener(openClick);
 			holder.userName = (TextView) view.findViewById(R.id.lc_user);
@@ -52,8 +55,6 @@ class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 			view.setTag(holder);
 			view.setOnClickListener(openClick);
 		}
-
-		ViewHolder holder = (ViewHolder) view.getTag();
 		CanvasModel model = models.get(position);
 		holder.canvasName.setText(model.name);
 		if (model.owner.equals(CollaUserManager.getCurrentUser()))
@@ -85,7 +86,10 @@ class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			ViewHolder holder = (ViewHolder) v.getTag();
-			activity.openCanvas(((CanvasModel) holder.delete.getTag()));
+			if (holder != null && holder.delete != null) {
+				CanvasModel model = (CanvasModel) holder.delete.getTag();
+				activity.openCanvas(model);
+			}
 		}
 	};
 

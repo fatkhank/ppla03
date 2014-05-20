@@ -398,7 +398,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 		// select-additional-toolbar
 		else if (v == cut) {
-			// TODO cut
 			canvas.copySelectedObjects();
 			canvas.deleteSelectedObjects();
 		} else if (v == copy) {
