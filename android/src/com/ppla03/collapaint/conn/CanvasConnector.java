@@ -95,32 +95,7 @@ public class CanvasConnector extends ServerConnector {
 			for (int i = 0; i < size; i++) {
 				AtomicAction ua = actions.get(i);
 				JSONObject joAct = new JSONObject();
-				CanvasObject co = null;
-				if (ua instanceof DrawAction) {
-					joAct.put(ActionJCode.ACTION_CODE, ActionCode.DRAW_ACTION);
-					joAct.put(ActionJCode.ACTION_PARAM, "");
-					co = ((DrawAction) ua).object;
-				} else if (ua instanceof DeleteAction) {
-					joAct.put(ActionJCode.ACTION_CODE, ActionCode.DELETE_ACTION);
-					joAct.put(ActionJCode.ACTION_PARAM, "");
-					co = ((DeleteAction) ua).object;
-				} else if (ua instanceof TransformAction) {
-					TransformAction ta = (TransformAction) ua;
-					joAct.put(ActionJCode.ACTION_CODE,
-							ActionCode.TRANSFORM_ACTION);
-					joAct.put(ActionJCode.ACTION_PARAM, ta.getParameter());
-					co = ta.object;
-				} else if (ua instanceof GeomAction) {
-					GeomAction ga = (GeomAction) ua;
-					joAct.put(ActionJCode.ACTION_CODE, ActionCode.GEOM_ACTION);
-					joAct.put(ActionJCode.ACTION_PARAM, ga.getParameter());
-					co = ga.object;
-				} else if (ua instanceof StyleAction) {
-					StyleAction sa = (StyleAction) ua;
-					joAct.put(ActionJCode.ACTION_CODE, ActionCode.STYLE_ACTION);
-					joAct.put(ActionJCode.ACTION_PARAM, sa.getParameter());
-					co = sa.object;
-				} else if (ua instanceof ResizeCanvas) {
+				if (ua instanceof ResizeCanvas) {
 					ResizeCanvas rc = (ResizeCanvas) ua;
 					joAct.put(ActionJCode.ACTION_CODE, ActionCode.RESIZE_ACTION);
 					joAct.put(ActionJCode.ACTION_PARAM, rc.getParameter());
@@ -128,22 +103,62 @@ public class CanvasConnector extends ServerConnector {
 					joAct.put(ActionJCode.CANVAS_HEIGHT, rc.height);
 					joAct.put(ActionJCode.CANVAS_TOP, rc.top);
 					joAct.put(ActionJCode.CANVAS_LEFT, rc.left);
-				}
-				if (co != null) {
+				} else {
+					CanvasObject co = null;
+					if (ua instanceof DrawAction) {
+						joAct.put(ActionJCode.ACTION_CODE,
+								ActionCode.DRAW_ACTION);
+						joAct.put(ActionJCode.ACTION_PARAM, "");
+						co = ((DrawAction) ua).object;
+					} else if (ua instanceof DeleteAction) {
+						joAct.put(ActionJCode.ACTION_CODE,
+								ActionCode.DELETE_ACTION);
+						joAct.put(ActionJCode.ACTION_PARAM, "");
+						co = ((DeleteAction) ua).object;
+					} else if (ua instanceof TransformAction) {
+						TransformAction ta = (TransformAction) ua;
+						joAct.put(ActionJCode.ACTION_CODE,
+								ActionCode.TRANSFORM_ACTION);
+						joAct.put(ActionJCode.ACTION_PARAM, ta.getParameter());
+						co = ta.object;
+					} else if (ua instanceof GeomAction) {
+						GeomAction ga = (GeomAction) ua;
+						joAct.put(ActionJCode.ACTION_CODE,
+								ActionCode.GEOM_ACTION);
+						joAct.put(ActionJCode.ACTION_PARAM, ga.getParameter());
+						co = ga.object;
+					} else if (ua instanceof StyleAction) {
+						StyleAction sa = (StyleAction) ua;
+						joAct.put(ActionJCode.ACTION_CODE,
+								ActionCode.STYLE_ACTION);
+						joAct.put(ActionJCode.ACTION_PARAM, sa.getParameter());
+						co = sa.object;
+					} else
+						break;
 					if (co.getGlobalID() == -1) {
 						// jika objek baru dan aksi draw -> masukkan di list
 						if (ua instanceof DrawAction) {
 							joAct.put(ActionJCode.ACTION_OBJ_LISTED,
 									sentObjects.size());
 							sentObjects.add(co);
-						} else
-							// jika objek baru dan aksi bukan draw -> cari idnya
-							for (int j = 0; j < sentObjects.size(); j++) {
-								if (sentObjects.get(j).privateID == co.privateID) {
-									joAct.put(ActionJCode.ACTION_OBJ_LISTED, j);
+						} else {
+							// jika objek baru dan aksi bukan draw -> cari
+							// idnya
+							int lid = 0;
+							for (; lid < sentObjects.size(); lid++) {
+								if (sentObjects.get(lid).privateID == co.privateID) {
+									joAct.put(ActionJCode.ACTION_OBJ_LISTED,
+											lid);
 									break;
 								}
 							}
+							// jika objek tidak ditemukan, masukkan manual
+							if (lid >= sentObjects.size()) {
+								joAct.put(ActionJCode.ACTION_OBJ_LISTED,
+										sentObjects.size());
+								sentObjects.add(co);
+							}
+						}
 					} else
 						// jika objek sudah diketahui masukkan id globalnya
 						joAct.put(ActionJCode.ACTION_OBJ_KNOWN,
