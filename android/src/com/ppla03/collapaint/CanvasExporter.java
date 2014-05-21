@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Environment;
 
 import com.ppla03.collapaint.model.CanvasModel;
@@ -23,7 +25,30 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * 
  */
 public class CanvasExporter {
+	/**
+	 * Listener untuk proses ekspor kanvas
+	 * @author hamba v7
+	 * 
+	 */
+	public static interface CanvasExportListener {
+		/**
+		 * Dipicu saat proses ekspor selesai
+		 * @param status {@link CanvasExporter#SUCCESS},
+		 *            {@link CanvasExporter#FAILED} atau
+		 *            {@link CanvasExporter#DISK_UNAVAILABLE}
+		 */
+		void onFinishExport(int status);
+	}
 
+	private static CanvasExportListener listener;
+	private static CanvasModel exportModel;
+	private static CompressFormat format;
+	private static boolean cropped;
+	private static boolean transparent;
+
+	/**
+	 * File yang baru saa diekspor
+	 */
 	private static File recent;
 
 	/**
@@ -67,35 +92,63 @@ public class CanvasExporter {
 	 *            akan diekspor. Jika false, maka hanya bagian yang ada objeknya
 	 *            yang akan diekspor.
 	 * 
-	 * @return status {@link #SUCCESS}, {@link #FAILED}, atau
-	 *         {@link #DISK_UNAVAILABLE}.
 	 */
-	public static int export(CanvasModel canvas, CompressFormat format,
-			boolean transparent, boolean cropped) {
-		String filename = canvas.name;
-		String storageState = Environment.getExternalStorageState();
-		if (storageState.equals(Environment.MEDIA_MOUNTED)) {
+	public static void export(CanvasModel canvas, CompressFormat format,
+			boolean transparent, boolean cropped, CanvasExportListener listener) {
+		exportModel = canvas;
+		CanvasExporter.listener = listener;
+		CanvasExporter.format = format;
+		CanvasExporter.transparent = transparent;
+		CanvasExporter.cropped = cropped;
+
+		new Exporter().execute();
+	}
+
+	private static class Exporter extends AsyncTask<Void, Void, Integer> {
+
+		@Override
+		protected Integer doInBackground(Void... params) {
+
+			String storageState = Environment.getExternalStorageState();
+
+			// jika tempat penyimpanan tidak ada
+			if (!storageState.equals(Environment.MEDIA_MOUNTED)) {
+				return DISK_UNAVAILABLE;
+			}
+
 			File dir = Environment
 					.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 			dir.mkdirs();
+
+			// atur nama file agar selalu berkahiran ekstensi yang sesuai
 			String extension = format.equals(CompressFormat.PNG) ? ".png"
 					: ".jpg";
+			String filename = exportModel.name;
 			if (filename.endsWith(extension))
 				filename = filename.substring(0,
 						filename.length() - extension.length());
+
+			// buat file
 			recent = new File(dir, filename + extension);
+			// jika file sudah ada -> concat nama dengan angka
 			int i = 1;
 			while (recent.exists())
 				recent = new File(dir, filename + i++ + extension);
-			boolean result = export(canvas, recent, format, transparent,
+
+			// ekspor kanvas
+			boolean result = export(exportModel, recent, format, transparent,
 					cropped);
 			if (result)
 				return SUCCESS;
 			else
 				return FAILED;
-		} else
-			return DISK_UNAVAILABLE;
-	}
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			listener.onFinishExport(result);
+		}
+	};
 
 	/**
 	 * Mendapatkan file hasil ekspor kanvas yang barusaja dibuat.
@@ -110,6 +163,15 @@ public class CanvasExporter {
 	 */
 	public static final int CROP_PADDING = 10;
 
+	/**
+	 * Mengekspor kanvas ke suatu file
+	 * @param model
+	 * @param file
+	 * @param format
+	 * @param transparent
+	 * @param cropped
+	 * @return
+	 */
 	private static boolean export(CanvasModel model, File file,
 			CompressFormat format, boolean transparent, boolean cropped) {
 		RectF bound = new RectF();
@@ -128,9 +190,13 @@ public class CanvasExporter {
 		try {
 			out = new FileOutputStream(file);
 			finalBitmap.compress(format, 100, out);
-			out.close();
 		} catch (Exception e) {
 			return false;
+		} finally {
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {}
 		}
 		return true;
 	}
@@ -188,7 +254,8 @@ public class CanvasExporter {
 			FileOutputStream out = context.openFileOutput("c" + model.getId()
 					+ ".png", Context.MODE_PRIVATE);
 			preview.compress(CompressFormat.PNG, 90, out);
-		} catch (FileNotFoundException e) {}
+			out.close();
+		} catch (IOException ex) {}
 	}
 
 	/**
@@ -201,8 +268,10 @@ public class CanvasExporter {
 		try {
 			FileInputStream in = context.openFileInput("c" + model.getId()
 					+ ".png");
-			return BitmapFactory.decodeStream(in);
-		} catch (FileNotFoundException e) {}
+			Bitmap b = BitmapFactory.decodeStream(in);
+			in.close();
+			return b;
+		} catch (IOException e) {}
 		return null;
 	}
 }

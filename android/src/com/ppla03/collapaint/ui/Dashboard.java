@@ -16,6 +16,7 @@ import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.UserInfoChangedCallback;
 
 import com.ppla03.collapaint.CanvasExporter;
+import com.ppla03.collapaint.CanvasExporter.CanvasExportListener;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.ManageParticipantListener;
@@ -36,6 +37,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewDebug.ExportedProperty;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -54,6 +56,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 	ParticipantManager manager;
 
 	ImageButton close;
+	ProgressBar loader;
 
 	// --- hide ---
 	CheckBox hide;
@@ -108,11 +111,13 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			hide = (CheckBox) parent.findViewById(R.id.d_button_hide);
 			hide.setOnClickListener(this);
 			hide.setText(R.string.d_nohide_text);
+			loader = (ProgressBar) parent.findViewById(R.id.d_loader);
+			loader.setVisibility(View.GONE);
 
 			// ------ participant list ------
 			adapter = new ParticipantAdapter(this);
 			partiList = (ListView) parent.findViewById(R.id.d_parti_list);
-//			partiList.setVisibility(View.GONE);
+			// partiList.setVisibility(View.GONE);
 			partiList.setAdapter(adapter);
 			partiLoader = (ProgressBar) parent
 					.findViewById(R.id.d_participant_loader);
@@ -289,23 +294,31 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 				: CompressFormat.JPEG;
 		boolean transparent = format.equals(CompressFormat.PNG);
 		boolean cropped = downloadCropped.isChecked();
-		int status = CanvasExporter.export(model, format, transparent, cropped);
-		String res = "";
-		if (status == CanvasExporter.SUCCESS) {
-			String path = CanvasExporter.getResultFile().getAbsolutePath();
-			res = "Downloaded to " + path;
-			Toast.makeText(workspace, res, Toast.LENGTH_SHORT).show();
-			MediaScannerConnection.scanFile(workspace, new String[] { path },
-					null, null);
-		} else if (status == CanvasExporter.FAILED) {
-			Toast.makeText(workspace, R.string.d_download_failed,
-					Toast.LENGTH_SHORT).show();
-		} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-			Toast.makeText(workspace, R.string.disk_unavailable,
-					Toast.LENGTH_SHORT).show();
-		}
-
+		loader.setVisibility(View.VISIBLE);
+		CanvasExporter.export(model, format, transparent, cropped,
+				downloadListener);
 	}
+
+	private CanvasExportListener downloadListener = new CanvasExportListener() {
+
+		@Override
+		public void onFinishExport(int status) {
+			loader.setVisibility(View.GONE);
+			if (status == CanvasExporter.SUCCESS) {
+				String path = CanvasExporter.getResultFile().getAbsolutePath();
+				String text = "Downloaded to " + path;
+				Toast.makeText(workspace, text, Toast.LENGTH_SHORT).show();
+				MediaScannerConnection.scanFile(workspace,
+						new String[] { path }, null, null);
+			} else if (status == CanvasExporter.FAILED) {
+				Toast.makeText(workspace, R.string.d_download_failed,
+						Toast.LENGTH_SHORT).show();
+			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
+				Toast.makeText(workspace, R.string.disk_unavailable,
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
 
 	private void reloadList() {
 		partiList.setVisibility(View.GONE);
@@ -320,23 +333,8 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			hide.setText(R.string.d_hide_text);
 		else
 			hide.setText(R.string.d_nohide_text);
-
-		// TODO debug adapter
-		adapter.clear();
-		UserModel user1 = new UserModel(1, "", "user pertama");
-		UserModel user2 = new UserModel(1, "", "user kedua");
-		UserModel user3 = new UserModel(1, "", "user ketiga");
-		UserModel user4 = new UserModel(1, "", "user keempat");
-
-		CanvasModel canvas = new CanvasModel(user1, "dummy canvas", 1000, 1200);
-
-		adapter.add(new Participation(user1, canvas, Role.OWNER));
-		adapter.add(new Participation(user2, canvas, Role.MEMBER));
-		adapter.add(new Participation(user4, canvas, Role.MEMBER));
-		adapter.add(new Participation(user3, canvas, Role.INVITATION));
-		// reloadList();
+		reloadList();
 	}
-
 
 	@Override
 	public void onParticipantFetched(CanvasModel canvas,
@@ -381,6 +379,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	@Override
 	public void onKickUser(UserModel user, CanvasModel model, int status) {
+		// TODO kick message
 		if (status == ServerConnector.SUCCESS) {
 			Toast.makeText(workspace, "User get kick :'(", Toast.LENGTH_SHORT)
 					.show();
@@ -432,32 +431,52 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	public void postImage() {
 		if (checkPermissions()) {
+			loader.setVisibility(View.VISIBLE);
 			CanvasExporter.export(workspace.canvas.getModel(),
-					CompressFormat.PNG, false, false);
-			File image = CanvasExporter.getResultFile();
-
-			Bitmap img = BitmapFactory.decodeFile(image.getPath());
-
-			Request uploadRequest = Request.newUploadPhotoRequest(
-					Session.getActiveSession(), img, new Request.Callback() {
-						@Override
-						public void onCompleted(Response response) {
-							Toast.makeText(workspace,
-									"Photo uploaded successfully",
-									Toast.LENGTH_LONG).show();
-						}
-					});
-			uploadRequest.executeAsync();
-			if (Session.getActiveSession() != null) {
-				Session.getActiveSession().closeAndClearTokenInformation();
-			}
-
-			Session.setActiveSession(null);
+					CompressFormat.PNG, false, false, postListener);
 		} else {
 			requestPermissions();
 		}
 
 	}
+
+	private CanvasExportListener postListener = new CanvasExportListener() {
+
+		@Override
+		public void onFinishExport(int status) {
+			loader.setVisibility(View.GONE);
+			if (status == CanvasExporter.SUCCESS) {
+				File image = CanvasExporter.getResultFile();
+
+				Bitmap img = BitmapFactory.decodeFile(image.getPath());
+
+				Request uploadRequest = Request.newUploadPhotoRequest(
+						Session.getActiveSession(), img,
+						new Request.Callback() {
+							@Override
+							public void onCompleted(Response response) {
+								Toast.makeText(workspace,
+										R.string.d_share_success,
+										Toast.LENGTH_LONG).show();
+							}
+						});
+				uploadRequest.executeAsync();
+				if (Session.getActiveSession() != null) {
+					Session.getActiveSession().closeAndClearTokenInformation();
+				}
+
+				Session.setActiveSession(null);
+			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
+				Toast.makeText(workspace, R.string.disk_unavailable,
+						Toast.LENGTH_SHORT).show();
+				return;
+			} else {
+				Toast.makeText(workspace, R.string.d_share_failed,
+						Toast.LENGTH_SHORT).show();
+			}
+
+		}
+	};
 
 	public boolean checkPermissions() {
 		Session s = Session.getActiveSession();

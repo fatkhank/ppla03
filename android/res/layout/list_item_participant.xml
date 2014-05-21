@@ -11,8 +11,8 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/p_list_status"
-        android:text="contoh nama"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/emptyString"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/dark" />
 
     <ImageButton
@@ -33,6 +33,7 @@
         android:layout_marginRight="32dp"
         android:layout_toLeftOf="@+id/p_list_close"
         android:gravity="center_horizontal"
-        android:text="(invited)" />
+        android:text="@string/emptyString"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

@@ -118,7 +118,9 @@
             android:id="@+id/b_invitation_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" >
+            android:layout_weight="1"
+            android:divider="@android:color/transparent" >
+
         </ListView>
 
         <TextView
@@ -135,7 +137,9 @@
             android:id="@+id/b_canvas_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:divider="@color/black_transparent" />
+
     </LinearLayout>
 
     <TextView

@@ -50,5 +50,7 @@
     <string name="d_hide_msg">Collaboration is off</string>
     <string name="d_nohide_text">Visible</string>
     <string name="d_nohide_msg">Collaboration is on</string>
+    <string name="d_share_failed">Cannot share image</string>
+    <string name="d_share_success">Image uploaded successfully.</string>
 
 </resources>
