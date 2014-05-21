@@ -13,7 +13,7 @@ import android.widget.ArrayAdapter;
 public class FontManager {
 
 	public static final int MIN_FONT_SIZE = 10;
-	public static final int MAX_FONT_SIZE = 100;
+	public static final int MAX_FONT_SIZE = 144;
 
 	private static final int UNDERLINE = 4;
 

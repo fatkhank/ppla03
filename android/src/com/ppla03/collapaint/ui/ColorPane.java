@@ -4,25 +4,18 @@ import com.ppla03.collapaint.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabSpec;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.TextView;
 
@@ -31,9 +24,8 @@ import android.widget.TextView;
  * @author hamba v7
  * 
  */
-public class ColorPane implements OnSeekBarChangeListener,
-		OnEditorActionListener, android.view.View.OnClickListener,
-		AnimationListener {
+class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
+		OnClickListener {
 	/**
 	 * Listener saat ada warna yang dipilih.
 	 * @author hamba v7
@@ -45,16 +37,13 @@ public class ColorPane implements OnSeekBarChangeListener,
 		 * @param color
 		 */
 		void onColorChanged(int color);
-	}
 
-	private static final ColorFilter redFilter = new PorterDuffColorFilter(
-			Color.RED, PorterDuff.Mode.SRC_IN);
-	private static final ColorFilter greenFilter = new PorterDuffColorFilter(
-			Color.GREEN, PorterDuff.Mode.SRC_IN);
-	private static final ColorFilter blueFilter = new PorterDuffColorFilter(
-			Color.BLUE, PorterDuff.Mode.SRC_IN);
-	private static final ColorFilter alphaFilter = new PorterDuffColorFilter(
-			Color.BLACK, PorterDuff.Mode.SRC_IN);
+		/**
+		 * Dipicu saat dialog ditutup.
+		 * @param color
+		 */
+		void onDialogClosed(int color);
+	}
 
 	private View parent;
 
@@ -72,7 +61,6 @@ public class ColorPane implements OnSeekBarChangeListener,
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
 	private int selectedColor;
-	private TranslateAnimation animShow;
 
 	public ColorPane(Activity activity, View view, ColorChangeListener listener) {
 		try {
@@ -91,17 +79,6 @@ public class ColorPane implements OnSeekBarChangeListener,
 			bSlider.setOnSeekBarChangeListener(this);
 			aSlider.setOnSeekBarChangeListener(this);
 
-			rSlider.getProgressDrawable().setColorFilter(redFilter);
-			gSlider.getProgressDrawable().setColorFilter(greenFilter);
-			bSlider.getProgressDrawable().setColorFilter(blueFilter);
-			aSlider.getProgressDrawable().setColorFilter(alphaFilter);
-
-			// TODO require api 16
-			// rSlider.getThumb().setColorFilter(redFilter);
-			// gSlider.getThumb().setColorFilter(greenFilter);
-			// bSlider.getThumb().setColorFilter(blueFilter);
-			// aSlider.getThumb().setColorFilter(alphaFilter);
-
 			rInput = (EditText) view.findViewById(R.id.cp_r_input);
 			gInput = (EditText) view.findViewById(R.id.cp_g_input);
 			bInput = (EditText) view.findViewById(R.id.cp_b_input);
@@ -118,14 +95,6 @@ public class ColorPane implements OnSeekBarChangeListener,
 			cancel = (ImageButton) view.findViewById(R.id.cp_cancel);
 			approve.setOnClickListener(this);
 			cancel.setOnClickListener(this);
-
-			animShow = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
-					Animation.RELATIVE_TO_SELF, 1, Animation.RELATIVE_TO_SELF,
-					0, Animation.RELATIVE_TO_SELF, 0);
-
-			animShow.setDuration(500);
-			animShow.setFillAfter(true);
-			animShow.setAnimationListener(this);
 
 			parent.setVisibility(View.GONE);
 			setColor(Color.BLACK);
@@ -171,7 +140,6 @@ public class ColorPane implements OnSeekBarChangeListener,
 	public void show() {
 		setColor(selectedColor);
 		parent.setVisibility(View.VISIBLE);
-		// parent.startAnimation(animShow);
 	}
 
 	@Override
@@ -191,7 +159,9 @@ public class ColorPane implements OnSeekBarChangeListener,
 				alpha = progress;
 				aInput.setText(String.valueOf(alpha));
 			}
-			preview.setBackgroundColor(Color.argb(alpha, red, green, blue));
+			selectedColor = Color.argb(alpha, red, green, blue);
+			preview.setBackgroundColor(selectedColor);
+			listener.onColorChanged(selectedColor);
 		}
 	}
 
@@ -240,22 +210,10 @@ public class ColorPane implements OnSeekBarChangeListener,
 	@Override
 	public void onClick(View v) {
 		if (mode == PALLETE) {
-			listener.onColorChanged(ColorView.currentColor);
+			listener.onDialogClosed(ColorView.currentColor);
 		} else {
 			selectedColor = Color.argb(alpha, red, green, blue);
-			listener.onColorChanged(selectedColor);
+			listener.onDialogClosed(selectedColor);
 		}
-		parent.setVisibility(View.GONE);
 	}
-
-	@Override
-	public void onAnimationStart(Animation animation) {
-		parent.setVisibility(View.VISIBLE);
-	}
-
-	@Override
-	public void onAnimationEnd(Animation animation) {}
-
-	@Override
-	public void onAnimationRepeat(Animation animation) {}
 }

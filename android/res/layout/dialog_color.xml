@@ -35,7 +35,9 @@
         android:layout_toLeftOf="@id/cp_r_input"
         android:layout_toRightOf="@id/cp_r_label"
         android:max="255"
-        android:progress="1" />
+        android:progress="100"
+        android:progressDrawable="@drawable/seek_red"
+        android:thumb="@drawable/thumb_red" />
 
     <TextView
         android:id="@+id/cp_g_label"
@@ -68,7 +70,9 @@
         android:layout_toLeftOf="@id/cp_g_input"
         android:layout_toRightOf="@id/cp_g_label"
         android:max="255"
-        android:progress="1" />
+        android:progress="100"
+        android:progressDrawable="@drawable/seek_green"
+        android:thumb="@drawable/thumb_green" />
 
     <TextView
         android:id="@+id/cp_b_label"
@@ -100,7 +104,8 @@
         android:layout_toLeftOf="@id/cp_b_input"
         android:layout_toRightOf="@id/cp_b_label"
         android:max="255"
-        android:progress="1" />
+        android:progress="120"
+        android:progressDrawable="@drawable/seek_blue" />
 
     <Button
         android:id="@+id/cp_rgb_preview"
@@ -145,8 +150,10 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/cp_a_label"
         android:layout_toLeftOf="@+id/cp_a_input"
-        android:max="254"
-        android:progress="1" />
+        android:max="255"
+        android:progress="200"
+        android:progressDrawable="@drawable/seek_transparent"
+        android:thumb="@drawable/thumb_transparent" />
 
     <ImageButton
         android:id="@+id/cp_cancel"

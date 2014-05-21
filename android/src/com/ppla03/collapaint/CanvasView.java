@@ -428,8 +428,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		mode = Mode.SELECT;
 
 		// default value
-		filled = true;
-		fillColor = Color.BLACK;
+		filled = false;
+		fillColorOri = Color.BLACK;
+		fillColor = (filled) ? fillColorOri : Color.TRANSPARENT;
 		strokeColor = Color.BLACK;
 		strokeWidth = 5;
 		strokeStyle = StrokeStyle.SOLID;
@@ -1407,6 +1408,31 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	}
 
 	/**
+	 * Mengubah state canvas ke parameter objek yang sedang aktif.
+	 */
+	public void captureObjectState() {
+		if (currentObject == currentBasic) {
+			fillColor = currentBasic.getFillColor();
+			filled = fillColor == Color.TRANSPARENT;
+			fillColorOri = fillColor + 0xff000000;
+			strokeColor = currentBasic.getStrokeColor();
+			strokeStyle = currentBasic.getStrokeStyle();
+			strokeWidth = currentBasic.getStrokeWidth();
+		} else if (currentObject == currentText) {
+			textColor = currentText.getTextColor();
+			textSize = currentText.getFontSize();
+			fontBold = FontManager.isBold(currentText.getFontCode());
+			fontItalic = FontManager.isItalic(currentText.getFontCode());
+			textUnderline = FontManager.isUnderline(currentText.getFontCode());
+			textFont = FontManager.fontId(currentText.getFontCode());
+		} else if (currentObject == currentLine) {
+			strokeColor = currentLine.getColor();
+			strokeWidth = currentLine.getWidth();
+			strokeStyle = currentLine.getStrokeStyle();
+		}
+	}
+
+	/**
 	 * Mengubah isi objek teks yang sedang aktif
 	 * 
 	 * @param text
@@ -1494,6 +1520,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 				currentType = ObjectType.FREE;
 			}
 			fillColor = currentBasic.getFillColor();
+			fillColorOri = fillColor + 0xff000000;
 			strokeColor = currentBasic.getStrokeColor();
 		} else if (co instanceof LineObject) {
 			currentLine = (LineObject) co;

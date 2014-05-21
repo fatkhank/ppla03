@@ -192,7 +192,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		inviteList.setVisibility(View.GONE);
 		reloadProgress.setVisibility(View.VISIBLE);
 		reloadButton.setVisibility(View.GONE);
-		listInfo.setText("Get canvas list");
+		listInfo.setText(R.string.b_load_list);
 	}
 
 	@Override
@@ -327,18 +327,10 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			listInfo.setVisibility(View.GONE);
 
 			if (canvasAdapter.isEmpty())
-				listInfo.setText("You have no canvas.");
+				listInfo.setText(R.string.b_no_canvas);
 
 		} else {
-
-			listInfo.setText(getResources().getString(R.string.bcl_failed));
-			String msg;
-			if (status == ServerConnector.CONNECTION_PROBLEM) {
-				msg = "Connection problem.";
-			} else
-				msg = "System error.";
-			listInfo.setText(msg);
-			// Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+			listInfo.setText(R.string.b_load_fail);
 		}
 	}
 

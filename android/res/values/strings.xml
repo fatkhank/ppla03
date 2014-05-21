@@ -1,33 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">collapaint</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_loader">LoaderActivity</string>
-    <string name="cp_r">R</string>
-    <string name="cp_g">G</string>
-    <string name="cp_b">B</string>
-    <string name="cp_a">Opacity</string>
-    <string name="title_activity_color_tester">ColorTesterActivity</string>
-    <string name="emptyString">\"\"</string>
-    <string name="emptyString2"></string>
-    <string name="sign_out">Sign Out</string>
-    <string name="create">Create canvas</string>
-    <string name="w_insert_text">Insert Text</string>
-    <string name="w_progress_participant">Get participants..</string>
-    <string name="wm_download">Download</string><string name="wm_hide">Hide</string>
+    <string name="app_name">Collapaint</string>
     <string name="app_id">750707618307514</string>
-    <string name="wm_participant">Participants</string>
-    
-    
-    
-    <string name="wm_paste">Paste</string><string name="wm_redo">Redo</string>
-    <string name="wm_share">Share</string><string name="wm_undo">Undo</string><string name="wm_unhide">Unhide</string><string name="bcd_name">Name</string>
-    <string name="bcd_width">Width</string>
-    <string name="bcd_height">Height</string>
-    <string name="bcl_loading">Get canvas list</string>
-    <string name="bcl_failed">Cannot load canvas list</string>
-    
+    <string name="emptyString"></string>
+    <string name="check_connection">Please check your internet connection.</string>
+    <string name="close_button">Close button</string>
+
+    <!-- authentication activity -->
+    <string name="a_cannot_contact">Cannot contact server. Please check your internet connection.</string>
+
+    <!-- browser activity -->
+    <string name="create_canvas">Create canvas</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="b_invitation_header">You have invitations</string>
+    <string name="b_canvas_list_header">Canvas list</string>
+    <string name="b_load_list">Get canvas list</string>
+    <string name="b_load_fail">Cannot load canvas list</string>
+    <string name="b_no_canvas">You have no canvas</string>
+    <!-- create canvas dialog -->
+    <string name="bc_name">Canvas name</string>
+    <string name="bc_width">Width</string>
+    <string name="bc_height">Height</string>
+    <string name="bc_create">Create</string>
+
+    <!-- workspace activity -->
+    <string name="w_progress_participant">Get participants.</string>
+    <string name="w_close_confirm">Close canvas?</string>
+    <!-- color dialog -->
+    <string name="cp_a">Opacity</string>
+    <string name="cp_b">B</string>
+    <string name="cp_g">G</string>
+    <string name="cp_r">R</string>
+    <!-- property dialog -->
+    <string name="wp_stroke_label">Stroke</string>
+    <string name="wp_stroke_width">Width</string>
+    <string name="wp_stroke_style">Style</string>
+    <string name="wp_fill">Fill</string>
+    <string name="wp_text_label">Text</string>
+    <string name="wp_font_type">Font</string>
+    <string name="wp_font_color">Color</string>
+    <string name="wp_font_size">Size</string>
+    <string name="wp_poly_corner">Corner</string>
+
+    <!-- dashboard -->
+    <string name="d_download_failed">Download failed</string>
+    <string name="disk_unavailable">Disk is unavailable</string>
+    <string name="d_hide_text">Hide</string>
+    <string name="d_hide_msg">Collaboration is off</string>
+    <string name="d_nohide_text">Visible</string>
+    <string name="d_nohide_msg">Collaboration is on</string>
 
 </resources>

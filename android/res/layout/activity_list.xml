@@ -33,7 +33,7 @@
             android:background="@drawable/button_dark_onpress"
             android:button="@drawable/rotated_expand"
             android:checked="false"
-            android:text="@string/create"
+            android:text="@string/create_canvas"
             android:textColor="@android:color/white"
             android:textStyle="bold" />
 
@@ -44,7 +44,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="24dp"
             android:layout_toLeftOf="@+id/b_signout"
-            android:text="Hello, Anonym"
+            android:text="@string/emptyString"
             android:textColor="@android:color/white" />
 
         <ImageButton
@@ -54,6 +54,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_dark_onpress"
+            android:contentDescription="@string/emptyString"
             android:padding="4dp"
             android:src="@drawable/ic_action_refresh" />
 
@@ -109,7 +110,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/holo_orange_light"
             android:padding="2dp"
-            android:text="You have invitations"
+            android:text="@string/b_invitation_header"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
 
@@ -126,7 +127,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/holo_orange_light"
             android:padding="2dp"
-            android:text="Canvas List"
+            android:text="@string/b_canvas_list_header"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
 
@@ -146,7 +147,7 @@
         android:layout_below="@+id/b_header"
         android:layout_toRightOf="@+id/b_divider_create"
         android:gravity="center_horizontal"
-        android:text="Loading"
+        android:text="@string/b_load_list"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/dark" />
 

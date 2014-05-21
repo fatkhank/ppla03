@@ -15,7 +15,7 @@ import android.view.View;
  * @author hamba v7
  * 
  */
-public class ColorView extends View {
+class ColorView extends View {
 	static final int[] colors2 = new int[] {
 			// abu
 			Color.rgb(255, 255, 255),

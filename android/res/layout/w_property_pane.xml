@@ -19,7 +19,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignWithParentIfMissing="false"
-            android:text="Stroke"
+            android:text="@string/wp_stroke_label"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/dark" />
 
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_stroke_color"
-            android:text="Width"
+            android:text="@string/wp_stroke_width"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/dark" />
 
@@ -50,7 +50,6 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_stroke_width_label"
             android:ems="3"
-            android:text="1"
             android:textColor="@color/dark" />
 
         <TextView
@@ -59,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_stroke_width"
-            android:text="Style"
+            android:text="@string/wp_stroke_style"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/dark" />
 
@@ -74,6 +73,7 @@
             android:id="@+id/w_stroke_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
+            android:contentDescription="@string/emptyString"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@android:color/white"
@@ -93,6 +93,7 @@
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
+            android:contentDescription="@string/emptyString"
             android:layout_alignParentTop="true"
             android:background="@android:color/holo_blue_dark"
             android:gravity="right"
@@ -104,7 +105,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/w_fill_color"
-            android:text="Fill"
+            android:text="@string/wp_fill"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/dark" />
 
@@ -124,7 +125,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:text="Text"
+            android:text="@string/wp_text_label"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <CheckBox
@@ -135,7 +136,7 @@
             android:background="@drawable/top_bar_toggle"
             android:button="@drawable/bold"
             android:checked="true"
-            android:text="@string/emptyString2"
+            android:text="@string/emptyString"
             android:textSize="30sp" />
 
         <CheckBox
@@ -147,7 +148,7 @@
             android:background="@drawable/top_bar_toggle"
             android:button="@drawable/italic"
             android:checked="true"
-            android:text="@string/emptyString2"
+            android:text="@string/emptyString"
             android:textSize="30sp" />
 
         <CheckBox
@@ -160,7 +161,7 @@
             android:background="@drawable/top_bar_toggle"
             android:button="@drawable/underline"
             android:checked="true"
-            android:text="@string/emptyString2"
+            android:text="@string/emptyString"
             android:textSize="30sp" />
 
         <EditText
@@ -186,7 +187,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_font_size_label"
-            android:text="100"
+            android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
@@ -195,7 +196,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_size"
-            android:text="Font"
+            android:text="@string/wp_font_type"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <Spinner
@@ -211,13 +212,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_style"
-            android:text="Color"
+            android:text="@string/wp_font_color"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageButton
             android:id="@+id/w_font_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
+            android:contentDescription="@string/emptyString"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_font_style"
             android:background="@android:color/holo_blue_dark"
@@ -229,7 +231,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_input"
-            android:text="Size"
+            android:text="@string/wp_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </RelativeLayout>
@@ -245,7 +247,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:text="Corner"
+            android:text="@string/wp_poly_corner"
             android:textColor="@color/dark" />
 
         <SeekBar
@@ -263,7 +265,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/w_poly_seek"
             android:layout_marginTop="5dp"
-            android:text="32"
+            android:text=""
             android:textColor="@color/dark" />
 
     </RelativeLayout>

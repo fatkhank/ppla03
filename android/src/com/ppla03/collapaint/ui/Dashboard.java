@@ -24,10 +24,9 @@ import com.ppla03.collapaint.conn.ParticipantManager;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.Participation;
+import com.ppla03.collapaint.model.Participation.Role;
 import com.ppla03.collapaint.model.UserModel;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -35,7 +34,6 @@ import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -49,7 +47,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Dashboard implements OnClickListener, ManageParticipantListener,
+class Dashboard implements OnClickListener, ManageParticipantListener,
 		OnKickUserListener {
 	View parent;
 	WorkspaceActivity workspace;
@@ -59,9 +57,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	// --- hide ---
 	CheckBox hide;
-	static final String HIDE_TEXT = "Hidden", NOHIDE_TEXT = "Visible",
-			HIDE_MSG = "Collaboration is off",
-			NOHIDE_MSG = "Collaboration is on";
 
 	// --- participant list ---
 	ListView partiList;
@@ -85,7 +80,6 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 	View shareContainer;
 	LoginButton loginFb;
 	ImageButton shareFb;
-	private String TAG = "Share";
 	private UiLifecycleHelper uiHelper;
 	private static final List<String> PERMISSIONS = Arrays
 			.asList("publish_actions");;
@@ -113,12 +107,12 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 			close.setOnClickListener(this);
 			hide = (CheckBox) parent.findViewById(R.id.d_button_hide);
 			hide.setOnClickListener(this);
-			hide.setText(NOHIDE_TEXT);
+			hide.setText(R.string.d_nohide_text);
 
 			// ------ participant list ------
 			adapter = new ParticipantAdapter(this);
 			partiList = (ListView) parent.findViewById(R.id.d_parti_list);
-			partiList.setVisibility(View.GONE);
+//			partiList.setVisibility(View.GONE);
 			partiList.setAdapter(adapter);
 			partiLoader = (ProgressBar) parent
 					.findViewById(R.id.d_participant_loader);
@@ -222,12 +216,13 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 			// --- hide
 		} else if (v == hide) {
 			if (hide.isChecked()) {
-				hide.setText(HIDE_TEXT);
-				Toast.makeText(workspace, HIDE_MSG, Toast.LENGTH_SHORT).show();
+				hide.setText(R.string.d_hide_text);
+				Toast.makeText(workspace, R.string.d_hide_msg,
+						Toast.LENGTH_SHORT).show();
 			} else {
-				hide.setText(NOHIDE_TEXT);
-				Toast.makeText(workspace, NOHIDE_MSG, Toast.LENGTH_SHORT)
-						.show();
+				hide.setText(R.string.d_nohide_text);
+				Toast.makeText(workspace, R.string.d_nohide_msg,
+						Toast.LENGTH_SHORT).show();
 			}
 
 			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
@@ -299,14 +294,17 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 		if (status == CanvasExporter.SUCCESS) {
 			String path = CanvasExporter.getResultFile().getAbsolutePath();
 			res = "Downloaded to " + path;
+			Toast.makeText(workspace, res, Toast.LENGTH_SHORT).show();
 			MediaScannerConnection.scanFile(workspace, new String[] { path },
 					null, null);
 		} else if (status == CanvasExporter.FAILED) {
-			res = "Download failed";
+			Toast.makeText(workspace, R.string.d_download_failed,
+					Toast.LENGTH_SHORT).show();
 		} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-			res = "Disk is unavailable";
+			Toast.makeText(workspace, R.string.disk_unavailable,
+					Toast.LENGTH_SHORT).show();
 		}
-		Toast.makeText(workspace, res, Toast.LENGTH_SHORT).show();
+
 	}
 
 	private void reloadList() {
@@ -317,18 +315,28 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 		manager.getParticipants(workspace.canvas.getModel());
 	}
 
-	public void show() {
+	public void init() {
 		if (workspace.canvas.isInHideMode())
-			hide.setText(HIDE_TEXT);
+			hide.setText(R.string.d_hide_text);
 		else
-			hide.setText(NOHIDE_TEXT);
-		parent.setVisibility(View.VISIBLE);
-		reloadList();
+			hide.setText(R.string.d_nohide_text);
+
+		// TODO debug adapter
+		adapter.clear();
+		UserModel user1 = new UserModel(1, "", "user pertama");
+		UserModel user2 = new UserModel(1, "", "user kedua");
+		UserModel user3 = new UserModel(1, "", "user ketiga");
+		UserModel user4 = new UserModel(1, "", "user keempat");
+
+		CanvasModel canvas = new CanvasModel(user1, "dummy canvas", 1000, 1200);
+
+		adapter.add(new Participation(user1, canvas, Role.OWNER));
+		adapter.add(new Participation(user2, canvas, Role.MEMBER));
+		adapter.add(new Participation(user4, canvas, Role.MEMBER));
+		adapter.add(new Participation(user3, canvas, Role.INVITATION));
+		// reloadList();
 	}
 
-	public void hide() {
-		parent.setVisibility(View.GONE);
-	}
 
 	@Override
 	public void onParticipantFetched(CanvasModel canvas,
@@ -367,8 +375,7 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 			// } else if(status == ManageParticipantListener.){
 
 		} else
-			Toast.makeText(workspace,
-					"Error,please check your connection problem",
+			Toast.makeText(workspace, R.string.check_connection,
 					Toast.LENGTH_SHORT).show();
 	}
 
@@ -425,10 +432,9 @@ public class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	public void postImage() {
 		if (checkPermissions()) {
-			CanvasExporter export = new CanvasExporter();
-			export.export(workspace.canvas.getModel(), CompressFormat.PNG,
-					false, false);
-			File image = export.getResultFile();
+			CanvasExporter.export(workspace.canvas.getModel(),
+					CompressFormat.PNG, false, false);
+			File image = CanvasExporter.getResultFile();
 
 			Bitmap img = BitmapFactory.decodeFile(image.getPath());
 

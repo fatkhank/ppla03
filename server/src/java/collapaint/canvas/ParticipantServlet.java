@@ -63,7 +63,7 @@ public class ParticipantServlet extends HttpServlet {
                 int canvasId = request.getInt(Request.CANVAS_ID);
                 int userId = request.getInt(Request.USER_ID);
                 if (action == Request.Action.INVITE) {
-                    String email = request.getString(Request.USER_EMAIL);
+                    String email = request.getString(Request.USER_EMAIL).toLowerCase();
                     invite(conn, reply, email, userId, canvasId);
                 } else if (action == Request.Action.KICK) {
                     int kickerId = request.getInt(Request.KICKER_ID);

@@ -152,7 +152,7 @@ public class CanvasConnector extends ServerConnector {
 									break;
 								}
 							}
-							// jika objek tidak ditemukan, masukkan manual
+							// jika objek tidak ditemukan, masukkan objeknya
 							if (lid >= sentObjects.size()) {
 								joAct.put(ActionJCode.ACTION_OBJ_LISTED,
 										sentObjects.size());

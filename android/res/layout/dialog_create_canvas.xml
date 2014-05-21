@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
-        android:text="Canvas Name"
+        android:text="@string/bc_create"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/dark" />
 
@@ -31,7 +31,7 @@
         android:layout_alignBottom="@+id/b_create_width"
         android:layout_alignTop="@+id/b_create_width"
         android:gravity="center_vertical"
-        android:text="Width"
+        android:text="@string/bc_width"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/dark" />
 
@@ -53,7 +53,7 @@
         android:layout_alignBottom="@+id/b_create_height"
         android:layout_alignTop="@+id/b_create_height"
         android:gravity="center_vertical"
-        android:text="Height"
+        android:text="@string/bc_height"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/dark" />
 
@@ -76,7 +76,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/button_textbox_dark"
-        android:text="Create"
+        android:text="@string/bc_create"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/dark" />
 

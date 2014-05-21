@@ -50,6 +50,13 @@ public class Participation {
 	public Participation(UserModel user, CanvasModel canvas) {
 		this.user = user;
 		this.canvas = canvas;
+		this.role = Role.INVITATION;
+	}
+	
+	public Participation(UserModel user, CanvasModel canvas, Role role) {
+		this.user = user;
+		this.canvas = canvas;
+		this.role = role;
 	}
 
 	public Participation setRole(Role role) {

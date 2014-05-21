@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.model.Participation;
+import com.ppla03.collapaint.model.Participation.Role;
 
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +22,7 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 	class ItemView {
 		Participation participation;
 		TextView name;
+		TextView status;
 		ImageButton close;
 	}
 
@@ -61,7 +63,7 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 		View v = convertView;
 		if (v == null) {
 			v = dashboard.workspace.getLayoutInflater().inflate(
-					R.layout.participant_list_item, null);
+					R.layout.list_item_participant, null);
 		}
 		ItemView iv = ((ItemView) v.getTag());
 		if (iv == null) {
@@ -69,6 +71,7 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 
 			iv.participation = participants.get(position);
 			iv.name = (TextView) v.findViewById(R.id.p_list_name);
+			iv.status = (TextView) v.findViewById(R.id.p_list_status);
 			iv.close = (ImageButton) v.findViewById(R.id.p_list_close);
 			iv.close.setOnClickListener(ParticipantAdapter.this);
 			iv.close.setTag(iv);
@@ -83,6 +86,12 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 		iv.participation = participants.get(position);
 		String name = iv.participation.user.name;
 		iv.name.setText((name == null || name.isEmpty()) ? NAME_IF_NULL : name);
+		if (iv.participation.getRole() == Role.OWNER) {
+			iv.status.setText("(owner)");
+		} else if (iv.participation.getRole() == Role.INVITATION) {
+			iv.status.setText("(invited)");
+		} else
+			iv.status.setText("");
 		return v;
 	}
 

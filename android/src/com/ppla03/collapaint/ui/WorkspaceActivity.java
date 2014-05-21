@@ -18,6 +18,8 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -73,10 +75,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private TextView canvasTitle;
 	private View colorConsumer;
 
+	// --------- color setting ---------
 	private ColorPane colorPane;
 	private View colorPaneView;
-	private View propertyPane;
+	private ValueAnimator animColor;
 
+	private View propertyPane;
 	private ValueAnimator animProp;
 
 	// --------- stroke setting ---------
@@ -133,13 +137,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- select ---
 			selectAddButtons = (LinearLayout) findViewById(R.id.w_selection_pane);
 			selectAddButtons.setVisibility(View.GONE);
-			showProp = (CheckBox) findViewById(R.id.w_show_property);
-			showProp.setChecked(true);
 			cut = (ImageButton) findViewById(R.id.w_sel_cut);
 			copy = (ImageButton) findViewById(R.id.w_sel_copy);
 			move = (ImageButton) findViewById(R.id.w_sel_move);
 			delete = (ImageButton) findViewById(R.id.w_sel_del);
-			showProp.setOnClickListener(this);
 			cut.setOnClickListener(this);
 			copy.setOnClickListener(this);
 			move.setOnClickListener(this);
@@ -148,7 +149,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- property pane ---
 			propertyPane = (View) findViewById(R.id.w_property_scroll);
 			propertyPane.setVisibility(View.GONE);
-			animProp = new ValueAnimator();
+			showProp = (CheckBox) findViewById(R.id.w_show_property);
+			showProp.setOnClickListener(this);
+			showProp.setChecked(true);
+			animProp = ValueAnimator.ofFloat(-800, 48);
 			animProp.addListener(this);
 			animProp.addUpdateListener(this);
 			animProp.setDuration(500);
@@ -217,6 +221,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- prepare color ---
 			colorPaneView = findViewById(R.id.w_color_pane_scroll);
 			colorPane = new ColorPane(this, colorPaneView, this);
+			animColor = ValueAnimator.ofFloat(-800, 48);
+			animColor.addListener(this);
+			animColor.addUpdateListener(this);
+			animColor.setDuration(500);
 
 			// --- prepare canvas ---
 			colorNormal = getResources().getColor(R.color.workspace_normal);
@@ -231,8 +239,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			dashboardView = findViewById(R.id.dashboard);
 			dashboardView.setVisibility(View.GONE);
 			dashboard = new Dashboard(savedInstanceState, this, dashboardView);
-			animDash = new ValueAnimator();
-			animDash.setDuration(500);
+			animDash = ValueAnimator.ofFloat(-800, 48);
+			animDash.setDuration(750);
 			animDash.addUpdateListener(this);
 			animDash.addListener(this);
 			topbar.bringToFront();
@@ -251,23 +259,57 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onBackPressed() {
-		closeCanvas();
+		if (dashboardView.getVisibility() == View.VISIBLE) {
+			// kalau dashbord muncul -> sembunyikan
+			showDash.setChecked(false);
+			animateDashboard(false);
+		} else
+			closeCanvas();
 	}
 
+	/**
+	 * Menutup kanvas.
+	 */
 	public void closeCanvas() {
-		CanvasSynchronizer.getInstance().closeCanvas(this);
+		if (dashboardView.getVisibility() == View.VISIBLE)
+			animateDashboard(false);
+		new AlertDialog.Builder(this)
+				.setMessage(R.string.w_close_confirm)
+				.setNegativeButton(android.R.string.cancel, null)
+				.setPositiveButton(android.R.string.yes,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								CanvasSynchronizer.getInstance().closeCanvas(
+										WorkspaceActivity.this);
+							}
+						}).create().show();
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// sama seperti showdash dipencet
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		showDash.setChecked(!showDash.isChecked());
-		onClick(showDash);
+		animateDashboard(showDash.isChecked());
 		return true;
 	}
 
 	@Override
 	public void onColorChanged(int color) {
+		if (colorConsumer == strokeColor) {
+			canvas.setStrokeColor(color, false);
+			strokeColor.setBackgroundColor(color);
+		} else if (colorConsumer == fillColor) {
+			canvas.setFillParameter(true, color, false);
+			fillColor.setBackgroundColor(color);
+		} else if (colorConsumer == textColor) {
+			canvas.setTextColor(color, false);
+			textColor.setBackgroundColor(color);
+		}
+	}
+
+	@Override
+	public void onDialogClosed(int color) {
 		if (colorConsumer == strokeColor) {
 			canvas.setStrokeColor(color, true);
 			strokeColor.setBackgroundColor(color);
@@ -278,6 +320,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.setTextColor(color, true);
 			textColor.setBackgroundColor(color);
 		}
+		animateColorDialog(false);
 	}
 
 	@Override
@@ -313,6 +356,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				if (param == ObjectType.TEXT) {
 					// jika sedang mengedit teks, tampilkan properti text saja
 					textPane.setVisibility(View.VISIBLE);
+					canvas.captureObjectState();
 				} else if (param == ObjectType.LINE) {
 					// edit line
 					strokePane.setVisibility(View.VISIBLE);
@@ -326,12 +370,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 					if (param == ObjectType.POLYGON)
 						shapePane.setVisibility(View.VISIBLE);
 				}
-				setPropPaneVisibility(showProp.isChecked());
+				setPropDialog(showProp.isChecked());
 			}
 		} else {
 			select.setChecked(canvas.isInSelectionMode());
 			selectAddButtons.setVisibility(View.GONE);
-			setPropPaneVisibility(false);
+			setPropDialog(false);
 		}
 	}
 
@@ -367,33 +411,9 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == redo) {
 			canvas.redo();
 		} else if (v == showDash) {
-			if (showDash.isChecked()) {
-				// munculkan
-				if (dashboardView.getVisibility() == View.GONE)
-					dashboardView.setY(-dashboardView.getHeight());
-				animDash.setFloatValues(dashboardView.getY(),
-						topbar.getHeight());
-
-				canvas.approveAction();
-
-				hand.setVisibility(View.GONE);
-				select.setVisibility(View.GONE);
-				undo.setVisibility(View.GONE);
-				redo.setVisibility(View.GONE);
-
-			} else {
-				// sembunyikan
-				animDash.setFloatValues(dashboardView.getY(),
-						-dashboardView.getHeight());
-
-				hand.setVisibility(View.VISIBLE);
-				select.setVisibility(View.VISIBLE);
-				undo.setVisibility(View.VISIBLE);
-				redo.setVisibility(View.VISIBLE);
-			}
-			animDash.start();
+			animateDashboard(showDash.isChecked());
 		} else if (v == showProp) {
-			setPropPaneVisibility(showProp.isChecked());
+			setPropDialog(showProp.isChecked());
 		}
 
 		// select-additional-toolbar
@@ -413,23 +433,23 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		else if (v == strokeColor) {
 			colorConsumer = strokeColor;
 			colorPane.setColor((int) canvas.getObjectParam(Param.strokeColor));
-			colorPane.show();
+			animateColorDialog(true);
 		} else if (v == fillColor) {
 			colorConsumer = fillColor;
 			colorPane.setColor((int) canvas.getObjectParam(Param.fillColor));
-			colorPane.show();
+			animateColorDialog(true);
 		} else if (v == textColor) {
 			colorConsumer = textColor;
 			colorPane.setColor((int) canvas.getObjectParam(Param.textColor));
-			colorPane.show();
+			animateColorDialog(true);
 		} else if (v == fillCheck) {
-			if (fillCheck.isChecked())
+			int color = ((Integer) canvas.getState(Param.fillColor)).intValue();
+			if (fillCheck.isChecked()) {
+				fillColor.setBackgroundColor(color);
 				fillColor.setVisibility(View.VISIBLE);
-			else
+			} else
 				fillColor.setVisibility(View.GONE);
-			canvas.setFillParameter(fillCheck.isChecked(),
-					((Integer) canvas.getState(Param.fillColor)).intValue(),
-					true);
+			canvas.setFillParameter(fillCheck.isChecked(), color, true);
 		} else if (v == textBold)
 			canvas.setFontBold(textBold.isChecked(), true);
 		else if (v == textItalic)
@@ -437,6 +457,35 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		else if (v == textUnderline)
 			canvas.setTextUnderline(textUnderline.isChecked(), true);
 
+	}
+
+	/**
+	 * Memunculkan atau menyembunyikan dashboard
+	 * @param show
+	 */
+	private void animateDashboard(boolean show) {
+		if (show) {
+			// munculkan
+			if (dashboardView.getVisibility() == View.GONE) {
+				dashboardView.setY(-dashboardView.getHeight());
+				dashboardView.setVisibility(View.VISIBLE);
+			}
+
+			animDash.setFloatValues(dashboardView.getY(), topbar.getHeight());
+
+			canvas.approveAction();
+
+			hand.setVisibility(View.GONE);
+			select.setVisibility(View.GONE);
+			undo.setVisibility(View.GONE);
+			redo.setVisibility(View.GONE);
+		} else {
+			// sembunyikan
+			animDash.setFloatValues(dashboardView.getY(),
+					-dashboardView.getHeight());
+
+		}
+		animDash.start();
 	}
 
 	@Override
@@ -524,13 +573,43 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		return true;
 	}
 
-	private void setPropPaneVisibility(boolean visible) {
+	/**
+	 * Menampilkan atau menyembunyikan color dialog
+	 * @param show
+	 */
+	private void animateColorDialog(boolean show) {
+		android.util.Log.d(
+				"POS",
+				"anim:" + show + ", " + animColor.isStarted() + ", "
+						+ colorPaneView.getY() + ","
+						+ colorPaneView.getVisibility());
+		if (show) {
+			// tampilkan
+			if (colorPaneView.getVisibility() == View.GONE) {
+				colorPaneView.setY(-colorPaneView.getHeight());
+				colorPaneView.setVisibility(View.VISIBLE);
+			}
+			animColor.setFloatValues(colorPaneView.getY(), topbar.getHeight());
+		} else {
+			// sembunyikan
+			animColor.setFloatValues(colorPaneView.getY(),
+					-colorPaneView.getHeight());
+		}
+		animColor.start();
+	}
+
+	/**
+	 * Menampilkan atau menyebunyikan property dialog
+	 * @param visible
+	 */
+	private void setPropDialog(boolean visible) {
 		int vis = propertyPane.getVisibility();
-		showProp.setChecked(visible);
 		if (visible) {
 			// animasikan proppane
-			if (vis == View.GONE)
+			if (vis == View.GONE) {
 				propertyPane.setY(-propertyPane.getHeight());
+				propertyPane.setVisibility(View.VISIBLE);
+			}
 			animProp.setFloatValues(propertyPane.getY(), topbar.getHeight());
 
 			// atur nilai pengaturan stroke
@@ -656,6 +735,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// sembunyikan proppane
 			animProp.setFloatValues(propertyPane.getY(),
 					-propertyPane.getHeight());
+			animateColorDialog(false);
 		}
 		animProp.start();
 	}
@@ -675,50 +755,43 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (animation == animProp) {
 			Float f = (Float) animProp.getAnimatedValue();
 			propertyPane.setY(f);
+		} else if (animation == animColor) {
+			Float f = (Float) animColor.getAnimatedValue();
+			colorPaneView.setY(f);
 		}
 	}
 
 	@Override
-	public void onAnimationStart(Animator animation) {
-		if (animation == animDash) {
-			if (showDash.isChecked()) {
-				// memulai animasi show dashboard
-				dashboard.show();
-			}
-		} else if (animation == animProp) {
-			if (showProp.isChecked()) {
-				// memulai animasi show proppane
-				propertyPane.setVisibility(View.VISIBLE);
-			}
-		}
-	}
+	public void onAnimationStart(Animator animation) {}
 
 	@Override
 	public void onAnimationEnd(Animator animation) {
 		if (animation == animDash) {
 			if (!showDash.isChecked()) {
 				// selesai animasi hide dashboard
-				dashboard.hide();
+				dashboardView.setVisibility(View.GONE);
+
+				hand.setVisibility(View.VISIBLE);
+				select.setVisibility(View.VISIBLE);
+				undo.setVisibility(View.VISIBLE);
+				redo.setVisibility(View.VISIBLE);
 			}
 		} else if (animation == animProp) {
 			if (!showProp.isChecked()) {
 				// selesai animasi hide proppane
 				propertyPane.setVisibility(View.GONE);
 			}
+		} else if (animation == animColor) {
+			if (colorPaneView.getY() < 0)
+				colorPaneView.setVisibility(View.GONE);
 		}
 	}
 
 	@Override
-	public void onAnimationCancel(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onAnimationCancel(Animator animation) {}
 
 	@Override
-	public void onAnimationRepeat(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
+	public void onAnimationRepeat(Animator animation) {}
 
 	@Override
 	protected void onResume() {

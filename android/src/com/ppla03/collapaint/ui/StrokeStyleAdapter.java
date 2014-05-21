@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public class StrokeStyleAdapter extends BaseAdapter {
+class StrokeStyleAdapter extends BaseAdapter {
 
 	Context context;
 	int styles[] = { StrokeStyle.SOLID, StrokeStyle.DASHED, StrokeStyle.DOTTED };

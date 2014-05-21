@@ -205,7 +205,7 @@ public class AuthenticationActivity extends FragmentActivity implements
 		// be returned in onConnectionFailed.
 		Log.i(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
 				+ result.getErrorCode());
-		
+
 		mLoader.setVisibility(View.GONE);
 		mSignInButton.setVisibility(View.VISIBLE);
 
@@ -346,10 +346,11 @@ public class AuthenticationActivity extends FragmentActivity implements
 														+ mSignInError);
 										mSignInProgress = STATE_DEFAULT;
 										mLoader.setVisibility(View.GONE);
-										mSignInButton.setVisibility(View.VISIBLE);
+										mSignInButton
+												.setVisibility(View.VISIBLE);
 									}
 								}).create();
-			}			
+			}
 		default:
 			return super.onCreateDialog(id);
 		}
@@ -366,9 +367,8 @@ public class AuthenticationActivity extends FragmentActivity implements
 			startActivity(intent);
 			finish();
 		} else if (status == ServerConnector.CONNECTION_PROBLEM) {
-			Toast.makeText(
-					this,
-					"Cannot contact server. Please check your internet connection.",
+			Toast.makeText(this,
+					getResources().getString(R.string.a_cannot_contact),
 					Toast.LENGTH_SHORT).show();
 		}
 	}

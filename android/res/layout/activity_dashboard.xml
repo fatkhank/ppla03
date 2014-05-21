@@ -3,7 +3,7 @@
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@drawable/bg_dialog"
     android:textAlignment="center" >
 
     <RelativeLayout
@@ -33,7 +33,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/d_parti_reload"
-            android:layout_marginBottom="8dp" >
+            android:layout_marginBottom="8dp"
+            android:divider="@color/light_white" >
+
         </ListView>
 
         <EditText
