@@ -6,7 +6,7 @@
     <RelativeLayout
         android:id="@+id/b_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/b_header_size"
+        android:layout_height="@dimen/w_topbar_height"
         android:background="@android:color/holo_orange_light"
         android:paddingLeft="8dp"
         android:paddingRight="8dp" >
@@ -27,7 +27,7 @@
         <CheckBox
             android:id="@+id/b_create_show"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_dark_onpress"
@@ -119,8 +119,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:animateLayoutChanges="true"
             android:divider="@android:color/transparent" >
-
         </ListView>
 
         <TextView
@@ -138,8 +138,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:animateLayoutChanges="true"
             android:divider="@color/black_transparent" />
-
     </LinearLayout>
 
     <TextView

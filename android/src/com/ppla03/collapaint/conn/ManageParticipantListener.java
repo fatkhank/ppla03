@@ -20,6 +20,10 @@ public interface ManageParticipantListener {
 	 * User sudah bergabung ke kanvas.
 	 */
 	public static final int ALREADY_JOINED = 6;
+	/**
+	 * User yang diundang belum terdaftar
+	 */
+	public static final int NOT_REGISTERED = 9;
 
 	/**
 	 * User yang dikick tidak tergabung dalam canvas yang bersangkutan.

@@ -11,6 +11,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/p_list_status"
+        android:ellipsize="end"
         android:text="@string/emptyString"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/dark" />
@@ -27,13 +28,14 @@
 
     <TextView
         android:id="@+id/p_list_status"
-        android:layout_width="64dp"
+        android:layout_width="72dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="32dp"
+        android:layout_marginRight="24dp"
         android:layout_toLeftOf="@+id/p_list_close"
         android:gravity="center_horizontal"
         android:text="@string/emptyString"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark" />
 
 </RelativeLayout>

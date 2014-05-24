@@ -255,7 +255,8 @@ public class FreeObject extends BasicObject {
 				return rg.contains((int) x, (int) y);
 			}
 		}
-		return false;
+		float tol = strokePaint.getStrokeWidth() + radius;
+		return (Math.abs(xLocs[0] - x) < tol && Math.abs(yLocs[0] - y) < tol);
 	}
 
 	@Override

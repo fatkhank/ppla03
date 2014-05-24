@@ -17,4 +17,9 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <!-- Workspace Theme Normal -->
+    <style name="WorkspaceActivityNormal" parent="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
+    </style>
+
+
 </resources>

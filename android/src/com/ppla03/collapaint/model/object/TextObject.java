@@ -175,8 +175,7 @@ public class TextObject extends CanvasObject {
 
 	@Override
 	public void setGeom(float[] param, int start, int end) {
-		// hitung juwmlah karakter yang dibaca dan pastikan ukuran buffer cukup
-		// TODO
+		// hitung jumlah karakter yang dibaca dan pastikan ukuran buffer cukup
 		int charLength = Float.floatToIntBits(param[start++]);
 		// int charLength = (int) param[start++];
 		int bufferLength = (charLength + 2) & 0xfffffffe;

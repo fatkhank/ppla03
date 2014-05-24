@@ -29,7 +29,7 @@ public class ParticipantManager extends ServerConnector {
 	protected void onHostAddressChange(String host) {
 		PARTICIPANT_SERVLET_URL = host + "participant";
 	}
-	
+
 	private ParticipantManager() {}
 
 	public ParticipantManager setListener(ManageParticipantListener mpl) {
@@ -54,8 +54,6 @@ public class ParticipantManager extends ServerConnector {
 	 */
 	public void getParticipants(CanvasModel canvas) {
 		JSONObject request = new JSONObject();
-		// TODO debug participant manager
-		android.util.Log.d("POS", "part manager get par");
 		try {
 			// masukan aksi, id user dan kanvas
 			askPartModel = canvas;
@@ -64,9 +62,7 @@ public class ParticipantManager extends ServerConnector {
 			int uid = CollaUserManager.getCurrentUser().collaID;
 			request.put(Request.USER_ID, uid);
 			new Client(PARTICIPANT_SERVLET_URL, replisMember).execute(request);
-			android.util.Log.d("POS", "executed");
 		} catch (JSONException e) {
-			android.util.Log.d("POS", "exception:" + e);
 			replisMember.process(INTERNAL_PROBLEM, null);
 		}
 	}
@@ -161,14 +157,19 @@ public class ParticipantManager extends ServerConnector {
 		public void process(int status, JSONObject reply) {
 			if (status == SUCCESS) {
 				// cek ada error atau tidak
-				if (reply.has(ParticipantJCode.ERROR)) {
-					//TODO user yang diundang tidak terdaftar
-//					String error = reply.getString(ParticipantJCode.Error.USER_UNREGISTERED)
-					listener.onInviteUser("", inviteCanvas, SERVER_PROBLEM);
-					return;
-				}
 				try {
 					String email = reply.getString(Reply.USER_EMAIL);
+
+					if (reply.has(ParticipantJCode.ERROR)) {
+						if (reply.getString(ParticipantJCode.ERROR).equals(
+								ParticipantJCode.Error.USER_UNREGISTERED))
+							listener.onInviteUser(email, inviteCanvas,
+									ManageParticipantListener.NOT_REGISTERED);
+						else
+							listener.onInviteUser(email, inviteCanvas,
+									SERVER_PROBLEM);
+						return;
+					}
 					String result = reply.getString(Reply.INVITE_STATUS);
 					if (result.equals(Reply.InviteStatus.ALREADY_JOINED)) {
 						listener.onInviteUser(email, inviteCanvas,
@@ -272,7 +273,8 @@ public class ParticipantManager extends ServerConnector {
 				request.put(Request.RESPONSE, Request.Response.DECLINE);
 
 			// kirim request
-			new Client(PARTICIPANT_SERVLET_URL, replisResponseInvite).execute(request);
+			new Client(PARTICIPANT_SERVLET_URL, replisResponseInvite)
+					.execute(request);
 		} catch (JSONException e) {
 			replisResponseInvite.process(INTERNAL_PROBLEM, null);
 		}

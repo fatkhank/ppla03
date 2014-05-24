@@ -5,7 +5,9 @@
     <string name="app_id">750707618307514</string>
     <string name="emptyString"></string>
     <string name="check_connection">Please check your internet connection.</string>
+    <string name="not_authorized">Sorry, you have no permission.</string>
     <string name="close_button">Close button</string>
+    <string name="error">Error occur.</string>
 
     <!-- authentication activity -->
     <string name="a_cannot_contact">Cannot contact server. Please check your internet connection.</string>
@@ -13,6 +15,7 @@
     <!-- browser activity -->
     <string name="create_canvas">Create canvas</string>
     <string name="sign_out">Sign Out</string>
+    <string name="b_ducplicate_name">Canvas\'s name is already exist. Try different name.</string>
     <string name="b_invitation_header">You have invitations</string>
     <string name="b_canvas_list_header">Canvas list</string>
     <string name="b_load_list">Get canvas list</string>
@@ -46,7 +49,10 @@
     <!-- dashboard -->
     <string name="d_download_failed">Download failed</string>
     <string name="disk_unavailable">Disk is unavailable</string>
-    <string name="d_hide_text">Hide</string>
+    <string name="d_invite_sucess">invited to canvas</string>
+    <string name="d_invite_joined">already joined</string>
+    <string name="d_invite_not_registered">is not registered</string>
+    <string name="d_hide_text">Hidden</string>
     <string name="d_hide_msg">Collaboration is off</string>
     <string name="d_nohide_text">Visible</string>
     <string name="d_nohide_msg">Collaboration is on</string>

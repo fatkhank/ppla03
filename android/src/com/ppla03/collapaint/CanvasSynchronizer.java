@@ -104,7 +104,6 @@ public class CanvasSynchronizer implements SyncEventListener,
 		actionBuffer = new ArrayList<>();
 		playbackList = new ArrayList<>();
 		sentList = new ArrayList<>();
-		handler = new Handler();
 		mode = IDLE;
 	}
 
@@ -131,6 +130,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void loadCanvas(CanvasLoadListener listener) {
 		if (connector == null)
 			connector = CanvasConnector.getInstance().setSyncListener(this);
+		// buat handler baru
+		handler = new Handler();
 		if (currentModel == null) {
 			// buat dummy kanvas kalau tidak ada
 			UserModel owner = CollaUserManager.getCurrentUser();

@@ -58,7 +58,6 @@ public class MoveMultiple extends UserAction {
 
 		@Override
 		public int insertInAtomic(ArrayList<AtomicAction> list) {
-			// TODO tidak bisa dimasukkan ke list
 			return 0;
 		}
 	}

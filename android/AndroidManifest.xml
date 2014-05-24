@@ -35,16 +35,16 @@
             android:name="com.ppla03.collapaint.ui.BrowserActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
-        </activity>
-        <activity
-            android:name="com.ppla03.collapaint.ui.LoaderActivity"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.ppla03.collapaint.ui.LoaderActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.ppla03.collapaint.ui.WorkspaceActivity"

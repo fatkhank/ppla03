@@ -15,13 +15,11 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.ColorFilter;
 import android.graphics.Paint.Style;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Path.Direction;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -91,7 +89,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	// Warna untuk memisahkan objek yang tidak diseleksi dan diseleksi. Objek2
 	// yang tidak diseleksi akan terkaburkan dengan warna ini, sedangkan objek
 	// yang diseleksi tidak akan terpengaruh terhadap warna ini.
-	static final int SELECTION_COVER_COLOR = Color.argb(50, 0, 0, 0);
+	static final int SELECTION_COVER_COLOR = Color.argb(30, 0, 0, 0);
 	// Lebar minimal untuk seleksi area. Jika lebar kotak seleksi kurang dari
 	// daerah ini, maka seleksi yang dilakukan adalah seleksi titik. Objek yang
 	// terseleksi adalah objek yang paling atas tersentuh oleh titik seleksi.
@@ -238,6 +236,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	// ---------------------- proto area ---------------
 	private static int PROTO_AREA_WIDTH = 200, PROTO_AREA_TOP_MARGIN = 0;
 	private static final int DS_NONE = 0,// tidak ada
+			DS_IGNORE = 4096,// diabaikan
 			DS_CLICK = 1, // sedang di klik, tapi belum drag
 			DS_DRAG = 2,// ada objek yang sedang didrag
 			DS_PROTO = 4,// objek yang didrag adalah proto
@@ -278,9 +277,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	/**
 	 * ikon delete di main bar
 	 */
-	private Drawable iconBin;
+	private Drawable iconBin, iconClipboard;
 	private int COLOR_THEME_NORMAL, COLOR_THEME_HIDDEN, COLOR_DESTROY = Color
-			.argb(100, 255, 0, 0), COLOR_HIGHLIGHT = Color.argb(100, 0, 0, 0);
+			.rgb(255, 68, 44), COLOR_HIGHLIGHT = Color.argb(100, 0, 0, 0);
 
 	// ---------------------- proto objects -------------
 	private ScaledObject captureObject;
@@ -324,13 +323,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		pathHighLight.lineTo(PROTO_AREA_WIDTH, PROTO_AREA_WIDTH);
 		pathHighLight.lineTo(0, PROTO_AREA_WIDTH);
 		pathHighLight.close();
-
-		// gambar lama
-		// RectF fr = new RectF(4, 4, PROTO_AREA_WIDTH - 4, PROTO_AREA_WIDTH -
-		// 4);
-		// pathHighLight.moveTo(4, 4);
-		// pathHighLight.addRoundRect(fr, icon_width / 2, icon_width / 2,
-		// Direction.CCW);
 
 		int y = PROTO_AREA_TOP_MARGIN;
 		protoLine = new LineObject(icon_left, icon_left, strokeColor,
@@ -421,6 +413,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 		iconBin.setBounds(0, getHeight() - PROTO_AREA_WIDTH, PROTO_AREA_WIDTH,
 				getHeight());
+		iconClipboard.setBounds(0, getHeight() - PROTO_AREA_WIDTH,
+				PROTO_AREA_WIDTH / 2, getHeight() - PROTO_AREA_WIDTH / 2);
 	}
 
 	public CanvasView(Context context, AttributeSet attrs) {
@@ -451,6 +445,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		if (isInEditMode()) {
 			PROTO_AREA_TOP_MARGIN = 48;
 			iconBin = new ShapeDrawable();
+			iconClipboard = new ShapeDrawable();
 			COLOR_THEME_NORMAL = Color.BLUE;
 			COLOR_THEME_HIDDEN = Color.RED;
 		} else {
@@ -458,6 +453,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					R.dimen.w_topbar_height);
 			iconBin = context.getResources().getDrawable(
 					R.drawable.ic_action_discard_dark);
+			iconClipboard = context.getResources().getDrawable(
+					R.drawable.ic_action_paste);
 			COLOR_THEME_NORMAL = context.getResources().getColor(
 					R.color.workspace_normal);
 			COLOR_THEME_HIDDEN = context.getResources().getColor(
@@ -494,14 +491,21 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		selectRect.setEmpty();
 		editRect.setEmpty();
 		// ---- reset ----
+		reloadBitmap();
+
+		reloadCache();
+		calcScrollBounds(getWidth(), getHeight());
+	}
+
+	/**
+	 * Mengatur ukuran cache agar sesuai dengan ukuran kanvas.
+	 */
+	private void reloadBitmap() {
 		cacheImage = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
 				Config.ARGB_8888);
 		selectedObjectsCache = Bitmap.createBitmap(model.getWidth(),
 				model.getHeight(), Config.ARGB_8888);
 		cacheCanvas.setBitmap(cacheImage);
-
-		reloadCache();
-		calcScrollBounds(getWidth(), getHeight());
 	}
 
 	/**
@@ -513,15 +517,19 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		return model;
 	}
 
+	/**
+	 * Mengubah ukuran kanvas
+	 * @param width lebar kanvas
+	 * @param height tinggi kanvas
+	 * @param top koordinat x pojok kiri atas kanvas
+	 * @param left koordinat y pojok kiri atas kanvas
+	 */
 	public void resizeCanvas(int width, int height, int top, int left) {
+		model.setDimension(width, height, top, left);
+		reloadBitmap();
+
 		ResizeCanvas rc = new ResizeCanvas(model, width, height, top, left,
 				true);
-		model.setDimension(width, height, top, left);
-		cacheImage = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
-				Config.ARGB_8888);
-		selectedObjectsCache = Bitmap.createBitmap(model.getWidth(),
-				model.getHeight(), Config.ARGB_8888);
-		cacheCanvas.setBitmap(cacheImage);
 		pushToUAStack(rc, true);
 		reloadCache();
 		postInvalidate();
@@ -540,7 +548,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 			// jika lebar kanvas kurang dari layar
 		} else {
-			minScrollX = 0;
+			minScrollX = -CANVAS_MARGIN - CANVAS_MARGIN;
 			maxScrollX = w - model.getWidth();
 		}
 
@@ -551,7 +559,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 			// jika tinggi kanvas kurang dari layar
 		} else {
-			minScrollY = 0;
+			minScrollY = -CANVAS_MARGIN - CANVAS_MARGIN;
 			maxScrollY = h - model.getHeight();
 		}
 	}
@@ -577,7 +585,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		canvas.drawRect(0, 0, PROTO_AREA_WIDTH, getHeight(), selectPaint);
 		if ((dragStatus & DS_DRAG) != DS_DRAG) {
 			// tampilkan highligh kalau diklik
-			if (protoY > PROTO_AREA_TOP_MARGIN || continueDraw) {
+			if (protoY >= PROTO_AREA_TOP_MARGIN || continueDraw) {
 				if ((dragStatus & DS_DRAW) == DS_DRAW) {
 					selectPaint.setColor(hide_mode ? COLOR_THEME_HIDDEN
 							: COLOR_THEME_NORMAL);
@@ -601,8 +609,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			capturePoly.draw(canvas);
 			captureText.draw(canvas);
 			if (ObjectClipboard.hasObject()
-					&& ((dragStatus & DS_PASTE) != DS_PASTE))
+					&& ((dragStatus & DS_PASTE) != DS_PASTE)) {
 				capturePaste.draw(canvas);
+				iconClipboard.draw(canvas);
+			}
 		} else {
 			if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
 				selectPaint.setColor(COLOR_DESTROY);
@@ -650,9 +660,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		// tampilkan hasil clone objek
 		if (((dragStatus & DS_DRAG) == DS_DRAG)
 				&& ((dragStatus & DS_PROTO) == DS_PROTO)
-				&& ((dragStatus & DS_INFLATED) != DS_INFLATED)) {
+				&& ((dragStatus & DS_INFLATED) != DS_INFLATED))
 			captureObject.draw(canvas);
-		} else if ((dragStatus & DS_PASTE) == DS_PASTE)
+		else if ((dragStatus & DS_PASTE) == DS_PASTE)
 			draggedPaste.draw(canvas);
 
 		// DEBUG
@@ -661,7 +671,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 	}
 
-	// /** DEBUG
+/** DEBUG
 	static Paint debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	static {
 		debugPaint.setColor(Color.RED);
@@ -671,6 +681,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 	void debug(Canvas canvas) {
 		canvas.translate(-scrollX, -scrollY);
+		canvas.drawText("DS:" + dragStatus, getWidth() - 540, getHeight(),
+				debugPaint);
 		canvas.drawText("U:" + userActions.size(), getWidth() - 460,
 				getHeight(), debugPaint);
 		canvas.drawText("R:" + redoStack.size(), getWidth() - 380, getHeight(),
@@ -801,8 +813,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			Float progress = (Float) animation.getAnimatedValue();
 			if (dragStatus == DS_PASTE_DEFLATING) {
 				// animasi hasil copy
-				float ofx = capturePaste.offsetX() + progress * pasteOfsX;
-				float ofy = capturePaste.offsetY() + progress * pasteOfsY;
+				float ofx = capturePaste.offsetX() + progress
+						* (pasteOfsX + scrollX);
+				float ofy = capturePaste.offsetY() + progress
+						* (pasteOfsY + scrollY);
 				draggedPaste.offsetTo(ofx, ofy);
 				float scale = pasteScale + (1 - pasteScale) * progress;
 				draggedPaste.scaleTo(scale);
@@ -816,6 +830,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			CanvasView.this.postInvalidate();
 		}
 	};
+
 	Animator.AnimatorListener animProtoListener = new AnimatorListener() {
 
 		@Override
@@ -826,11 +841,14 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 		@Override
 		public void onAnimationEnd(Animator animation) {
+
 			// jika user masih melakukan drag
 			if ((dragStatus & DS_DRAG) == DS_DRAG) {
 				// jika yang dianimasi objek proto
-				currentObject = protoObject;
-				currentObject.offset(-scrollX, -scrollY);
+				if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
+					currentObject = protoObject;
+					currentObject.offset(-scrollX, -scrollY);
+				}
 				dragStatus |= DS_ANIM_FINISH;
 			} else {
 				if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
@@ -863,14 +881,21 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		public void onAnimationCancel(Animator animation) {}
 	};
 
+	/**
+	 * Menempatkan hasil paste ke posisi yang pas.
+	 */
 	private void placePaste() {
 		pasteFromClipboard();// paste objek
 		// hitung pergeseran dari saat dicopy
-		float ofx = draggedPaste.offsetX() - capturePaste.offsetX() - pasteOfsX;
-		float ofy = draggedPaste.offsetY() - capturePaste.offsetY() - pasteOfsY;
+		float ofx = draggedPaste.offsetX() - capturePaste.offsetX() - pasteOfsX
+				- scrollX;
+		float ofy = draggedPaste.offsetY() - capturePaste.offsetY() - pasteOfsY
+				- scrollY;
 		// atur penempatan objek2 yang sudah di paste
 		for (int i = 0; i < selectedObjects.size(); i++)
 			selectedObjects.get(i).offset(ofx, ofy);
+		reloadCache();
+		postInvalidate();
 	}
 
 	/**
@@ -930,9 +955,11 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			}
 			return false;
 		} else {
-			if (dragStatus == DS_NONE) // abaikan jika tak ada aksi
+			// abaikan jika tak ada aksi atau sedang menggambar
+			if (dragStatus == DS_NONE || (dragStatus & DS_IGNORE) == DS_IGNORE)
 				return false;
 			if (act == MotionEvent.ACTION_MOVE) {
+
 				float dx = x - anchorX;
 				float dy = y - anchorY;
 				if ((dragStatus & DS_CLICK) == DS_CLICK) {
@@ -940,10 +967,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					if (Math.abs(dx) > MIN_DRAG_DISTANCE
 							|| Math.abs(dy) > MIN_DRAG_DISTANCE) {
 						dragStatus &= ~DS_CLICK;// matikan klik
-
-						// hilangkan fitur drag saat paste
-						if ((dragStatus & DS_PASTE) != DS_PASTE)
-							dragStatus |= DS_DRAG;// tandai drag
+						dragStatus |= DS_DRAG;// tandai drag
 
 						if (dragStatus == DS_DRAG_PROTO) {
 							// sedang mendrag proto -> clone objek
@@ -1060,6 +1084,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		if (onTouchProtoArea(event, act))
 			return true;
 		if (act == MotionEvent.ACTION_DOWN) {
+			// tandai untuk mengabaikan aksi di protoarea
+			dragStatus = DS_IGNORE;
 			int x = (int) event.getX();
 			int y = (int) event.getY();
 			if ((mode & Mode.HAND) == Mode.HAND) {
@@ -1070,9 +1096,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 				anchorY = y - scrollY;
 				socX = 0;
 				socY = 0;
-				if ((mode & Mode.MOVING) == Mode.MOVING) {
-					protaMove.anchorDown(anchorX, anchorY);
-				} else if (mode == Mode.SELECT) {
+				if (mode == Mode.SELECT) {
 					selectRect.set(anchorX, anchorY, anchorX, anchorY);
 				} else if (mode == Mode.DRAW) {
 					if (objectType == ObjectType.LINE) {
@@ -1097,6 +1121,14 @@ public class CanvasView extends View implements View.OnLongClickListener {
 						} else
 							approveAction();
 					}
+				} else if ((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION) {
+					// kalau diklik di luar objek yang diseleksi, hilangkan
+					// seleksi
+					if (!editRect.contains(x, y)) {
+						approveAction();
+					} else if ((mode & Mode.MOVING) == Mode.MOVING) {
+						protaMove.anchorDown(anchorX, anchorY);
+					}
 				}
 			}
 		} else if (act == MotionEvent.ACTION_MOVE) {
@@ -1104,6 +1136,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			int y = (int) event.getY();
 			// geser kanvas
 			if ((mode & Mode.HAND) == Mode.HAND) {
+				// batasi pergerakan kanvas
 				int nsx = x + anchorX;
 				if ((nsx > scrollX && nsx < maxScrollX)
 						|| (nsx <= scrollX && nsx > minScrollX))
@@ -1144,6 +1177,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 				}
 			}
 		} else if (act == MotionEvent.ACTION_UP) {
+			// perbolehkan aksi di proto area
+			dragStatus = DS_NONE;
 			if ((mode & Mode.HAND) == Mode.HAND) {
 				centerX = (getWidth() >> 1) - scrollX;
 				centerY = (getHeight() >> 1) - scrollY;
@@ -1928,7 +1963,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	 *            hanya merubah parameter objek saja.
 	 */
 	public void setFillParameter(boolean fill, int color, boolean save) {
-		android.util.Log.d("POS", "setFill:" + fill + "," + color + "," + save);
 		filled = fill;
 		color += 0xff000000;// opacity dimaksimalkan
 		fillColorOri = color;
@@ -2010,6 +2044,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		}
 	}
 
+	/**
+	 * Menyalin objek yang diseleksi ke clipboard
+	 * @return jumlah obek yang diseleksi
+	 */
 	public int copySelectedObjects() {
 		ObjectClipboard.put(selectedObjects);
 		draggedPaste.capture(selectedObjects);
@@ -2025,6 +2063,9 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		return selectedObjects.size();
 	}
 
+	/**
+	 * Menghapus object yang diseleksi.
+	 */
 	public void deleteSelectedObjects() {
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			DeleteAction dm = new DeleteAction(currentObject);
@@ -2300,6 +2341,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			// aksi resize canvas tidak ditunda
 			ResizeCanvas rc = (ResizeCanvas) action;
 			model.setDimension(rc.width, rc.height, rc.top, rc.left);
+			reloadBitmap();
 		}
 	}
 

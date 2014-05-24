@@ -34,6 +34,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputFilter.LengthFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,20 +48,25 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabSpec;
 
 class Dashboard implements OnClickListener, ManageParticipantListener,
-		OnKickUserListener {
+		OnKickUserListener, OnTabChangeListener {
+
 	View parent;
 	WorkspaceActivity workspace;
 	ParticipantManager manager;
 
-	ImageButton close;
 	ProgressBar loader;
 
 	// --- hide ---
+	View closeBar;
 	CheckBox hide;
+	ImageButton close;
 
 	// --- participant list ---
 	ListView partiList;
@@ -70,34 +77,37 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 	ImageButton invite;
 	EditText email;
 
+	// --- tab ---
+	private static final String TAB_DOWNLOAD = "TD", TAB_SETTING = "TS",
+			TAB_SHARE = "TH", TAB_REPORT = "TR";
+
 	// --- download ---
-	CheckBox downHeader;
 	View downContainer;
+	TextView downFormatLabel;
 	Spinner downloadFormat;
 	CheckBox downloadCropped;
 	Button downloadButton;
 	ArrayAdapter<String> formatAdapter;
 
 	// --- share ---
-	CheckBox shareHeader;
 	View shareContainer;
 	LoginButton loginFb;
-	ImageButton shareFb;
+	Button shareFb;
 	private UiLifecycleHelper uiHelper;
 	private static final List<String> PERMISSIONS = Arrays
 			.asList("publish_actions");;
 
 	// --- report ---
-	CheckBox reportHeader;
 	View reportCont;
 	Button reportSend;
 	EditText reportInput;
 
 	// --- setting ---
 	View settCont;
-	CheckBox settHeader;
 	EditText settWidth, settHeight;
 	Button settOK;
+
+	InputFilter[] canvasSizeFilter = { new LengthFilter(4) };
 
 	public Dashboard(Bundle savedInstanceState, WorkspaceActivity activity,
 			View parent) {
@@ -106,9 +116,11 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			this.workspace = activity;
 			this.parent = parent;
 
-			close = (ImageButton) parent.findViewById(R.id.d_button_close);
+			closeBar = workspace.findViewById(R.id.w_right_dash_bar);
+			closeBar.setVisibility(View.GONE);
+			close = (ImageButton) workspace.findViewById(R.id.d_button_close);
 			close.setOnClickListener(this);
-			hide = (CheckBox) parent.findViewById(R.id.d_button_hide);
+			hide = (CheckBox) workspace.findViewById(R.id.d_button_hide);
 			hide.setOnClickListener(this);
 			hide.setText(R.string.d_nohide_text);
 			loader = (ProgressBar) parent.findViewById(R.id.d_loader);
@@ -131,16 +143,56 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			email = (EditText) parent.findViewById(R.id.d_insert_email);
 			invite.setOnClickListener(this);
 
+			// ------ TAB ------
+			TabHost host = (TabHost) parent.findViewById(android.R.id.tabhost);
+			host.setup();
+			host.setOnTabChangedListener(this);
+
+			// download
+			TabSpec spec = host.newTabSpec(TAB_DOWNLOAD);
+			spec.setIndicator(
+					"",
+					workspace.getResources().getDrawable(
+							R.drawable.ic_action_download));
+			spec.setContent(R.id.d_download_pane);
+			host.addTab(spec);
+
+			// tampilkan setting hanya untuk owner
+			if (workspace.canvas.getModel().owner.equals(CollaUserManager
+					.getCurrentUser())) {
+				// setting
+				spec = host.newTabSpec(TAB_SETTING);
+				spec.setIndicator(
+						"",
+						workspace.getResources().getDrawable(
+								R.drawable.ic_action_settings));
+				spec.setContent(R.id.d_setting_pane);
+				host.addTab(spec);
+			}
+
+			// share
+			spec = host.newTabSpec(TAB_SHARE);
+			spec.setIndicator(
+					"",
+					workspace.getResources().getDrawable(
+							R.drawable.ic_action_share));
+			spec.setContent(R.id.d_share_pane);
+			host.addTab(spec);
+
+			// report
+			spec = host.newTabSpec(TAB_REPORT);
+			spec.setIndicator("",
+					workspace.getResources().getDrawable(R.drawable.ic_bug));
+			spec.setContent(R.id.d_report_pane);
+			host.addTab(spec);
+
 			// ------ share -------
-			shareHeader = (CheckBox) parent.findViewById(R.id.d_share_header);
-			shareHeader.setOnClickListener(this);
 			shareContainer = parent.findViewById(R.id.d_share_pane);
-			shareContainer.setVisibility(View.GONE);
 			uiHelper = new UiLifecycleHelper(workspace, statusCallback);
 			uiHelper.onCreate(savedInstanceState);
-			shareFb = (ImageButton) parent.findViewById(R.id.d_share_fb);
+			shareFb = (Button) parent.findViewById(R.id.d_share_fb);
 			shareFb.setOnClickListener(this);
-			loginFb = (LoginButton) parent.findViewById(R.id.fb_login_button);
+			loginFb = (LoginButton) parent.findViewById(R.id.d_fb_login_button);
 			loginFb.setUserInfoChangedCallback(new UserInfoChangedCallback() {
 				@Override
 				public void onUserInfoFetched(GraphUser user) {
@@ -153,18 +205,15 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			loginFb.setVisibility(View.GONE);
 
 			// ------ report ------
-			reportHeader = (CheckBox) parent.findViewById(R.id.d_report_header);
-			reportHeader.setOnClickListener(this);
 			reportCont = parent.findViewById(R.id.d_report_pane);
 			reportSend = (Button) parent.findViewById(R.id.d_report_send);
 			reportSend.setOnClickListener(this);
 			reportInput = (EditText) parent.findViewById(R.id.d_report_input);
 
 			// ------ download ------
-			downHeader = (CheckBox) parent.findViewById(R.id.d_download_header);
-			downHeader.setOnClickListener(this);
 			downContainer = parent.findViewById(R.id.d_download_pane);
-			downContainer.setVisibility(View.VISIBLE);
+			downFormatLabel = (TextView) parent
+					.findViewById(R.id.d_text_format);
 			downloadFormat = (Spinner) parent
 					.findViewById(R.id.d_download_format);
 			formatAdapter = new ArrayAdapter<>(activity,
@@ -179,24 +228,17 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 					.findViewById(R.id.d_button_download);
 			downloadButton.setOnClickListener(this);
 
-			settHeader = (CheckBox) parent.findViewById(R.id.d_setting_header);
-			settHeader.setOnClickListener(this);
-
+			// ------ setting ------
 			// sembuyikan pengaturan jika bukan owner
-			if (!workspace.canvas.getModel().owner.equals(CollaUserManager
-					.getCurrentUser())) {
-				settHeader.setVisibility(View.GONE);
-			}
 			settCont = parent.findViewById(R.id.d_setting_pane);
-			settCont.setVisibility(View.GONE);
 			settWidth = (EditText) parent.findViewById(R.id.d_width_input);
+			settWidth.setFilters(canvasSizeFilter);
 			settHeight = (EditText) parent.findViewById(R.id.d_height_input);
+			settHeight.setFilters(canvasSizeFilter);
 			settOK = (Button) parent.findViewById(R.id.d_button_resize);
 			settOK.setOnClickListener(this);
 
 			manager = ParticipantManager.getInstance().setListener(this);
-
-			setCurrentTab(downHeader, downContainer);
 		} catch (Exception ex) {
 			android.util.Log.d("POS", "e:" + ex);
 			for (StackTraceElement s : ex.getStackTrace()) {
@@ -213,8 +255,6 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			workspace.closeCanvas();
 
 			// --- share
-		} else if (v == shareHeader) {
-			setCurrentTab(shareHeader, shareContainer);
 		} else if (v == shareFb) {
 			loginFb.performClick();
 
@@ -239,53 +279,51 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			String em = email.getText().toString();
 			if (!em.isEmpty()) {
 				manager.inviteUser(em, workspace.canvas.getModel());
+				email.setVisibility(View.GONE);
+				invite.setVisibility(View.GONE);
 			}
 
 			// --- download
 		} else if (v == downloadButton) {
 			downloadCanvas();
-		} else if (v == downHeader) {
-			setCurrentTab(downHeader, downContainer);
 
 			// --- report
-		} else if (v == reportHeader) {
-			setCurrentTab(reportHeader, reportCont);
 		} else if (v == reportSend) {
 			reportBug();
 
 			// --- setting
-		} else if (v == settHeader) {
-			setCurrentTab(settHeader, settCont);
-			settWidth.setText(String.valueOf(workspace.canvas.getModel()
-					.getWidth()));
-			settHeight.setText(String.valueOf(workspace.canvas.getModel()
-					.getHeight()));
+
 		} else if (v == settOK) {
 			// ubah ukuran kanvas
 			int width = Integer.parseInt(settWidth.getText().toString());
+			if (width > CanvasModel.MAX_WIDTH)
+				width = CanvasModel.MAX_WIDTH;
 			int height = Integer.parseInt(settHeight.getText().toString());
+			if (height > CanvasModel.MAX_HEIGHT)
+				height = CanvasModel.MAX_HEIGHT;
 			workspace.canvas.resizeCanvas(width, height, 0, 0);
 		}
 	}
 
-	/**
-	 * Menampilkan sebuah tab, dan menutup tab lain.
-	 * @param header
-	 * @param content
-	 */
-	void setCurrentTab(CheckBox header, View content) {
-		settHeader.setChecked(false);
-		downHeader.setChecked(false);
-		shareHeader.setChecked(false);
-		reportHeader.setChecked(false);
-		settCont.setVisibility(View.GONE);
-		downContainer.setVisibility(View.GONE);
-		shareContainer.setVisibility(View.GONE);
-		reportCont.setVisibility(View.GONE);
+	@Override
+	public void onTabChanged(String tabId) {
+		switch (tabId) {
+		case TAB_DOWNLOAD:
 
-		header.setChecked(true);
-		content.setVisibility(View.VISIBLE);
+			break;
+		case TAB_SETTING:
+			settWidth.setText(String.valueOf(workspace.canvas.getModel()
+					.getWidth()));
+			settHeight.setText(String.valueOf(workspace.canvas.getModel()
+					.getHeight()));
+			break;
+		case TAB_SHARE:
 
+			break;
+		case TAB_REPORT:
+
+			break;
+		}
 	}
 
 	private void downloadCanvas() {
@@ -295,6 +333,10 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		boolean transparent = format.equals(CompressFormat.PNG);
 		boolean cropped = downloadCropped.isChecked();
 		loader.setVisibility(View.VISIBLE);
+		downloadButton.setVisibility(View.GONE);
+		downloadFormat.setVisibility(View.GONE);
+		downloadCropped.setVisibility(View.GONE);
+		downFormatLabel.setVisibility(View.GONE);
 		CanvasExporter.export(model, format, transparent, cropped,
 				downloadListener);
 	}
@@ -304,6 +346,10 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		@Override
 		public void onFinishExport(int status) {
 			loader.setVisibility(View.GONE);
+			downloadFormat.setVisibility(View.VISIBLE);
+			downloadCropped.setVisibility(View.VISIBLE);
+			downFormatLabel.setVisibility(View.VISIBLE);
+			downloadButton.setVisibility(View.VISIBLE);
 			if (status == CanvasExporter.SUCCESS) {
 				String path = CanvasExporter.getResultFile().getAbsolutePath();
 				String text = "Downloaded to " + path;
@@ -328,12 +374,17 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		manager.getParticipants(workspace.canvas.getModel());
 	}
 
-	public void init() {
+	void init() {
 		if (workspace.canvas.isInHideMode())
 			hide.setText(R.string.d_hide_text);
 		else
 			hide.setText(R.string.d_nohide_text);
 		reloadList();
+		closeBar.setVisibility(View.VISIBLE);
+	}
+
+	void hide() {
+		closeBar.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -342,8 +393,8 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		adapter.clear();
 		adapter.addAll(participants);
 		partiLoader.setVisibility(View.GONE);
-		partiReload.setVisibility(View.GONE);
 		partiFailed.setVisibility(View.GONE);
+		partiReload.setVisibility(View.VISIBLE);
 		partiList.setVisibility(View.VISIBLE);
 	}
 
@@ -357,21 +408,40 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	@Override
 	public void onInviteUser(String accountId, CanvasModel model, int status) {
+		email.setVisibility(View.VISIBLE);
+		invite.setVisibility(View.VISIBLE);
+		accountId += " ";
 		if (status == ServerConnector.SUCCESS) {
+			Toast.makeText(
+					workspace,
+					accountId
+							+ workspace.getResources().getString(
+									R.string.d_invite_sucess),
+					Toast.LENGTH_SHORT).show();
 			email.setText("");
-			Toast.makeText(workspace, "User is invited", Toast.LENGTH_SHORT)
-					.show();
 			reloadList();
 		} else if (status == ManageParticipantListener.ALREADY_INVITED) {
-			Toast.makeText(workspace, "User has been invited",
+			Toast.makeText(
+					workspace,
+					accountId
+							+ workspace.getResources().getString(
+									R.string.d_invite_sucess),
 					Toast.LENGTH_SHORT).show();
 		} else if (status == ManageParticipantListener.ALREADY_JOINED) {
-			Toast.makeText(workspace, "The user has joined this canvas",
+			Toast.makeText(
+					workspace,
+					accountId
+							+ workspace.getResources().getString(
+									R.string.d_invite_sucess),
 					Toast.LENGTH_SHORT).show();
 
-			// TODO user yang diundang tidak terdaftar
-			// } else if(status == ManageParticipantListener.){
-
+		} else if (status == ManageParticipantListener.NOT_REGISTERED) {
+			Toast.makeText(
+					workspace,
+					accountId
+							+ workspace.getResources().getString(
+									R.string.d_invite_not_registered),
+					Toast.LENGTH_SHORT).show();
 		} else
 			Toast.makeText(workspace, R.string.check_connection,
 					Toast.LENGTH_SHORT).show();
@@ -379,10 +449,13 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	@Override
 	public void onKickUser(UserModel user, CanvasModel model, int status) {
-		// TODO kick message
+		partiList.setVisibility(View.VISIBLE);
+		partiReload.setVisibility(View.VISIBLE);
+		partiLoader.setVisibility(View.GONE);
 		if (status == ServerConnector.SUCCESS) {
-			Toast.makeText(workspace, "User get kick :'(", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(workspace,
+					user.name + " is no longer a participant",
+					Toast.LENGTH_SHORT).show();
 			reloadList();
 		} else
 			Toast.makeText(workspace, "Error", Toast.LENGTH_SHORT).show();
@@ -390,6 +463,9 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	public void kick(Participation part) {
 		manager.kickUser(part.user, part.canvas, this);
+		partiList.setVisibility(View.GONE);
+		partiReload.setVisibility(View.GONE);
+		partiLoader.setVisibility(View.VISIBLE);
 	}
 
 	private void reportBug() {
@@ -512,5 +588,4 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 	void onSaveInstanceState(Bundle savedState) {
 		uiHelper.onSaveInstanceState(savedState);
 	}
-
 }

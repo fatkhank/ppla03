@@ -223,7 +223,11 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		} else if (v == createButton) {
 			String canvasName = nameInput.getText().toString();
 			int width = Integer.parseInt(widthInput.getText().toString());
+			if (width > CanvasModel.MAX_WIDTH)
+				width = CanvasModel.MAX_WIDTH;
 			int height = Integer.parseInt(heightInput.getText().toString());
+			if (height > CanvasModel.MAX_HEIGHT)
+				height = CanvasModel.MAX_HEIGHT;
 			BrowserConnector.getInstance().createCanvas(
 					CollaUserManager.getCurrentUser(), canvasName, width,
 					height);
@@ -269,17 +273,17 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			startActivity(intent);
 			finish();
 		} else {
-			String msg;
 			if (status == CanvasCreationListener.DUPLICATE_NAME) {
-				// TODO show create dialog
-				msg = "Canvas with same name is already exist. Try different name.";
+				Toast.makeText(this, R.string.b_ducplicate_name,
+						Toast.LENGTH_SHORT).show();
 			} else if (status == CanvasCreationListener.NOT_AUTHORIZED) {
-				msg = "User is unregistered.";
+				Toast.makeText(this, R.string.not_authorized,
+						Toast.LENGTH_SHORT).show();
 			} else if (status == ServerConnector.CONNECTION_PROBLEM) {
-				msg = "Connection problem.";
+				Toast.makeText(this, R.string.check_connection,
+						Toast.LENGTH_SHORT).show();
 			} else
-				msg = "System error.";
-			Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
 
 			showCreateLoader(false);
 		}
@@ -305,7 +309,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		reloadProgress.setVisibility(View.GONE);
 
 		if (status == ServerConnector.SUCCESS) {
-			
+
 			if (!invited.isEmpty()) {
 				inviteList.setVisibility(View.GONE);
 				inviteAdapter.clear();

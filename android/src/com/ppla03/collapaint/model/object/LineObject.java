@@ -199,8 +199,10 @@ public class LineObject extends CanvasObject {
 	@Override
 	public boolean selectedBy(float x, float y, float radius) {
 		// quick reject
-		if (x < Math.min(0, x2) || x > Math.max(0, x2) || y < Math.min(0, y2)
-				|| y > Math.max(0, y2))
+		if ((x + radius) < Math.min(-radius, x2)
+				|| (x - radius) > Math.max(0, x2)
+				|| (y + radius) < Math.min(0, y2)
+				|| (y - radius) > Math.max(0, y2))
 			return false;
 		// aproksimasi jarak titik ke garis
 		float tol = paint.getStrokeWidth() + radius;

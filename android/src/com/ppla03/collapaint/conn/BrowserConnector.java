@@ -138,7 +138,6 @@ public class BrowserConnector extends ServerConnector {
 
 		@Override
 		public void process(int status, JSONObject reply) {
-			// TODO json browser
 			if (status == SUCCESS) {
 				try {
 					// -------- process owned -----

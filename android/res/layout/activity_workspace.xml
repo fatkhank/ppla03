@@ -21,82 +21,91 @@
         android:layout_alignParentRight="true"
         android:background="@color/workspace_normal" >
 
-        <CheckBox
+        <com.ppla03.collapaint.ui.CheckImage
             android:id="@+id/w_show_dash"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/w_topbar_height"
             android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
             android:background="@drawable/checkbox_topbar"
-            android:button="@drawable/ic_action_overflow"
-            android:contentDescription="@string/emptyString"
+            android:checked="true"
+            android:src="@drawable/ic_action_overflow"
             android:text="@string/emptyString" />
 
-        <View
-            android:id="@+id/w_divider1"
-            android:layout_width="1dp"
-            android:layout_height="30dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="4dp"
+        <LinearLayout
+            android:id="@+id/w_top_left_control"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_toRightOf="@+id/w_show_dash"
-            android:background="@android:color/white" />
+            android:orientation="horizontal" >
 
-        <CheckBox
-            android:id="@+id/w_select"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="4dp"
-            android:layout_toRightOf="@+id/w_divider1"
-            android:background="@drawable/checkbox_topbar"
-            android:button="@drawable/ic_action_select_all"
-            android:checked="true"
-            android:text="@string/emptyString" />
+            <View
+                android:id="@+id/w_divider1"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
 
-        <CheckBox
-            android:id="@+id/w_hand"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp"
-            android:layout_toRightOf="@+id/w_select"
-            android:background="@drawable/checkbox_topbar"
-            android:button="@drawable/ic_hand"
-            android:checked="true"
-            android:text="@string/emptyString" />
+            <com.ppla03.collapaint.ui.CheckImage
+                android:id="@+id/w_select"
+                android:layout_width="@dimen/w_topbar_height"
+                android:layout_height="match_parent"
+                android:background="@drawable/checkbox_topbar"
+                android:checked="true"
+                android:src="@drawable/ic_action_select_all"
+                android:text="@string/emptyString" />
 
-        <ImageButton
-            android:id="@+id/w_undo"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp"
-            android:layout_toRightOf="@+id/w_hand"
-            android:background="@drawable/button_round"
-            android:contentDescription="@string/emptyString"
-            android:src="@drawable/icon_undo" />
+            <com.ppla03.collapaint.ui.CheckImage
+                android:id="@+id/w_hand"
+                android:layout_width="@dimen/w_topbar_height"
+                android:layout_height="match_parent"
+                android:background="@drawable/checkbox_topbar"
+                android:checked="true"
+                android:src="@drawable/ic_hand"
+                android:text="@string/emptyString" />
 
-        <ImageButton
-            android:id="@+id/w_redo"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="4dp"
-            android:layout_toRightOf="@+id/w_undo"
-            android:background="@drawable/button_round"
-            android:contentDescription="@string/emptyString"
-            android:scaleX="-1"
-            android:src="@drawable/icon_undo" />
+            <View
+                android:id="@+id/w_divider2"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/black_transparent" />
+
+            <ImageButton
+                android:id="@+id/w_undo"
+                android:layout_width="@dimen/w_topbar_height"
+                android:layout_height="@dimen/w_topbar_height"
+                android:background="@drawable/button_round"
+                android:contentDescription="@string/emptyString"
+                android:src="@drawable/icon_undo" />
+
+            <ImageButton
+                android:id="@+id/w_redo"
+                android:layout_width="@dimen/w_topbar_height"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_round"
+                android:contentDescription="@string/emptyString"
+                android:scaleX="-1"
+                android:src="@drawable/icon_undo" />
+
+            <View
+                android:id="@+id/w_divider3"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/w_canvas_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_toLeftOf="@+id/w_selection_pane"
-            android:layout_toRightOf="@+id/w_redo"
+            android:layout_toRightOf="@+id/w_top_left_control"
             android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
             android:lines="1"
@@ -111,51 +120,106 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            android:visibility="visible" >
+
+            <View
+                android:id="@+id/w_divider_select1"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
 
             <ImageButton
                 android:id="@+id/w_sel_cut"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/w_topbar_height"
                 android:layout_height="match_parent"
-                android:layout_marginRight="8dp"
                 android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_cut" />
 
             <ImageButton
                 android:id="@+id/w_sel_copy"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/w_topbar_height"
                 android:layout_height="match_parent"
-                android:layout_marginRight="8dp"
                 android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_copy" />
 
             <ImageButton
                 android:id="@+id/w_sel_move"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/w_topbar_height"
                 android:layout_height="match_parent"
-                android:layout_marginRight="8dp"
                 android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_move" />
 
             <ImageButton
                 android:id="@+id/w_sel_del"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/w_topbar_height"
                 android:layout_height="match_parent"
-                android:layout_marginRight="8dp"
                 android:background="@drawable/button_dark_onpress"
                 android:src="@drawable/ic_action_discard" />
 
-            <CheckBox
+            <View
+                android:id="@+id/w_divider_select2"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
+
+            <com.ppla03.collapaint.ui.CheckImage
                 android:id="@+id/w_show_property"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/w_topbar_height"
                 android:layout_height="match_parent"
                 android:background="@drawable/checkbox_topbar"
-                android:button="@drawable/icon_property"
                 android:checked="true"
+                android:src="@drawable/icon_property"
                 android:text="@string/emptyString" />
-
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/w_right_dash_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <View
+                android:id="@+id/w_divider_hide"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
+
+            <CheckBox
+                android:id="@+id/d_button_hide"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_dark_onpress"
+                android:button="@drawable/icon_hide_white"
+                android:padding="5dp"
+                android:text="Hidden"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/w_divider_close"
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/black_transparent" />
+
+            <ImageButton
+                android:id="@+id/d_button_close"
+                android:layout_width="@dimen/w_topbar_height"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_dark_onpress"
+                android:src="@drawable/ic_exit" />
+        </LinearLayout>
     </RelativeLayout>
 
     <ScrollView
@@ -183,7 +247,7 @@
 
         <include layout="@layout/dialog_color" />
     </ScrollView>
-    
+
     <include
         android:id="@+id/dashboard"
         android:layout_width="wrap_content"
@@ -191,7 +255,6 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
-        android:visibility="gone" />
-    
+        android:visibility="visible" />
 
 </RelativeLayout>

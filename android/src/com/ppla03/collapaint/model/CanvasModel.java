@@ -12,6 +12,15 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  */
 public class CanvasModel {
 	/**
+	 * Lebar maksimal kanvas
+	 */
+	public static final int MAX_WIDTH = 8192;
+	/**
+	 * Tinggi maksimal kanvas
+	 */
+	public static final int MAX_HEIGHT = 8192;
+
+	/**
 	 * id global kanvas
 	 */
 	private int globalID;
@@ -47,8 +56,6 @@ public class CanvasModel {
 	private int height;
 
 	public Date createDate;
-	
-	
 
 	/**
 	 * Daftar objek yang ada di kanvas, terurut dari yang berada paling belakang

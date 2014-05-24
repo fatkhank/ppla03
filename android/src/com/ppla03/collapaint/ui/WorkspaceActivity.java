@@ -17,16 +17,21 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.ScaleAnimation;
@@ -48,14 +53,15 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener,
-		OnLongClickListener, CanvasListener, ColorChangeListener,
-		OnSeekBarChangeListener, OnItemSelectedListener,
-		OnEditorActionListener, CanvasCloseListener, AnimatorUpdateListener,
-		AnimatorListener {
+		OnLongClickListener, ColorChangeListener, OnItemSelectedListener,
+		OnSeekBarChangeListener, OnEditorActionListener, CanvasListener,
+		CanvasCloseListener, AnimatorUpdateListener, AnimatorListener
+
+{
 
 	// --------- top bar ---------
-	private View topbar;
-	private CheckBox select, hand;
+	private View topbar, leftButtons;
+	private CheckImage select, hand;
 	private ImageButton undo, redo;
 
 	// --------- select additional ---------
@@ -63,13 +69,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	private ImageButton cut, copy, move, delete;
 
 	// --------- dashboard ---------
-	private CheckBox showDash;
+	private CheckImage showDash;
 	private View dashboardView;
 	Dashboard dashboard;
 	private ValueAnimator animDash;
 
 	// --------- property --------
-	private CheckBox showProp;
+	private CheckImage showProp;
 
 	private int colorNormal, colorHidden, currentThemeColor;
 	private TextView canvasTitle;
@@ -119,11 +125,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			setContentView(R.layout.activity_workspace);
 			// --- top bar ---
 			topbar = findViewById(R.id.w_topbar);
-			select = (CheckBox) findViewById(R.id.w_select);
-			hand = (CheckBox) findViewById(R.id.w_hand);
+			leftButtons = findViewById(R.id.w_top_left_control);
+			select = (CheckImage) findViewById(R.id.w_select);
+			hand = (CheckImage) findViewById(R.id.w_hand);
 			undo = (ImageButton) findViewById(R.id.w_undo);
 			redo = (ImageButton) findViewById(R.id.w_redo);
-			showDash = (CheckBox) findViewById(R.id.w_show_dash);
+			showDash = (CheckImage) findViewById(R.id.w_show_dash);
 
 			select.setOnClickListener(this);
 			select.setOnLongClickListener(this);
@@ -149,7 +156,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- property pane ---
 			propertyPane = (View) findViewById(R.id.w_property_scroll);
 			propertyPane.setVisibility(View.GONE);
-			showProp = (CheckBox) findViewById(R.id.w_show_property);
+			showProp = (CheckImage) findViewById(R.id.w_show_property);
 			showProp.setOnClickListener(this);
 			showProp.setChecked(true);
 			animProp = ValueAnimator.ofFloat(-800, 48);
@@ -248,6 +255,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --- load ---
 			canvasTitle.setText(canvas.getModel().name);
 			onClick(select);
+
 		} catch (Exception ex) {
 			android.util.Log.d("POS", "e:" + ex);
 			for (StackTraceElement s : ex.getStackTrace()) {
@@ -271,8 +279,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Menutup kanvas.
 	 */
 	public void closeCanvas() {
-		if (dashboardView.getVisibility() == View.VISIBLE)
-			animateDashboard(false);
+		// if (dashboardView.getVisibility() == View.VISIBLE)
+		// animateDashboard(false);
 		new AlertDialog.Builder(this)
 				.setMessage(R.string.w_close_confirm)
 				.setNegativeButton(android.R.string.cancel, null)
@@ -285,13 +293,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 										WorkspaceActivity.this);
 							}
 						}).create().show();
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		showDash.setChecked(!showDash.isChecked());
-		animateDashboard(showDash.isChecked());
-		return true;
 	}
 
 	@Override
@@ -395,12 +396,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 		// main-toolbar
 		if (v == select) {
+			select.toggle();
 			canvas.setMode(CanvasView.Mode.SELECT);
 			if (canvas.isInSelectionMode()) {
 				hand.setChecked(false);
 				select.setChecked(true);
 			}
 		} else if (v == hand) {
+			hand.toggle();
 			canvas.setMode(CanvasView.Mode.HAND);
 			if (canvas.isInHandMode())
 				select.setChecked(false);
@@ -411,8 +414,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		} else if (v == redo) {
 			canvas.redo();
 		} else if (v == showDash) {
+			showDash.toggle();
 			animateDashboard(showDash.isChecked());
 		} else if (v == showProp) {
+			showProp.toggle();
 			setPropDialog(showProp.isChecked());
 		}
 
@@ -470,20 +475,17 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				dashboardView.setY(-dashboardView.getHeight());
 				dashboardView.setVisibility(View.VISIBLE);
 			}
-
 			animDash.setFloatValues(dashboardView.getY(), topbar.getHeight());
-
+			dashboard.init();
 			canvas.approveAction();
-
-			hand.setVisibility(View.GONE);
-			select.setVisibility(View.GONE);
-			undo.setVisibility(View.GONE);
-			redo.setVisibility(View.GONE);
+			leftButtons.setVisibility(View.GONE);
+			selectAddButtons.setVisibility(View.GONE);
 		} else {
 			// sembunyikan
 			animDash.setFloatValues(dashboardView.getY(),
 					-dashboardView.getHeight());
 
+			dashboard.hide();
 		}
 		animDash.start();
 	}
@@ -578,11 +580,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * @param show
 	 */
 	private void animateColorDialog(boolean show) {
-		android.util.Log.d(
-				"POS",
-				"anim:" + show + ", " + animColor.isStarted() + ", "
-						+ colorPaneView.getY() + ","
-						+ colorPaneView.getVisibility());
 		if (show) {
 			// tampilkan
 			if (colorPaneView.getVisibility() == View.GONE) {
@@ -770,11 +767,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (!showDash.isChecked()) {
 				// selesai animasi hide dashboard
 				dashboardView.setVisibility(View.GONE);
+				dashboard.hide();
 
-				hand.setVisibility(View.VISIBLE);
-				select.setVisibility(View.VISIBLE);
-				undo.setVisibility(View.VISIBLE);
-				redo.setVisibility(View.VISIBLE);
+				leftButtons.setVisibility(View.VISIBLE);
+				selectAddButtons.setVisibility(View.VISIBLE);
 			}
 		} else if (animation == animProp) {
 			if (!showProp.isChecked()) {

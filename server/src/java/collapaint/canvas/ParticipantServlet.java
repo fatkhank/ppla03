@@ -114,6 +114,9 @@ public class ParticipantServlet extends HttpServlet {
             try (PreparedStatement userCheck = conn.prepareStatement(DB.User.Q.Select.BY_EMAIL)) {
                 userCheck.setString(DB.User.Q.Select.ByEmail.EMAIL, email);  //cari berdasar email
 
+                //masukkan alamat email yang diundang
+                reply.add(Reply.USER_EMAIL, email);
+
                 ResultSet userResult = userCheck.executeQuery();
                 if (!userResult.next()) {
                     //user yang diundang belum terdaftar
@@ -144,7 +147,6 @@ public class ParticipantServlet extends HttpServlet {
                         String status = DB.Participation.Status.INVITATION;
                         if (addParticipation(conn, userId, canvasId, status)) {
                             //undangan berhasil dibuat
-                            reply.add(Reply.USER_EMAIL, email);
                             reply.add(Reply.INVITE_STATUS, Reply.InviteStatus.SUCCESS);
                         } else
                             //undangan gagal dibuat

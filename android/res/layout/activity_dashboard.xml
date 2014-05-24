@@ -16,9 +16,10 @@
         <TextView
             android:id="@+id/d_text_parti"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/w_topbar_height"
             android:layout_alignBottom="@+id/d_parti_reload"
             android:layout_alignParentTop="true"
+            android:layout_marginBottom="8dp"
             android:gravity="center_horizontal"
             android:text="Participant"
             android:textAppearance="?android:attr/textAppearanceLarge"
@@ -27,15 +28,14 @@
 
         <ListView
             android:id="@+id/d_parti_list"
-            android:layout_width="226dp"
-            android:layout_height="174dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_above="@+id/d_insert_email"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/d_parti_reload"
+            android:layout_below="@+id/d_text_parti"
             android:layout_marginBottom="8dp"
             android:divider="@color/light_white" >
-
         </ListView>
 
         <EditText
@@ -75,7 +75,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_margin="4dp"
             android:background="@drawable/button_round"
             android:src="@drawable/ic_action_refresh_dark"
             android:textColor="@color/dark" />
@@ -87,7 +86,6 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -97,321 +95,244 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:background="@drawable/bg_dialog"
-        android:paddingBottom="8dp"
         android:paddingLeft="2dp" >
 
-        <RelativeLayout
-            android:id="@+id/d_report_pane"
+        <TabHost
+            android:id="@android:id/tabhost"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/d_divider_second_content"
-            android:background="@color/light_white" >
+            android:layout_height="match_parent" >
 
-            <TextView
-                android:id="@+id/d_report_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:gravity="center_horizontal"
-                android:text="State the bug : "
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark" />
-
-            <EditText
-                android:id="@+id/d_report_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/d_report_send"
-                android:layout_below="@+id/d_report_title"
-                android:layout_margin="4dp"
-                android:inputType="textMultiLine" />
-
-            <Button
-                android:id="@+id/d_report_send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/button_textbox_dark"
-                android:padding="4dp"
-                android:text="Send"
-                android:textColor="@color/dark" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/d_setting_pane"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/d_divider_second_content"
-            android:background="@color/light_white"
-            android:orientation="vertical"
-            android:visibility="gone" >
-
-            <TextView
-                android:id="@+id/d_setting_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:text="Resize canvas"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark" />
-
-            <TextView
-                android:id="@+id/d_setting_x"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:text="x"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/dark" />
-
-            <Button
-                android:id="@+id/d_button_resize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/button_textbox_dark"
-                android:gravity="center_vertical|center_horizontal|start"
-                android:padding="4dp"
-                android:text="Resize"
-                android:textColor="@color/dark" />
-
-            <EditText
-                android:id="@+id/d_width_input"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/d_setting_x"
-                android:ems="10"
-                android:imeOptions="actionDone|flagNoFullscreen"
-                android:inputType="number"
-                android:textColor="@color/dark" />
-
-            <EditText
-                android:id="@+id/d_height_input"
-                android:layout_width="66dp"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/d_width_input"
-                android:layout_alignBottom="@+id/d_width_input"
-                android:layout_alignParentRight="true"
-                android:layout_toRightOf="@+id/d_setting_x"
-                android:ems="10"
-                android:imeOptions="actionDone|flagNoFullscreen"
-                android:inputType="number"
-                android:textColor="@color/dark" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/d_main_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:padding="4dp" >
-
-            <CheckBox
-                android:id="@+id/d_button_hide"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.03"
-                android:background="@drawable/button_round"
-                android:button="@drawable/icon_hide"
-                android:padding="5dp"
-                android:text="Hidden"
-                android:textColor="@color/dark" />
-
-            <ImageButton
-                android:id="@+id/d_button_close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_round"
-                android:src="@drawable/ic_action_cancel" />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/d_divider_main_second"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_below="@+id/d_main_button"
-            android:background="@color/black_transparent" />
-
-        <LinearLayout
-            android:id="@+id/d_second_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/d_divider_main_second"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal" >
-
-            <CheckBox
-                android:id="@+id/d_download_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/d_tab_header"
-                android:button="@drawable/ic_action_download"
-                android:checked="true"
-                android:ellipsize="marquee"
-                android:lines="1"
-                android:text="Download"
-                android:textColor="@color/dark" />
-
-            <CheckBox
-                android:id="@+id/d_setting_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/d_tab_header"
-                android:button="@drawable/ic_action_settings"
-                android:checked="false"
-                android:ellipsize="marquee"
-                android:lines="1"
-                android:text="Setting"
-                android:textColor="@color/dark" />
-
-            <CheckBox
-                android:id="@+id/d_share_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/d_tab_header"
-                android:button="@drawable/ic_action_share"
-                android:checked="false"
-                android:ellipsize="marquee"
-                android:lines="1"
-                android:text="Share"
-                android:textColor="@color/dark"
-                android:visibility="visible" />
-
-            <CheckBox
-                android:id="@+id/d_report_header"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/d_tab_header"
-                android:button="@drawable/ic_bug"
-                android:checked="true"
-                android:ellipsize="marquee"
-                android:lines="1"
-                android:text="Report bug"
-                android:textColor="@color/dark" />
+                android:orientation="vertical" >
 
-        </LinearLayout>
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:tabStripEnabled="false" >
+                </TabWidget>
 
-        <View
-            android:id="@+id/d_divider_second_content"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_below="@+id/d_second_button"
-            android:background="@color/black_transparent" />
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
 
-        <RelativeLayout
-            android:id="@+id/d_download_pane"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/d_divider_second_content"
-            android:background="@color/light_white"
-            android:visibility="gone" >
+                    <RelativeLayout
+                        android:id="@+id/d_download_pane"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
 
-            <TextView
-                android:id="@+id/d_download_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="Download canvas"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark" />
+                        <TextView
+                            android:id="@+id/d_download_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:background="@android:color/holo_blue_dark"
+                            android:gravity="center_horizontal"
+                            android:text="Download canvas"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/d_text_format"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/d_download_format"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/d_download_title"
-                android:gravity="center_vertical"
-                android:text="Format"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark" />
+                        <TextView
+                            android:id="@+id/d_text_format"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/d_download_title"
+                            android:layout_centerHorizontal="true"
+                            android:text="Format"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/dark"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/d_download_format"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_toRightOf="@+id/d_text_format" />
+                        <Spinner
+                            android:id="@+id/d_download_format"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/d_text_format" />
 
-            <Button
-                android:id="@+id/d_button_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/button_textbox_dark"
-                android:gravity="center_vertical|center_horizontal|start"
-                android:padding="4dp"
-                android:text="Download"
-                android:textAlignment="gravity"
-                android:textColor="@color/dark" />
+                        <CheckBox
+                            android:id="@+id/d_checkbox_cropped"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/d_download_format"
+                            android:layout_centerHorizontal="true"
+                            android:gravity="center_vertical|start"
+                            android:text="cropped"
+                            android:textColor="@color/dark"
+                            android:textSize="24sp" />
 
-            <CheckBox
-                android:id="@+id/d_checkbox_cropped"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/d_download_format"
-                android:layout_centerHorizontal="true"
-                android:gravity="center_vertical|start"
-                android:text="cropped"
-                android:textColor="@color/dark" />
-        </RelativeLayout>
+                        <Button
+                            android:id="@+id/d_button_download"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_margin="24dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/button_dashboard"
+                            android:gravity="center"
+                            android:text="Download"
+                            android:textAlignment="gravity"
+                            android:textColor="@android:color/white"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/d_share_pane"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/d_divider_second_content"
-            android:background="@color/light_white"
-            android:visibility="gone" >
+                    <RelativeLayout
+                        android:id="@+id/d_setting_pane"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/d_share_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:text="Share canvas"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark" />
+                        <TextView
+                            android:id="@+id/d_setting_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentTop="true"
+                            android:background="@android:color/holo_blue_dark"
+                            android:gravity="center_horizontal"
+                            android:text="Resize canvas"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-            <ImageButton
-                android:id="@+id/d_share_fb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/d_share_title"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="32dp"
-                android:layout_weight="1"
-                android:background="@drawable/share_facebook"
-                android:src="@android:color/transparent" />
+                        <TextView
+                            android:id="@+id/d_setting_x"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:text="x"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="@color/dark" />
 
-            <com.facebook.widget.LoginButton
-                android:id="@+id/fb_login_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                facebook:confirm_logout="true"
-                facebook:fetch_user_info="true" />
-        </RelativeLayout>
+                        <Button
+                            android:id="@+id/d_button_resize"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_margin="24dp"
+                            android:background="@drawable/button_dashboard"
+                            android:gravity="center"
+                            android:text="Resize"
+                            android:textColor="@android:color/white"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/d_width_input"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@+id/d_setting_x"
+                            android:ems="10"
+                            android:imeOptions="actionNext|flagNoFullscreen"
+                            android:inputType="number"
+                            android:textColor="@color/dark" />
+
+                        <EditText
+                            android:id="@+id/d_height_input"
+                            android:layout_width="66dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBaseline="@+id/d_width_input"
+                            android:layout_alignBottom="@+id/d_width_input"
+                            android:layout_alignParentRight="true"
+                            android:layout_toRightOf="@+id/d_setting_x"
+                            android:ems="10"
+                            android:imeOptions="actionDone|flagNoFullscreen"
+                            android:inputType="number"
+                            android:textColor="@color/dark" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/d_report_pane"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:id="@+id/d_report_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginBottom="24dp"
+                            android:background="@android:color/holo_blue_dark"
+                            android:gravity="center_horizontal"
+                            android:text="Report bug"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/d_report_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_above="@+id/d_report_send"
+                            android:layout_below="@+id/d_report_title"
+                            android:gravity="left|top"
+                            android:hint="state the bug"
+                            android:imeOptions="actionDone"
+                            android:inputType="textMultiLine" />
+
+                        <Button
+                            android:id="@+id/d_report_send"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_margin="24dp"
+                            android:background="@drawable/button_dashboard"
+                            android:text="Send"
+                            android:textColor="@android:color/white"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/d_share_pane"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:id="@+id/d_share_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="32dp"
+                            android:background="@android:color/holo_blue_dark"
+                            android:gravity="center_horizontal"
+                            android:text="Share canvas"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/d_share_fb"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/d_share_title"
+                            android:layout_centerHorizontal="true"
+                            android:layout_margin="8dp"
+                            android:background="#4b6daa"
+                            android:text="facebook"
+                            android:textColor="@android:color/white"
+                            android:textSize="24dp"
+                            android:textStyle="bold" />
+
+                        <com.facebook.widget.LoginButton
+                            android:id="@+id/d_fb_login_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:visibility="gone"
+                            facebook:confirm_logout="true"
+                            facebook:fetch_user_info="true" />
+                    </RelativeLayout>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
 
         <ProgressBar
             android:id="@+id/d_loader"
@@ -419,7 +340,6 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
-
     </RelativeLayout>
 
 </RelativeLayout>
