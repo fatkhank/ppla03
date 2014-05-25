@@ -181,7 +181,7 @@ public class FreeObject extends BasicObject {
 
 	@Override
 	public void setFillMode(boolean filled, int color) {
-		if (state == CLOSED)
+		if ((state & CLOSED) == CLOSED)
 			super.setFillMode(filled, color);
 	}
 
@@ -191,7 +191,7 @@ public class FreeObject extends BasicObject {
 	 * @return
 	 */
 	public boolean fillable() {
-		return state == CLOSED;
+		return (state & CLOSED) == CLOSED;
 	}
 
 	/*
@@ -229,7 +229,7 @@ public class FreeObject extends BasicObject {
 
 	@Override
 	public int extractGeom(float[] data, int start) {
-		// data[start++] = Float.intBitsToFloat(state);
+		data[start++] = Float.intBitsToFloat(state);
 		System.arraycopy(xLocs, 0, data, start, xLocs.length);
 		System.arraycopy(yLocs, 0, data, start + xLocs.length, yLocs.length);
 		return 1 + xLocs.length + yLocs.length;

@@ -225,9 +225,13 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			int width = Integer.parseInt(widthInput.getText().toString());
 			if (width > CanvasModel.MAX_WIDTH)
 				width = CanvasModel.MAX_WIDTH;
+			else if (width < CanvasModel.MIN_WIDTH)
+				width = CanvasModel.MIN_WIDTH;
 			int height = Integer.parseInt(heightInput.getText().toString());
 			if (height > CanvasModel.MAX_HEIGHT)
 				height = CanvasModel.MAX_HEIGHT;
+			else if (height < CanvasModel.MIN_HEIGHT)
+				height = CanvasModel.MIN_HEIGHT;
 			BrowserConnector.getInstance().createCanvas(
 					CollaUserManager.getCurrentUser(), canvasName, width,
 					height);

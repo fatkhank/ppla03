@@ -20,8 +20,9 @@ public class Joint extends ControlPoint {
 	static {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setStyle(Style.FILL);
-		paint.setShader(new RadialGradient(5, -5, DRAW_RADIUS, JOINT_COLOR1,
-				JOINT_COLOR2, TileMode.CLAMP));
+		paint.setColor(Color.rgb(153, 51, 204));
+		// paint.setShader(new RadialGradient(5, -5, DRAW_RADIUS, JOINT_COLOR1,
+		// JOINT_COLOR2, TileMode.CLAMP));
 	}
 
 	/**
@@ -40,8 +41,6 @@ public class Joint extends ControlPoint {
 		float dx = this.x - points[OBJ_X];
 		float dy = this.y - points[OBJ_Y];
 		grabbed = (dx * dx + dy * dy) < GRAB_RADIUS_SQUARED;
-		if (grabbed)
-			paint.setAlpha(200);
 		return grabbed;
 	}
 
@@ -54,13 +53,17 @@ public class Joint extends ControlPoint {
 	@Override
 	public void release() {
 		super.release();
-		paint.setAlpha(255);
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		canvas.save();
 		canvas.translate(x, y);
+		if (grabbed) {
+			paint.setAlpha(200);
+			canvas.scale(2f, 2f);
+		} else
+			paint.setAlpha(255);
 		canvas.drawCircle(0, 0, DRAW_RADIUS, paint);
 		canvas.restore();
 	}

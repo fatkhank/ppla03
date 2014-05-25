@@ -12,6 +12,14 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  */
 public class CanvasModel {
 	/**
+	 * Lebar minimal kanvas
+	 */
+	public static final int MIN_WIDTH = 32;
+	/**
+	 * Tinggi minimal kanvas
+	 */
+	public static final int MIN_HEIGHT = 32;
+	/**
 	 * Lebar maksimal kanvas
 	 */
 	public static final int MAX_WIDTH = 8192;

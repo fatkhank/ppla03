@@ -7,7 +7,7 @@ import android.graphics.Path;
 import android.graphics.Paint.Style;
 
 /**
- * Membuat
+ * Titik pojok untuk scale objek
  * @author hamba v7
  * 
  */
@@ -22,12 +22,12 @@ public class Corner extends ControlPoint {
 	private static final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	private static final Path path = new Path();
 	static {
-		paint.setColor(Color.rgb(20,40,255));
+		paint.setColor(Color.rgb(0, 153, 204));
 		paint.setStyle(Style.FILL);
 		path.moveTo(3, 3);
 		path.lineTo(20, 3);
 		path.lineTo(20, -3);
-		path.lineTo(-3, -3);
+		path.lineTo(-8, -8);
 		path.lineTo(-3, 20);
 		path.lineTo(3, 20);
 		path.lineTo(3, 0);
@@ -44,6 +44,11 @@ public class Corner extends ControlPoint {
 		canvas.save();
 		canvas.translate(x, y);
 		canvas.rotate(type);
+		if (grabbed) {
+			paint.setAlpha(150);
+			canvas.scale(2f, 2f);
+		} else
+			paint.setAlpha(255);
 		canvas.drawPath(path, paint);
 		canvas.restore();
 	}
@@ -56,7 +61,8 @@ public class Corner extends ControlPoint {
 		float dy = anchorY - y;
 		anchorX = this.x;
 		anchorY = this.y;
-		return (dx * dx + dy * dy) < GRAB_RADIUS_SQUARED;
+		grabbed = (dx * dx + dy * dy) < GRAB_RADIUS_SQUARED;
+		return grabbed;
 	}
 
 	@Override

@@ -4,7 +4,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 
+/**
+ * Titik di tepi untuk mengatur lebar atau tinggi
+ * @author hamba v7
+ * 
+ */
 public class SidePoint extends Joint {
 	public static final int LEFT = 0;
 	public static final int TOP = 90;
@@ -12,9 +18,21 @@ public class SidePoint extends Joint {
 	public static final int BOTTOM = -90;
 
 	private static final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	private static final Path path = new Path();
 	static {
-		paint.setColor(Color.rgb(255, 20, 20));
+		paint.setColor(Color.rgb(204, 0, 0));
 		paint.setStyle(Style.FILL);
+		path.moveTo(7, 0);
+		path.lineTo(3, 5);
+		path.lineTo(3, 13);
+		path.lineTo(-3, 13);
+		path.lineTo(-3, 5);
+		path.lineTo(-7, 0);
+		path.lineTo(-3, -5);
+		path.lineTo(-3, -13);
+		path.lineTo(3, -13);
+		path.lineTo(3, -5);
+		path.close();
 	}
 
 	private int type;
@@ -29,7 +47,13 @@ public class SidePoint extends Joint {
 		canvas.save();
 		canvas.translate(x, y);
 		canvas.rotate(type);
-		canvas.drawRect(-3, -10, 3, 10, paint);
+		if (grabbed) {
+			paint.setAlpha(180);
+			canvas.scale(2.5f, 2.5f);
+		} else
+			paint.setAlpha(255);
+		canvas.drawPath(path, paint);
+		// canvas.drawRect(-3, -10, 3, 10, paint);
 		canvas.restore();
 	}
 

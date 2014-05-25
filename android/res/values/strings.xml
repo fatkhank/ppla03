@@ -30,6 +30,7 @@
     <!-- workspace activity -->
     <string name="w_progress_participant">Get participants.</string>
     <string name="w_close_confirm">Close canvas?</string>
+    <string name="w_change2hide">There is connection problem. Change to Hide Mode?</string>
     <!-- color dialog -->
     <string name="cp_a">Opacity</string>
     <string name="cp_b">B</string>

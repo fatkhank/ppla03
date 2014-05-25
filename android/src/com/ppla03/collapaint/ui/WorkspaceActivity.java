@@ -351,6 +351,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (state == CanvasListener.EDIT_MULTIPLE) {
 				move.setVisibility(View.VISIBLE);
 				showProp.setVisibility(View.GONE);
+				setPropDialog(false);
 			} else {
 				move.setVisibility(View.GONE);
 				showProp.setVisibility(View.VISIBLE);
@@ -488,6 +489,19 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			dashboard.hide();
 		}
 		animDash.start();
+	}
+
+	/**
+	 * Mengubah ukuran kanvas
+	 * @param width
+	 * @param height
+	 * @param top
+	 * @param left
+	 */
+	void resizeCanvas(int width, int height, int top, int left) {
+		canvas.resizeCanvas(width, height, top, left);
+		showDash.setChecked(false);
+		animateDashboard(false);
 	}
 
 	@Override

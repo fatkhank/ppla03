@@ -657,11 +657,15 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		canvas.translate(-scrollX, -scrollY);
 		drawProtoArea(canvas);
 
-		// tampilkan hasil clone objek
-		if (((dragStatus & DS_DRAG) == DS_DRAG)
-				&& ((dragStatus & DS_PROTO) == DS_PROTO)
+		// tampilkan hasil proto
+		if (((dragStatus & DS_PROTO) == DS_PROTO)
+		// yang sedang didrag atau sedang animasi inflate
+				&& (((dragStatus & DS_DRAG) == DS_DRAG) || (dragStatus & DS_INFLATE_FLAG) == DS_INFLATE_FLAG)
+				// tapi animasi belum selesai
 				&& ((dragStatus & DS_INFLATED) != DS_INFLATED))
 			captureObject.draw(canvas);
+
+		// tampilkan hasil paste
 		else if ((dragStatus & DS_PASTE) == DS_PASTE)
 			draggedPaste.draw(canvas);
 

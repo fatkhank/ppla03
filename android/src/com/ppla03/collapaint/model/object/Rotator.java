@@ -21,8 +21,9 @@ public class Rotator extends ControlPoint {
 	static {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setStyle(Style.FILL);
-		paint.setShader(new RadialGradient(5, -5, DRAW_RADIUS, ROTATE_COLOR1,
-				ROTATE_COLOR2, TileMode.CLAMP));
+		// paint.setShader(new RadialGradient(5, -5, DRAW_RADIUS, ROTATE_COLOR1,
+		// ROTATE_COLOR2, TileMode.CLAMP));
+		paint.setColor(Color.rgb(153, 204, 0));
 		linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		linePaint.setStyle(Style.STROKE);
 		linePaint.setColor(Color.DKGRAY);
@@ -80,6 +81,11 @@ public class Rotator extends ControlPoint {
 	@Override
 	public void draw(Canvas canvas) {
 		canvas.drawLine(0, 0, 0, -radius, linePaint);
+		if (grabbed) {
+			paint.setAlpha(100);
+			canvas.drawCircle(0, -radius, DRAW_RADIUS + DRAW_RADIUS, paint);
+		}
+		paint.setAlpha(255);
 		canvas.drawCircle(0, -radius, DRAW_RADIUS, paint);
 	}
 

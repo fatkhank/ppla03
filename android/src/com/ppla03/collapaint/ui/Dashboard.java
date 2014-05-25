@@ -298,10 +298,14 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			int width = Integer.parseInt(settWidth.getText().toString());
 			if (width > CanvasModel.MAX_WIDTH)
 				width = CanvasModel.MAX_WIDTH;
+			else if (width < CanvasModel.MIN_WIDTH)
+				width = CanvasModel.MIN_WIDTH;
 			int height = Integer.parseInt(settHeight.getText().toString());
 			if (height > CanvasModel.MAX_HEIGHT)
 				height = CanvasModel.MAX_HEIGHT;
-			workspace.canvas.resizeCanvas(width, height, 0, 0);
+			else if (height < CanvasModel.MIN_HEIGHT)
+				height = CanvasModel.MIN_HEIGHT;
+			workspace.resizeCanvas(width, height, 0, 0);
 		}
 	}
 

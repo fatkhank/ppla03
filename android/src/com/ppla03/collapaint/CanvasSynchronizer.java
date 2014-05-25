@@ -159,9 +159,10 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void setCanvasView(CanvasView canvas) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				canvas.getContext());
-		builder.setMessage("There is connection problem. Change to Hide Mode?");
-		hideModeDialog = builder.setPositiveButton("YES", this)
-				.setNegativeButton("NO", this).setCancelable(false).create();
+		builder.setMessage(R.string.w_change2hide);
+		hideModeDialog = builder.setPositiveButton(android.R.string.yes, this)
+				.setNegativeButton(android.R.string.no, this)
+				.setCancelable(false).create();
 		this.view = canvas;
 		canvas.open(currentModel);
 		canvas.execute(actionBuffer);
