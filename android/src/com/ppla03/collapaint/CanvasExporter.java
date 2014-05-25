@@ -2,7 +2,6 @@ package com.ppla03.collapaint;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -100,7 +99,6 @@ public class CanvasExporter {
 		CanvasExporter.format = format;
 		CanvasExporter.transparent = transparent;
 		CanvasExporter.cropped = cropped;
-
 		new Exporter().execute();
 	}
 
@@ -108,7 +106,6 @@ public class CanvasExporter {
 
 		@Override
 		protected Integer doInBackground(Void... params) {
-
 			String storageState = Environment.getExternalStorageState();
 
 			// jika tempat penyimpanan tidak ada

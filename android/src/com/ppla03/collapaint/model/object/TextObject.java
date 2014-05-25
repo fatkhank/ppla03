@@ -1,7 +1,5 @@
 package com.ppla03.collapaint.model.object;
 
-import java.util.Arrays;
-
 import com.ppla03.collapaint.FontManager;
 
 import android.graphics.Canvas;
@@ -232,7 +230,9 @@ public class TextObject extends CanvasObject {
 
 	@Override
 	public boolean selectedBy(float x, float y, float radius) {
-		return bounds.contains((int) x, (int) y);
+		return (y > bounds.top - radius) && (y < bounds.bottom + radius)
+				&& (x > bounds.left - radius) && (x < bounds.right + radius);
+
 	}
 
 	@Override

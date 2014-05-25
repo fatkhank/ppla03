@@ -21,7 +21,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginBottom="8dp"
             android:gravity="center_horizontal"
-            android:text="Participant"
+            android:text="@string/d_participant_title"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/dark"
             android:textStyle="bold" />
@@ -45,7 +45,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/d_add_user"
-            android:hint="Insert email here"
+            android:hint="@string/d_insert_email"
             android:inputType="textEmailAddress"
             android:textColor="@color/dark" />
 
@@ -58,6 +58,7 @@
             android:layout_alignTop="@+id/d_insert_email"
             android:layout_margin="4dp"
             android:background="@drawable/button_round"
+            android:contentDescription="@string/d_invite_desc"
             android:src="@drawable/ic_add_user" />
 
         <TextView
@@ -66,7 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/d_parti_reload"
             android:layout_centerHorizontal="true"
-            android:text="Failed to fetch list"
+            android:text="@string/d_fetch_failed"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageButton
@@ -76,6 +77,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/button_round"
+            android:contentDescription="@string/d_fetch_desc"
             android:src="@drawable/ic_action_refresh_dark"
             android:textColor="@color/dark" />
 
@@ -131,7 +133,7 @@
                             android:layout_marginBottom="8dp"
                             android:background="@android:color/holo_blue_dark"
                             android:gravity="center_horizontal"
-                            android:text="Download canvas"
+                            android:text="@string/d_download_title"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:textColor="@android:color/white"
                             android:textStyle="bold" />
@@ -142,7 +144,7 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@+id/d_download_title"
                             android:layout_centerHorizontal="true"
-                            android:text="Format"
+                            android:text="@string/d_download_format"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:textColor="@color/dark"
                             android:textSize="24sp"
@@ -152,7 +154,8 @@
                             android:id="@+id/d_download_format"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@+id/d_text_format" />
+                            android:layout_below="@+id/d_text_format"
+                            android:popupBackground="@drawable/box_white_border_dark" />
 
                         <CheckBox
                             android:id="@+id/d_checkbox_cropped"
@@ -160,10 +163,13 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@+id/d_download_format"
                             android:layout_centerHorizontal="true"
+                            android:button="@drawable/checkbox_flat"
+                            android:checked="false"
                             android:gravity="center_vertical|start"
-                            android:text="cropped"
+                            android:text="@string/d_download_cropped"
                             android:textColor="@color/dark"
-                            android:textSize="24sp" />
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/d_button_download"
@@ -171,10 +177,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
                             android:layout_margin="24dp"
-                            android:layout_weight="1"
                             android:background="@drawable/button_dashboard"
                             android:gravity="center"
-                            android:text="Download"
+                            android:text="@string/d_download_button"
                             android:textAlignment="gravity"
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
@@ -194,7 +199,7 @@
                             android:layout_alignParentTop="true"
                             android:background="@android:color/holo_blue_dark"
                             android:gravity="center_horizontal"
-                            android:text="Resize canvas"
+                            android:text="@string/d_setting_title"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:textColor="@android:color/white"
                             android:textStyle="bold" />
@@ -218,7 +223,7 @@
                             android:layout_margin="24dp"
                             android:background="@drawable/button_dashboard"
                             android:gravity="center"
-                            android:text="Resize"
+                            android:text="@string/d_setting_button"
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
                             android:textStyle="bold" />
@@ -261,7 +266,7 @@
                             android:layout_marginBottom="24dp"
                             android:background="@android:color/holo_blue_dark"
                             android:gravity="center_horizontal"
-                            android:text="Report bug"
+                            android:text="@string/d_report_title"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:textColor="@android:color/white"
                             android:textStyle="bold" />
@@ -273,7 +278,7 @@
                             android:layout_above="@+id/d_report_send"
                             android:layout_below="@+id/d_report_title"
                             android:gravity="left|top"
-                            android:hint="state the bug"
+                            android:hint="@string/d_report_hint"
                             android:imeOptions="actionDone"
                             android:inputType="textMultiLine" />
 
@@ -285,7 +290,7 @@
                             android:layout_centerHorizontal="true"
                             android:layout_margin="24dp"
                             android:background="@drawable/button_dashboard"
-                            android:text="Send"
+                            android:text="@string/d_report_button"
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
                             android:textStyle="bold" />
@@ -303,7 +308,7 @@
                             android:layout_marginBottom="32dp"
                             android:background="@android:color/holo_blue_dark"
                             android:gravity="center_horizontal"
-                            android:text="Share canvas"
+                            android:text="@string/d_share_title"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:textColor="@android:color/white"
                             android:textStyle="bold" />
@@ -316,7 +321,7 @@
                             android:layout_centerHorizontal="true"
                             android:layout_margin="8dp"
                             android:background="#4b6daa"
-                            android:text="facebook"
+                            android:text="@string/d_share_facebook"
                             android:textColor="@android:color/white"
                             android:textSize="24dp"
                             android:textStyle="bold" />

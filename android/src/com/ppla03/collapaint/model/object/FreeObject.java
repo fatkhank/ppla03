@@ -46,7 +46,7 @@ public class FreeObject extends BasicObject {
 		points.ensureCapacity(128);
 	}
 
-	private static final int EDIT_MASK = 1, EDITABLE = 1, PERMANENT = 0,
+	private static final int EDIT_MASK = 1, EDITABLE = 1,// PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;
 
 	private static final float MAKE_LOOP_DIST = 20;

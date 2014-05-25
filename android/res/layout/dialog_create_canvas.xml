@@ -11,9 +11,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
-        android:text="@string/bc_create"
+        android:text="@string/bc_name"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_name"
@@ -33,7 +34,8 @@
         android:gravity="center_vertical"
         android:text="@string/bc_width"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_width"
@@ -55,7 +57,8 @@
         android:gravity="center_vertical"
         android:text="@string/bc_height"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_height"

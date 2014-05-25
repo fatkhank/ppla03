@@ -50,6 +50,11 @@
     <!-- dashboard -->
     <string name="d_download_failed">Download failed</string>
     <string name="disk_unavailable">Disk is unavailable</string>
+    <string name="d_participant_title">Participants</string>
+    <string name="d_fetch_failed">Failed to fetch list</string>
+    <string name="d_fetch_desc">reload participant list</string>
+    <string name="d_insert_email">Insert email</string>
+    <string name="d_invite_desc">invite</string>
     <string name="d_invite_sucess">invited to canvas</string>
     <string name="d_invite_joined">already joined</string>
     <string name="d_invite_not_registered">is not registered</string>
@@ -57,7 +62,22 @@
     <string name="d_hide_msg">Collaboration is off</string>
     <string name="d_nohide_text">Visible</string>
     <string name="d_nohide_msg">Collaboration is on</string>
+    <!-- download -->
+    <string name="d_download_title">Download canvas</string>
+    <string name="d_download_format">Format</string>
+    <string name="d_download_cropped">cropped</string>
+    <string name="d_download_button">Download</string>
+    <!-- setting -->
+    <string name="d_setting_title">Resize canvas</string>
+    <string name="d_setting_button">Resize</string>
+    <!-- share -->
+    <string name="d_share_title">Share image</string>
+    <string name="d_share_facebook">facebook</string>
     <string name="d_share_failed">Cannot share image</string>
     <string name="d_share_success">Image uploaded successfully.</string>
+    <!-- report bug -->
+    <string name="d_report_title">Report bug</string>
+    <string name="d_report_hint">State the bug</string>
+    <string name="d_report_button">Send</string>
 
 </resources>

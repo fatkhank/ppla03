@@ -216,8 +216,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 					.findViewById(R.id.d_text_format);
 			downloadFormat = (Spinner) parent
 					.findViewById(R.id.d_download_format);
-			formatAdapter = new ArrayAdapter<>(activity,
-					android.R.layout.simple_list_item_1);
+			formatAdapter = new ArrayAdapter<>(activity, R.layout.text_simple);
 			formatAdapter.add("PNG");
 			formatAdapter.add("JPG");
 			downloadFormat.setSelection(0);

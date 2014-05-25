@@ -23,6 +23,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -30,6 +32,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.view.animation.Animation;
@@ -54,10 +57,9 @@ import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, ColorChangeListener, OnItemSelectedListener,
-		OnSeekBarChangeListener, OnEditorActionListener, CanvasListener,
-		CanvasCloseListener, AnimatorUpdateListener, AnimatorListener
-
-{
+		OnSeekBarChangeListener, OnEditorActionListener, TextWatcher,
+		CanvasListener, CanvasCloseListener, AnimatorUpdateListener,
+		AnimatorListener {
 
 	// --------- top bar ---------
 	private View topbar, leftButtons;
@@ -197,6 +199,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
 			textInput = (EditText) findViewById(R.id.w_font_input);
 			textInput.setOnEditorActionListener(this);
+			textInput.addTextChangedListener(this);
 			textSize = (SeekBar) findViewById(R.id.w_font_size);
 			fontStyles = (Spinner) findViewById(R.id.w_font_style);
 			textBold = (CheckBox) findViewById(R.id.w_font_bold);
@@ -587,6 +590,18 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.setTextObjContent(textInput.getText().toString());
 		}
 		return true;
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		canvas.setTextObjContent(textInput.getText().toString());
 	}
 
 	/**

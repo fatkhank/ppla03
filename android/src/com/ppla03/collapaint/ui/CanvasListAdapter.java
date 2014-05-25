@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.model.CanvasModel;
-import com.ppla03.collapaint.model.UserModel;
 
 class CanvasListAdapter extends BaseAdapter implements OnClickListener {
 	private BrowserActivity activity;

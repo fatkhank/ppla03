@@ -14,7 +14,6 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:ellipsize="end"
-        android:text="Canvas name"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark" />
 
@@ -26,7 +25,6 @@
         android:layout_marginRight="32dp"
         android:layout_toLeftOf="@+id/lc_delete"
         android:gravity="center_vertical"
-        android:text="username"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark" />
 

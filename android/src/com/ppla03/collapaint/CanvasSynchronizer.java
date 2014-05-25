@@ -293,7 +293,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	@Override
 	public void onCanvasOpened(int status, int lan) {
 		if (status == ServerConnector.SUCCESS) {
-			this.lastActNum = lan;
+			lastActNum = lan;
 		}
 		loadListener.onCanvasLoaded(currentModel, status);
 	}

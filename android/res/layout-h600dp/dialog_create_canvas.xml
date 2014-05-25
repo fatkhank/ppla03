@@ -12,9 +12,10 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="32dp"
         android:gravity="center_vertical"
-        android:text="Canvas Name"
+        android:text="@string/bc_name"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_name"
@@ -33,9 +34,10 @@
         android:layout_alignBottom="@+id/b_create_width"
         android:layout_alignTop="@+id/b_create_width"
         android:gravity="center_vertical"
-        android:text="Width"
+        android:text="@string/bc_width"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_width"
@@ -56,9 +58,10 @@
         android:layout_alignBottom="@+id/b_create_height"
         android:layout_alignTop="@+id/b_create_height"
         android:gravity="center_vertical"
-        android:text="Height"
+        android:text="@string/bc_height"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/b_create_height"

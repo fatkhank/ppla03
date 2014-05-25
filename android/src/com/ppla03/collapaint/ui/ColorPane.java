@@ -3,11 +3,7 @@ package com.ppla03.collapaint.ui;
 import com.ppla03.collapaint.R;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.Participation;
-import com.ppla03.collapaint.model.UserModel;
 
 /**
  * Antarmuka aksi yang berkaitan dengan pengelolaan partisipan

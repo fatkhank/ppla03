@@ -151,9 +151,11 @@ public class FontManager {
 	private static ArrayAdapter<Font> adapter;
 
 	public static ArrayAdapter<Font> getAdapter(Context context) {
-		if (adapter == null || !adapter.getContext().equals(context))
-			adapter = new ArrayAdapter<Font>(context,
-					android.R.layout.simple_list_item_1, fonts);
+		if (adapter == null || !adapter.getContext().equals(context)) {
+			adapter = new ArrayAdapter<Font>(context, R.layout.text_simple);
+			adapter.clear();
+			adapter.addAll(fonts);
+		}
 		return adapter;
 	}
 

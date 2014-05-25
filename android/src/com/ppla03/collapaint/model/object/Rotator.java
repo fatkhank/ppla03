@@ -3,9 +3,7 @@ package com.ppla03.collapaint.model.object;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RadialGradient;
 import android.graphics.Paint.Style;
-import android.graphics.Shader.TileMode;
 
 /**
  * Titik untuk mengatur rotasi objek.
@@ -14,15 +12,11 @@ import android.graphics.Shader.TileMode;
  */
 public class Rotator extends ControlPoint {
 	public static final float MIN_RADIUS = 50;
-	private static final int ROTATE_COLOR1 = Color.argb(200, 10, 255, 150);
-	private static final int ROTATE_COLOR2 = Color.argb(200, 0, 250, 20);
 
 	private static final Paint paint, linePaint;
 	static {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setStyle(Style.FILL);
-		// paint.setShader(new RadialGradient(5, -5, DRAW_RADIUS, ROTATE_COLOR1,
-		// ROTATE_COLOR2, TileMode.CLAMP));
 		paint.setColor(Color.rgb(153, 204, 0));
 		linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		linePaint.setStyle(Style.STROKE);

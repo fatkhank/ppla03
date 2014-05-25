@@ -2,13 +2,16 @@ package com.ppla03.collapaint.ui;
 
 import java.util.ArrayList;
 
+import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.object.StrokeStyle;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -25,9 +28,11 @@ class StrokeStyleAdapter extends BaseAdapter {
 	class StrokeView extends View {
 		Paint paint = new Paint();
 
-		public StrokeView(Context context, int style) {
-			super(context);
+		public StrokeView(Context ctx, int style) {
+			super(ctx);
 			paint.setStrokeWidth(6);
+			paint.setStyle(Style.STROKE);
+			paint.setColor(ctx.getResources().getColor(R.color.dark));
 			StrokeStyle.applyEffect(style, paint);
 			setLayerType(LAYER_TYPE_SOFTWARE, paint);
 		}
@@ -46,7 +51,7 @@ class StrokeStyleAdapter extends BaseAdapter {
 		@Override
 		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 			int parent = MeasureSpec.getSize(widthMeasureSpec);
-			setMeasuredDimension(parent, 58);
+			setMeasuredDimension(parent, 50);
 		}
 	}
 

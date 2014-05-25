@@ -21,13 +21,15 @@
             android:layout_alignWithParentIfMissing="false"
             android:text="@string/wp_stroke_label"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/dark" />
+            android:textColor="@color/dark"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/w_stroke_width_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             android:layout_below="@+id/w_stroke_color"
             android:text="@string/wp_stroke_width"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -57,6 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             android:layout_below="@+id/w_stroke_width"
             android:text="@string/wp_stroke_style"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -67,16 +70,19 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_below="@+id/w_stroke_style_label"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:dropDownHorizontalOffset="0dp"
+            android:dropDownVerticalOffset="0dp"
+            android:popupBackground="@drawable/box_white_border_dark" />
 
         <ImageButton
             android:id="@+id/w_stroke_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
-            android:contentDescription="@string/emptyString"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@android:color/white"
+            android:contentDescription="@string/emptyString"
             android:gravity="right"
             android:src="@drawable/w_color_button" />
     </RelativeLayout>
@@ -93,9 +99,9 @@
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
-            android:contentDescription="@string/emptyString"
             android:layout_alignParentTop="true"
             android:background="@android:color/holo_blue_dark"
+            android:contentDescription="@string/emptyString"
             android:gravity="right"
             android:src="@drawable/w_color_button" />
 
@@ -105,10 +111,12 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/w_fill_color"
+            android:button="@drawable/checkbox_flat"
+            android:checked="true"
             android:text="@string/wp_fill"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/dark" />
-
+            android:textColor="@color/dark"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -117,7 +125,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/w_prop_fill"
         android:layout_marginBottom="10dp"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <TextView
             android:id="@+id/w_font_label"
@@ -126,18 +134,23 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:text="@string/wp_text_label"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/dark"
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/w_font_bold"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_toLeftOf="@+id/w_font_italic"
-            android:background="@drawable/top_bar_toggle"
-            android:button="@drawable/bold"
+            android:background="@drawable/toggle_blue"
+            android:button="@android:color/transparent"
             android:checked="true"
-            android:text="@string/emptyString"
-            android:textSize="30sp" />
+            android:gravity="center"
+            android:text="B"
+            android:textColor="@color/dark"
+            android:textSize="24dp"
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/w_font_italic"
@@ -145,11 +158,14 @@
             android:layout_height="32dp"
             android:layout_marginLeft="5dp"
             android:layout_toLeftOf="@+id/w_font_underline"
-            android:background="@drawable/top_bar_toggle"
-            android:button="@drawable/italic"
-            android:checked="true"
-            android:text="@string/emptyString"
-            android:textSize="30sp" />
+            android:background="@drawable/toggle_blue"
+            android:button="@android:color/transparent"
+            android:checked="false"
+            android:gravity="center"
+            android:text="I"
+            android:textColor="@color/dark"
+            android:textSize="24dp"
+            android:textStyle="italic|bold" />
 
         <CheckBox
             android:id="@+id/w_font_underline"
@@ -158,9 +174,9 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="5dp"
-            android:background="@drawable/top_bar_toggle"
-            android:button="@drawable/underline"
-            android:checked="true"
+            android:background="@drawable/toggle_blue"
+            android:button="@drawable/inset_underline"
+            android:checked="false"
             android:text="@string/emptyString"
             android:textSize="30sp" />
 
@@ -170,7 +186,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/w_font_underline"
             android:imeOptions="flagNoFullscreen|actionDone"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="@color/dark" />
 
         <SeekBar
             android:id="@+id/w_font_size"
@@ -188,7 +205,8 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_font_size_label"
             android:text=""
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/dark" />
 
         <TextView
             android:id="@+id/w_font_style_label"
@@ -197,14 +215,18 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_size"
             android:text="@string/wp_font_type"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/dark" />
 
         <Spinner
             android:id="@+id/w_font_style"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/w_font_style_label" />
+            android:layout_below="@+id/w_font_style_label"
+            android:dropDownHorizontalOffset="0dp"
+            android:dropDownVerticalOffset="0dp"
+            android:popupBackground="@drawable/box_white_border_dark" />
 
         <TextView
             android:id="@+id/w_font_color_label"
@@ -213,16 +235,17 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_style"
             android:text="@string/wp_font_color"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/dark" />
 
         <ImageButton
             android:id="@+id/w_font_color"
             android:layout_width="64dp"
             android:layout_height="32dp"
-            android:contentDescription="@string/emptyString"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/w_font_style"
             android:background="@android:color/holo_blue_dark"
+            android:contentDescription="@string/emptyString"
             android:src="@drawable/w_color_button" />
 
         <TextView
@@ -232,8 +255,8 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/w_font_input"
             android:text="@string/wp_font_size"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/dark" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -246,8 +269,11 @@
             android:id="@+id/w_poly_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:text="@string/wp_poly_corner"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/dark" />
 
         <SeekBar
@@ -267,7 +293,6 @@
             android:layout_marginTop="5dp"
             android:text=""
             android:textColor="@color/dark" />
-
     </RelativeLayout>
 
 </RelativeLayout>

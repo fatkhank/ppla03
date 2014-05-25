@@ -39,8 +39,16 @@ public class ShapeHandler {
 		size = points.length;
 		this.object = object;
 	}
-	
-	protected static final RectF bounds = new RectF(); 
+
+	/**
+	 * Mengatur kembali posisi handler karena ada parameter objek yang berubah
+	 * dari luar handler.
+	 */
+	public void refresh() {
+		object.getBounds(bounds);
+	}
+
+	protected static final RectF bounds = new RectF();
 
 	/**
 	 * Menggambar handler beserta titik-titik kontrol yang dimiliki ke dalam
@@ -97,11 +105,11 @@ public class ShapeHandler {
 		for (int i = 0; i < size; i++)
 			points[i].enable = enable;
 	}
-	
+
 	/**
 	 * Menginisiasi handler.
 	 */
-	public void init(){
+	public void init() {
 		object.getBounds(bounds);
 	}
 

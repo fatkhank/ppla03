@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import collapaint.code.ParticipantJCode;
 import collapaint.code.ParticipantJCode.Reply;
-import collapaint.code.ParticipantJCode.Reply.KickStatus;
 import collapaint.code.ParticipantJCode.Request;
 
 import com.ppla03.collapaint.CollaUserManager;

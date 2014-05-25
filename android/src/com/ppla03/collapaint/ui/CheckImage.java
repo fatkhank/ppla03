@@ -1,14 +1,8 @@
 package com.ppla03.collapaint.ui;
 
-import com.ppla03.collapaint.R;
-
-import android.R.anim;
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.Checkable;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 
 public class CheckImage extends ImageButton implements Checkable {

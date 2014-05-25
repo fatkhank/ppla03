@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import collapaint.code.CanvasJCode;
 import collapaint.code.CanvasJCode.Reply;
 import collapaint.code.CanvasJCode.Request;
-import collapaint.code.ParticipantJCode;
 
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;

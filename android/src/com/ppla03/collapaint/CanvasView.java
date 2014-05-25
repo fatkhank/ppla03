@@ -21,7 +21,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
@@ -544,23 +543,23 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		// jika lebar kanvas lebih dari layar
 		if (model.getWidth() >= w) {
 			minScrollX = w - CANVAS_MARGIN - model.getWidth();
-			maxScrollX = CANVAS_MARGIN;
+			maxScrollX = CANVAS_MARGIN + CANVAS_MARGIN;
 
 			// jika lebar kanvas kurang dari layar
 		} else {
-			minScrollX = -CANVAS_MARGIN - CANVAS_MARGIN;
-			maxScrollX = w - model.getWidth();
+			minScrollX = -CANVAS_MARGIN;
+			maxScrollX = w - model.getWidth() + CANVAS_MARGIN;
 		}
 
 		// jika tinggi kanvas lebih dari layar
 		if (model.getHeight() >= h) {
 			minScrollY = h - CANVAS_MARGIN - model.getHeight();
-			maxScrollY = CANVAS_MARGIN;
+			maxScrollY = CANVAS_MARGIN + CANVAS_MARGIN;
 
 			// jika tinggi kanvas kurang dari layar
 		} else {
-			minScrollY = -CANVAS_MARGIN - CANVAS_MARGIN;
-			maxScrollY = h - model.getHeight();
+			minScrollY = -CANVAS_MARGIN;
+			maxScrollY = h - model.getHeight() + CANVAS_MARGIN;
 		}
 	}
 
@@ -823,13 +822,13 @@ public class CanvasView extends View implements View.OnLongClickListener {
 						* (pasteOfsY + scrollY);
 				draggedPaste.offsetTo(ofx, ofy);
 				float scale = pasteScale + (1 - pasteScale) * progress;
-				draggedPaste.scaleTo(scale);
+				draggedPaste.scaleTo(scale, false);
 			} else if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
 				// inflate proto objek
 				captureObject.setScale(progress);
 			} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
 				// inflate paste
-				draggedPaste.scaleTo(progress);
+				draggedPaste.scaleTo(progress, true);
 			}
 			CanvasView.this.postInvalidate();
 		}
@@ -898,6 +897,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		// atur penempatan objek2 yang sudah di paste
 		for (int i = 0; i < selectedObjects.size(); i++)
 			selectedObjects.get(i).offset(ofx, ofy);
+		// tempatkan draggedpaste ke capture.
+		draggedPaste.matchSize(capturePaste);
 		reloadCache();
 		postInvalidate();
 	}
@@ -1021,7 +1022,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 						} else if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
 							float sc = capturePaste.scale();
 							animator.setFloatValues(sc, 1);
-							draggedPaste.scaleTo(sc);
+							draggedPaste.scaleTo(sc, false);
 						}
 						animator.setInterpolator(interOvershoot);
 						animator.setDuration(INFLATE_DURATION);
@@ -1482,6 +1483,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		textContent = text;
 		if (currentObject != null && currentObject == currentText) {
 			currentText.setText(text);
+			handler.refresh();
 			postInvalidate();
 			return true;
 		}
@@ -1837,6 +1839,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 					pushToUAStack(protaStyle.capture(), false);
 				listener.onWaitForApproval();
 			}
+			handler.refresh();
 			postInvalidate();
 		}
 	}

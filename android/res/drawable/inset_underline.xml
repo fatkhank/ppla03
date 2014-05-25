@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/underline"
-    android:insetLeft="7dp" 
-    android:insetRight="-7dp"
-    />
+    android:drawable="@drawable/ic_underline"
+    android:insetBottom="3dp"
+    android:insetLeft="3dp"
+    android:insetRight="3dp"
+    android:insetTop="3dp" />

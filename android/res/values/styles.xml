@@ -18,8 +18,6 @@
     </style>
 
     <!-- Workspace Theme Normal -->
-    <style name="WorkspaceActivityNormal" parent="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
-    </style>
-
+    <style name="WorkspaceActivityNormal" parent="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"></style>
 
 </resources>
