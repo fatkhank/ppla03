@@ -16,12 +16,12 @@
         android:indeterminateDuration="1000" />
 
     <TextView
-        android:id="@+id/w_stroke_label"
+        android:id="@+id/l_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/l_progress"
         android:layout_centerHorizontal="true"
-        android:text="Loading workspace"
+        android:text="@string/l_loading"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@android:color/holo_red_light"
         android:textStyle="bold" />

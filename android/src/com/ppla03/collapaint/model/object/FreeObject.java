@@ -21,6 +21,8 @@ import android.graphics.Paint.Join;
  * 
  */
 public class FreeObject extends BasicObject {
+	public static final float MIN_DISTANCE = 1;
+
 	/**
 	 * Batas-batas objek
 	 */
@@ -45,6 +47,8 @@ public class FreeObject extends BasicObject {
 	static {
 		points.ensureCapacity(128);
 	}
+
+	private static float lastX, lastY;
 
 	private static final int EDIT_MASK = 1, EDITABLE = 1,// PERMANENT = 0,
 			LOOP_MASK = 16, CLOSED = 16, OPEN = 0;
@@ -117,7 +121,8 @@ public class FreeObject extends BasicObject {
 		points.add(new PointF(0, 0));
 		path.reset();
 		path.moveTo(0, 0);
-		path.lineTo(0, 0);
+		lastX = worldX;
+		lastY = worldY;
 		// }
 		return this;
 	}
@@ -131,6 +136,11 @@ public class FreeObject extends BasicObject {
 	 */
 	public void penTo(float worldX, float worldY) {
 		// if ((state & EDIT_MASK) == EDITABLE) {
+		if (Math.abs(worldX - lastX) < MIN_DISTANCE
+				|| Math.abs(worldY - lastY) < MIN_DISTANCE)
+			return;
+		lastX = worldX;
+		lastY = worldY;
 		worldX -= offsetX;
 		worldY -= offsetY;
 		path.lineTo(worldX, worldY);
@@ -147,15 +157,21 @@ public class FreeObject extends BasicObject {
 	 */
 	public FreeObject penUp() {
 		state &= ~EDIT_MASK;// buat jadi permanen
+		if (points.size() < 2) {
+			// jika cuma satu titik, jadikan 2 titik berjarak minimum
+			points.add(new PointF(MIN_DISTANCE, MIN_DISTANCE));
+			path.lineTo(MIN_DISTANCE, MIN_DISTANCE);
+		} else {
+			// tentukan apakah membentuk loop atau tidak
+			PointF first = points.get(0);
+			PointF last = points.get(points.size() - 1);
 
-		// tentukan apakah membentuk loop atau tidak
-		PointF first = points.get(0);
-		PointF last = points.get(points.size() - 1);
-		float dx = Math.abs(first.x - last.x);
-		float dy = Math.abs(first.y - last.y);
-		if (dx < MAKE_LOOP_DIST && dy < MAKE_LOOP_DIST) {
-			state = CLOSED;
-			path.close();
+			float dx = Math.abs(first.x - last.x);
+			float dy = Math.abs(first.y - last.y);
+			if (dx < MAKE_LOOP_DIST && dy < MAKE_LOOP_DIST) {
+				state = CLOSED;
+				path.close();
+			}
 		}
 
 		// hitung titik tengah

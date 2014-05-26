@@ -2,7 +2,6 @@ package com.ppla03.collapaint.ui;
 
 import com.ppla03.collapaint.CanvasListener;
 import com.ppla03.collapaint.CanvasSynchronizer;
-import com.ppla03.collapaint.CanvasSynchronizer.CanvasCloseListener;
 import com.ppla03.collapaint.CanvasView;
 import com.ppla03.collapaint.CanvasView.ObjectType;
 import com.ppla03.collapaint.CanvasView.Param;
@@ -17,33 +16,19 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.ContextMenu;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
-import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -51,16 +36,13 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnLongClickListener, ColorChangeListener, OnItemSelectedListener,
-		OnSeekBarChangeListener, OnEditorActionListener, TextWatcher,
-		CanvasListener, CanvasCloseListener, AnimatorUpdateListener,
-		AnimatorListener {
+		OnSeekBarChangeListener, TextWatcher, CanvasListener,
+		AnimatorUpdateListener, AnimatorListener {
 
 	// --------- top bar ---------
 	private View topbar, leftButtons;
@@ -199,7 +181,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// --------- font ---------
 			textPane = (RelativeLayout) findViewById(R.id.w_prop_text);
 			textInput = (EditText) findViewById(R.id.w_font_input);
-			textInput.setOnEditorActionListener(this);
 			textInput.addTextChangedListener(this);
 			textSize = (SeekBar) findViewById(R.id.w_font_size);
 			fontStyles = (Spinner) findViewById(R.id.w_font_style);
@@ -293,8 +274,13 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								CanvasSynchronizer.getInstance().closeCanvas(
-										WorkspaceActivity.this);
+								Intent intent = new Intent(
+										WorkspaceActivity.this,
+										LoaderActivity.class);
+								intent.putExtra(LoaderActivity.ACTION,
+										LoaderActivity.CLOSE);
+								startActivity(intent);
+								finish();
 							}
 						}).create().show();
 	}
@@ -345,6 +331,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onSelectionEvent(int state, int param) {
 		if (state == CanvasListener.EDIT_MULTIPLE
 				|| state == CanvasListener.EDIT_OBJECT) {
+			select.setImageResource(R.drawable.ic_deselect);
 			hand.setChecked(false);
 			select.setChecked(false);
 			selectAddButtons.setVisibility(View.VISIBLE);
@@ -380,6 +367,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				setPropDialog(showProp.isChecked());
 			}
 		} else {
+			select.setImageResource(R.drawable.ic_action_select_all);
 			select.setChecked(canvas.isInSelectionMode());
 			selectAddButtons.setVisibility(View.GONE);
 			setPropDialog(false);
@@ -433,8 +421,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.deleteSelectedObjects();
 		} else if (v == copy) {
 			int count = canvas.copySelectedObjects();
-			Toast.makeText(this, count + " objects copied", Toast.LENGTH_SHORT)
-					.show();
+			CollaToast
+					.show(this, count + " objects copied", Toast.LENGTH_SHORT);
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == delete) {
@@ -508,6 +496,10 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// sembunyikan
 			animDash.setFloatValues(dashboardView.getY(),
 					-dashboardView.getHeight());
+			if (propertyPane.getVisibility() == View.VISIBLE) {
+				showProp.setChecked(false);
+				propertyPane.setVisibility(View.GONE);
+			}
 			dashboard.hide();
 		}
 		animDash.start();
@@ -533,8 +525,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (count > 0) {
 				if (count <= 1)
 					move.setVisibility(View.GONE);
-				Toast.makeText(this, "All object selected", Toast.LENGTH_SHORT)
-						.show();
+				CollaToast
+						.show(this, "All object selected", Toast.LENGTH_SHORT);
 			}
 		}
 		return true;
@@ -602,14 +594,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {}
-
-	@Override
-	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-		if (v == textInput) {
-			canvas.setTextObjContent(textInput.getText().toString());
-		}
-		return true;
-	}
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
@@ -783,13 +767,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			animateColorDialog(false);
 		}
 		animProp.start();
-	}
-
-	@Override
-	public void onCanvasClosed(int status) {
-		Intent intent = new Intent(this, BrowserActivity.class);
-		startActivity(intent);
-		finish();
 	}
 
 	@Override

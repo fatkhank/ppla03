@@ -25,7 +25,6 @@ import com.ppla03.collapaint.conn.ParticipantManager;
 import com.ppla03.collapaint.conn.ServerConnector;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.Participation;
-import com.ppla03.collapaint.model.Participation.Role;
 import com.ppla03.collapaint.model.UserModel;
 
 import android.content.Intent;
@@ -39,7 +38,6 @@ import android.text.InputFilter.LengthFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewDebug.ExportedProperty;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -261,12 +259,12 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		} else if (v == hide) {
 			if (hide.isChecked()) {
 				hide.setText(R.string.d_hide_text);
-				Toast.makeText(workspace, R.string.d_hide_msg,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.d_hide_msg,
+						Toast.LENGTH_SHORT);
 			} else {
 				hide.setText(R.string.d_nohide_text);
-				Toast.makeText(workspace, R.string.d_nohide_msg,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.d_nohide_msg,
+						Toast.LENGTH_SHORT);
 			}
 
 			workspace.canvas.setHideMode(hide.isChecked());
@@ -356,15 +354,16 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			if (status == CanvasExporter.SUCCESS) {
 				String path = CanvasExporter.getResultFile().getAbsolutePath();
 				String text = "Downloaded to " + path;
-				Toast.makeText(workspace, text, Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, text, Toast.LENGTH_LONG);
+				// Toast.makeText(workspace, text, Toast.LENGTH_SHORT).show();
 				MediaScannerConnection.scanFile(workspace,
 						new String[] { path }, null, null);
 			} else if (status == CanvasExporter.FAILED) {
-				Toast.makeText(workspace, R.string.d_download_failed,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.d_download_failed,
+						Toast.LENGTH_SHORT);
 			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-				Toast.makeText(workspace, R.string.disk_unavailable,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.disk_unavailable,
+						Toast.LENGTH_SHORT);
 			}
 		}
 	};
@@ -415,39 +414,39 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		invite.setVisibility(View.VISIBLE);
 		accountId += " ";
 		if (status == ServerConnector.SUCCESS) {
-			Toast.makeText(
+			CollaToast.show(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_sucess),
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT);
 			email.setText("");
 			reloadList();
 		} else if (status == ManageParticipantListener.ALREADY_INVITED) {
-			Toast.makeText(
+			CollaToast.show(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_sucess),
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT);
 		} else if (status == ManageParticipantListener.ALREADY_JOINED) {
-			Toast.makeText(
+			CollaToast.show(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_sucess),
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT);
 
 		} else if (status == ManageParticipantListener.NOT_REGISTERED) {
-			Toast.makeText(
+			CollaToast.show(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_not_registered),
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT);
 		} else
-			Toast.makeText(workspace, R.string.check_connection,
-					Toast.LENGTH_SHORT).show();
+			CollaToast.show(workspace, R.string.check_connection,
+					Toast.LENGTH_SHORT);
 	}
 
 	@Override
@@ -456,12 +455,13 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		partiReload.setVisibility(View.VISIBLE);
 		partiLoader.setVisibility(View.GONE);
 		if (status == ServerConnector.SUCCESS) {
-			Toast.makeText(workspace,
-					user.name + " is no longer a participant",
-					Toast.LENGTH_SHORT).show();
+			CollaToast.show(workspace, user.name + " "
+					+ workspace.getResources().getString(R.string.d_no_longer),
+					Toast.LENGTH_SHORT);
 			reloadList();
-		} else
-			Toast.makeText(workspace, "Error", Toast.LENGTH_SHORT).show();
+		} else if (status == ServerConnector.CONNECTION_PROBLEM)
+			CollaToast.show(workspace, R.string.check_connection,
+					Toast.LENGTH_SHORT);
 	}
 
 	public void kick(Participation part) {
@@ -534,9 +534,9 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 						new Request.Callback() {
 							@Override
 							public void onCompleted(Response response) {
-								Toast.makeText(workspace,
+								CollaToast.show(workspace,
 										R.string.d_share_success,
-										Toast.LENGTH_LONG).show();
+										Toast.LENGTH_LONG);
 							}
 						});
 				uploadRequest.executeAsync();
@@ -546,12 +546,12 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 				Session.setActiveSession(null);
 			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-				Toast.makeText(workspace, R.string.disk_unavailable,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.disk_unavailable,
+						Toast.LENGTH_SHORT);
 				return;
 			} else {
-				Toast.makeText(workspace, R.string.d_share_failed,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(workspace, R.string.d_share_failed,
+						Toast.LENGTH_SHORT);
 			}
 
 		}

@@ -4,6 +4,7 @@ import com.ppla03.collapaint.R;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.text.InputFilter;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -48,7 +49,6 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	private EditText rInput, gInput, bInput, aInput;
 	private Button preview;
 	private ImageButton approve, cancel;
-	private ColorView colorView;
 
 	static final int PALLETE = 0, RGB = 1;
 	static final String PALLETE_STRING = "Palletes", RGB_STRING = "RGB";
@@ -58,6 +58,9 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
 	private int originalColor;
+
+	private static final InputFilter[] colorFilter = { new InputFilter.LengthFilter(
+			3) };
 
 	public ColorPane(Activity activity, View view, ColorChangeListener listener) {
 		try {
@@ -85,6 +88,11 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			gInput.setOnEditorActionListener(this);
 			bInput.setOnEditorActionListener(this);
 			aInput.setOnEditorActionListener(this);
+
+			rInput.setFilters(colorFilter);
+			gInput.setFilters(colorFilter);
+			bInput.setFilters(colorFilter);
+			aInput.setFilters(colorFilter);
 
 			preview = (Button) view.findViewById(R.id.cp_rgb_preview);
 
@@ -165,34 +173,22 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	@Override
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		int value = Integer.parseInt(v.getText().toString());
+		if (value > 255) {
+			v.setText(String.valueOf(255));
+			value = 255;
+		}
 		if (v == rInput) {
-			if (value > 255)
-				v.setText(String.valueOf(red));
-			else {
-				red = value;
-				rSlider.setProgress(red);
-			}
+			red = value;
+			rSlider.setProgress(red);
 		} else if (v == gInput) {
-			if (value > 255)
-				v.setText(String.valueOf(blue));
-			else {
-				green = value;
-				gSlider.setProgress(green);
-			}
+			green = value;
+			gSlider.setProgress(green);
 		} else if (v == bInput) {
-			if (value > 255)
-				v.setText(String.valueOf(blue));
-			else {
-				blue = value;
-				bSlider.setProgress(blue);
-			}
+			blue = value;
+			bSlider.setProgress(blue);
 		} else if (v == aInput) {
-			if (value > 255)
-				v.setText(String.valueOf(alpha));
-			else {
-				alpha = value;
-				aSlider.setProgress(alpha);
-			}
+			alpha = value;
+			aSlider.setProgress(alpha);
 		}
 		preview.setBackgroundColor(Color.argb(alpha, red, green, blue));
 		return true;
@@ -210,4 +206,5 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			listener.onColorDialogClosed(originalColor, app);
 		}
 	}
+
 }

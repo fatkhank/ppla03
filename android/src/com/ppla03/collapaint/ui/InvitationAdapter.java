@@ -2,7 +2,6 @@ package com.ppla03.collapaint.ui;
 
 import java.util.ArrayList;
 
-import com.ppla03.collapaint.CollaUserManager;
 import com.ppla03.collapaint.R;
 import com.ppla03.collapaint.conn.ParticipantManager.InviteResponse;
 import com.ppla03.collapaint.model.CanvasModel;

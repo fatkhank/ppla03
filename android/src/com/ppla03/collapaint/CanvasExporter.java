@@ -75,10 +75,8 @@ public class CanvasExporter {
 	 * akan memiliki background yang transparan, sedangkan JPG akan memiliki
 	 * background sesuai warna kanvas. <br/>
 	 * Direktori ekspor adalah direktori media/pictures .<br/>
-	 * File berada Jika file belum ada, maka akan dibuat, jika sudah ada, maka
-	 * akan ditimpa tanpa pemberitahuan.<br/>
 	 * Penamaan file mengikuti nama kanvas jpg memiliki ekstensi .jpg, dan file
-	 * bertipe png adalah .png. jika parameter {@code filename} tidak mempunyai
+	 * bertipe png adalah .png. Jika parameter {@code filename} tidak mempunyai
 	 * ekstensi, akan otomatis ditambahkan yang sesuai.<br/>
 	 * Jika terdapat nama yang sama, maka akan ditambahkan angka sebelum
 	 * ekstensi.
@@ -87,8 +85,8 @@ public class CanvasExporter {
 	 * @param format format file, hanya yang {@link CompressFormat#PNG} atau
 	 *            {@link CompressFormat#JPEG}
 	 * @param transparent background transparan atau tidak
-	 * @param cropped dipotong atau tidak. Jika true, maka keseluruhan kanvas
-	 *            akan diekspor. Jika false, maka hanya bagian yang ada objeknya
+	 * @param cropped dipotong atau tidak. Jika false, maka keseluruhan kanvas
+	 *            akan diekspor. Jika true, maka hanya bagian yang ada objeknya
 	 *            yang akan diekspor.
 	 * 
 	 */
@@ -102,6 +100,11 @@ public class CanvasExporter {
 		new Exporter().execute();
 	}
 
+	/**
+	 * Exporter kanvas
+	 * @author hamba v7
+	 * 
+	 */
 	private static class Exporter extends AsyncTask<Void, Void, Integer> {
 
 		@Override
@@ -113,11 +116,12 @@ public class CanvasExporter {
 				return DISK_UNAVAILABLE;
 			}
 
+			// buat folder kalau belum ada
 			File dir = Environment
 					.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 			dir.mkdirs();
 
-			// atur nama file agar selalu berkahiran ekstensi yang sesuai
+			// atur nama file agar selalu berakhiran ekstensi yang sesuai
 			String extension = format.equals(CompressFormat.PNG) ? ".png"
 					: ".jpg";
 			String filename = exportModel.name;
@@ -133,12 +137,32 @@ public class CanvasExporter {
 				recent = new File(dir, filename + i++ + extension);
 
 			// ekspor kanvas
-			boolean result = export(exportModel, recent, format, transparent,
-					cropped);
-			if (result)
-				return SUCCESS;
+			RectF bound = new RectF();
+			Bitmap oriBitmap = draw(exportModel, transparent, bound);
+
+			// hitung gambar akhir
+			Bitmap finalBitmap;
+			if (cropped)
+				finalBitmap = Bitmap.createBitmap(oriBitmap, (int) bound.left,
+						(int) bound.top, (int) bound.width(),
+						(int) bound.height());
 			else
+				finalBitmap = oriBitmap;
+
+			// tulis ke file
+			FileOutputStream out = null;
+			try {
+				out = new FileOutputStream(recent);
+				finalBitmap.compress(format, 100, out);
+			} catch (Exception e) {
 				return FAILED;
+			} finally {
+				if (out != null)
+					try {
+						out.close();
+					} catch (IOException e) {}
+			}
+			return SUCCESS;
 		}
 
 		@Override
@@ -159,44 +183,6 @@ public class CanvasExporter {
 	 * Jarak tepi gambar ke objek kanvas paling tepi.
 	 */
 	public static final int CROP_PADDING = 10;
-
-	/**
-	 * Mengekspor kanvas ke suatu file
-	 * @param model
-	 * @param file
-	 * @param format
-	 * @param transparent
-	 * @param cropped
-	 * @return
-	 */
-	private static boolean export(CanvasModel model, File file,
-			CompressFormat format, boolean transparent, boolean cropped) {
-		RectF bound = new RectF();
-		Bitmap oriBitmap = draw(model, transparent, bound);
-
-		// hitung gambar akhir
-		Bitmap finalBitmap;
-		if (cropped)
-			finalBitmap = Bitmap.createBitmap(oriBitmap, (int) bound.left,
-					(int) bound.top, (int) bound.width(), (int) bound.height());
-		else
-			finalBitmap = oriBitmap;
-
-		// tulis ke file
-		FileOutputStream out = null;
-		try {
-			out = new FileOutputStream(file);
-			finalBitmap.compress(format, 100, out);
-		} catch (Exception e) {
-			return false;
-		} finally {
-			if (out != null)
-				try {
-					out.close();
-				} catch (IOException e) {}
-		}
-		return true;
-	}
 
 	/**
 	 * Mendapatkan bitmap dari sebuah kanvas.

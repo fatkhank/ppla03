@@ -7,6 +7,7 @@ import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
+import com.ppla03.collapaint.ui.CollaToast;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -326,25 +327,70 @@ public class CanvasView extends View {
 		pathHighLight.close();
 
 		int y = PROTO_AREA_TOP_MARGIN;
-		protoLine = new LineObject(icon_left, icon_left, strokeColor,
-				PROTO_STROKE_WIDTH, strokeStyle);
-		protoLine.penTo(icon_right, icon_right);
+		protoLine = new LineObject(0, 0, strokeColor, strokeWidth, strokeStyle);
+		protoLine.penTo(centerY, centerY);
 		captureLine = new ScaledObject(protoLine);
 		captureLine.placeTo(icon_left, y + icon_left, icon_width, icon_width);
+		float w = PROTO_STROKE_WIDTH
+				/ (captureLine.getScale() > SCALE_THRESHOLD ? captureLine
+						.getScale() : 1);
+		protoLine.setWidth((int) (w));
 
 		// object free
 		y += PROTO_AREA_WIDTH;
 		protoFree = new FreeObject(fillColor, strokeColor, strokeWidth,
 				strokeStyle);
-		protoFree.penDown(icon_left, y + icon_left);
-		protoFree.penTo(icon_right, y + center);
-		protoFree.penTo(icon_left, y + icon_right);
-		protoFree.penTo(icon_right, y + icon_right + icon_right);
+		// protoFree.penDown(icon_left, y + icon_left);
+		// protoFree.penTo(icon_right, y + center);
+		// protoFree.penTo(icon_left, y + icon_right);
+		// protoFree.penTo(icon_right, y + icon_right + icon_right);
+		// protoFree.penUp();
+
+		float near = centerX / 24, far = near + near, near2 = near + near, far2 = far
+				+ far, far3 = far2 + far, far4 = far3 + far, far5 = far4 + far;
+
+		protoFree.penDown(far, -near2 - far5);
+		// -2,0
+		protoFree.penTo(0, -near2 - far5);
+		// -2,1
+		protoFree.penTo(-far, -near - far5);
+		// -2,2
+		protoFree.penTo(-far2, -near - far4);
+		// -1,2
+		protoFree.penTo(-far2 - near, -near - far3);
+		// 0,2
+		protoFree.penTo(-far2 - near, -near - far2);
+		// 1,2
+		protoFree.penTo(-far2, -near - far);
+		// 2,2
+		protoFree.penTo(-far, -near);
+		// 2,1
+		// --- tengah ---
+		protoFree.penTo(0, 0);
+		// --------------
+		// 2,1
+		protoFree.penTo(far, near);
+		// 2,2
+		protoFree.penTo(far2, near + far);
+		// 1,2
+		protoFree.penTo(far2 + near, near + far2);
+		// 0,2
+		protoFree.penTo(far2 + near, near + far3);
+		// -1,2
+		protoFree.penTo(far2, near + far4);
+		// -2,2
+		protoFree.penTo(far, near + far5);
+		// -2,1
+		protoFree.penTo(0, near2 + far5);
+		// -2,0
+		protoFree.penTo(-far, near2 + far5);
+		// selesai
 		protoFree.penUp();
+
 		captureFree = new ScaledObject(protoFree);
 		captureFree.placeTo(icon_left, y + icon_left, icon_width, icon_width);
 		// tentukan ukuran stroke agar terlihat jelas
-		float w = PROTO_STROKE_WIDTH
+		w = PROTO_STROKE_WIDTH
 				/ (captureFree.getScale() > SCALE_THRESHOLD ? captureFree
 						.getScale() : 1);
 		protoFree.setStrokeWidth((int) (w));
@@ -917,11 +963,10 @@ public class CanvasView extends View {
 		int x = (int) event.getX();
 		int y = (int) event.getY();
 		if (act == MotionEvent.ACTION_DOWN) {
-			// saat layar mulai dipencet -> abaikan jika sedang ada aksi lain
-			if (dragStatus != DS_NONE)
-				return false;
-			// jika user memasuki area mainbar -> kemungkinan akan menggambar
-			if (x < PROTO_AREA_WIDTH && y > PROTO_AREA_TOP_MARGIN) {
+			// jika user memasuki area mainbar -> kemungkinan akan menggambar,
+			// abaikan jika sedang ada aksi lain
+			if (x < PROTO_AREA_WIDTH && y > PROTO_AREA_TOP_MARGIN
+					&& dragStatus == DS_NONE) {
 				approveAction();// setujui semua aksinya dulu
 
 				continueDraw = false;
@@ -1055,14 +1100,14 @@ public class CanvasView extends View {
 						if (protoObject instanceof FreeObject) {
 							// jika objek free, ubah ke mode gambar biasa
 							insertPrimitive(ObjectType.FREE);
-							Toast.makeText(getContext(), "Drag to make path",
-									Toast.LENGTH_SHORT).show();
+							CollaToast.show(getContext(), "Drag to make path",
+									Toast.LENGTH_SHORT);
 							dragStatus = DS_DRAW_FREE;
 							continueDraw = true;
 						} else if (protoObject instanceof LineObject) {
 							insertPrimitive(ObjectType.LINE);
-							Toast.makeText(getContext(), "Drag to make line",
-									Toast.LENGTH_SHORT).show();
+							CollaToast.show(getContext(), "Drag to make line",
+									Toast.LENGTH_SHORT);
 							dragStatus = DS_DRAW_LINE;
 						}
 					}
@@ -1249,6 +1294,17 @@ public class CanvasView extends View {
 						else
 							w = PROTO_STROKE_WIDTH;
 						protoFree.setStrokeWidth((int) w);
+					} else {
+						protoLine = currentLine.cloneObject();
+						captureLine.setObject(protoLine);
+
+						// hitung ukuran stroke agar kelihatan jelas di main bar
+						float w = captureLine.getScale();
+						if (w > SCALE_THRESHOLD)
+							w = PROTO_STROKE_WIDTH / w;
+						else
+							w = PROTO_STROKE_WIDTH;
+						protoLine.setWidth((int) w);
 					}
 					redoStack.clear();
 					listener.onURStatusChange(true, false);

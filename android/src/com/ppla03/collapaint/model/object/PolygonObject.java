@@ -227,7 +227,9 @@ public class PolygonObject extends BasicObject {
 
 	@Override
 	public boolean selectedBy(float x, float y, float radius) {
-		if (bounds.contains(x, y)) {// quick reject
+		if ((x > bounds.left - radius) && (x < bounds.right + radius)
+				&& (y > bounds.top - radius) && (y < bounds.bottom + radius)) {// quick
+			// reject
 			if (fillPaint.getColor() == Color.TRANSPARENT) {
 				int last = corner - 1;
 				float x1 = xLocs[last];
@@ -255,7 +257,7 @@ public class PolygonObject extends BasicObject {
 				rg.setPath(path, new Region((int) bounds.left,
 						(int) bounds.top, (int) bounds.right,
 						(int) bounds.bottom));
-				selected = rg.contains((int) x, (int) y);
+				return rg.contains((int) x, (int) y);
 			}
 		}
 		return false;

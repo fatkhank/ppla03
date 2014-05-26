@@ -26,6 +26,7 @@
         android:ems="10"
         android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
+        android:nextFocusForward="@+id/cp_g_input"
         android:text="255"
         android:textColor="@android:color/holo_red_dark" />
 
@@ -63,6 +64,7 @@
         android:ems="10"
         android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
+        android:nextFocusForward="@+id/cp_b_input"
         android:text="255"
         android:textColor="@android:color/holo_green_dark" />
 
@@ -99,6 +101,7 @@
         android:ems="10"
         android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
+        android:nextFocusForward="@+id/cp_a_input"
         android:text="255"
         android:textColor="@android:color/holo_blue_dark" />
 
@@ -149,7 +152,6 @@
         android:inputType="number"
         android:text="255"
         android:textColor="@color/dark" >
-
     </EditText>
 
     <SeekBar

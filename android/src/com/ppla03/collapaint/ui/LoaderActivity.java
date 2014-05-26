@@ -1,6 +1,7 @@
 package com.ppla03.collapaint.ui;
 
 import com.ppla03.collapaint.CanvasSynchronizer;
+import com.ppla03.collapaint.CanvasSynchronizer.CanvasCloseListener;
 import com.ppla03.collapaint.FontManager;
 import com.ppla03.collapaint.CanvasSynchronizer.CanvasLoadListener;
 import com.ppla03.collapaint.R;
@@ -9,30 +10,40 @@ import com.ppla03.collapaint.model.CanvasModel;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class LoaderActivity extends Activity implements CanvasLoadListener {
+public class LoaderActivity extends Activity implements CanvasLoadListener,
+		CanvasCloseListener {
+	static final String ACTION = "action";
+	static final int LOAD = 2, CLOSE = 9;
 
-	ProgressBar progress;
 	Handler handler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.acivity_loader);
-		if (FontManager.readFontAsset(getAssets())) {
-			progress = (ProgressBar) findViewById(R.id.l_progress);
-			handler = new Handler();
-			CanvasSynchronizer.getInstance().loadCanvas(LoaderActivity.this);
+		TextView info = (TextView) findViewById(R.id.l_text);
+
+		int action = getIntent().getIntExtra(ACTION, LOAD);
+		if (action == LOAD) {
+			// muat kanvas
+			info.setText(R.string.l_loading);
+			if (FontManager.readFontAsset(getAssets())) {
+				handler = new Handler();
+				CanvasSynchronizer.getInstance()
+						.loadCanvas(LoaderActivity.this);
+			} else {
+				CollaToast.show(this, R.string.l_font_failed,
+						Toast.LENGTH_SHORT);
+			}
 		} else {
-			Toast.makeText(this, "Cannot load font assets", Toast.LENGTH_SHORT)
-					.show();
+			// tutup kanvas
+			info.setText(R.string.l_close);
+			CanvasSynchronizer.getInstance().closeCanvas(this);
 		}
 	}
 
@@ -43,16 +54,28 @@ public class LoaderActivity extends Activity implements CanvasLoadListener {
 			startActivity(intent);
 			finish();
 		} else {
-			Toast.makeText(this, "Cannot load canvas", Toast.LENGTH_LONG)
-					.show();
+			if (status == ServerConnector.CONNECTION_PROBLEM)
+				CollaToast.show(this, R.string.check_connection,
+						Toast.LENGTH_LONG);
+			else
+				CollaToast
+						.show(this, R.string.l_load_failed, Toast.LENGTH_LONG);
 			final Intent intent = new Intent(this, BrowserActivity.class);
 			handler.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
 					startActivity(intent);
+					finish();
 				}
 			}, 500);
 		}
+	}
+
+	@Override
+	public void onCanvasClosed(int status) {
+		Intent intent = new Intent(this, BrowserActivity.class);
+		startActivity(intent);
+		finish();
 	}
 }

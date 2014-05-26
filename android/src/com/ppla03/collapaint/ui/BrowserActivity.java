@@ -274,16 +274,16 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			finish();
 		} else {
 			if (status == CanvasCreationListener.DUPLICATE_NAME) {
-				Toast.makeText(this, R.string.b_ducplicate_name,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(this, R.string.b_ducplicate_name,
+						Toast.LENGTH_SHORT);
 			} else if (status == CanvasCreationListener.NOT_AUTHORIZED) {
-				Toast.makeText(this, R.string.not_authorized,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(this, R.string.not_authorized,
+						Toast.LENGTH_SHORT);
 			} else if (status == ServerConnector.CONNECTION_PROBLEM) {
-				Toast.makeText(this, R.string.check_connection,
-						Toast.LENGTH_SHORT).show();
+				CollaToast.show(this, R.string.check_connection,
+						Toast.LENGTH_SHORT);
 			} else
-				Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
+				CollaToast.show(this, R.string.error, Toast.LENGTH_SHORT);
 
 			showCreateLoader(false);
 		}
@@ -296,6 +296,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	void openCanvas(CanvasModel canvas) {
 		CanvasSynchronizer.getInstance().setCanvas(canvas);
 		Intent intent = new Intent(this, LoaderActivity.class);
+		intent.putExtra(LoaderActivity.ACTION, LoaderActivity.LOAD);
 		startActivity(intent);
 		finish();
 	}
