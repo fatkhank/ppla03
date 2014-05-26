@@ -78,16 +78,20 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/button_textbox_dark"
+        android:background="@drawable/orange_dark_onpress"
         android:text="@string/bc_create"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/dark" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
 
     <ProgressBar
         android:id="@+id/b_create_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/progress_orange"
+        android:indeterminateDuration="1000" />
 
 </RelativeLayout>

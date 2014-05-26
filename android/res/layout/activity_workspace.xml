@@ -255,6 +255,6 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </RelativeLayout>

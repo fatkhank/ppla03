@@ -141,7 +141,8 @@ public class ScaledBitmap {
 	}
 
 	/**
-	 * Mengubah posisi dan ukuran sesuai dengan objek lain.
+	 * Mengubah posisi dan ukuran sesuai dengan objek lain. Skala objek otomatis
+	 * menyesuaikan ukuran yang tersedia.
 	 * @param sb objek yang ditiru.
 	 */
 	public void matchSize(ScaledBitmap sb) {
@@ -149,6 +150,7 @@ public class ScaledBitmap {
 		this.top = sb.top;
 		this.width = sb.width;
 		this.height = sb.height;
+		this.scale = rescaleTo(sb);
 	}
 
 	/**

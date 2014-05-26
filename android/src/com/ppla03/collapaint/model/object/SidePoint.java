@@ -49,7 +49,7 @@ public class SidePoint extends Joint {
 		canvas.rotate(type);
 		if (grabbed) {
 			paint.setAlpha(180);
-			canvas.scale(2.5f, 2.5f);
+			canvas.scale(3f, 3f);
 		} else
 			paint.setAlpha(255);
 		canvas.drawPath(path, paint);

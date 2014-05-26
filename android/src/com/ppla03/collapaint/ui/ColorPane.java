@@ -37,8 +37,9 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 		/**
 		 * Dipicu saat dialog ditutup.
 		 * @param color
+		 * @param approve perubahan warna disetujui atau dibatalkan
 		 */
-		void onDialogClosed(int color);
+		void onColorDialogClosed(int color, boolean approve);
 	}
 
 	private View parent;
@@ -56,7 +57,7 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
-	private int selectedColor;
+	private int originalColor;
 
 	public ColorPane(Activity activity, View view, ColorChangeListener listener) {
 		try {
@@ -93,7 +94,7 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			cancel.setOnClickListener(this);
 
 			parent.setVisibility(View.GONE);
-			setColor(Color.BLACK);
+			setColor(Color.BLACK, true);
 
 			// ---setup pallete ---
 			// colorView = (ColorView) view.findViewById(R.id.cd_tab_pallete);
@@ -108,9 +109,11 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	/**
 	 * Mengganti warna default dialog.
 	 * @param color
+	 * @param save disimpan sebagai warna asli bukan
 	 */
-	public void setColor(int color) {
-		selectedColor = color;
+	public void setColor(int color, boolean save) {
+		if (save)
+			originalColor = color;
 
 		red = Color.red(color);
 		green = Color.green(color);
@@ -130,14 +133,6 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 		preview.setBackgroundColor(color);
 	}
 
-	/**
-	 * Menampilkan dialog untuk memilih warna.
-	 */
-	public void show() {
-		setColor(selectedColor);
-		parent.setVisibility(View.VISIBLE);
-	}
-
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
@@ -155,9 +150,9 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 				alpha = progress;
 				aInput.setText(String.valueOf(alpha));
 			}
-			selectedColor = Color.argb(alpha, red, green, blue);
-			preview.setBackgroundColor(selectedColor);
-			listener.onColorChanged(selectedColor);
+			int clr = Color.argb(alpha, red, green, blue);
+			preview.setBackgroundColor(clr);
+			listener.onColorChanged(clr);
 		}
 	}
 
@@ -205,11 +200,14 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 
 	@Override
 	public void onClick(View v) {
+		boolean app = (v == approve);
+		if (app)
+			originalColor = Color.argb(alpha, red, green, blue);
 		if (mode == PALLETE) {
-			listener.onDialogClosed(ColorView.currentColor);
+			// TODO color view
+			listener.onColorDialogClosed(ColorView.currentColor, app);
 		} else {
-			selectedColor = Color.argb(alpha, red, green, blue);
-			listener.onDialogClosed(selectedColor);
+			listener.onColorDialogClosed(originalColor, app);
 		}
 	}
 }

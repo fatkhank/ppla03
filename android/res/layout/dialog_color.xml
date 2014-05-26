@@ -14,7 +14,8 @@
         android:gravity="center_vertical"
         android:text="@string/cp_r"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_red_light"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/cp_r_input"
@@ -23,9 +24,10 @@
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/cp_r_label"
         android:ems="10"
+        android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
         android:text="255"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_red_dark" />
 
     <SeekBar
         android:id="@+id/cp_r_slider"
@@ -49,7 +51,8 @@
         android:gravity="center_vertical"
         android:text="@string/cp_g"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_green_dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/cp_g_input"
@@ -58,9 +61,10 @@
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/cp_g_label"
         android:ems="10"
+        android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
         android:text="255"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_green_dark" />
 
     <SeekBar
         android:id="@+id/cp_g_slider"
@@ -83,7 +87,8 @@
         android:gravity="center_vertical"
         android:text="@string/cp_b"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_blue_dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/cp_b_input"
@@ -92,9 +97,10 @@
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/cp_b_label"
         android:ems="10"
+        android:imeOptions="actionNext|flagNoFullscreen"
         android:inputType="number"
         android:text="255"
-        android:textColor="@color/dark" />
+        android:textColor="@android:color/holo_blue_dark" />
 
     <SeekBar
         android:id="@+id/cp_b_slider"
@@ -128,7 +134,8 @@
         android:gravity="center_horizontal"
         android:text="@string/cp_a"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/dark" />
+        android:textColor="@color/dark"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/cp_a_input"
@@ -138,7 +145,9 @@
         android:layout_below="@+id/cp_a_label"
         android:layout_marginBottom="24dp"
         android:ems="10"
+        android:imeOptions="actionDone|flagNoFullscreen"
         android:inputType="number"
+        android:text="255"
         android:textColor="@color/dark" >
 
     </EditText>

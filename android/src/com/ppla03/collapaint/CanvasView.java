@@ -30,7 +30,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
-public class CanvasView extends View implements View.OnLongClickListener {
+public class CanvasView extends View {
 	public static class Mode {
 		/**
 		 * Mode untuk menyeleksi objek yang ada di kanvas.
@@ -242,6 +242,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			DS_PASTE = 8, // objek yang didrag adalah paste
 			DS_MASK_PROPAS = DS_PROTO | DS_PASTE,// masking proto atau paste
 			DS_ANIM_FINISH = 16,// animasi selesai
+			DS_AUTO = 8192, // otomatis animasi
+			DS_PASTE_AUTO = DS_PASTE | DS_AUTO,// animasi paste
 			DS_INFLATE_FLAG = 32,// menggembungkan objek
 			DS_DEFLATE_FLAG = 64,// objek sedang dikempeskan
 			// animasi penggembungan selesai
@@ -459,8 +461,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			COLOR_THEME_HIDDEN = context.getResources().getColor(
 					R.color.workspace_hidden);
 		}
-
-		setOnLongClickListener(this);
 	}
 
 	/**
@@ -491,8 +491,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		editRect.setEmpty();
 		// ---- reset ----
 		reloadBitmap();
-
 		reloadCache();
+
 		calcScrollBounds(getWidth(), getHeight());
 	}
 
@@ -679,11 +679,10 @@ public class CanvasView extends View implements View.OnLongClickListener {
 	static {
 		debugPaint.setColor(Color.RED);
 		debugPaint.setTextSize(20);
-		debugPaint.setTypeface(Typeface.MONOSPACE);
+		debugPaint.setTypeface(android.graphics.Typeface.MONOSPACE);
 	}
 
 	void debug(Canvas canvas) {
-		canvas.translate(-scrollX, -scrollY);
 		canvas.drawText("DS:" + dragStatus, getWidth() - 540, getHeight(),
 				debugPaint);
 		canvas.drawText("U:" + userActions.size(), getWidth() - 460,
@@ -738,7 +737,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		if ((mode & Mode.MOVING) == Mode.MOVING)
 			res += "MV|";
 		canvas.drawText(res, getWidth() - 460, getHeight() - 25, debugPaint);
-		for (int i = (userActions.size() > 5 ? userActions.size() - 5 : 0); i < userActions
+		for (int i = (userActions.size() > 8 ? userActions.size() - 5 : 0); i < userActions
 				.size(); i++) {
 			UserAction ua = userActions.get(i);
 			canvas.drawText(
@@ -814,7 +813,7 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		@Override
 		public void onAnimationUpdate(ValueAnimator animation) {
 			Float progress = (Float) animation.getAnimatedValue();
-			if (dragStatus == DS_PASTE_DEFLATING) {
+			if (dragStatus == DS_PASTE_DEFLATING || dragStatus == DS_PASTE_AUTO) {
 				// animasi hasil copy
 				float ofx = capturePaste.offsetX() + progress
 						* (pasteOfsX + scrollX);
@@ -844,9 +843,13 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 		@Override
 		public void onAnimationEnd(Animator animation) {
+			if (dragStatus == DS_PASTE_AUTO) {
+				pasteFromClipboard();
+				dragStatus = DS_NONE;
+				draggedPaste.matchSize(capturePaste);
 
-			// jika user masih melakukan drag
-			if ((dragStatus & DS_DRAG) == DS_DRAG) {
+				// jika user masih melakukan drag
+			} else if ((dragStatus & DS_DRAG) == DS_DRAG) {
 				// jika yang dianimasi objek proto
 				if ((dragStatus & DS_MASK_PROPAS) == DS_PROTO) {
 					currentObject = protoObject;
@@ -1040,8 +1043,14 @@ public class CanvasView extends View implements View.OnLongClickListener {
 				if ((dragStatus & DS_CLICK) == DS_CLICK) {
 					if ((dragStatus & DS_MASK_PROPAS) == DS_PASTE) {
 						// diklik paste -> paste objek dari kanvas
-						pasteFromClipboard();
-						dragStatus = DS_NONE;
+						dragStatus = DS_PASTE_AUTO;
+						draggedPaste.copy(capturePaste);
+						draggedPaste.matchSize(capturePaste);
+						pasteScale = draggedPaste.rescaleTo(capturePaste);
+						animator.setInterpolator(interLinear);
+						animator.setFloatValues(0, 1);
+						animator.setDuration(DEFLATE_DURATION);
+						animator.start();
 					} else {
 						if (protoObject instanceof FreeObject) {
 							// jika objek free, ubah ke mode gambar biasa
@@ -1321,10 +1330,6 @@ public class CanvasView extends View implements View.OnLongClickListener {
 
 	public boolean isInHandMode() {
 		return (mode & Mode.HAND) == Mode.HAND;
-	}
-
-	public int currentObject() {
-		return objectType;
 	}
 
 	public enum Param {
@@ -2077,13 +2082,18 @@ public class CanvasView extends View implements View.OnLongClickListener {
 		if ((mode & Mode.EDIT) == Mode.EDIT) {
 			DeleteAction dm = new DeleteAction(currentObject);
 			model.objects.remove(currentObject);
+			// hilangkan seleksi, bersihkan UAStack sampai checkpoint
+			cancelSelect();
+			// push setelah UAStack bersih
 			pushToUAStack(dm, !hide_mode);
 		} else {
 			DeleteMultiple dm = new DeleteMultiple(selectedObjects);
 			model.objects.removeAll(selectedObjects);
+			// // hilangkan seleksi, bersihkan UAStack sampai checkpoint
+			cancelSelect();
+			// push setelah UAStack bersih
 			pushToUAStack(dm, !hide_mode);
 		}
-		cancelSelect();
 	}
 
 	/**
@@ -2349,14 +2359,8 @@ public class CanvasView extends View implements View.OnLongClickListener {
 			ResizeCanvas rc = (ResizeCanvas) action;
 			model.setDimension(rc.width, rc.height, rc.top, rc.left);
 			reloadBitmap();
+			reloadCache();
+			calcScrollBounds(getWidth(), getHeight());
 		}
-	}
-
-	@Override
-	public boolean onLongClick(View v) {
-		if ((dragStatus & DS_CLICK) == DS_CLICK) {
-			continueDraw = true;
-		}
-		return false;
 	}
 }

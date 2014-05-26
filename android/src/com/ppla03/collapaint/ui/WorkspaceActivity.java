@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -228,14 +229,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			polyText = (TextView) findViewById(R.id.w_poly_text);
 			polyText.setText(String.valueOf(PolygonObject.MIN_CORNER_COUNT));
 
-			// --- prepare color ---
-			colorPaneView = findViewById(R.id.w_color_pane_scroll);
-			colorPane = new ColorPane(this, colorPaneView, this);
-			animColor = ValueAnimator.ofFloat(-800, 48);
-			animColor.addListener(this);
-			animColor.addUpdateListener(this);
-			animColor.setDuration(500);
-
 			// --- prepare canvas ---
 			colorNormal = getResources().getColor(R.color.workspace_normal);
 			colorHidden = getResources().getColor(R.color.workspace_hidden);
@@ -244,6 +237,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas = (CanvasView) findViewById(R.id.w_canvas);
 			canvas.setListener(this);
 			CanvasSynchronizer.getInstance().setCanvasView(canvas);
+
+			// --- prepare color ---
+			colorPaneView = findViewById(R.id.w_color_pane_scroll);
+			colorPane = new ColorPane(this, colorPaneView, this);
+			animColor = ValueAnimator.ofFloat(-800, 48);
+			animColor.addListener(this);
+			animColor.addUpdateListener(this);
+			animColor.setDuration(500);
 
 			// --- dashboard ---
 			dashboardView = findViewById(R.id.dashboard);
@@ -298,32 +299,33 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 						}).create().show();
 	}
 
-	@Override
-	public void onColorChanged(int color) {
+	/**
+	 * Terapkan warna pada komponen yang meminta.
+	 * @param color
+	 * @param save
+	 */
+	private void consumeColor(int color, boolean save) {
 		if (colorConsumer == strokeColor) {
-			canvas.setStrokeColor(color, false);
+			canvas.setStrokeColor(color, save);
 			strokeColor.setBackgroundColor(color);
 		} else if (colorConsumer == fillColor) {
-			canvas.setFillParameter(true, color, false);
+			canvas.setFillParameter(true, color, save);
 			fillColor.setBackgroundColor(color);
 		} else if (colorConsumer == textColor) {
-			canvas.setTextColor(color, false);
+			canvas.setTextColor(color, save);
 			textColor.setBackgroundColor(color);
 		}
 	}
 
 	@Override
-	public void onDialogClosed(int color) {
-		if (colorConsumer == strokeColor) {
-			canvas.setStrokeColor(color, true);
-			strokeColor.setBackgroundColor(color);
-		} else if (colorConsumer == fillColor) {
-			canvas.setFillParameter(true, color, true);
-			fillColor.setBackgroundColor(color);
-		} else if (colorConsumer == textColor) {
-			canvas.setTextColor(color, true);
-			textColor.setBackgroundColor(color);
-		}
+	public void onColorChanged(int color) {
+		consumeColor(color, false);
+	}
+
+	@Override
+	public void onColorDialogClosed(int color, boolean approve) {
+		consumeColor(color, true);
+		colorConsumer = null;
 		animateColorDialog(false);
 	}
 
@@ -440,17 +442,35 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		}
 		// color
 		else if (v == strokeColor) {
-			colorConsumer = strokeColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.strokeColor));
-			animateColorDialog(true);
+			int clr = (int) canvas.getObjectParam(Param.strokeColor);
+			if (colorConsumer == null) {
+				colorPane.setColor(clr, true);
+				colorConsumer = strokeColor;
+				animateColorDialog(true);
+			} else {
+				colorPane.setColor(clr, false);
+				consumeColor(clr, true);
+			}
 		} else if (v == fillColor) {
-			colorConsumer = fillColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.fillColor));
-			animateColorDialog(true);
+			int clr = (int) canvas.getObjectParam(Param.fillColor);
+			if (colorConsumer == null) {
+				colorPane.setColor(clr, true);
+				colorConsumer = fillColor;
+				animateColorDialog(true);
+			} else {
+				colorPane.setColor(clr, false);
+				consumeColor(clr, true);
+			}
 		} else if (v == textColor) {
-			colorConsumer = textColor;
-			colorPane.setColor((int) canvas.getObjectParam(Param.textColor));
-			animateColorDialog(true);
+			int clr = (int) canvas.getObjectParam(Param.textColor);
+			if (colorConsumer == null) {
+				colorPane.setColor(clr, true);
+				colorConsumer = textColor;
+				animateColorDialog(true);
+			} else {
+				colorPane.setColor(clr, false);
+				consumeColor(clr, true);
+			}
 		} else if (v == fillCheck) {
 			int color = ((Integer) canvas.getState(Param.fillColor)).intValue();
 			if (fillCheck.isChecked()) {
@@ -488,7 +508,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// sembunyikan
 			animDash.setFloatValues(dashboardView.getY(),
 					-dashboardView.getHeight());
-
 			dashboard.hide();
 		}
 		animDash.start();
@@ -799,7 +818,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				dashboard.hide();
 
 				leftButtons.setVisibility(View.VISIBLE);
-				selectAddButtons.setVisibility(View.VISIBLE);
 			}
 		} else if (animation == animProp) {
 			if (!showProp.isChecked()) {

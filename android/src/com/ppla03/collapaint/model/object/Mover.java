@@ -22,7 +22,7 @@ public class Mover extends ControlPoint {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setStyle(Style.STROKE);
 		paint.setStrokeWidth(6);
-		paint.setColor(Color.rgb(20, 20, 20));
+		paint.setColor(Color.rgb(102, 102, 102));
 		paint.setStrokeCap(Cap.ROUND);
 	}
 
@@ -43,21 +43,15 @@ public class Mover extends ControlPoint {
 
 	@Override
 	public boolean grabbed(float[] points) {
-		// anchorX = points[TRANS_X];
-		// anchorY = points[TRANS_Y];
-
 		anchorX = points[TRANS_X];
 		anchorY = points[TRANS_Y];
 
 		refX = this.x;
 		refY = this.y;
-
-		paint.setAlpha(200);
-		return objBounds.contains(points[OBJ_X], points[OBJ_Y]);
-
-		// float dx = anchorX - x;
-		// float dy = anchorY - y;
-		// return (dx * dx + dy * dy) < radius_sq;
+		grabbed = objBounds.contains(points[OBJ_X], points[OBJ_Y]);
+		if (grabbed)
+			paint.setAlpha(200);
+		return grabbed;
 	}
 
 	@Override
@@ -69,17 +63,20 @@ public class Mover extends ControlPoint {
 	@Override
 	public void release() {
 		super.release();
-		paint.setAlpha(230);
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		canvas.save();
 		canvas.translate(x, y);
-		canvas.drawLine(x - MOVER_CROSS_SIZE, y - MOVER_CROSS_SIZE, x
-				+ MOVER_CROSS_SIZE, y + MOVER_CROSS_SIZE, paint);
-		canvas.drawLine(x - MOVER_CROSS_SIZE, y + MOVER_CROSS_SIZE, x
-				+ MOVER_CROSS_SIZE, y - MOVER_CROSS_SIZE, paint);
+		float rad;
+		if (grabbed) {
+			rad = MOVER_CROSS_SIZE + MOVER_CROSS_SIZE;
+		} else {
+			rad = MOVER_CROSS_SIZE;
+		}
+		canvas.drawLine(x - rad, y - rad, x + rad, y + rad, paint);
+		canvas.drawLine(x - rad, y + rad, x + rad, y - rad, paint);
 		canvas.restore();
 	}
 

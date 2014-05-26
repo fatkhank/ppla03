@@ -12,9 +12,9 @@
         android:useLevel="false" >
         <gradient
             android:angle="0"
-            android:endColor="@android:color/holo_red_light"
+            android:endColor="@android:color/holo_blue_light"
             android:gradientRadius="100%"
-            android:startColor="@android:color/holo_red_dark"
+            android:startColor="@android:color/holo_blue_dark"
             android:type="sweep"
             android:useLevel="false" />
     </shape>

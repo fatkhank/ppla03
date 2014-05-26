@@ -4,5 +4,6 @@
     <dimen name="a_login_margin_bottom">128dp</dimen>
     <dimen name="b_header_size">64dp</dimen>
     <dimen name="w_topbar_height">56dp</dimen>
+    <dimen name="color_dialog_width">300dp</dimen>
 
 </resources>

@@ -269,7 +269,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 						Toast.LENGTH_SHORT).show();
 			}
 
-			workspace.canvas.setHideMode(!workspace.canvas.isInHideMode());
+			workspace.canvas.setHideMode(hide.isChecked());
 
 			// --- participant
 		} else if (v == partiReload) {
