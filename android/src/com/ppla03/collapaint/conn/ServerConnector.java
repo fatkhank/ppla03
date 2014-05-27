@@ -22,8 +22,10 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 public abstract class ServerConnector {
-	public static String HOST = "http://192.168.43.64:8080/collapaint/";
-//	public static String HOST = "http://10.5.134.128:8080/collapaint/";
+	// public static String HOST = "http://192.168.43.64:8080/collapaint/";
+	public static String HOST = "http://10.5.134.11:8080/collapaint/";
+
+	// public static String HOST = "http://10.5.134.128:8080/collapaint/";
 
 	protected abstract void onHostAddressChange(String host);
 
@@ -69,10 +71,8 @@ public abstract class ServerConnector {
 		/**
 		 * Jawaban telah diterima
 		 * 
-		 * @param status
-		 *            status jawaban
-		 * @param reply
-		 *            jawaban dari server, atau null jika {@code status} !=
+		 * @param status status jawaban
+		 * @param reply jawaban dari server, atau null jika {@code status} !=
 		 *            {@link ServerConnector#SUCCESS}.
 		 * @see {@link ServerConnector#SUCCESS},
 		 *      {@link ServerConnector#INTERNAL_PROBLEM},

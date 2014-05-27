@@ -166,7 +166,9 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 								R.drawable.ic_action_settings));
 				spec.setContent(R.id.d_setting_pane);
 				host.addTab(spec);
-			}
+			} else
+				(parent.findViewById(R.id.d_setting_pane))
+						.setVisibility(View.GONE);
 
 			// share
 			spec = host.newTabSpec(TAB_SHARE);

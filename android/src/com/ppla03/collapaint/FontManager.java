@@ -13,9 +13,11 @@ import android.widget.ArrayAdapter;
 public class FontManager {
 
 	public static final int MIN_FONT_SIZE = 10;
-	public static final int MAX_FONT_SIZE = 144;
+	public static final int MAX_FONT_SIZE = 216;
 
 	private static final int UNDERLINE = 4;
+
+	private static final String FONT_FOLDER = "collafonts";
 
 	public static class Font {
 		public final String name;
@@ -43,9 +45,7 @@ public class FontManager {
 	}
 
 	private static final ArrayList<Font> fonts = new ArrayList<Font>();
-	static {
-		fonts.add(new Font("Sans Serif"));
-	};
+	static {};
 
 	private static final HashMap<String, Font> mapper = new HashMap<String, Font>();
 
@@ -57,14 +57,15 @@ public class FontManager {
 	 */
 	public static boolean readFontAsset(AssetManager am) {
 		try {
-			String[] fileNames = am.list("fonts");
+			String[] fileNames = am.list(FONT_FOLDER);
 			mapper.clear();
 			fonts.ensureCapacity(fileNames.length / 4);
 			fonts.clear();
 			for (int i = 0; i < fileNames.length; i++) {
 				// nama file komplit
 				String fileName = fileNames[i];
-				Typeface tp = Typeface.createFromAsset(am, "fonts/" + fileName);
+				Typeface tp = Typeface.createFromAsset(am, FONT_FOLDER + '/'
+						+ fileName);
 				// hilangkan ekstensi, menghasilkan nama font+code
 				String fontName = fileName.substring(0, fileName.length() - 4)
 						.replace('_', ' ');
@@ -94,7 +95,7 @@ public class FontManager {
 				}
 			}
 			return true;
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			return false;
 		}
 	}

@@ -397,8 +397,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 				select.setChecked(true);
 			}
 		} else if (v == hand) {
-			hand.toggle();
 			canvas.setMode(CanvasView.Mode.HAND);
+			hand.setChecked(canvas.isInHandMode());
 			if (canvas.isInHandMode())
 				select.setChecked(false);
 			else if (canvas.isInSelectionMode() && !canvas.hasSelectedObject())
@@ -764,6 +764,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			// sembunyikan proppane
 			animProp.setFloatValues(propertyPane.getY(),
 					-propertyPane.getHeight());
+			colorConsumer = null;
 			animateColorDialog(false);
 		}
 		animProp.start();

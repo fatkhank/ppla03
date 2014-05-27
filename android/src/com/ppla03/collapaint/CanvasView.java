@@ -1310,10 +1310,8 @@ public class CanvasView extends View {
 					listener.onURStatusChange(true, false);
 					if (!continueDraw)
 						editObject(currentObject, ShapeHandler.ALL);
-					else {
-						model.objects.add(currentObject);
-						reloadCache();
-					}
+					else
+						approveAction();
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (grabbedCPoint != null) {
@@ -2092,7 +2090,7 @@ public class CanvasView extends View {
 		selectedObjects.addAll(model.objects);
 		for (int i = 0; i < selectedObjects.size(); i++)
 			selectedObjects.get(i).select();
-		mode |= Mode.HAS_SELECTION;
+		mode = Mode.SELECT | Mode.HAS_SELECTION;
 		reloadCache();
 		listener.onSelectionEvent(CanvasListener.EDIT_MULTIPLE,
 				selectedObjects.size());
