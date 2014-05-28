@@ -120,6 +120,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			close.setOnClickListener(this);
 			hide = (CheckBox) workspace.findViewById(R.id.d_button_hide);
 			hide.setOnClickListener(this);
+			hide.setChecked(false);
 			hide.setText(R.string.d_nohide_text);
 			loader = (ProgressBar) parent.findViewById(R.id.d_loader);
 			loader.setVisibility(View.GONE);
@@ -259,16 +260,6 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 			// --- hide
 		} else if (v == hide) {
-			if (hide.isChecked()) {
-				hide.setText(R.string.d_hide_text);
-				CollaToast.show(workspace, R.string.d_hide_msg,
-						Toast.LENGTH_SHORT);
-			} else {
-				hide.setText(R.string.d_nohide_text);
-				CollaToast.show(workspace, R.string.d_nohide_msg,
-						Toast.LENGTH_SHORT);
-			}
-
 			workspace.canvas.setHideMode(hide.isChecked());
 
 			// --- participant
@@ -305,6 +296,22 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			else if (height < CanvasModel.MIN_HEIGHT)
 				height = CanvasModel.MIN_HEIGHT;
 			workspace.resizeCanvas(width, height, 0, 0);
+		}
+	}
+
+	/**
+	 * Menginformasikan bahwa mode hide berganti
+	 * @param hidden
+	 */
+	void onHideModeChanged(boolean hidden) {
+		hide.setChecked(hidden);
+		if (hidden) {
+			hide.setText(R.string.d_hide_text);
+			CollaToast.show(workspace, R.string.d_hide_msg, Toast.LENGTH_SHORT);
+		} else {
+			hide.setText(R.string.d_nohide_text);
+			CollaToast.show(workspace, R.string.d_nohide_msg,
+					Toast.LENGTH_SHORT);
 		}
 	}
 

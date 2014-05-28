@@ -325,6 +325,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			currentThemeColor = colorNormal;
 		}
 		topbar.setBackgroundColor(currentThemeColor);
+		dashboard.onHideModeChanged(hidden);
 	}
 
 	@Override

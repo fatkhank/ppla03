@@ -16,6 +16,7 @@ import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -48,7 +49,8 @@ import com.ppla03.collapaint.model.UserModel;
 public class BrowserActivity extends Activity implements OnClickListener,
 		ConnectionCallbacks, OnConnectionFailedListener,
 		CanvasCreationListener, OnFetchListListener, OnKickUserListener,
-		AnimatorListener, AnimatorUpdateListener, InvitationResponseListener {
+		AnimatorListener, AnimatorUpdateListener, InvitationResponseListener,
+		OnFocusChangeListener {
 	private Button mSignOutButton;
 	private TextView username;
 	private GoogleApiClient mGoogleApiClient;
@@ -121,6 +123,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			widthInput = (EditText) createView
 					.findViewById(R.id.b_create_width);
 			widthInput.setFilters(canvasDimFilter);
+			widthInput.setOnFocusChangeListener(this);
 			widthInput.setText(String.valueOf(DEFAULT_WIDTH));
 
 			heightLabel = (TextView) createView
@@ -128,6 +131,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			heightInput = (EditText) createView
 					.findViewById(R.id.b_create_height);
 			heightInput.setFilters(canvasDimFilter);
+			heightInput.setOnFocusChangeListener(this);
 			heightInput.setText(String.valueOf(DEFAULT_HEIGHT));
 
 			createButton = (Button) findViewById(R.id.b_create);
@@ -244,6 +248,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			widthInput.setVisibility(View.GONE);
 			heightLabel.setVisibility(View.GONE);
 			heightInput.setVisibility(View.GONE);
+			createButton.setVisibility(View.GONE);
 			createProggress.setVisibility(View.VISIBLE);
 		} else {
 			nameLabel.setVisibility(View.VISIBLE);
@@ -252,6 +257,7 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			widthInput.setVisibility(View.VISIBLE);
 			heightLabel.setVisibility(View.VISIBLE);
 			heightInput.setVisibility(View.VISIBLE);
+			createButton.setVisibility(View.VISIBLE);
 			createProggress.setVisibility(View.GONE);
 		}
 	}
@@ -443,6 +449,27 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	@Override
 	public void onResponse(Participation invitation, int status) {
 		loadCanvasList();
+	}
+
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		if (v == widthInput) {
+			if (!hasFocus) {
+				int width = Integer.parseInt(widthInput.getText().toString());
+				if (width > CanvasModel.MAX_WIDTH)
+					width = CanvasModel.MAX_WIDTH;
+				else if (width < CanvasModel.MIN_WIDTH)
+					width = CanvasModel.MIN_WIDTH;
+			}
+		} else if (v == heightInput) {
+			if (!hasFocus) {
+				int height = Integer.parseInt(heightInput.getText().toString());
+				if (height > CanvasModel.MAX_HEIGHT)
+					height = CanvasModel.MAX_HEIGHT;
+				else if (height < CanvasModel.MIN_HEIGHT)
+					height = CanvasModel.MIN_HEIGHT;
+			}
+		}
 	}
 
 }

@@ -490,14 +490,14 @@ public class CanvasView extends View {
 		setLayerType(LAYER_TYPE_SOFTWARE, canvasPaint);
 
 		if (isInEditMode()) {
-			PROTO_AREA_TOP_MARGIN = 48;
+			PROTO_AREA_TOP_MARGIN = 0;
 			iconBin = new ShapeDrawable();
 			iconClipboard = new ShapeDrawable();
 			COLOR_THEME_NORMAL = Color.BLUE;
 			COLOR_THEME_HIDDEN = Color.RED;
 		} else {
-			PROTO_AREA_TOP_MARGIN = (int) context.getResources().getDimension(
-					R.dimen.w_topbar_height);
+			PROTO_AREA_TOP_MARGIN = 0;
+			// context.getResources().getDimension(R.dimen.w_topbar_height);
 			iconBin = context.getResources().getDrawable(
 					R.drawable.ic_action_discard_dark);
 			iconClipboard = context.getResources().getDrawable(
@@ -631,7 +631,7 @@ public class CanvasView extends View {
 		if ((dragStatus & DS_DRAG) != DS_DRAG) {
 			// tampilkan highligh kalau diklik
 			if (protoY >= PROTO_AREA_TOP_MARGIN || continueDraw) {
-				if ((dragStatus & DS_DRAW) == DS_DRAW) {
+				if (continueDraw || (dragStatus & DS_DRAW) == DS_DRAW) {
 					selectPaint.setColor(hide_mode ? COLOR_THEME_HIDDEN
 							: COLOR_THEME_NORMAL);
 					// bawa ke posisi ikon yang sedang menggambar
@@ -966,7 +966,8 @@ public class CanvasView extends View {
 			// jika user memasuki area mainbar -> kemungkinan akan menggambar,
 			// abaikan jika sedang ada aksi lain
 			if (x < PROTO_AREA_WIDTH && y > PROTO_AREA_TOP_MARGIN
-					&& dragStatus == DS_NONE) {
+			// && dragStatus == DS_NONE
+			) {
 				approveAction();// setujui semua aksinya dulu
 
 				continueDraw = false;
@@ -1109,7 +1110,8 @@ public class CanvasView extends View {
 							CollaToast.show(getContext(), "Drag to make line",
 									Toast.LENGTH_SHORT);
 							dragStatus = DS_DRAW_LINE;
-						}
+						} else
+							dragStatus = DS_NONE;
 					}
 					// --- user sudah mendrag ---
 				} else if ((dragStatus & DS_DESTROY_FLAG) == DS_DESTROY_FLAG) {
@@ -1310,8 +1312,15 @@ public class CanvasView extends View {
 					listener.onURStatusChange(true, false);
 					if (!continueDraw)
 						editObject(currentObject, ShapeHandler.ALL);
-					else
-						approveAction();
+					else {
+						model.objects.add(currentObject);
+						UserAction action = new DrawAction(currentObject);
+						pushToUAStack(action, !hide_mode);
+						checkpoint = userActions.size();
+						currentObject = null;
+						reloadCache();
+						redoStack.clear();
+					}
 				}
 			} else if ((mode & Mode.EDIT) == Mode.EDIT) {
 				if (grabbedCPoint != null) {
@@ -1695,6 +1704,7 @@ public class CanvasView extends View {
 		mode = Mode.SELECT;
 		postInvalidate();
 		redoStack.clear();
+		listener.onURStatusChange(!userActions.empty(), false);
 	}
 
 	/**

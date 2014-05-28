@@ -45,7 +45,15 @@ public class FontManager {
 	}
 
 	private static final ArrayList<Font> fonts = new ArrayList<Font>();
-	static {};
+	static {
+		Font f = new Font("");
+		f.normal = Typeface.SANS_SERIF;
+		f.bold = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
+		f.italic = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC);
+		f.bold_italic = Typeface.create(Typeface.SANS_SERIF,
+				Typeface.BOLD_ITALIC);
+		fonts.add(f);
+	}
 
 	private static final HashMap<String, Font> mapper = new HashMap<String, Font>();
 

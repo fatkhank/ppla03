@@ -1,13 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <!--
     <item android:id="@android:id/background">
         <shape android:shape="rectangle" >
+            <solid android:color="@color/light_white" />
+             
             <gradient
                 android:endColor="#222222"
                 android:startColor="#ffffff"
                 android:type="linear" />
+    
         </shape>
+    </item>
+    -->
+    <item android:id="@android:id/background">
+        <color android:color="@color/dark" />
+    </item>
+    <item android:id="@android:id/progress">
+        <clip android:gravity="left" >
+            <color android:color="@color/light_white" />
+        </clip>
     </item>
 
 </layer-list>

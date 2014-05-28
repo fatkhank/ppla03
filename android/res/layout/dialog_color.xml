@@ -1,189 +1,199 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="200dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="5dp"
-    android:paddingLeft="5dp" >
+    android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/cp_r_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="5dp"
-        android:gravity="center_vertical"
-        android:text="@string/cp_r"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/holo_red_light"
-        android:textStyle="bold" />
-
-    <EditText
-        android:id="@+id/cp_r_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cp_r_label"
-        android:ems="10"
-        android:imeOptions="actionNext|flagNoFullscreen"
-        android:inputType="number"
-        android:nextFocusForward="@+id/cp_g_input"
-        android:text="255"
-        android:textColor="@android:color/holo_red_dark" />
-
-    <SeekBar
-        android:id="@+id/cp_r_slider"
+    <LinearLayout
+        android:id="@+id/cp_red"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cp_r_label"
-        android:layout_toLeftOf="@id/cp_r_input"
-        android:layout_toRightOf="@id/cp_r_label"
-        android:max="255"
-        android:progress="100"
-        android:progressDrawable="@drawable/seek_red"
-        android:thumb="@drawable/thumb_red" />
-
-    <TextView
-        android:id="@+id/cp_g_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/cp_r_label"
-        android:layout_marginRight="5dp"
+        android:layout_height="@dimen/w_topbar_height"
         android:gravity="center_vertical"
-        android:text="@string/cp_g"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/holo_green_dark"
-        android:textStyle="bold" />
+        android:orientation="horizontal" >
 
-    <EditText
-        android:id="@+id/cp_g_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cp_g_label"
-        android:ems="10"
-        android:imeOptions="actionNext|flagNoFullscreen"
-        android:inputType="number"
-        android:nextFocusForward="@+id/cp_b_input"
-        android:text="255"
-        android:textColor="@android:color/holo_green_dark" />
+        <TextView
+            android:id="@+id/cp_r_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:gravity="center_vertical"
+            android:text="@string/cp_r"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
 
-    <SeekBar
-        android:id="@+id/cp_g_slider"
+        <SeekBar
+            android:id="@+id/cp_r_slider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="255"
+            android:progress="100"
+            android:progressDrawable="@drawable/seek_red"
+            android:thumb="@drawable/thumb_red" />
+
+        <EditText
+            android:id="@+id/cp_r_input"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:imeOptions="actionNext|flagNoFullscreen"
+            android:inputType="number"
+            android:nextFocusForward="@+id/cp_g_input"
+            android:text="255"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cp_blue"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cp_g_label"
-        android:layout_toLeftOf="@id/cp_g_input"
-        android:layout_toRightOf="@id/cp_g_label"
-        android:max="255"
-        android:progress="100"
-        android:progressDrawable="@drawable/seek_green"
-        android:thumb="@drawable/thumb_green" />
-
-    <TextView
-        android:id="@+id/cp_b_label"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_below="@id/cp_g_label"
-        android:layout_marginRight="5dp"
+        android:layout_height="@dimen/w_topbar_height"
         android:gravity="center_vertical"
-        android:text="@string/cp_b"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/holo_blue_dark"
-        android:textStyle="bold" />
+        android:orientation="horizontal" >
 
-    <EditText
-        android:id="@+id/cp_b_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/cp_b_label"
-        android:ems="10"
-        android:imeOptions="actionNext|flagNoFullscreen"
-        android:inputType="number"
-        android:nextFocusForward="@+id/cp_a_input"
-        android:text="255"
-        android:textColor="@android:color/holo_blue_dark" />
+        <TextView
+            android:id="@+id/cp_g_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:gravity="center_vertical"
+            android:text="@string/cp_g"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/holo_green_dark"
+            android:textStyle="bold" />
 
-    <SeekBar
-        android:id="@+id/cp_b_slider"
+        <SeekBar
+            android:id="@+id/cp_g_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="255"
+            android:progress="100"
+            android:progressDrawable="@drawable/seek_green"
+            android:thumb="@drawable/thumb_green" />
+
+        <EditText
+            android:id="@+id/cp_g_input"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:imeOptions="actionNext|flagNoFullscreen"
+            android:inputType="number"
+            android:nextFocusForward="@+id/cp_b_input"
+            android:text="255"
+            android:textColor="@android:color/holo_green_dark" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cp_blue"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/cp_b_label"
-        android:layout_toLeftOf="@id/cp_b_input"
-        android:layout_toRightOf="@id/cp_b_label"
-        android:max="255"
-        android:progress="120"
-        android:progressDrawable="@drawable/seek_blue" />
+        android:layout_height="@dimen/w_topbar_height"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
 
-    <Button
-        android:id="@+id/cp_rgb_preview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/cp_cancel"
-        android:layout_alignTop="@+id/cp_cancel"
-        android:layout_margin="4dp"
-        android:layout_toLeftOf="@+id/cp_ok"
-        android:layout_toRightOf="@+id/cp_cancel"
-        android:background="@android:color/holo_blue_dark" />
+        <TextView
+            android:id="@+id/cp_b_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:gravity="center_vertical"
+            android:text="@string/cp_b"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textStyle="bold" />
+
+        <SeekBar
+            android:id="@+id/cp_b_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="255"
+            android:progress="120"
+            android:progressDrawable="@drawable/seek_blue"
+            android:thumb="@drawable/thumb_blue" />
+
+        <EditText
+            android:id="@+id/cp_b_input"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:imeOptions="actionNext|flagNoFullscreen"
+            android:inputType="number"
+            android:nextFocusForward="@+id/cp_a_input"
+            android:text="255"
+            android:textColor="@android:color/holo_blue_dark" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/cp_a_label"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cp_b_label"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/cp_b_label"
         android:gravity="center_horizontal"
         android:text="@string/cp_a"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/dark"
         android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/cp_a_input"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/cp_a_label"
-        android:layout_marginBottom="24dp"
-        android:ems="10"
-        android:imeOptions="actionDone|flagNoFullscreen"
-        android:inputType="number"
-        android:text="255"
-        android:textColor="@color/dark" >
-    </EditText>
-
-    <SeekBar
-        android:id="@+id/cp_a_slider"
+    <LinearLayout
+        android:id="@+id/cp_alpha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/cp_a_label"
-        android:layout_toLeftOf="@+id/cp_a_input"
-        android:max="255"
-        android:progress="200"
-        android:progressDrawable="@drawable/seek_transparent"
-        android:thumb="@drawable/thumb_transparent" />
+        android:orientation="horizontal" >
 
-    <ImageButton
-        android:id="@+id/cp_cancel"
-        android:layout_width="wrap_content"
+        <SeekBar
+            android:id="@+id/cp_a_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="255"
+            android:progress="200"
+            android:progressDrawable="@drawable/seek_transparent"
+            android:thumb="@drawable/thumb_transparent" />
+
+        <EditText
+            android:id="@+id/cp_a_input"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:imeOptions="actionDone|flagNoFullscreen"
+            android:inputType="number"
+            android:text="255"
+            android:textColor="@color/dark" >
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cp_appr_area"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cp_a_slider"
-        android:layout_alignTop="@+id/cp_ok"
-        android:layout_margin="4dp"
-        android:background="@drawable/button_round"
-        android:src="@drawable/ic_action_cancel" />
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
 
-    <ImageButton
-        android:id="@+id/cp_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/cp_a_input"
-        android:layout_margin="4dp"
-        android:background="@drawable/button_round"
-        android:src="@drawable/ic_action_accept" />
+        <ImageButton
+            android:id="@+id/cp_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/button_round"
+            android:src="@drawable/ic_action_cancel" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/cp_rgb_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/w_topbar_height"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@android:color/holo_blue_dark" />
+
+        <ImageButton
+            android:id="@+id/cp_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/button_round"
+            android:src="@drawable/ic_action_accept" />
+
+    </LinearLayout>
+
+</LinearLayout>

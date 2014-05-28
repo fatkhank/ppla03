@@ -32,12 +32,12 @@ public class FreeObject extends BasicObject {
 	/**
 	 * Daftar koordinat x dari bentuk objek.
 	 */
-	private float[] xLocs;
+	private float[] xLocs = {};
 
 	/**
 	 * Daftar koordinat y dari bentuk objek.
 	 */
-	private float[] yLocs;
+	private float[] yLocs = {};
 
 	/**
 	 * Daftar untuk mencatat titik-titik goresan pena, terurut dari yang
