@@ -34,7 +34,7 @@
 
         <EditText
             android:id="@+id/cp_r_input"
-            android:layout_width="56dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:ems="10"
             android:imeOptions="actionNext|flagNoFullscreen"
@@ -74,7 +74,7 @@
 
         <EditText
             android:id="@+id/cp_g_input"
-            android:layout_width="56dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:ems="10"
             android:imeOptions="actionNext|flagNoFullscreen"
@@ -114,7 +114,7 @@
 
         <EditText
             android:id="@+id/cp_b_input"
-            android:layout_width="56dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:ems="10"
             android:imeOptions="actionNext|flagNoFullscreen"
