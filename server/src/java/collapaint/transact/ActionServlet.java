@@ -24,10 +24,7 @@ public class ActionServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         dataSource = new MysqlDataSource();
-        dataSource.setDatabaseName(DB.DB_NAME);
-        dataSource.setURL(DB.DB_URL);
-        dataSource.setUser(DB.DB_USERNAME);
-        dataSource.setPassword(DB.DB_PASSWORD);
+        DB.init(dataSource, getServletContext());
     }
 
     /**
@@ -47,7 +44,7 @@ public class ActionServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
-                System.out.println("q:"+request);
+                System.out.println("q:" + request);
                 //*************************** SAVE REQUEST *************************
                 ArrayList<CanvasObject> objectPool = new ArrayList<>();
                 ArrayList<Action> userActions = new ArrayList<>();
@@ -68,8 +65,8 @@ public class ActionServlet extends HttpServlet {
             } catch (SQLException ex) {
                 reply.add(ActionJCode.ERROR, ActionJCode.SERVER_ERROR);
             }
-            
-            System.out.println("p:"+reply.build());
+
+            System.out.println("p:" + reply.build());
             out.println(reply.build());
         }
     }
@@ -156,16 +153,16 @@ public class ActionServlet extends HttpServlet {
      */
     void processReply(Connection conn, JsonObject request, int canvasId, ArrayList<Action> userActions,
             ArrayList<CanvasObject> objectPool, JsonObjectBuilder reply) throws SQLException {
-        try (PreparedStatement lastestAction = conn.prepareStatement(DB.Action.Q.Select.LASTEST)) {
+        try (PreparedStatement lastestAction = conn.prepareStatement(DB.Action.Q.SELECT_LAST)) {
 
             // ----- ambil aksi terakhir.
             int lastActionNumber = request.getInt(ActionJCode.LAST_ACTION_NUM);
             //kembalikan ke user lan yang sedang diminta
             reply.add(ActionJCode.OLD_ACTION_NUM, lastActionNumber);
             JsonArrayBuilder actionArray = Json.createArrayBuilder();
-            lastestAction.setInt(DB.Action.Q.Select.Lastest.CANVAS_ID, canvasId);
-            lastestAction.setInt(DB.Action.Q.Select.Lastest.LIMIT_MIN, lastActionNumber);
-            lastestAction.setInt(DB.Action.Q.Select.Lastest.LIMIT_COUNT, 256);
+            lastestAction.setInt(DB.Action.Q.SELECT_LAST_CANVASID, canvasId);
+            lastestAction.setInt(DB.Action.Q.SELECT_LAST_LIMITMIN, lastActionNumber);
+            lastestAction.setInt(DB.Action.Q.SELECT_LAST_LIMITCOUNT, 256);
             ResultSet result = lastestAction.executeQuery();
             int pointer = 0;//digunakan untuk mempercepat proses pencarian aksi
             int newObjects = 0;//menghitung jumlah objek yang belum diketahui klien
@@ -175,7 +172,7 @@ public class ActionServlet extends HttpServlet {
 
                 //cek apakah aksi ini adalah aksi yang disubmit klien
                 int actionID = result.
-                        getInt(DB.Action.Q.Select.Lastest.Column.ID);
+                        getInt(DB.Action.Q.SELECT_LAST_RESULT_ID);
                 for (int i = pointer; i < userActions.size(); i++) {
                     if (userActions.get(i).id == actionID) {
                         actionObject.add(ActionJCode.ACTION_SUBMITTED, i);
@@ -186,10 +183,10 @@ public class ActionServlet extends HttpServlet {
 
                 //Jika aksi ini merupakan aksi dari user lain (tidak tercantum di request), masukkan datanya ke reply
                 int actionCode = result.
-                        getInt(DB.Action.Q.Select.Lastest.Column.CODE);
+                        getInt(DB.Action.Q.SELECT_LAST_RESULT_CODE);
                 if (actionID != -1) {
                     String param = result.
-                            getString(DB.Action.Q.Select.Lastest.Column.PARAMETER);
+                            getString(DB.Action.Q.SELECT_LAST_RESULT_PARAMETER);
                     actionObject.add(ActionJCode.ACTION_PARAM, param);
                     actionObject.add(ActionJCode.ACTION_CODE, actionCode);
                 }
@@ -197,7 +194,7 @@ public class ActionServlet extends HttpServlet {
                 if (actionCode != ActionCode.RESIZE_ACTION) {
                     //Jika aksi berkatian dengan suatu objek, ambil id objek
                     int objectID = result.
-                            getInt(DB.Action.Q.Select.Lastest.Column.OBJECT_ID);
+                            getInt(DB.Action.Q.SELECT_LAST_RESULT_OBJECTID);
                     //var ini tidak digunakan lagi, dioverwrite untuk mencari indeks objek yang berkaitan dengan aksi di atas.
                     actionID = OBJECT_INCOMPLETE;
                     //Cari apakah objek ada di object pool.
@@ -257,28 +254,28 @@ public class ActionServlet extends HttpServlet {
             //menyimpan posisi objek yang belum lengkap
             int counter = 0;
             int size = objectPool.size();
-            try (PreparedStatement getDetail = conn.prepareStatement(DB.Objects.Q.Select.BY_ID)) {
+            try (PreparedStatement getDetail = conn.prepareStatement(DB.Objects.Q.SELECT_BYID)) {
                 //catat objek yang datanya belum lengkap
                 for (int i = 0; i < size; i++) {
                     CanvasObject canvasObject = objectPool.get(i);
                     if (canvasObject.id == OBJECT_INCOMPLETE) {
                         getDetail.
-                                setInt(DB.Objects.Q.Select.ById.ID, canvasObject.globalId);
+                                setInt(DB.Objects.Q.SELECT_BYID_ID, canvasObject.globalId);
                         //ambil datanya
                         ResultSet result = getDetail.executeQuery();
                         //masukkan datanya ke objek
                         counter = 0;
                         if (result.next()) {
                             canvasObject.globalId = result.
-                                    getInt(DB.Objects.Q.Select.ById.Column.ID);
+                                    getInt(DB.Objects.Q.SELECT_BYID_RESULT_ID);
                             canvasObject.code = result.
-                                    getInt(DB.Objects.Q.Select.ById.Column.CODE);
+                                    getInt(DB.Objects.Q.SELECT_BYID_RESULT_CODE);
                             canvasObject.geom = result.
-                                    getString(DB.Objects.Q.Select.ById.Column.GEOM);
+                                    getString(DB.Objects.Q.SELECT_BYID_RESULT_GEOM);
                             canvasObject.style = result.
-                                    getString(DB.Objects.Q.Select.ById.Column.STYLE);
+                                    getString(DB.Objects.Q.SELECT_BYID_RESULT_STYLE);
                             canvasObject.transform = result.
-                                    getString(DB.Objects.Q.Select.ById.Column.TRANSFORM);
+                                    getString(DB.Objects.Q.SELECT_BYID_RESULT_TRANSFORM);
                         } else
                             canvasObject.id = OBJECT_MISSING;
                     }
@@ -321,15 +318,15 @@ public class ActionServlet extends HttpServlet {
         if (size == 0)
             return;
         try (PreparedStatement insert = conn
-                .prepareStatement(DB.Objects.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement(DB.Objects.Q.INSERT_OBJECT, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < size; i++) {
                 CanvasObject obj = objects.get(0);
-                insert.setInt(DB.Objects.Q.Insert.All.CANVAS_ID, canvasId);
-                insert.setInt(DB.Objects.Q.Insert.All.CODE, obj.code);
-                insert.setString(DB.Objects.Q.Insert.All.TRANSFORM, obj.transform);
-                insert.setString(DB.Objects.Q.Insert.All.STYLE, obj.style);
-                insert.setString(DB.Objects.Q.Insert.All.GEOM, obj.geom);
-                insert.setBoolean(DB.Objects.Q.Insert.All.EXIST, true);
+                insert.setInt(DB.Objects.Q.INSERT_OBJECT_CANVASID, canvasId);
+                insert.setInt(DB.Objects.Q.INSERT_OBJECT_CODE, obj.code);
+                insert.setString(DB.Objects.Q.INSERT_OBJECT_TRANSFORM, obj.transform);
+                insert.setString(DB.Objects.Q.INSERT_OBJECT_STYLE, obj.style);
+                insert.setString(DB.Objects.Q.INSERT_OBJECT_GEOM, obj.geom);
+                insert.setBoolean(DB.Objects.Q.INSERT_OBJECT_EXIST, true);
                 insert.addBatch();
             }
             insert.executeBatch();
@@ -354,51 +351,51 @@ public class ActionServlet extends HttpServlet {
         if (size == 0)
             return;
 
-        try (PreparedStatement updateTrans = conn.prepareStatement(DB.Objects.Q.Update.TRANSFORM);
-                PreparedStatement updateStyle = conn.prepareStatement(DB.Objects.Q.Update.STYLE);
-                PreparedStatement updateGeom = conn.prepareStatement(DB.Objects.Q.Update.GEOM);
-                PreparedStatement deleteObject = conn.prepareStatement(DB.Objects.Q.Update.STATUS);
+        try (PreparedStatement updateTrans = conn.prepareStatement(DB.Objects.Q.UPDATE_TRANSFORM);
+                PreparedStatement updateStyle = conn.prepareStatement(DB.Objects.Q.UPDATE_STYLE);
+                PreparedStatement updateGeom = conn.prepareStatement(DB.Objects.Q.UDATE_GEOM);
+                PreparedStatement deleteObject = conn.prepareStatement(DB.Objects.Q.UPDATE_STATUS);
                 PreparedStatement insertAction = conn
-                .prepareStatement(DB.Action.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS);
-                PreparedStatement updateCanvas = conn.prepareStatement(DB.Canvas.Q.Update.SIZE)) {
+                .prepareStatement(DB.Action.Q.INSERT_ACTION, PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement updateCanvas = conn.prepareStatement(DB.Canvas.Q.UDATE_SIZE)) {
             for (int i = 0; i < size; i++) {
                 Action act = actions.get(i);
-                insertAction.setInt(DB.Action.Q.Insert.All.CANVAS_ID, canvasID);
-                insertAction.setInt(DB.Action.Q.Insert.All.CODE, act.code);
-                insertAction.setString(DB.Action.Q.Insert.All.PARAMETER, act.param);
+                insertAction.setInt(DB.Action.Q.INSERT_ACTION_CANVASID, canvasID);
+                insertAction.setInt(DB.Action.Q.INSERT_ACTION_CODE, act.code);
+                insertAction.setString(DB.Action.Q.INSERT_ACTION_PARAMETER, act.param);
                 if (act instanceof Resize) {
-                    insertAction.setInt(DB.Action.Q.Insert.All.OBJECT_ID, 0);
+                    insertAction.setInt(DB.Action.Q.INSERT_ACTION_OBJECTID, 0);
                     //Mengubah ukuran kanvas
                     Resize rs = (Resize) act;
-                    updateCanvas.setInt(DB.Canvas.Q.Update.Size.WIDTH, rs.width);
-                    updateCanvas.setInt(DB.Canvas.Q.Update.Size.HEIGHT, rs.height);
-                    updateCanvas.setInt(DB.Canvas.Q.Update.Size.TOP, rs.top);
-                    updateCanvas.setInt(DB.Canvas.Q.Update.Size.LEFT, rs.left);
-                    updateCanvas.setInt(DB.Canvas.Q.Update.Size.ID, canvasID);
+                    updateCanvas.setInt(DB.Canvas.Q.UDATE_SIZE_WIDTH, rs.width);
+                    updateCanvas.setInt(DB.Canvas.Q.UDATE_SIZE_HEIGHT, rs.height);
+                    updateCanvas.setInt(DB.Canvas.Q.UDATE_SIZE_TOP, rs.top);
+                    updateCanvas.setInt(DB.Canvas.Q.UDATE_SIZE_LEFT, rs.left);
+                    updateCanvas.setInt(DB.Canvas.Q.UDATE_SIZE_CANVASID, canvasID);
                     updateCanvas.addBatch();
                 } else {
                     ActionObject actionObject = (ActionObject) act;
                     insertAction.
-                            setInt(DB.Action.Q.Insert.All.OBJECT_ID, actionObject.objectID);
+                            setInt(DB.Action.Q.INSERT_ACTION_OBJECTID, actionObject.objectID);
                     if (act.code == ActionCode.GEOM_ACTION) {
                         //ubah geometri objek
-                        updateGeom.setString(DB.Objects.Q.Update.Geom.GEOM_PARAM, act.param);
-                        updateGeom.setInt(DB.Objects.Q.Update.Geom.OBJECT_ID, actionObject.objectID);
+                        updateGeom.setString(DB.Objects.Q.UDATE_GEOM_GEOMPARAM, act.param);
+                        updateGeom.setInt(DB.Objects.Q.UDATE_GEOM_OBJECTID, actionObject.objectID);
                         updateGeom.addBatch();
                     } else if (act.code == ActionCode.TRANSFORM_ACTION) {
                         //ubah transformasi objek
-                        updateTrans.setString(DB.Objects.Q.Update.Transform.TRANS_PARAM, act.param);
-                        updateTrans.setInt(DB.Objects.Q.Update.Transform.OBJECT_ID, actionObject.objectID);
+                        updateTrans.setString(DB.Objects.Q.UPDATE_TRANSFORM_TRANSPARAM, act.param);
+                        updateTrans.setInt(DB.Objects.Q.UPDATE_TRANSFORM_OBJECTID, actionObject.objectID);
                         updateTrans.addBatch();
                     } else if (act.code == ActionCode.STYLE_ACTION) {
                         //ubah style objek
-                        updateStyle.setString(DB.Objects.Q.Update.Style.STYLE_PARAM, act.param);
-                        updateStyle.setInt(DB.Objects.Q.Update.Style.OBJECT_ID, actionObject.objectID);
+                        updateStyle.setString(DB.Objects.Q.UPDATE_STYLE_STYLEPARAM, act.param);
+                        updateStyle.setInt(DB.Objects.Q.UPDATE_STYLE_OBJECTID, actionObject.objectID);
                         updateStyle.addBatch();
                     } else if (act.code == ActionCode.DELETE_ACTION) {
                         //ubah status objek menjadi sudah terhapus
-                        deleteObject.setBoolean(DB.Objects.Q.Update.Status.STATUS_PARAM, false);
-                        deleteObject.setInt(DB.Objects.Q.Update.Status.OBJECT_ID, actionObject.objectID);
+                        deleteObject.setBoolean(DB.Objects.Q.UPDATE_STATUS_STATUSPARAM, false);
+                        deleteObject.setInt(DB.Objects.Q.UPDATE_STATUS_OBJECTID, actionObject.objectID);
                         deleteObject.addBatch();
                     }
                 }

@@ -41,10 +41,7 @@ public class PortalServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         dataSource = new MysqlDataSource();
-        dataSource.setDatabaseName(DB.DB_NAME);
-        dataSource.setURL(DB.DB_URL);
-        dataSource.setUser(DB.DB_USERNAME);
-        dataSource.setPassword(DB.DB_PASSWORD);
+        DB.init(dataSource, getServletContext());
     }
 
     /**
@@ -94,60 +91,60 @@ public class PortalServlet extends HttpServlet {
      */
     private void open(Connection conn, JsonObjectBuilder reply, int userId, int canvasId) {
         //cek apakah user punya akses ke kanvas atau tidak
-        try (PreparedStatement open = conn.prepareStatement(DB.Participation.Q.Update.TRACE)) {
-            open.setInt(DB.Participation.Q.Update.Trace.USER_ID, userId);
-            open.setInt(DB.Participation.Q.Update.Trace.CANVAS_ID, canvasId);
-            open.setObject(DB.Participation.Q.Update.Trace.LAST_ACCESS, new Date(System.currentTimeMillis()));
-            open.setString(DB.Participation.Q.Update.Trace.ACTION, DB.Participation.Action.OPEN);
+        try (PreparedStatement open = conn.prepareStatement(DB.Participation.Q.UPDATE_TRACE)) {
+            open.setInt(DB.Participation.Q.UPDATE_TRACE_USERID, userId);
+            open.setInt(DB.Participation.Q.UPDATE_TRACE_CANVASID, canvasId);
+            open.setObject(DB.Participation.Q.UPDATE_TRACE_LASTACCESS, new Date(System.currentTimeMillis()));
+            open.setString(DB.Participation.Q.UPDATE_TRACE_ACTION, DB.Participation.Action.OPEN);
             int result = open.executeUpdate();
             if (result > 0) {
-                try (PreparedStatement canvasDetail = conn.prepareStatement(DB.Canvas.Q.Select.DETAIL_BY_ID);
-                        PreparedStatement actionCount = conn.prepareStatement(DB.Action.Q.Select.COUNT);
-                        PreparedStatement getObject = conn.prepareStatement(DB.Objects.Q.Select.BY_CANVAS_ID)) {
+                try (PreparedStatement canvasDetail = conn.prepareStatement(DB.Canvas.Q.SELECT_DETAILBYID);
+                        PreparedStatement actionCount = conn.prepareStatement(DB.Action.Q.SELECT_COUNT);
+                        PreparedStatement getObject = conn.prepareStatement(DB.Objects.Q.SELECT_BYCANVASID)) {
                     //mengambil data kanvas
-                    canvasDetail.setInt(DB.Canvas.Q.Select.DetailById.CANVAS_ID, canvasId);
+                    canvasDetail.setInt(DB.Canvas.Q.SELECT_DETAILBYID_CANVASID, canvasId);
                     ResultSet detail = canvasDetail.executeQuery();
                     if (detail.next()) {
-                        reply.add(Reply.CANVAS_ID, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.CANVAS_ID));
+                        reply.add(Reply.CANVAS_ID, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_CANVASID));
                         reply.add(Reply.CANVAS_NAME, detail
-                                .getString(DB.Canvas.Q.Select.DetailById.Column.CANVAS_NAME));
-                        reply.add(Reply.CANVAS_WIDTH, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.WIDTH));
-                        reply.add(Reply.CANVAS_HEIGHT, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.HEIGHT));
-                        reply.add(Reply.CANVAS_TOP, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.TOP));
-                        reply.add(Reply.CANVAS_LEFT, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.LEFT));
+                                .getString(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_CANVASNAME));
+                        reply.add(Reply.CANVAS_WIDTH, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_WIDTH));
+                        reply.add(Reply.CANVAS_HEIGHT, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_HEIGHT));
+                        reply.add(Reply.CANVAS_TOP, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_TOP));
+                        reply.add(Reply.CANVAS_LEFT, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_LEFT));
                         reply.add(Reply.CREATE_TIME, detail
-                                .getString(DB.Canvas.Q.Select.DetailById.Column.CREATE_TIME));
-                        reply.add(Reply.OWNER_ID, detail.getInt(DB.Canvas.Q.Select.DetailById.Column.OWNER_ID));
-                        reply.add(Reply.OWNER_NAME, detail.getString(DB.Canvas.Q.Select.DetailById.Column.OWNER_NAME));
+                                .getString(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_CREATETIME));
+                        reply.add(Reply.OWNER_ID, detail.getInt(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_OWNERID));
+                        reply.add(Reply.OWNER_NAME, detail.getString(DB.Canvas.Q.SELECT_DETAILBYID_RESULT_OWNERNAME));
 
                         //mengambil jumlah aksi terakhir pada kanvas
-                        actionCount.setInt(DB.Action.Q.Select.Count.CANVAS_ID, canvasId);
+                        actionCount.setInt(DB.Action.Q.SELECT_COUNT_CANVASID, canvasId);
                         ResultSet count = actionCount.executeQuery();
                         if (count.next())
-                            reply.add(Reply.LAST_ACTION_NUM, count.getInt(DB.Action.Q.Select.Count.CANVAS_ID));
+                            reply.add(Reply.LAST_ACTION_NUM, count.getInt(DB.Action.Q.SELECT_COUNT_CANVASID));
 
                         //mengambil daftar objek pada kanvas
-                        getObject.setInt(DB.Objects.Q.Select.ByCanvasId.CANVAS_ID, canvasId);
+                        getObject.setInt(DB.Objects.Q.SELECT_BYCANVASID_CANVASID, canvasId);
                         ResultSet objectResult = getObject.executeQuery();
                         JsonArrayBuilder objects = Json.createArrayBuilder();
                         while (objectResult.next()) {
                             JsonObjectBuilder obj = Json.createObjectBuilder();
-                            obj.add(Reply.OBJECT_ID, objectResult.getInt(DB.Objects.Q.Select.ByCanvasId.Column.ID));
+                            obj.add(Reply.OBJECT_ID, objectResult.getInt(DB.Objects.Q.SELECT_BYCANVASID_RESULT_ID));
 
-                            int objCode = objectResult.getInt(DB.Objects.Q.Select.ByCanvasId.Column.CODE);
+                            int objCode = objectResult.getInt(DB.Objects.Q.SELECT_BYCANVASID_RESULT_CODE);
                             obj.add(Reply.OBJECT_CODE, objCode);
 
-                            String objGeom = objectResult.getString(DB.Objects.Q.Select.ByCanvasId.Column.GEOM);
+                            String objGeom = objectResult.getString(DB.Objects.Q.SELECT_BYCANVASID_RESULT_GEOM);
                             obj.add(Reply.OBJECT_GEOM, objGeom);
 
-                            String objStyle = objectResult.getString(DB.Objects.Q.Select.ByCanvasId.Column.STYLE);
+                            String objStyle = objectResult.getString(DB.Objects.Q.SELECT_BYCANVASID_RESULT_STYLE);
                             obj.add(Reply.OBJECT_STYLE, objStyle);
 
                             String objTrans = objectResult
-                                    .getString(DB.Objects.Q.Select.ByCanvasId.Column.TRANSFORM);
+                                    .getString(DB.Objects.Q.SELECT_BYCANVASID_RESULT_TRANSFORM);
                             obj.add(Reply.OBJECT_TRANSFORM, objTrans);
 
-                            if (objectResult.getBoolean(DB.Objects.Q.Select.ByCanvasId.Column.EXIST))
+                            if (objectResult.getBoolean(DB.Objects.Q.SELECT_BYCANVASID_RESULT_EXIST))
                                 obj.add(Reply.OBJECT_EXIST, true);
                             else
                                 obj.add(Reply.OBJECT_EXIST, false);
@@ -176,13 +173,27 @@ public class PortalServlet extends HttpServlet {
      * @param canvasId id kanvas yang ditutup.
      */
     private void close(Connection conn, JsonObjectBuilder reply, int userId, int canvasId) {
-        try (PreparedStatement closing = conn.prepareStatement(DB.Participation.Q.Update.TRACE)) {
-            closing.setInt(DB.Participation.Q.Update.Trace.USER_ID, userId);
-            closing.setInt(DB.Participation.Q.Update.Trace.CANVAS_ID, canvasId);
-            closing.setObject(DB.Participation.Q.Update.Trace.LAST_ACCESS, new Date(System.currentTimeMillis()));
-            closing.setString(DB.Participation.Q.Update.Trace.ACTION, DB.Participation.Action.CLOSE);
-            if (closing.executeUpdate() <= 0)
+        try (PreparedStatement closing = conn.prepareStatement(DB.Participation.Q.UPDATE_TRACE)) {
+            closing.setInt(DB.Participation.Q.UPDATE_TRACE_USERID, userId);
+            closing.setInt(DB.Participation.Q.UPDATE_TRACE_CANVASID, canvasId);
+            closing.setObject(DB.Participation.Q.UPDATE_TRACE_LASTACCESS, new Date(System.currentTimeMillis()));
+            closing.setString(DB.Participation.Q.UPDATE_TRACE_ACTION, DB.Participation.Action.CLOSE);
+            if (closing.executeUpdate() <= 0) {
                 reply.add(PortalJCode.ERROR, PortalJCode.Error.NOT_AUTHORIZED);
+                return;
+            }
+            //jika semua user sudah menutup kanvas -> bersihkan aksi
+            try (PreparedStatement countCheck = conn.prepareStatement(DB.Participation.Q.COUNT_ACTIVE)) {
+                countCheck.setInt(DB.Participation.Q.COUNT_ACTIVE_CANVASID, canvasId);
+                ResultSet countResult = countCheck.executeQuery();
+                if (countResult.next() && countResult.getInt(DB.Participation.Q.COUNT_ACTIVE_RESULT_COUNT) == 0) {
+                    try (PreparedStatement delete
+                            = conn.prepareStatement(DB.Action.Q.DELETE_BYCANVAS)) {
+                        delete.setInt(DB.Action.Q.DELETE_BYCANVAS_CANVASID, canvasId);
+                        delete.execute();
+                    }
+                }
+            }
         } catch (SQLException ex) {
             reply.add(PortalJCode.ERROR, PortalJCode.Error.SERVER_ERROR);
         }

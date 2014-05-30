@@ -37,10 +37,7 @@ public class ParticipantServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         dataSource = new MysqlDataSource();
-        dataSource.setDatabaseName(DB.DB_NAME);
-        dataSource.setURL(DB.DB_URL);
-        dataSource.setUser(DB.DB_USERNAME);
-        dataSource.setPassword(DB.DB_PASSWORD);
+        DB.init(dataSource, getServletContext());
     }
 
     /**
@@ -92,8 +89,8 @@ public class ParticipantServlet extends HttpServlet {
      */
     private void invite(Connection conn, JsonObjectBuilder reply, String email, int inviterId, int canvasId) {
         //cek apakah si pengundang adalah pemilik kanvas atau bukan
-        try (PreparedStatement ownerCheck = conn.prepareStatement(DB.Canvas.Q.Select.OWNER_OF)) {
-            ownerCheck.setInt(DB.Canvas.Q.Select.OwnerOf.CANVAS_ID, canvasId); //cari berdasar id kanvas
+        try (PreparedStatement ownerCheck = conn.prepareStatement(DB.Canvas.Q.SELECT_OWNEROF)) {
+            ownerCheck.setInt(DB.Canvas.Q.SELECT_OWNEROF_CANVASID, canvasId); //cari berdasar id kanvas
 
             ResultSet ownerResult = ownerCheck.executeQuery();
             if (!ownerResult.next()) {
@@ -103,7 +100,7 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //kanvas ditemukan, cek apakah yang mengundang adalah owner atau bukan.
-            int ownerId = ownerResult.getInt(DB.Canvas.Q.Select.OwnerOf.Column.OWNER_ID);
+            int ownerId = ownerResult.getInt(DB.Canvas.Q.SELECT_OWNEROF_RESULT_OWNERID);
             if (ownerId != inviterId) {
                 //yang mengundang bukanlah owner, berarti tidak mempunyai hak mengundang
                 reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.NOT_AUTHORIZED);
@@ -111,8 +108,8 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //cek user yang diundang sudah terdaftar atau belum
-            try (PreparedStatement userCheck = conn.prepareStatement(DB.User.Q.Select.BY_EMAIL)) {
-                userCheck.setString(DB.User.Q.Select.ByEmail.EMAIL, email);  //cari berdasar email
+            try (PreparedStatement userCheck = conn.prepareStatement(DB.User.Q.SELECT_BYEMAIL)) {
+                userCheck.setString(DB.User.Q.SELECT_BYEMAIL_EMAIL, email);  //cari berdasar email
 
                 //masukkan alamat email yang diundang
                 reply.add(Reply.USER_EMAIL, email);
@@ -125,17 +122,17 @@ public class ParticipantServlet extends HttpServlet {
                 }
 
                 //user yang diundang sudah terdaftar
-                int userId = userResult.getInt(DB.User.Q.Select.ByEmail.Column.ID);
+                int userId = userResult.getInt(DB.User.Q.SELECT_BYEMAIL_RESULT_ID);
 
                 //cek apakah data partisipasi user di kanvas tersebut ada atau tidak
-                try (PreparedStatement inviteCheck = conn.prepareStatement(Q.Select.CHECK_PARTICIPATION)) {
-                    inviteCheck.setInt(Q.Select.CheckParticipation.USER_ID, userId);
-                    inviteCheck.setInt(Q.Select.CheckParticipation.CANVAS_ID, canvasId);
+                try (PreparedStatement inviteCheck = conn.prepareStatement(Q.CHECK_PARTICIPATION)) {
+                    inviteCheck.setInt(Q.CHECK_PARTICIPATION_USERID, userId);
+                    inviteCheck.setInt(Q.CHECK_PARTICIPATION_CANVASID, canvasId);
 
                     ResultSet inviteResult = inviteCheck.executeQuery();
                     if (inviteResult.next()) {
                         //user sudah berpartisipasi pada kanvas -> cek statusnya
-                        String status = inviteResult.getString(Q.Select.CheckParticipation.Column.STATUS);
+                        String status = inviteResult.getString(Q.CHECK_PARTICIPATION_RESULT_STATUS);
                         if (status.equals(DB.Participation.Status.INVITATION))
                             //user memang sedang diundang ke kanvas tersebut
                             reply.add(Reply.INVITE_STATUS, Reply.InviteStatus.ALREADY_INVITED);
@@ -169,8 +166,8 @@ public class ParticipantServlet extends HttpServlet {
      */
     private void kick(Connection conn, JsonObjectBuilder reply, int userId, int kickerID, int canvasId) {
         //cek apakah si kicker adalah owner kanvas atau bukan
-        try (PreparedStatement authCheck = conn.prepareStatement(DB.Canvas.Q.Select.OWNER_OF)) {
-            authCheck.setInt(DB.Canvas.Q.Select.OwnerOf.CANVAS_ID, canvasId);
+        try (PreparedStatement authCheck = conn.prepareStatement(DB.Canvas.Q.SELECT_OWNEROF)) {
+            authCheck.setInt(DB.Canvas.Q.SELECT_OWNEROF_CANVASID, canvasId);
             ResultSet authResult = authCheck.executeQuery();
             if (!authResult.next()) {
                 //data kanvas tidak ditemukan
@@ -179,7 +176,7 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //data kanvas ada -> periksa apakah user berwenang mengkick atau tidak
-            int ownerId = authResult.getInt(DB.Canvas.Q.Select.OwnerOf.Column.OWNER_ID);
+            int ownerId = authResult.getInt(DB.Canvas.Q.SELECT_OWNEROF_RESULT_OWNERID);
 
             if ((ownerId != kickerID && kickerID != userId) ||//selain owner han yaboleh me-kick dirinya sendiri
                     (ownerId == kickerID && userId == kickerID)) {//owner boleh me-kick selain dirinya                reply.add(ParticipantJCode.ERROR, ParticipantJCode.Error.NOT_AUTHORIZED);
@@ -187,9 +184,9 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //kicker adalah owner -> lakukan kick
-            try (PreparedStatement delete = conn.prepareStatement(DB.Participation.Q.Delete.RECORD)) {
-                delete.setInt(DB.Participation.Q.Delete.Record.USER_ID, userId);
-                delete.setInt(DB.Participation.Q.Delete.Record.CANVAS_ID, canvasId);
+            try (PreparedStatement delete = conn.prepareStatement(Q.DELETE_RECORD)) {
+                delete.setInt(Q.DELETE_RECORD_USERID, userId);
+                delete.setInt(Q.DELETE_RECORD_CANVASID, canvasId);
                 if (delete.executeUpdate() > 0) {
                     //operasi kick sukses
                     reply.add(Reply.KICK_STATUS, Reply.KickStatus.SUCCESS);
@@ -212,9 +209,9 @@ public class ParticipantServlet extends HttpServlet {
      */
     private void list(Connection conn, JsonObjectBuilder reply, int canvasId, int userId) {
         //cek apakah user yang meminta berpartisipasi pada kanvas tersebut atau tidak
-        try (PreparedStatement check = conn.prepareStatement(Q.Select.CHECK_PARTICIPATION)) {
-            check.setInt(Q.Select.CheckParticipation.CANVAS_ID, canvasId);
-            check.setInt(Q.Select.CheckParticipation.USER_ID, userId);
+        try (PreparedStatement check = conn.prepareStatement(Q.CHECK_PARTICIPATION)) {
+            check.setInt(Q.CHECK_PARTICIPATION_CANVASID, canvasId);
+            check.setInt(Q.CHECK_PARTICIPATION_USERID, userId);
 
             if (!check.executeQuery().next()) {
                 //user tidak berpartisipasi pada kanvas, berarti tidak berwenang melihat daftar partisipan.
@@ -223,20 +220,20 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //user berwenang -> ambil daftar partisipan dari kanvas
-            try (PreparedStatement getList = conn.prepareStatement(Q.Select.BY_CANVAS)) {
-                getList.setInt(Q.Select.ByCanvas.CANVAS_ID, canvasId);
+            try (PreparedStatement getList = conn.prepareStatement(Q.SELECT_BYCANVAS)) {
+                getList.setInt(Q.SELECT_BYCANVAS_CANVASID, canvasId);
 
                 ResultSet result = getList.executeQuery();
                 JsonArrayBuilder array = Json.createArrayBuilder();
                 while (result.next()) {
                     //masukkan data partisipan satu persatu
                     JsonObjectBuilder user = Json.createObjectBuilder();
-                    user.add(Reply.USER_ID, result.getInt(Q.Select.ByCanvas.Column.USER_ID));
-                    user.add(Reply.USER_NAME, result.getString(Q.Select.ByCanvas.Column.USER_NAME));
-                    user.add(Reply.LAST_ACCESS, result.getString(Q.Select.ByCanvas.Column.LAST_ACCESS));
+                    user.add(Reply.USER_ID, result.getInt(Q.SELECT_BYCANVAS_RESULT_USERID));
+                    user.add(Reply.USER_NAME, result.getString(Q.SELECT_BYCANVAS_RESULT_USERNAME));
+                    user.add(Reply.LAST_ACCESS, result.getString(Q.SELECT_BYCANVAS_RESULT_LASTACCESS));
 
                     //terjemahkan status partisipan
-                    String status = result.getString(Q.Select.ByCanvas.Column.STATUS);
+                    String status = result.getString(Q.SELECT_BYCANVAS_RESULT_STATUS);
                     switch (status) {
                         case DB.Participation.Status.OWNER:
                             user.add(Reply.PARTICIPANT_STATUS, Reply.ParticipantStatus.OWNER);
@@ -250,7 +247,7 @@ public class ParticipantServlet extends HttpServlet {
                     }
 
                     //terjemahkan aksi ang dilakukan partisipan
-                    String action = result.getString(Q.Select.ByCanvas.Column.ACTION);
+                    String action = result.getString(Q.SELECT_BYCANVAS_RESULT_ACTION);
                     if (action.equals(DB.Participation.Action.OPEN))
                         user.add(Reply.PARTICIPANT_ACTION, Reply.PARTICIPANT_ACTION_OPEN);
                     else
@@ -276,9 +273,9 @@ public class ParticipantServlet extends HttpServlet {
      */
     private void response(Connection conn, JsonObjectBuilder reply, int canvasId, int userId, int response) {
         //cek apakah data undangan user masuk pada kanvas tersebu ada atau tidak
-        try (PreparedStatement check = conn.prepareStatement(Q.Select.CHECK_PARTICIPATION)) {
-            check.setInt(Q.Select.CheckParticipation.USER_ID, userId);
-            check.setInt(Q.Select.CheckParticipation.CANVAS_ID, canvasId);
+        try (PreparedStatement check = conn.prepareStatement(Q.CHECK_PARTICIPATION)) {
+            check.setInt(Q.CHECK_PARTICIPATION_USERID, userId);
+            check.setInt(Q.CHECK_PARTICIPATION_CANVASID, canvasId);
             //masukkan data request
             reply.add(Reply.USER_ID, userId);
             reply.add(Reply.CANVAS_ID, canvasId);
@@ -291,24 +288,24 @@ public class ParticipantServlet extends HttpServlet {
             }
 
             //user ada di tabel partisipan -> cek statusnya
-            String status = checkResult.getString(Q.Select.CheckParticipation.Column.STATUS);
+            String status = checkResult.getString(Q.CHECK_PARTICIPATION_RESULT_STATUS);
             if (status.equals(DB.Participation.Status.INVITATION)) {
                 //user memang sedang diundang -> jalankan response user
                 if (response == Request.Response.ACCEPT) {
                     //Jika user menyetujui undangan, maka ubah status partisipasi menjadi member
-                    try (PreparedStatement update = conn.prepareStatement(Q.Update.STATUS)) {
-                        update.setInt(Q.Update.Status.USER_ID, userId);
-                        update.setInt(Q.Update.Status.CANVAS_ID, canvasId);
-                        update.setString(Q.Update.Status.STATUS, DB.Participation.Status.MEMBER);
+                    try (PreparedStatement update = conn.prepareStatement(Q.UPDATE_STATUS)) {
+                        update.setInt(Q.UPDATE_STATUS_USERID, userId);
+                        update.setInt(Q.UPDATE_STATUS_CANVASID, canvasId);
+                        update.setString(Q.UPDATE_STATUS_STATUS, DB.Participation.Status.MEMBER);
                         update.executeUpdate();
                         //undangan berhasil disetujui
                         reply.add(Reply.RESPONSE_STATUS, Reply.ResponseStatus.SUCCESS);
                     }
                 } else {
                     //Jika user menolak undangan, maka hapus data undangan
-                    try (PreparedStatement delete = conn.prepareStatement(Q.Delete.RECORD)) {
-                        delete.setInt(Q.Delete.Record.USER_ID, userId);
-                        delete.setInt(Q.Delete.Record.CANVAS_ID, canvasId);
+                    try (PreparedStatement delete = conn.prepareStatement(Q.DELETE_RECORD)) {
+                        delete.setInt(Q.DELETE_RECORD_USERID, userId);
+                        delete.setInt(Q.DELETE_RECORD_CANVASID, canvasId);
                         delete.executeUpdate();
                         //undangan berhasil dihapus
                         reply.add(Reply.RESPONSE_STATUS, Reply.ResponseStatus.SUCCESS);
@@ -333,13 +330,13 @@ public class ParticipantServlet extends HttpServlet {
      * @throws SQLException
      */
     public static boolean addParticipation(Connection conn, int userId, int canvasId, String status) throws SQLException {
-        try (PreparedStatement invitation = conn.prepareCall(DB.Participation.Q.Insert.ALL)) {
-            invitation.setInt(Q.Insert.All.USER_ID, userId);
-            invitation.setInt(Q.Insert.All.CANVAS_ID, canvasId);
+        try (PreparedStatement invitation = conn.prepareCall(Q.INSERT_ALL)) {
+            invitation.setInt(Q.INSERT_ALL_USERID, userId);
+            invitation.setInt(Q.INSERT_ALL_CANVASID, canvasId);
             Date today = new Date(System.currentTimeMillis());
-            invitation.setObject(Q.Insert.All.LAST_ACCESS, today);
-            invitation.setString(Q.Insert.All.STATUS, status);
-            invitation.setString(Q.Insert.All.ACTION, DB.Participation.Action.CLOSE);
+            invitation.setObject(Q.INSERT_ALL_LASTACCESS, today);
+            invitation.setString(Q.INSERT_ALL_STATUS, status);
+            invitation.setString(Q.INSERT_ALL_ACTION, DB.Participation.Action.CLOSE);
 
             return invitation.executeUpdate() > 0;
         }

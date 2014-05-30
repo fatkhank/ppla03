@@ -8,10 +8,15 @@ package collapaint.code;
 public class ActionJCode {
 
     /**
+     * Id user.
+     */
+    public static final String USER_ID = "uid";
+
+    /**
      * Nomor aksi terakhir
      */
     public static final String LAST_ACTION_NUM = "lan";
-    
+
     /**
      * Nomor aksi terakhir yang diminta user
      */

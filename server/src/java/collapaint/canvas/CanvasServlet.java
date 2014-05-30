@@ -39,10 +39,7 @@ public class CanvasServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         dataSource = new MysqlDataSource();
-        dataSource.setDatabaseName(DB.DB_NAME);
-        dataSource.setURL(DB.DB_URL);
-        dataSource.setUser(DB.DB_USERNAME);
-        dataSource.setPassword(DB.DB_PASSWORD);
+        DB.init(dataSource, getServletContext());
     }
 
     /**
@@ -114,14 +111,14 @@ public class CanvasServlet extends HttpServlet {
 
             //pengguna terdaftar -> buat kanvas baru
             try (PreparedStatement create = conn
-                    .prepareStatement(Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                create.setString(DB.Canvas.Q.Insert.All.NAME, canvasName);
-                create.setInt(DB.Canvas.Q.Insert.All.WIDTH, width);
-                create.setInt(DB.Canvas.Q.Insert.All.HEIGHT, height);
-                create.setInt(DB.Canvas.Q.Insert.All.TOP, top);
-                create.setInt(DB.Canvas.Q.Insert.All.LEFT, left);
-                create.setInt(DB.Canvas.Q.Insert.All.OWNER_ID, userId);
-                create.setObject(DB.Canvas.Q.Insert.All.CREATE_TIME, new Date(System.currentTimeMillis()));
+                    .prepareStatement(Q.INSERT_CANVAS, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                create.setString(Q.INSERT_CANVAS_NAME, canvasName);
+                create.setInt(Q.INSERT_CANVAS_WIDTH, width);
+                create.setInt(Q.INSERT_CANVAS_HEIGHT, height);
+                create.setInt(Q.INSERT_CANVAS_TOP, top);
+                create.setInt(Q.INSERT_CANVAS_LEFT, left);
+                create.setInt(Q.INSERT_CANVAS_OWNER_ID, userId);
+                create.setObject(Q.INSERT_CANVAS_CREATE_TIME, new Date(System.currentTimeMillis()));
                 create.execute();
 
                 ResultSet keys = create.getGeneratedKeys();
@@ -152,8 +149,8 @@ public class CanvasServlet extends HttpServlet {
      */
     private void delete(Connection conn, JsonObjectBuilder reply, int userId, int canvasId) {
         //cek apakah user adalah owner kanvas atau bukan
-        try (PreparedStatement check = conn.prepareStatement(DB.Canvas.Q.Select.OWNER_OF)) {
-            check.setInt(DB.Canvas.Q.Select.OwnerOf.CANVAS_ID, canvasId);
+        try (PreparedStatement check = conn.prepareStatement(Q.SELECT_OWNEROF)) {
+            check.setInt(Q.SELECT_OWNEROF_CANVASID, canvasId);
             ResultSet checkResult = check.executeQuery();
             if (!checkResult.next()) {
                 //data kanvas tidak ditemukan
@@ -162,7 +159,7 @@ public class CanvasServlet extends HttpServlet {
             }
 
             //data kanvas ditemukan -> cek owner atau bukan
-            int ownerId = checkResult.getInt(DB.Canvas.Q.Select.OwnerOf.Column.OWNER_ID);
+            int ownerId = checkResult.getInt(Q.SELECT_OWNEROF_RESULT_OWNERID);
             if (ownerId != userId) {
                 //user bukan owner -> tidak berwenang
                 reply.add(Reply.DELETE_STATUS, CanvasJCode.Error.NOT_AUTHORIZED);
@@ -170,8 +167,8 @@ public class CanvasServlet extends HttpServlet {
             }
 
             //user adalah owner -> hapus kanvas
-            try (PreparedStatement delete = conn.prepareStatement(DB.Canvas.Q.Delete.BY_ID)) {
-                delete.setInt(DB.Canvas.Q.Delete.ById.CANVAS_ID, canvasId);
+            try (PreparedStatement delete = conn.prepareStatement(Q.DELETE_BYID)) {
+                delete.setInt(Q.DELETE_BYID_CANVASID, canvasId);
                 if (delete.executeUpdate() > 0)
                     reply.add(Reply.DELETE_STATUS, Reply.DELETE_STATUS_SUCCESS);
                 else
@@ -192,23 +189,23 @@ public class CanvasServlet extends HttpServlet {
     private void list(Connection conn, JsonObjectBuilder reply, int userId) {
         //ambil daftar  partisipasi canvas
         try (PreparedStatement participation = conn.prepareStatement(DB.Q.CANVAS_BY_USER)) {
-            participation.setInt(DB.Q.CanvasByUser.USER_ID, userId);
+            participation.setInt(DB.Q.CANVAS_BY_USER_USERID, userId);
             ResultSet result = participation.executeQuery();
             JsonArrayBuilder inviteList = Json.createArrayBuilder();
             JsonArrayBuilder oldList = Json.createArrayBuilder();
             JsonArrayBuilder ownList = Json.createArrayBuilder();
             while (result.next()) {
                 JsonObjectBuilder canvas = Json.createObjectBuilder();
-                canvas.add(Reply.CANVAS_ID, result.getString(DB.Q.CanvasByUser.Column.CANVAS_ID));
-                canvas.add(Reply.CANVAS_NAME, result.getString(DB.Q.CanvasByUser.Column.CANVAS_NAME));
-                canvas.add(Reply.CANVAS_WIDTH, result.getString(DB.Q.CanvasByUser.Column.CANVAS_WIDTH));
-                canvas.add(Reply.CANVAS_HEIGHT, result.getString(DB.Q.CanvasByUser.Column.CANVAS_HEIGHT));
-                canvas.add(Reply.OWNER_ID, result.getString(DB.Q.CanvasByUser.Column.OWNER_ID));
-                canvas.add(Reply.OWNER_NAME, result.getString(DB.Q.CanvasByUser.Column.OWNER_NAME));
-                canvas.add(Reply.LAST_ACCESS, result.getString(DB.Q.CanvasByUser.Column.LAST_ACCESS));
+                canvas.add(Reply.CANVAS_ID, result.getString(DB.Q.CANVAS_BYUSER_RESULT_CANVASID));
+                canvas.add(Reply.CANVAS_NAME, result.getString(DB.Q.CANVAS_BYUSER_RESULT_CANVASNAME));
+                canvas.add(Reply.CANVAS_WIDTH, result.getString(DB.Q.CANVAS_BYUSER_RESULT_CANVASWIDTH));
+                canvas.add(Reply.CANVAS_HEIGHT, result.getString(DB.Q.CANVAS_BYUSER_RESULT_CANVASHEIGHT));
+                canvas.add(Reply.OWNER_ID, result.getString(DB.Q.CANVAS_BYUSER_RESULT_OWNERID));
+                canvas.add(Reply.OWNER_NAME, result.getString(DB.Q.CANVAS_BYUSER_RESULT_OWNERNAME));
+                canvas.add(Reply.LAST_ACCESS, result.getString(DB.Q.CANVAS_BYUSER_RESULT_LASTACCESS));
 
                 //pisahkan berdasarkan status partisipasi
-                String status = result.getString(DB.Q.CanvasByUser.Column.STATUS);
+                String status = result.getString(DB.Q.CANVAS_BYUSER_RESULT_STATUS);
                 switch (status) {
                     case DB.Participation.Status.MEMBER:
                         oldList.add(canvas);

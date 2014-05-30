@@ -33,10 +33,7 @@ public class UserServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         dataSource = new MysqlDataSource();
-        dataSource.setDatabaseName(DB.DB_NAME);
-        dataSource.setURL(DB.DB_URL);
-        dataSource.setUser(DB.DB_USERNAME);
-        dataSource.setPassword(DB.DB_PASSWORD);
+        DB.init(dataSource, getServletContext());
     }
 
     /**
@@ -82,27 +79,27 @@ public class UserServlet extends HttpServlet {
      */
     private void check(Connection conn, JsonObjectBuilder reply, String email, String username) {
         //periksa apakah akun sudah ada atau belum
-        try (PreparedStatement checkAccount = conn.prepareStatement(DB.User.Q.Select.BY_EMAIL)) {
-            checkAccount.setString(DB.User.Q.Select.ByEmail.EMAIL, email);
+        try (PreparedStatement checkAccount = conn.prepareStatement(DB.User.Q.SELECT_BYEMAIL)) {
+            checkAccount.setString(DB.User.Q.SELECT_BYEMAIL_EMAIL, email);
             ResultSet checkResult = checkAccount.executeQuery();
             if (checkResult.next()) {
                 //ambil id user
-                reply.add(Reply.USER_ID, checkResult.getInt(DB.User.Q.Select.ByEmail.Column.ID));
+                reply.add(Reply.USER_ID, checkResult.getInt(DB.User.Q.SELECT_BYEMAIL_RESULT_ID));
                 //email sudah terdaftar, ubah status jadi login
-                int userId = checkResult.getInt(DB.User.Q.Select.ByEmail.Column.ID);
-                try (PreparedStatement changeStatus = conn.prepareStatement(DB.User.Q.Update.STATUS_BY_ID)) {
-                    changeStatus.setInt(DB.User.Q.Update.StatusById.USER_ID, userId);
-                    changeStatus.setString(DB.User.Q.Update.StatusById.STATUS, DB.User.Status.LOGIN);
+                int userId = checkResult.getInt(DB.User.Q.SELECT_BYEMAIL_RESULT_ID);
+                try (PreparedStatement changeStatus = conn.prepareStatement(DB.User.Q.UPDATE_STATUS_BYID)) {
+                    changeStatus.setInt(DB.User.Q.UPDATE_STATUS_BYID_USERID, userId);
+                    changeStatus.setString(DB.User.Q.UPDATE_STATUS_BYID_STATUS, DB.User.Status.LOGIN);
                     changeStatus.execute();
                     reply.add(Reply.STATUS, Reply.ACCOUNT_EXIST);
                 }
             } else {
                 //jika email belum terdaftar, buat akun baru dengan status sudah login
                 try (PreparedStatement create = conn
-                        .prepareStatement(DB.User.Q.Insert.ALL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                    create.setString(DB.User.Q.Insert.All.ACCOUNT_ID, email);
-                    create.setString(DB.User.Q.Insert.All.NAME, username);
-                    create.setString(DB.User.Q.Insert.All.STATUS, DB.User.Status.LOGIN);
+                        .prepareStatement(DB.User.Q.INSERT_USER, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                    create.setString(DB.User.Q.INSERT_USER_ACCOUNTID, email);
+                    create.setString(DB.User.Q.INSERT_USER_NAME, username);
+                    create.setString(DB.User.Q.INSERT_USER_STATUS, DB.User.Status.LOGIN);
                     create.execute();
                     //akun berhasil dibuat
                     reply.add(Reply.STATUS, Reply.ACCOUNT_CREATED);
@@ -126,9 +123,9 @@ public class UserServlet extends HttpServlet {
      */
     private void logout(Connection conn, JsonObjectBuilder reply, int userID) {
         //ubah status user jadi logout
-        try (PreparedStatement logout = conn.prepareStatement(DB.User.Q.Update.STATUS_BY_ID)) {
-            logout.setInt(DB.User.Q.Update.StatusById.USER_ID, userID);
-            logout.setString(DB.User.Q.Update.StatusById.STATUS, DB.User.Status.LOGOUT);
+        try (PreparedStatement logout = conn.prepareStatement(DB.User.Q.UPDATE_STATUS_BYID)) {
+            logout.setInt(DB.User.Q.UPDATE_STATUS_BYID_USERID, userID);
+            logout.setString(DB.User.Q.UPDATE_STATUS_BYID_STATUS, DB.User.Status.LOGOUT);
             logout.execute();
             reply.add(Reply.STATUS, Reply.LOGOUT_SUCESS);
         } catch (SQLException ex) {
@@ -145,8 +142,8 @@ public class UserServlet extends HttpServlet {
      * @throws SQLException
      */
     public static final boolean exist(Connection conn, int userId) throws SQLException {
-        try (PreparedStatement check = conn.prepareStatement(DB.User.Q.Select.BY_ID)) {
-            check.setInt(DB.User.Q.Select.ById.ID, userId);
+        try (PreparedStatement check = conn.prepareStatement(DB.User.Q.SELECT_BYID)) {
+            check.setInt(DB.User.Q.SELECT_BYID_ID, userId);
             if (check.executeQuery().next())
                 return true;
         }
