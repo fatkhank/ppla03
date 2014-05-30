@@ -39,7 +39,10 @@ public class DrawAction extends AtomicAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		return ((action instanceof DrawAction) && ((DrawAction) action).object
-				.equals(object));
+		if (action instanceof DrawAction)
+			return ((DrawAction) action).object.equals(object);
+		else if (action instanceof DrawMultiple)
+			return ((DrawMultiple) action).objects.contains(object);
+		return false;
 	}
 }

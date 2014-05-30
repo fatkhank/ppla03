@@ -36,11 +36,13 @@ public class MoveMultiple extends UserAction {
 
 		@Override
 		public boolean inverseOf(UserAction action) {
+			// tidak digunakan
 			return false;
 		}
 
 		@Override
 		public boolean overwrites(UserAction action) {
+			// tidak digunakan
 			return false;
 		}
 
@@ -194,16 +196,10 @@ public class MoveMultiple extends UserAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		if (action != null) {
-			if (action instanceof MoveMultiple) {
-				MoveMultiple tm = (MoveMultiple) action;
-				return tm.objects.equals(objects);
-			} else if (action instanceof TransformAction) {
-				return objects.contains(((TransformAction) action).object);
-			} else if (action instanceof ReshapeAction) {
-				return objects.contains(((ReshapeAction) action).object);
-			}
-		}
+		if (action instanceof MoveMultiple)
+			return ((MoveMultiple) action).objects.equals(objects);
+		else if (action instanceof TransformAction)
+			return objects.contains(((TransformAction) action).object);
 		return false;
 	}
 

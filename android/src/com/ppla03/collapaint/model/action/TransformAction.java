@@ -174,25 +174,13 @@ public class TransformAction extends AtomicAction {
 
 	@Override
 	public boolean inverseOf(UserAction action) {
-		if (action == null || !(action instanceof TransformAction))
-			return false;
-		TransformAction ta = (TransformAction) action;
-		return ((ta.trans[OFFSET_X] == -trans[OFFSET_X])
-				&& (ta.trans[OFFSET_Y] == -trans[OFFSET_Y]) && ta.object
-					.equals(object));
+		return action == inverse;
 	}
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		if (action != null) {
-			if (action instanceof TransformAction) {
-				return ((TransformAction) action).object.equals(this.object);
-			} else if (action instanceof ReshapeAction) {
-				return ((ReshapeAction) action).object.equals(this.object);
-			} else if (action instanceof MoveMultiple) {
-				return ((MoveMultiple) action).objects.contains(this.object);
-			}
-		}
+		if (action instanceof TransformAction)
+			return ((TransformAction) action).object.equals(this.object);
 		return false;
 	}
 }

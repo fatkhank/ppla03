@@ -51,6 +51,11 @@ public class DrawMultiple extends UserAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
+		if (action instanceof DrawAction)
+			return this.objects.contains(((DrawAction) action).object);
+		else if (action instanceof DrawMultiple)
+			return (action == this)
+					|| this.objects.contains(((DrawMultiple) action).objects);
 		return false;
 	}
 

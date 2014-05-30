@@ -39,12 +39,10 @@ public class DeleteAction extends AtomicAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		if (action != null) {
-			if (action instanceof DeleteAction)
-				return ((DeleteAction) action).object.equals(this.object);
-			else if (action instanceof DeleteMultiple)
-				return ((DeleteMultiple) action).objects.contains(object);
-		}
+		if (action instanceof DeleteAction)
+			return ((DeleteAction) action).object.equals(this.object);
+		else if (action instanceof DeleteMultiple)
+			return ((DeleteMultiple) action).objects.contains(this.object);
 		return false;
 	}
 

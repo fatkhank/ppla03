@@ -60,6 +60,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 	ParticipantManager manager;
 
 	ProgressBar loader;
+	TabHost host;
 
 	// --- hide ---
 	View closeBar;
@@ -143,7 +144,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			invite.setOnClickListener(this);
 
 			// ------ TAB ------
-			TabHost host = (TabHost) parent.findViewById(android.R.id.tabhost);
+			host = (TabHost) parent.findViewById(android.R.id.tabhost);
 			host.setup();
 			host.setOnTabChangedListener(this);
 
@@ -157,19 +158,14 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			host.addTab(spec);
 
 			// tampilkan setting hanya untuk owner
-			if (workspace.canvas.getModel().owner.equals(CollaUserManager
-					.getCurrentUser())) {
-				// setting
-				spec = host.newTabSpec(TAB_SETTING);
-				spec.setIndicator(
-						"",
-						workspace.getResources().getDrawable(
-								R.drawable.ic_action_settings));
-				spec.setContent(R.id.d_setting_pane);
-				host.addTab(spec);
-			} else
-				(parent.findViewById(R.id.d_setting_pane))
-						.setVisibility(View.GONE);
+			// setting
+			spec = host.newTabSpec(TAB_SETTING);
+			spec.setIndicator(
+					"",
+					workspace.getResources().getDrawable(
+							R.drawable.ic_action_settings));
+			spec.setContent(R.id.d_setting_pane);
+			host.addTab(spec);
 
 			// share
 			spec = host.newTabSpec(TAB_SHARE);
@@ -579,6 +575,18 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		if (s != null)
 			s.requestNewPublishPermissions(new Session.NewPermissionsRequest(
 					workspace, PERMISSIONS));
+	}
+
+	void onStart() {
+		if (!workspace.canvas.getModel().owner.equals(CollaUserManager
+				.getCurrentUser())) {
+			(parent.findViewById(R.id.d_setting_pane)).setVisibility(View.GONE);
+			View tab = host.getTabWidget().getChildTabViewAt(1);
+			tab.setEnabled(false);
+			tab.setBackgroundColor(workspace.getResources().getColor(
+					R.color.dark));
+		}
+
 	}
 
 	void onResume() {

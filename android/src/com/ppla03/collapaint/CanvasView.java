@@ -155,8 +155,8 @@ public class CanvasView extends View {
 	private final ArrayList<TransformAction> pendingTransformActions = new ArrayList<>();
 
 	private CanvasListener listener;
-	private CanvasSynchronizer synczer;
-	private CanvasModel model;
+	private static CanvasSynchronizer synczer;
+	private static CanvasModel model;
 	private ShapeHandler handler;
 	private ControlPoint grabbedCPoint;
 
@@ -526,7 +526,8 @@ public class CanvasView extends View {
 	 *            id kanvas.
 	 */
 	public void open(CanvasModel model) {
-		this.model = model;
+		CanvasView.model = model;
+		checkpoint = 0;
 		selectedObjects.clear();
 		userActions.clear();
 		redoStack.clear();
@@ -546,11 +547,13 @@ public class CanvasView extends View {
 	 * Mengatur ukuran cache agar sesuai dengan ukuran kanvas.
 	 */
 	private void reloadBitmap() {
-		cacheImage = Bitmap.createBitmap(model.getWidth(), model.getHeight(),
-				Config.ARGB_8888);
-		selectedObjectsCache = Bitmap.createBitmap(model.getWidth(),
-				model.getHeight(), Config.ARGB_8888);
-		cacheCanvas.setBitmap(cacheImage);
+		if (model != null) {
+			cacheImage = Bitmap.createBitmap(model.getWidth(),
+					model.getHeight(), Config.ARGB_8888);
+			selectedObjectsCache = Bitmap.createBitmap(model.getWidth(),
+					model.getHeight(), Config.ARGB_8888);
+			cacheCanvas.setBitmap(cacheImage);
+		}
 	}
 
 	/**
@@ -1254,15 +1257,14 @@ public class CanvasView extends View {
 					if (selected) {
 						// menyeleksi satu objek
 						selectedObjects.add(currentObject);
-						editObject(currentObject, ShapeHandler.SHAPE);
+						editObject(currentObject, ShapeHandler.ALL);
 					}
 				} else {
 					selected = selectArea(selectRect);
 					if (selected) {
 						// menyeleksi satu objek
 						if (selectedObjects.size() == 1)
-							editObject(selectedObjects.get(0),
-									ShapeHandler.SHAPE);
+							editObject(selectedObjects.get(0), ShapeHandler.ALL);
 						else {
 							// menyeleksi banyak objek
 							listener.onSelectionEvent(
@@ -1273,6 +1275,7 @@ public class CanvasView extends View {
 					}
 				}
 				if (selected) {
+					checkpoint = userActions.size();
 					mode |= Mode.HAS_SELECTION;
 					reloadCache();
 				}
@@ -1640,11 +1643,11 @@ public class CanvasView extends View {
 			currentType = ObjectType.TEXT;
 			textColor = currentText.getTextColor();
 		}
-		selectedObjects.clear();
-		selectedObjects.add(co);
 		// checkpoint untuk perubahan minor, akan hilang saat approveAction atau
 		// cancelAction
 		checkpoint = userActions.size();
+		selectedObjects.clear();
+		selectedObjects.add(co);
 		handler = co.getHandler(ShapeHandler.ALL);
 		handler.init();
 		listener.onWaitForApproval();
@@ -2094,8 +2097,9 @@ public class CanvasView extends View {
 	public int selectAllObject() {
 		if (model.objects.isEmpty())
 			return 0;
-		if (currentObject != null)
+		if (hasUnsavedChanges())
 			approveAction();
+		checkpoint = userActions.size();
 		selectedObjects.clear();
 		selectedObjects.addAll(model.objects);
 		for (int i = 0; i < selectedObjects.size(); i++)
@@ -2173,6 +2177,7 @@ public class CanvasView extends View {
 			selectedObjects.get(i).deselect();
 		if ((mode & Mode.EDIT) == Mode.EDIT)
 			cancelAction();
+
 		selectedObjects.clear();
 		handler = null;
 		currentType = ObjectType.NONE;
@@ -2198,6 +2203,7 @@ public class CanvasView extends View {
 			selectedObjects.add(clone);
 			model.objects.add(clone);
 		}
+		checkpoint = userActions.size();
 		mode |= Mode.HAS_SELECTION;
 		if (objs.size() > 1) {
 			DrawMultiple dm = new DrawMultiple(selectedObjects);
@@ -2250,7 +2256,9 @@ public class CanvasView extends View {
 	 * Mengembalikan perubahan yang terjadi oleh aksi yang terakhir dilakukan.
 	 */
 	public void undo() {
+		// jika bisa diundo
 		if (!userActions.isEmpty()) {
+			// kalau tidak ada aksi minor, hilangkan seleksi
 			if (checkpoint == userActions.size()
 					&& (((mode & Mode.HAS_SELECTION) == Mode.HAS_SELECTION) || ((mode & Mode.DRAW) == Mode.DRAW))) {
 				cancelAction();
@@ -2263,10 +2271,21 @@ public class CanvasView extends View {
 			if (inverse == null)
 				return;
 			execute(inverse, true);
+
 			if (!hide_mode)
 				synczer.addToBuffer(inverse);
-			reloadCache();
+			else if (revertList.size() > 0)
+				// jika sedang hidden_mode, hilangkan aksi
+				revertList.remove(revertList.size() - 1);
 			redoStack.push(action);
+
+			if (currentObject != null && handler != null) {
+				// jika sedang mengedit objek, reload handler
+				handler = currentObject.getHandler(ShapeHandler.ALL);
+				handler.init();
+			}
+
+			reloadCache();
 			invalidate();
 			listener.onURStatusChange(!userActions.isEmpty(), true);
 		}
@@ -2285,6 +2304,11 @@ public class CanvasView extends View {
 		if (!redoStack.isEmpty()) {
 			UserAction action = redoStack.pop();
 			execute(action, true);
+			if (currentObject != null && handler != null) {
+				// jika sedang mengedit objek, reload handler
+				handler = currentObject.getHandler(ShapeHandler.ALL);
+				handler.init();
+			}
 			pushToUAStack(action, !hide_mode);
 			reloadCache();
 			invalidate();
@@ -2298,7 +2322,6 @@ public class CanvasView extends View {
 	 * @param hidden
 	 */
 	public void setHideMode(boolean hidden) {
-
 		if (hidden) {
 			if (!hide_mode) {
 				// berubah dari tidak hide menjadi hide

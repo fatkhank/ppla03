@@ -228,10 +228,8 @@ public class StyleAction extends AtomicAction {
 
 	@Override
 	public boolean overwrites(UserAction action) {
-		if (action != null && action instanceof StyleAction) {
-			StyleAction sa = (StyleAction) action;
-			return sa.object.equals(this.object);
-		}
+		if (action instanceof StyleAction)
+			return ((StyleAction) action).object.equals(this.object);
 		return false;
 	}
 }

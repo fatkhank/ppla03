@@ -68,7 +68,7 @@ public class LineObject extends CanvasObject {
 	public void penTo(float worldX, float worldY) {
 		float nx = worldX - offsetX;
 		float ny = worldY - offsetY;
-		if (nx > MIN_LENGTH || ny > MIN_LENGTH) {
+		if (Math.abs(nx) > MIN_LENGTH || Math.abs(ny) > MIN_LENGTH) {
 			x2 = nx;
 			y2 = ny;
 		}

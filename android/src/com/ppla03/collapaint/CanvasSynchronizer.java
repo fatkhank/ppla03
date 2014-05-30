@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Handler;
-import android.util.Log;
 
 import com.ppla03.collapaint.conn.CanvasConnector;
 import com.ppla03.collapaint.conn.CanvasConnector.OnCanvasOpenListener;
@@ -156,24 +155,23 @@ public class CanvasSynchronizer implements SyncEventListener,
 		connector.closeCanvas(currentModel, CollaUserManager.getCurrentUser());
 	}
 
-	public void setCanvasView(CanvasView canvas) {
+	public boolean setCanvasView(CanvasView canvas) {
+		if(currentModel == null)
+			return false;
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				canvas.getContext());
 		builder.setMessage(R.string.w_change2hide);
-		hideModeDialog = builder.setPositiveButton(android.R.string.yes, this)
-				.setNegativeButton(android.R.string.no, this)
-				.setCancelable(false).create();
+		hideModeDialog = builder.setPositiveButton("Yes", this)
+				.setNegativeButton("No", this).setCancelable(false).create();
 		this.view = canvas;
 		canvas.open(currentModel);
 		canvas.execute(actionBuffer);
 		actionBuffer.clear();
-		if (!canvas.isInHideMode()) {
-			start();
-		}
+		return true;
 	}
 
 	public void start() {
-		Log.d("POS", "----- synchronizer started ------");
+		android.util.Log.d("POS", "----- synchronizer started ------");
 		mode = IDLE;
 		handler.postDelayed(updater, sync_time);
 	}
@@ -182,7 +180,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	 * Memberhentikan proses sinkronisasi
 	 */
 	public void stop() {
-		Log.d("POS", "----- synchronizer stopped ------");
+		android.util.Log.d("POS", "----- synchronizer stopped ------");
 		mode |= STOP;
 	}
 
@@ -220,7 +218,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 				actionBuffer.get(i).insertInAtomic(sentList);
 			actionBuffer.clear();
 			mode |= SYNCING;
-			connector.updateActions(currentModel.getId(), lastActNum, sentList);
+			connector.updateActions(CollaUserManager.getCurrentUser().collaID,
+					currentModel.getId(), lastActNum, sentList);
 		}
 	};
 
@@ -229,17 +228,24 @@ public class CanvasSynchronizer implements SyncEventListener,
 	 * @param action
 	 */
 	public void addToBuffer(UserAction action) {
-		if (actionBuffer.isEmpty())
-			actionBuffer.add(action);
-		else {
-			int last = actionBuffer.size() - 1;
-			UserAction act = actionBuffer.get(last);
-			if (action.inverseOf(act))
-				actionBuffer.remove(last);
-			else if (action.overwrites(act))
-				actionBuffer.set(last, action);
-			else
-				actionBuffer.add(action);
+		if (action == null)
+			return;
+		// cek efek terhadap aksi terdahulu
+		int i = actionBuffer.size() - 1;
+		// masukkan aksi di belakang
+		actionBuffer.add(action);
+		while (i >= 0) {
+			UserAction act = actionBuffer.get(i);
+			if (action.inverseOf(act)) {
+				// jika kedua aksi inverse -> hilangkan keduanya
+				actionBuffer.remove(actionBuffer.size() - 1);
+				actionBuffer.remove(i);
+				break;
+			} else if (action.overwrites(act)) {
+				// jika aksi overwrite -> hilangkan yg lama
+				actionBuffer.remove(i);
+			}
+			i--;
 		}
 	}
 

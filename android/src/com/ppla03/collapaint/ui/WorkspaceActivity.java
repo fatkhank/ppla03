@@ -217,7 +217,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvasTitle = (TextView) findViewById(R.id.w_canvas_name);
 			canvas = (CanvasView) findViewById(R.id.w_canvas);
 			canvas.setListener(this);
-			CanvasSynchronizer.getInstance().setCanvasView(canvas);
 
 			// --- prepare color ---
 			colorPaneView = findViewById(R.id.w_color_pane_scroll);
@@ -238,16 +237,20 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			topbar.bringToFront();
 
 			// --- load ---
-			canvasTitle.setText(canvas.getModel().name);
-			onClick(select);
-
+			if (CanvasSynchronizer.getInstance().setCanvasView(canvas)) {
+				canvasTitle.setText(canvas.getModel().name);
+				onClick(select);
+			}else{
+				//kembalikan ke browser jika terjadi masalah
+				startActivity(new Intent(this, BrowserActivity.class));
+				finish();
+			}
 		} catch (Exception ex) {
 			android.util.Log.d("POS", "e:" + ex);
 			for (StackTraceElement s : ex.getStackTrace()) {
 				android.util.Log.d("POS", "ex:" + s);
 			}
 		}
-
 	}
 
 	@Override
@@ -816,6 +819,15 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	public void onAnimationRepeat(Animator animation) {}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		dashboard.onStart();
+		if (!canvas.isInHideMode()) {
+			CanvasSynchronizer.getInstance().start();
+		}
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		dashboard.onResume();
@@ -825,6 +837,12 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	protected void onPause() {
 		super.onPause();
 		dashboard.onPause();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		CanvasSynchronizer.getInstance().stop();
 	}
 
 	@Override

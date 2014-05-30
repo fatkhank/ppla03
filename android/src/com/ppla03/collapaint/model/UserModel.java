@@ -5,7 +5,7 @@ package com.ppla03.collapaint.model;
  * @author hamba v7
  * 
  */
-public class UserModel {
+public class UserModel{
 	/**
 	 * id collapaint
 	 */
@@ -19,11 +19,6 @@ public class UserModel {
 	 */
 	public String name;
 	
-	/**
-	 * Status user sekarang.
-	 */
-	public String status;
-
 	public UserModel() {
 		collaID = -1;
 		accountID = "";
@@ -44,5 +39,5 @@ public class UserModel {
 					|| (um.collaID == this.collaID);
 		}
 		return false;
-	}
+	} 
 }

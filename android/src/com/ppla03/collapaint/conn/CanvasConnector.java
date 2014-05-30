@@ -82,7 +82,7 @@ public class CanvasConnector extends ServerConnector {
 		return this;
 	}
 
-	public void updateActions(int canvasID, int lastActNum,
+	public void updateActions(int userId, int canvasID, int lastActNum,
 			ArrayList<AtomicAction> actions) {
 		// encode action to json
 		JSONObject msg = new JSONObject();
@@ -201,6 +201,7 @@ public class CanvasConnector extends ServerConnector {
 			// ------------ lan ---------
 			msg.put(ActionJCode.LAST_ACTION_NUM, lastActNum);
 			msg.put(ActionJCode.CANVAS_ID, canvasID);
+			msg.put(ActionJCode.USER_ID, userId);
 
 			new Client(COMMIT_URL, replisUpdate).execute(msg);
 		} catch (JSONException ex) {

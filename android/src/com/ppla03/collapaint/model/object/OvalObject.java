@@ -77,16 +77,23 @@ public class OvalObject extends BasicObject {
 				|| y < bounds.top - tol || y > bounds.bottom + tol)
 			return false;
 		else {
-			// dicek apakah titik masuk ke dalam lingkaran luar atau tidak. jika
-			// tidak memiliki isian, dicek lagi apakah masuk lingkaran dalam
-			// atau tidak.
-			float r2 = x * x + y * y;
-			float max = Math.max(bounds.right, bounds.bottom);
-			float appr2 = max + tol;
-			appr2 *= appr2;
-			return (r2 <= appr2)
-					&& ((fillPaint.getColor() != Color.TRANSPARENT) || r2 > appr2
-							- 4 * max * tol);
+			// persamaan ellipse -> (x/radx)^2 + (y/rady)^2 = 1
+			float x2 = x * x;
+			float y2 = y * y;
+			float radX = bounds.right + tol;// radius x luar
+			radX *= radX;
+			float radY = bounds.bottom + tol;// radius y luar
+			radY *= radY;
+			// jika melebihi radius luar, maka tidak terseleksi
+			if ((x2 / radX + y2 / radY) > 1)
+				return false;
+			// jika objek memiliki isian, cukup dicek sampai sini
+			if (fillPaint.getColor() != Color.TRANSPARENT)
+				return true;
+			radX -= 4 * bounds.right * tol;// radius x dalam
+			radY -= 4 * bounds.bottom * tol;// radius y dalam
+			//harus berada di luar radius dalam
+			return (x2 / radX + y2 / radY) > 1;
 		}
 	}
 
