@@ -12,7 +12,7 @@
                 android:type="linear" />
     
         </shape>
-    </item>
+    </item>
     -->
     <item android:id="@android:id/background">
         <color android:color="@color/dark" />
