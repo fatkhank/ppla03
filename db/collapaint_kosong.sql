@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2014 at 01:12 AM
+-- Generation Time: Jun 01, 2014 at 11:50 AM
 -- Server version: 5.6.16
 -- PHP Version: 5.5.11
 
@@ -19,8 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `collapaint`
 --
-CREATE DATABASE IF NOT EXISTS `collapaint` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `collapaint`;
 
 -- --------------------------------------------------------
 
@@ -35,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `action` (
   `object_id` int(11) NOT NULL,
   `parameter` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=349 ;
 
 -- --------------------------------------------------------
 
@@ -50,11 +48,11 @@ CREATE TABLE IF NOT EXISTS `canvas` (
   `height` int(11) NOT NULL,
   `owner` int(11) NOT NULL,
   `create_time` datetime NOT NULL,
-  `left` int(11) NOT NULL DEFAULT '0',
+  `canvas_left` int(11) NOT NULL DEFAULT '0',
   `top` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`owner`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=61 ;
 
 -- --------------------------------------------------------
 
@@ -71,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `object` (
   `style` varchar(24) NOT NULL,
   `geom` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=445 ;
 
 -- --------------------------------------------------------
 
@@ -97,12 +95,12 @@ CREATE TABLE IF NOT EXISTS `participation` (
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` varchar(22) NOT NULL,
-  `nickname` varchar(32) NOT NULL,
+  `account_id` varchar(48) NOT NULL,
+  `nickname` varchar(50) NOT NULL,
   `status` enum('LOGIN','LOGOUT') NOT NULL DEFAULT 'LOGIN',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`account_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
 
 --
 -- Constraints for dumped tables

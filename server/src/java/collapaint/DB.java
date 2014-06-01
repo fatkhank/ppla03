@@ -75,7 +75,7 @@ public class DB {
         public static final String WIDTH = "width";
         public static final String HEIGHT = "height";
         public static final String TOP = "top";
-        public static final String LEFT = "`left`";
+        public static final String LEFT = "canvas_left";
         public static final String OWNER_ID = "owner";
         public static final String CREATE_TIME = "create_time";
 
