@@ -102,6 +102,17 @@ public class CollaDialog {
 	/**
 	 * Konfirmasi OK - batal
 	 * @param context
+	 * @param msg
+	 * @param onClick
+	 */
+	public static void confirm(Context context, String msg,
+			OnClickListener onClick) {
+		confirm(context, msg, null, null, onClick, null);
+	}
+
+	/**
+	 * Konfirmasi OK - batal
+	 * @param context
 	 * @param msgId
 	 * @param onClick
 	 */

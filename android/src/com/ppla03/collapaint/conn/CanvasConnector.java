@@ -253,6 +253,7 @@ public class CanvasConnector extends ServerConnector {
 							co = sentObjects.get(j++);
 						} while (co.privateID != oid);
 						co.setGlobaID(gid);
+						objectMap.put(gid, co);
 					} else {
 						// jika objek merupakan objek baru dari server ->
 						// abaikan jika data objek di server tidak ada
@@ -297,15 +298,17 @@ public class CanvasConnector extends ServerConnector {
 						} else {
 							// aksi lain -> cek dulu objeknya
 							CanvasObject co = null;
-							if (joAct.has(ActionJCode.ACTION_OBJ_LISTED))
+							if (joAct.has(ActionJCode.ACTION_OBJ_LISTED)) {
 								// jika objek tercantumkan, cari di replyObject
 								co = replyObjects.get(joAct
 										.getInt(ActionJCode.ACTION_OBJ_LISTED));
-							else
+								android.util.Log.d("POS", "obj local:" + co);
+							} else {
 								// jika objek sudah diketahui, cari di objectMap
 								// menggunakan id globalnya
 								co = objectMap.get(joAct
 										.getInt(ActionJCode.ACTION_OBJ_KNOWN));
+							}
 
 							// abaikan aksi jika tidak diketahui objeknya
 							if (co != null)

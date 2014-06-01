@@ -63,7 +63,8 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 		View v = convertView;
 		if (v == null) {
 			v = dashboard.workspace.getLayoutInflater().inflate(
-					R.layout.list_item_participant, null);
+
+			R.layout.list_item_participant, null);
 		}
 		ItemView iv = ((ItemView) v.getTag());
 		if (iv == null) {
@@ -88,6 +89,7 @@ public class ParticipantAdapter extends BaseAdapter implements OnClickListener {
 		iv.name.setText((name == null || name.isEmpty()) ? NAME_IF_NULL : name);
 		if (iv.participation.getRole() == Role.OWNER) {
 			iv.status.setText("(owner)");
+			iv.close.setVisibility(View.GONE);
 		} else if (iv.participation.getRole() == Role.INVITATION) {
 			iv.status.setText("(invited)");
 		} else

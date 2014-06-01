@@ -229,24 +229,26 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			animColor.addUpdateListener(this);
 			animColor.setDuration(500);
 
-			// --- dashboard ---
-			dashboardView = findViewById(R.id.dashboard);
-			dashboardView.setVisibility(View.GONE);
-			dashboard = new Dashboard(savedInstanceState, this, dashboardView);
-			animDash = ValueAnimator.ofFloat(-800, 48);
-			animDash.end();
-			animDash.addListener(this);
-			animDash.addUpdateListener(this);
-			animDash.setDuration(750);
-			topbar.bringToFront();
-
 			// --- load ---
 			if (CanvasSynchronizer.getInstance().setCanvasView(canvas)) {
 				canvasTitle.setText(canvas.getModel().name);
+
+				// --- dashboard ---
+				dashboardView = findViewById(R.id.dashboard);
+				dashboardView.setVisibility(View.GONE);
+				dashboard = new Dashboard(savedInstanceState, this,
+						dashboardView);
+				animDash = ValueAnimator.ofFloat(-800, 48);
+				animDash.end();
+				animDash.addListener(this);
+				animDash.addUpdateListener(this);
+				animDash.setDuration(750);
+				topbar.bringToFront();
+
 				onClick(select);
 			} else {
 				// kembalikan ke browser jika terjadi masalah
-				startActivity(new Intent(this, BrowserActivity.class));
+				startActivity(new Intent(this, AuthenticationActivity.class));
 				finish();
 			}
 		} catch (Exception ex) {
@@ -816,7 +818,6 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onStart() {
 		super.onStart();
-		dashboard.onStart();
 		if (!canvas.isInHideMode()) {
 			CanvasSynchronizer.getInstance().start();
 		}

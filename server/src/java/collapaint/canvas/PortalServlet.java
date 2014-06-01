@@ -60,6 +60,7 @@ public class PortalServlet extends HttpServlet {
             JsonObjectBuilder reply = Json.createObjectBuilder();
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
+                System.out.println("q:" + request);
                 int userId = request.getInt(Request.USER_ID);
                 int canvasId = request.getInt(Request.CANVAS_ID);
 
@@ -76,7 +77,7 @@ public class PortalServlet extends HttpServlet {
             } catch (SQLException ex) {
                 reply.add(PortalJCode.ERROR, PortalJCode.Error.SERVER_ERROR);
             }
-
+            System.out.println("p:" + reply.build());
             out.print(reply.build());
         }
     }

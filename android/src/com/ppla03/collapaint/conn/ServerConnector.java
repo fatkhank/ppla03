@@ -23,7 +23,7 @@ import android.os.AsyncTask;
 
 public abstract class ServerConnector {
 	// public static String HOST = "http://192.168.43.64:8080/collapaint/";
-	public static String HOST = "http://10.5.134.11:8080/collapaint/";
+	public static String HOST = "http://10.5.135.194:8080/collapaint/";
 
 	// public static String HOST = "http://10.5.134.128:8080/collapaint/";
 
@@ -104,8 +104,8 @@ public abstract class ServerConnector {
 				HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
 
 				// TODO debug server connection
-				android.util.Log.d("POS", "send:" + msgs[0].toString() + ":"
-						+ url);
+				// android.util.Log.d("POS", "send:" + msgs[0].toString() + ":"
+				// + url);
 
 				post.setParams(params);
 				post.setEntity(new StringEntity(msgs[0].toString()));
@@ -129,7 +129,7 @@ public abstract class ServerConnector {
 				reply = new JSONObject(sb.toString());
 
 				// TODO debug server connection
-				android.util.Log.d("POS", "rep:" + reply.toString());
+//				android.util.Log.d("POS", "rep:" + reply.toString());
 
 				return SUCCESS;
 			} catch (UnsupportedEncodingException ue) {

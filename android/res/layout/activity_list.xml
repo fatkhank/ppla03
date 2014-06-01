@@ -7,19 +7,18 @@
         android:id="@+id/b_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/w_topbar_height"
-        android:background="@android:color/holo_orange_light"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp" >
+        android:background="@android:color/holo_orange_light" >
 
         <Button
             android:id="@+id/b_signout"
             style="@android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="64dp"
             android:background="@drawable/button_dark_onpress"
+            android:padding="4dp"
             android:text="@string/sign_out"
             android:textColor="@android:color/white"
             android:textStyle="bold" />
@@ -50,8 +49,8 @@
 
         <ImageButton
             android:id="@+id/b_list_reload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/w_topbar_height"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_dark_onpress"

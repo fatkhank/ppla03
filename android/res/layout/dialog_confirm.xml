@@ -31,8 +31,7 @@
             android:layout_weight="1"
             android:background="@drawable/button_dark_onpress"
             android:text="@android:string/cancel"
-            android:textColor="@color/dark"
-            android:textStyle="bold" />
+            android:textColor="@color/dark" />
 
         <View
             android:layout_width="1px"
@@ -46,8 +45,8 @@
             android:layout_weight="1"
             android:background="@drawable/button_dark_onpress"
             android:text="@android:string/ok"
-            android:textColor="@color/dark"
-            android:textStyle="bold" />
+            android:textColor="@color/dark" />
+
     </LinearLayout>
 
 </LinearLayout>

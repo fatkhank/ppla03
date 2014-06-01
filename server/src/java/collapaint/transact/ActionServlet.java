@@ -5,6 +5,7 @@ import collapaint.code.ActionJCode;
 import collapaint.DB;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import javax.json.*;
@@ -45,6 +46,8 @@ public class ActionServlet extends HttpServlet {
             try (Connection conn = dataSource.getConnection()) {
                 JsonObject request = Json.createReader(is).readObject();
                 System.out.println("q:" + request);
+
+                reply.add(ActionJCode.USER_ID, request.getInt(ActionJCode.USER_ID));
                 //*************************** SAVE REQUEST *************************
                 ArrayList<CanvasObject> objectPool = new ArrayList<>();
                 ArrayList<Action> userActions = new ArrayList<>();
@@ -320,7 +323,7 @@ public class ActionServlet extends HttpServlet {
         try (PreparedStatement insert = conn
                 .prepareStatement(DB.Objects.Q.INSERT_OBJECT, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < size; i++) {
-                CanvasObject obj = objects.get(0);
+                CanvasObject obj = objects.get(i);
                 insert.setInt(DB.Objects.Q.INSERT_OBJECT_CANVASID, canvasId);
                 insert.setInt(DB.Objects.Q.INSERT_OBJECT_CODE, obj.code);
                 insert.setString(DB.Objects.Q.INSERT_OBJECT_TRANSFORM, obj.transform);

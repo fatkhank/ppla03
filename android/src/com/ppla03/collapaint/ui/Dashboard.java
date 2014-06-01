@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -51,9 +52,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabSpec;
+import android.widget.TextView.OnEditorActionListener;
 
 class Dashboard implements OnClickListener, ManageParticipantListener,
-		OnKickUserListener, OnTabChangeListener {
+		OnKickUserListener, OnTabChangeListener, OnEditorActionListener {
 
 	View parent;
 	WorkspaceActivity workspace;
@@ -141,6 +143,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			partiFailed.setVisibility(View.GONE);
 			invite = (ImageButton) parent.findViewById(R.id.d_add_user);
 			email = (EditText) parent.findViewById(R.id.d_insert_email);
+			email.setOnEditorActionListener(this);
 			invite.setOnClickListener(this);
 
 			// ------ TAB ------
@@ -159,13 +162,18 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 			// tampilkan setting hanya untuk owner
 			// setting
-			spec = host.newTabSpec(TAB_SETTING);
-			spec.setIndicator(
-					"",
-					workspace.getResources().getDrawable(
-							R.drawable.ic_action_settings));
-			spec.setContent(R.id.d_setting_pane);
-			host.addTab(spec);
+			if (workspace.canvas.getModel().owner.equals(CollaUserManager
+					.getCurrentUser())) {
+				spec = host.newTabSpec(TAB_SETTING);
+				spec.setIndicator(
+						"",
+						workspace.getResources().getDrawable(
+								R.drawable.ic_action_settings));
+				spec.setContent(R.id.d_setting_pane);
+				host.addTab(spec);
+			} else
+				parent.findViewById(R.id.d_setting_pane).setVisibility(
+						View.GONE);
 
 			// share
 			spec = host.newTabSpec(TAB_SHARE);
@@ -303,7 +311,8 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		hide.setChecked(hidden);
 		if (hidden) {
 			hide.setText(R.string.d_hide_text);
-			CollaDialog.toast(workspace, R.string.d_hide_msg, Toast.LENGTH_SHORT);
+			CollaDialog.toast(workspace, R.string.d_hide_msg,
+					Toast.LENGTH_SHORT);
 		} else {
 			hide.setText(R.string.d_nohide_text);
 			CollaDialog.toast(workspace, R.string.d_nohide_msg,
@@ -403,6 +412,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		partiFailed.setVisibility(View.GONE);
 		partiReload.setVisibility(View.VISIBLE);
 		partiList.setVisibility(View.VISIBLE);
+		partiList.setAdapter(adapter);
 	}
 
 	@Override
@@ -577,18 +587,6 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 					workspace, PERMISSIONS));
 	}
 
-	void onStart() {
-		if (!workspace.canvas.getModel().owner.equals(CollaUserManager
-				.getCurrentUser())) {
-			(parent.findViewById(R.id.d_setting_pane)).setVisibility(View.GONE);
-			View tab = host.getTabWidget().getChildTabViewAt(1);
-			tab.setEnabled(false);
-			tab.setBackgroundColor(workspace.getResources().getColor(
-					R.color.dark));
-		}
-
-	}
-
 	void onResume() {
 		uiHelper.onResume();
 	}
@@ -607,5 +605,13 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 	void onSaveInstanceState(Bundle savedState) {
 		uiHelper.onSaveInstanceState(savedState);
+	}
+
+	@Override
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		if (v == email) {
+			onClick(invite);
+		}
+		return true;
 	}
 }

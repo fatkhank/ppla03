@@ -315,22 +315,22 @@ public class BrowserActivity extends Activity implements OnClickListener,
 		if (status == ServerConnector.SUCCESS) {
 
 			if (!invited.isEmpty()) {
-				inviteList.setVisibility(View.GONE);
 				inviteAdapter.clear();
 				inviteAdapter.addAll(invited);
 				inviteHeader.setVisibility(View.VISIBLE);
 				inviteList.setVisibility(View.VISIBLE);
+				inviteList.setAdapter(inviteAdapter);
 			} else {
 				inviteHeader.setVisibility(View.GONE);
 				inviteList.setVisibility(View.GONE);
 			}
 
-			canvasList.setVisibility(View.GONE);
 			canvasAdapter.clear();
 			canvasAdapter.addAll(owned);
 			canvasAdapter.addAll(oldList);
 			canvasHeader.setVisibility(View.VISIBLE);
 			canvasList.setVisibility(View.VISIBLE);
+			canvasList.setAdapter(canvasAdapter);
 
 			listInfo.setVisibility(View.GONE);
 
@@ -377,9 +377,17 @@ public class BrowserActivity extends Activity implements OnClickListener,
 	 * Menghapus kanvas yang dimiliki seorang user
 	 * @param model kanvas milik user yang mau dihapus
 	 */
-	void deleteCanvas(CanvasModel model) {
-		BrowserConnector.getInstance().deleteCanvas(
-				CollaUserManager.getCurrentUser(), model);
+	void deleteCanvas(final CanvasModel model) {
+		CollaDialog.confirm(this, "Delete " + model.name + "?",
+				new CollaDialog.OnClickListener() {
+
+					@Override
+					public void onClick(int c) {
+						BrowserConnector.getInstance().deleteCanvas(
+								CollaUserManager.getCurrentUser(), model);
+					}
+				});
+
 	}
 
 	/**
