@@ -303,10 +303,10 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		hide.setChecked(hidden);
 		if (hidden) {
 			hide.setText(R.string.d_hide_text);
-			CollaToast.show(workspace, R.string.d_hide_msg, Toast.LENGTH_SHORT);
+			CollaDialog.toast(workspace, R.string.d_hide_msg, Toast.LENGTH_SHORT);
 		} else {
 			hide.setText(R.string.d_nohide_text);
-			CollaToast.show(workspace, R.string.d_nohide_msg,
+			CollaDialog.toast(workspace, R.string.d_nohide_msg,
 					Toast.LENGTH_SHORT);
 		}
 	}
@@ -359,15 +359,15 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			if (status == CanvasExporter.SUCCESS) {
 				String path = CanvasExporter.getResultFile().getAbsolutePath();
 				String text = "Downloaded to " + path;
-				CollaToast.show(workspace, text, Toast.LENGTH_LONG);
+				CollaDialog.toast(workspace, text, Toast.LENGTH_LONG);
 				// Toast.makeText(workspace, text, Toast.LENGTH_SHORT).show();
 				MediaScannerConnection.scanFile(workspace,
 						new String[] { path }, null, null);
 			} else if (status == CanvasExporter.FAILED) {
-				CollaToast.show(workspace, R.string.d_download_failed,
+				CollaDialog.toast(workspace, R.string.d_download_failed,
 						Toast.LENGTH_SHORT);
 			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-				CollaToast.show(workspace, R.string.disk_unavailable,
+				CollaDialog.toast(workspace, R.string.disk_unavailable,
 						Toast.LENGTH_SHORT);
 			}
 		}
@@ -419,7 +419,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		invite.setVisibility(View.VISIBLE);
 		accountId += " ";
 		if (status == ServerConnector.SUCCESS) {
-			CollaToast.show(
+			CollaDialog.toast(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
@@ -428,14 +428,14 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 			email.setText("");
 			reloadList();
 		} else if (status == ManageParticipantListener.ALREADY_INVITED) {
-			CollaToast.show(
+			CollaDialog.toast(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_sucess),
 					Toast.LENGTH_SHORT);
 		} else if (status == ManageParticipantListener.ALREADY_JOINED) {
-			CollaToast.show(
+			CollaDialog.toast(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
@@ -443,14 +443,14 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 					Toast.LENGTH_SHORT);
 
 		} else if (status == ManageParticipantListener.NOT_REGISTERED) {
-			CollaToast.show(
+			CollaDialog.toast(
 					workspace,
 					accountId
 							+ workspace.getResources().getString(
 									R.string.d_invite_not_registered),
 					Toast.LENGTH_SHORT);
 		} else
-			CollaToast.show(workspace, R.string.check_connection,
+			CollaDialog.toast(workspace, R.string.check_connection,
 					Toast.LENGTH_SHORT);
 	}
 
@@ -460,12 +460,12 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 		partiReload.setVisibility(View.VISIBLE);
 		partiLoader.setVisibility(View.GONE);
 		if (status == ServerConnector.SUCCESS) {
-			CollaToast.show(workspace, user.name + " "
+			CollaDialog.toast(workspace, user.name + " "
 					+ workspace.getResources().getString(R.string.d_no_longer),
 					Toast.LENGTH_SHORT);
 			reloadList();
 		} else if (status == ServerConnector.CONNECTION_PROBLEM)
-			CollaToast.show(workspace, R.string.check_connection,
+			CollaDialog.toast(workspace, R.string.check_connection,
 					Toast.LENGTH_SHORT);
 	}
 
@@ -539,7 +539,7 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 						new Request.Callback() {
 							@Override
 							public void onCompleted(Response response) {
-								CollaToast.show(workspace,
+								CollaDialog.toast(workspace,
 										R.string.d_share_success,
 										Toast.LENGTH_LONG);
 							}
@@ -551,11 +551,11 @@ class Dashboard implements OnClickListener, ManageParticipantListener,
 
 				Session.setActiveSession(null);
 			} else if (status == CanvasExporter.DISK_UNAVAILABLE) {
-				CollaToast.show(workspace, R.string.disk_unavailable,
+				CollaDialog.toast(workspace, R.string.disk_unavailable,
 						Toast.LENGTH_SHORT);
 				return;
 			} else {
-				CollaToast.show(workspace, R.string.d_share_failed,
+				CollaDialog.toast(workspace, R.string.d_share_failed,
 						Toast.LENGTH_SHORT);
 			}
 

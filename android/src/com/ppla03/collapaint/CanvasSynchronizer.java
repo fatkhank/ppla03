@@ -2,8 +2,6 @@ package com.ppla03.collapaint;
 
 import java.util.ArrayList;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Handler;
 
 import com.ppla03.collapaint.conn.CanvasConnector;
@@ -13,6 +11,7 @@ import com.ppla03.collapaint.conn.SyncEventListener;
 import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.UserModel;
 import com.ppla03.collapaint.model.action.*;
+import com.ppla03.collapaint.ui.CollaDialog;
 
 /**
  * Mengurusi proses pemuatan dan sinkronisasi kanvas.
@@ -20,7 +19,7 @@ import com.ppla03.collapaint.model.action.*;
  * 
  */
 public class CanvasSynchronizer implements SyncEventListener,
-		DialogInterface.OnClickListener, OnCanvasOpenListener {
+		CollaDialog.OnClickListener, OnCanvasOpenListener {
 
 	private static final int DEFAULT_CANVAS_WIDTH = 800,
 			DEFAULT_CANVAS_HEIGHT = 400, DEFAULT_CANVAS_ID = 1;
@@ -61,7 +60,6 @@ public class CanvasSynchronizer implements SyncEventListener,
 	private CanvasCloseListener closeListener;
 	private static CanvasModel currentModel;
 
-	private AlertDialog hideModeDialog;
 	private CanvasView view;
 	private CanvasConnector connector;
 	private static int lastActNum;
@@ -90,7 +88,7 @@ public class CanvasSynchronizer implements SyncEventListener,
 	/**
 	 * Interval waktu untuk sinkronisasi
 	 */
-	private int sync_time = 1000;
+	private int sync_time = 500;
 
 	private int mode;
 	private final int IDLE = 1;
@@ -156,13 +154,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 	}
 
 	public boolean setCanvasView(CanvasView canvas) {
-		if(currentModel == null)
+		if (currentModel == null)
 			return false;
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				canvas.getContext());
-		builder.setMessage(R.string.w_change2hide);
-		hideModeDialog = builder.setPositiveButton("Yes", this)
-				.setNegativeButton("No", this).setCancelable(false).create();
 		this.view = canvas;
 		canvas.open(currentModel);
 		canvas.execute(actionBuffer);
@@ -173,6 +166,8 @@ public class CanvasSynchronizer implements SyncEventListener,
 	public void start() {
 		android.util.Log.d("POS", "----- synchronizer started ------");
 		mode = IDLE;
+		if (handler == null)
+			handler = new Handler();
 		handler.postDelayed(updater, sync_time);
 	}
 
@@ -283,15 +278,16 @@ public class CanvasSynchronizer implements SyncEventListener,
 		if (status == ServerConnector.CONNECTION_PROBLEM
 				|| status == ServerConnector.SERVER_PROBLEM) {
 			if (!view.isInHideMode())
-				hideModeDialog.show();
+				CollaDialog.alert(view.getContext(), R.string.w_change2hide,
+						"Yes", "No", this);
 		}
 	}
 
 	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		if (which == DialogInterface.BUTTON_POSITIVE) {
+	public void onClick(int which) {
+		if (which == CollaDialog.YES) {
 			view.setHideMode(true);
-		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
+		} else if (which == CollaDialog.NO) {
 			handler.postDelayed(updater, sync_time);
 		}
 	}

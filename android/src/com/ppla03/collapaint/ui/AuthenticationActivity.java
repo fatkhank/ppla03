@@ -367,8 +367,8 @@ public class AuthenticationActivity extends FragmentActivity implements
 			startActivity(intent);
 			finish();
 		} else if (status == ServerConnector.CONNECTION_PROBLEM) {
-			CollaToast
-					.show(this, R.string.a_cannot_contact, Toast.LENGTH_SHORT);
+			CollaDialog
+					.toast(this, R.string.a_cannot_contact, Toast.LENGTH_SHORT);
 		}
 	}
 }

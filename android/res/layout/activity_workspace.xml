@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/workspace"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="start" >
@@ -232,28 +233,28 @@
         android:layout_below="@+id/w_topbar"
         android:background="@drawable/bg_dialog"
         android:fillViewport="true"
-        android:padding="4dp"
         android:visibility="visible" >
 
         <include
             android:layout_width="@dimen/w_property_pane_width"
             android:layout_height="wrap_content"
             layout="@layout/w_property_pane" />
+
     </ScrollView>
 
     <ScrollView
         android:id="@+id/w_color_pane_scroll"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/cp_width"
         android:layout_height="wrap_content"
         android:layout_below="@+id/w_topbar"
         android:layout_toLeftOf="@+id/w_property_scroll"
         android:background="@drawable/bg_dialog"
         android:fillViewport="true"
-        android:padding="5dp"
+        android:padding="3dp"
         android:visibility="visible" >
 
         <include
-            android:layout_width="@dimen/cp_width"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             layout="@layout/dialog_color" />
     </ScrollView>
@@ -265,6 +266,6 @@
         android:layout_below="@+id/w_topbar"
         layout="@layout/activity_dashboard"
         android:background="@drawable/bg_dialog"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </RelativeLayout>

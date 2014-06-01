@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:state_pressed="true"><layer-list>
+            <item android:right="8dp"><shape android:shape="rectangle">
+                    <size android:height="24dp" android:width="24dp" />
+
+                    <solid android:color="@color/black_transparent" />
+
+                    <stroke android:width="3dp" android:color="#666666" />
+                </shape></item>
+        </layer-list></item>
     <item android:state_checked="true"><layer-list>
             <item android:bottom="4dp" android:right="8dp" android:top="4dp"><shape android:shape="rectangle">
                     <size android:height="24dp" android:width="24dp" />
 
-                    <stroke android:width="3dp" android:color="#999999" />
+                    <stroke android:width="3dp" android:color="#777777" />
                 </shape></item>
             <item><inset android:drawable="@drawable/ic_action_accept" android:insetBottom="4dp" android:insetLeft="0dp" android:insetRight="0dp" android:insetTop="-4dp" />
             </item>
@@ -14,7 +23,7 @@
             <item android:right="8dp"><shape android:shape="rectangle">
                     <size android:height="24dp" android:width="24dp" />
 
-                    <stroke android:width="3dp" android:color="#999999" />
+                    <stroke android:width="3dp" android:color="@color/dark" />
                 </shape></item>
         </layer-list></item>
 

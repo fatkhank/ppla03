@@ -7,13 +7,10 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputFilter;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -280,16 +277,16 @@ public class BrowserActivity extends Activity implements OnClickListener,
 			finish();
 		} else {
 			if (status == CanvasCreationListener.DUPLICATE_NAME) {
-				CollaToast.show(this, R.string.b_ducplicate_name,
+				CollaDialog.toast(this, R.string.b_ducplicate_name,
 						Toast.LENGTH_SHORT);
 			} else if (status == CanvasCreationListener.NOT_AUTHORIZED) {
-				CollaToast.show(this, R.string.not_authorized,
+				CollaDialog.toast(this, R.string.not_authorized,
 						Toast.LENGTH_SHORT);
 			} else if (status == ServerConnector.CONNECTION_PROBLEM) {
-				CollaToast.show(this, R.string.check_connection,
+				CollaDialog.toast(this, R.string.check_connection,
 						Toast.LENGTH_SHORT);
 			} else
-				CollaToast.show(this, R.string.error, Toast.LENGTH_SHORT);
+				CollaDialog.toast(this, R.string.error, Toast.LENGTH_SHORT);
 
 			showCreateLoader(false);
 		}
@@ -363,37 +360,17 @@ public class BrowserActivity extends Activity implements OnClickListener,
 					CollaUserManager.getCurrentUser(), response, this);
 			return;
 		}
-		LayoutInflater li = this.getLayoutInflater();
-		View promptsView;
 
-		promptsView = li.inflate(R.layout.dialog_sure, null);
+		CollaDialog.confirm(this, R.string.b_invitation_reject,
+				new CollaDialog.OnClickListener() {
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-		alertDialogBuilder.setView(promptsView);
-
-		// set dialog message
-		alertDialogBuilder
-				.setCancelable(false)
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
+					@Override
+					public void onClick(int c) {
 						ParticipantManager.getInstance().responseInvitation(
 								model, CollaUserManager.getCurrentUser(),
 								response, BrowserActivity.this);
 					}
-				})
-				.setNegativeButton("Cancel",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
+				});
 	}
 
 	/**

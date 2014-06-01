@@ -17,6 +17,7 @@
     <string name="sign_out">Sign Out</string>
     <string name="b_ducplicate_name">Canvas\'s name is already exist. Try different name.</string>
     <string name="b_invitation_header">You have invitations</string>
+    <string name="b_invitation_reject">Reject invitation?</string>
     <string name="b_canvas_list_header">Canvas list</string>
     <string name="b_load_list">Get canvas list</string>
     <string name="b_load_fail">Cannot load canvas list</string>

@@ -4,6 +4,7 @@
     <dimen name="a_login_margin_bottom">128dp</dimen>
     <dimen name="b_header_size">64dp</dimen>
     <dimen name="cp_width">250dp</dimen>
+    <dimen name="cp_pallete_height">300dp</dimen>
     <dimen name="w_property_pane_width">250dp</dimen>
     <dimen name="w_topbar_height">56dp</dimen>
     <dimen name="color_dialog_width">300dp</dimen>

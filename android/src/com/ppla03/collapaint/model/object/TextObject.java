@@ -79,6 +79,7 @@ public class TextObject extends CanvasObject {
 		paint.getTextBounds(text, 0, text.length(), bounds);
 		bounds.offset(-bounds.centerX(), -bounds.centerY());
 		mover.setObject(this);
+		rotator.radius = bounds.bottom + Rotator.MIN_RADIUS;
 	}
 
 	/**

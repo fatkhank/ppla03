@@ -7,7 +7,8 @@ import com.ppla03.collapaint.model.CanvasModel;
 import com.ppla03.collapaint.model.action.*;
 import com.ppla03.collapaint.model.action.MoveMultiple.MoveStepper;
 import com.ppla03.collapaint.model.object.*;
-import com.ppla03.collapaint.ui.CollaToast;
+import com.ppla03.collapaint.ui.CollaDialog;
+import com.ppla03.collapaint.ui.ColorPallete;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -207,7 +208,7 @@ public class CanvasView extends View {
 	static {
 		editPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		editPaint.setStyle(Style.STROKE);
-		editPaint.setColor(Color.BLACK);
+		editPaint.setColor(ColorPallete.DARK);
 		editPaint.setStrokeWidth(1);
 		StrokeStyle.applyEffect(StrokeStyle.DOTTED, editPaint);
 	}
@@ -229,8 +230,8 @@ public class CanvasView extends View {
 		canvasPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		canvasPaint.setStyle(Style.FILL);
 		canvasPaint.setColor(CANVAS_COLOR);
-		canvasPaint.setShadowLayer(CANVAS_SHADOW_RADIUS, CANVAS_SHADOW_DX,
-				CANVAS_SHADOW_DY, CANVAS_SHADOW_COLOR);
+		// canvasPaint.setShadowLayer(CANVAS_SHADOW_RADIUS, CANVAS_SHADOW_DX,
+		// CANVAS_SHADOW_DY, CANVAS_SHADOW_COLOR);
 	}
 
 	// ---------------------- proto area ---------------
@@ -1104,14 +1105,14 @@ public class CanvasView extends View {
 						if (protoObject instanceof FreeObject) {
 							// jika objek free, ubah ke mode gambar biasa
 							insertPrimitive(ObjectType.FREE);
-							CollaToast.show(getContext(), "Drag to make path",
-									Toast.LENGTH_SHORT);
+							CollaDialog.toast(getContext(),
+									"Drag to make path", Toast.LENGTH_SHORT);
 							dragStatus = DS_DRAW_FREE;
 							continueDraw = true;
 						} else if (protoObject instanceof LineObject) {
 							insertPrimitive(ObjectType.LINE);
-							CollaToast.show(getContext(), "Drag to make line",
-									Toast.LENGTH_SHORT);
+							CollaDialog.toast(getContext(),
+									"Drag to make line", Toast.LENGTH_SHORT);
 							dragStatus = DS_DRAW_LINE;
 						} else
 							dragStatus = DS_NONE;

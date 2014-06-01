@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -44,6 +45,9 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	}
 
 	private View parent;
+	private ColorPallete colorView;
+	private CheckBox headerRGB, headerPallete;
+	private View rgbView;
 
 	private SeekBar rSlider, gSlider, bSlider, aSlider;
 	private EditText rInput, gInput, bInput, aInput;
@@ -53,7 +57,6 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 	static final int PALLETE = 0, RGB = 1;
 	static final String PALLETE_STRING = "Palletes", RGB_STRING = "RGB";
 	static final String PALLETE_TAG = "pallete", RGB_TAG = "rgb";
-	private int mode = RGB;
 
 	private ColorChangeListener listener;
 	private int red, green, blue, alpha;
@@ -67,6 +70,17 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			this.listener = listener;
 
 			this.parent = view;
+
+			// --- setup tab ---
+			headerRGB = (CheckBox) parent.findViewById(R.id.cp_show_rgb);
+			headerRGB.setOnClickListener(this);
+			headerPallete = (CheckBox) parent
+					.findViewById(R.id.cp_show_pallete);
+			headerPallete.setOnClickListener(this);
+			rgbView = parent.findViewById(R.id.cp_rgb);
+			colorView = (ColorPallete) parent.findViewById(R.id.cp_pallete);
+			colorView.dialog = this;
+			setTab(headerRGB);
 
 			// --- setup rgb chooser ---
 			rSlider = (SeekBar) view.findViewById(R.id.cp_r_slider);
@@ -105,7 +119,7 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			setColor(Color.BLACK, true);
 
 			// ---setup pallete ---
-			// colorView = (ColorView) view.findViewById(R.id.cd_tab_pallete);
+			colorView = (ColorPallete) view.findViewById(R.id.cp_pallete);
 		} catch (Exception ex) {
 			StackTraceElement[] ste = ex.getStackTrace();
 			for (StackTraceElement s : ste) {
@@ -190,21 +204,49 @@ class ColorPane implements OnSeekBarChangeListener, OnEditorActionListener,
 			alpha = value;
 			aSlider.setProgress(alpha);
 		}
-		preview.setBackgroundColor(Color.argb(alpha, red, green, blue));
+		int clr = Color.argb(alpha, red, green, blue);
+		preview.setBackgroundColor(clr);
+		listener.onColorChanged(clr);
 		return true;
 	}
 
 	@Override
 	public void onClick(View v) {
-		boolean app = (v == approve);
-		if (app)
-			originalColor = Color.argb(alpha, red, green, blue);
-		if (mode == PALLETE) {
-			// TODO color view
-			listener.onColorDialogClosed(ColorView.currentColor, app);
-		} else {
+		if (v == approve || v == cancel) {
+			boolean app = (v == approve);
+			if (app) {
+				originalColor = Color.argb(alpha, red, green, blue);
+				ColorPallete.addColor(originalColor);
+			}
 			listener.onColorDialogClosed(originalColor, app);
+		} else if (v == headerRGB) {
+			setTab(headerRGB);
+		} else if (v == headerPallete) {
+			setTab(headerPallete);
 		}
 	}
 
+	private void setTab(CheckBox header) {
+		if (header == headerRGB) {
+			headerRGB.setChecked(false);
+			headerRGB.setTextColor(ColorPallete.DARK);
+			headerPallete.setChecked(true);
+			headerPallete.setTextColor(Color.WHITE);
+			rgbView.setVisibility(View.VISIBLE);
+			colorView.setVisibility(View.GONE);
+		} else {
+			headerRGB.setChecked(true);
+			headerRGB.setTextColor(Color.WHITE);
+			headerPallete.setChecked(false);
+			headerPallete.setTextColor(ColorPallete.DARK);
+			rgbView.setVisibility(View.GONE);
+			colorView.setVisibility(View.VISIBLE);
+		}
+	}
+
+	void palleteChange(int color) {
+		setColor(color, false);
+		int clr = Color.argb(alpha, red, green, blue);
+		listener.onColorChanged(clr);
+	}
 }

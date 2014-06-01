@@ -10,7 +10,7 @@ import com.ppla03.collapaint.model.object.CanvasObject;
  * @author hamba v7
  * 
  */
-public class CanvasModel {
+public class CanvasModel{
 	/**
 	 * Lebar minimal kanvas
 	 */

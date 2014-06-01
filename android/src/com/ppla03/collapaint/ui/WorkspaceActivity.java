@@ -17,8 +17,6 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -44,6 +42,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		OnSeekBarChangeListener, TextWatcher, CanvasListener,
 		AnimatorUpdateListener, AnimatorListener {
 
+	private View view;
 	// --------- top bar ---------
 	private View topbar, leftButtons;
 	private CheckImage select, hand;
@@ -108,6 +107,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		try {
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_workspace);
+
+			view = findViewById(R.id.workspace);
 			// --- top bar ---
 			topbar = findViewById(R.id.w_topbar);
 			leftButtons = findViewById(R.id.w_top_left_control);
@@ -145,6 +146,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			showProp.setOnClickListener(this);
 			showProp.setChecked(true);
 			animProp = ValueAnimator.ofFloat(-800, 48);
+			animProp.end();
 			animProp.addListener(this);
 			animProp.addUpdateListener(this);
 			animProp.setDuration(500);
@@ -222,6 +224,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			colorPaneView = findViewById(R.id.w_color_pane_scroll);
 			colorPane = new ColorPane(this, colorPaneView, this);
 			animColor = ValueAnimator.ofFloat(-800, 48);
+			animColor.end();
 			animColor.addListener(this);
 			animColor.addUpdateListener(this);
 			animColor.setDuration(500);
@@ -231,17 +234,18 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			dashboardView.setVisibility(View.GONE);
 			dashboard = new Dashboard(savedInstanceState, this, dashboardView);
 			animDash = ValueAnimator.ofFloat(-800, 48);
-			animDash.setDuration(750);
-			animDash.addUpdateListener(this);
+			animDash.end();
 			animDash.addListener(this);
+			animDash.addUpdateListener(this);
+			animDash.setDuration(750);
 			topbar.bringToFront();
 
 			// --- load ---
 			if (CanvasSynchronizer.getInstance().setCanvasView(canvas)) {
 				canvasTitle.setText(canvas.getModel().name);
 				onClick(select);
-			}else{
-				//kembalikan ke browser jika terjadi masalah
+			} else {
+				// kembalikan ke browser jika terjadi masalah
 				startActivity(new Intent(this, BrowserActivity.class));
 				finish();
 			}
@@ -267,25 +271,18 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 	 * Menutup kanvas.
 	 */
 	public void closeCanvas() {
-		// if (dashboardView.getVisibility() == View.VISIBLE)
-		// animateDashboard(false);
-		new AlertDialog.Builder(this)
-				.setMessage(R.string.w_close_confirm)
-				.setNegativeButton(android.R.string.cancel, null)
-				.setPositiveButton(android.R.string.yes,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								Intent intent = new Intent(
-										WorkspaceActivity.this,
-										LoaderActivity.class);
-								intent.putExtra(LoaderActivity.ACTION,
-										LoaderActivity.CLOSE);
-								startActivity(intent);
-								finish();
-							}
-						}).create().show();
+		CollaDialog.confirm(this, R.string.w_close_confirm,
+				new CollaDialog.OnClickListener() {
+					@Override
+					public void onClick(int v) {
+						Intent intent = new Intent(WorkspaceActivity.this,
+								LoaderActivity.class);
+						intent.putExtra(LoaderActivity.ACTION,
+								LoaderActivity.CLOSE);
+						startActivity(intent);
+						finish();
+					}
+				});
 	}
 
 	/**
@@ -425,8 +422,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			canvas.deleteSelectedObjects();
 		} else if (v == copy) {
 			int count = canvas.copySelectedObjects();
-			CollaToast
-					.show(this, count + " objects copied", Toast.LENGTH_SHORT);
+			CollaDialog.toast(this, count + " objects copied",
+					Toast.LENGTH_SHORT);
 		} else if (v == move) {
 			canvas.moveSelectedObject();
 		} else if (v == delete) {
@@ -488,7 +485,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (show) {
 			// munculkan
 			if (dashboardView.getVisibility() == View.GONE) {
-				dashboardView.setY(-dashboardView.getHeight());
+				dashboardView.setY(-view.getHeight());
 				dashboardView.setVisibility(View.VISIBLE);
 			}
 			animDash.setFloatValues(dashboardView.getY(), topbar.getHeight());
@@ -498,8 +495,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			selectAddButtons.setVisibility(View.GONE);
 		} else {
 			// sembunyikan
-			animDash.setFloatValues(dashboardView.getY(),
-					-dashboardView.getHeight());
+			animDash.setFloatValues(dashboardView.getY(), -view.getHeight());
 			if (propertyPane.getVisibility() == View.VISIBLE) {
 				showProp.setChecked(false);
 				propertyPane.setVisibility(View.GONE);
@@ -529,8 +525,8 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			if (count > 0) {
 				if (count <= 1)
 					move.setVisibility(View.GONE);
-				CollaToast
-						.show(this, "All object selected", Toast.LENGTH_SHORT);
+				CollaDialog.toast(this, "All object selected",
+						Toast.LENGTH_SHORT);
 			}
 		}
 		return true;
@@ -619,14 +615,14 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (show) {
 			// tampilkan
 			if (colorPaneView.getVisibility() == View.GONE) {
-				colorPaneView.setY(-colorPaneView.getHeight());
+				colorPaneView.setY(-view.getHeight());
 				colorPaneView.setVisibility(View.VISIBLE);
 			}
 			animColor.setFloatValues(colorPaneView.getY(), topbar.getHeight());
+
 		} else {
 			// sembunyikan
-			animColor.setFloatValues(colorPaneView.getY(),
-					-colorPaneView.getHeight());
+			animColor.setFloatValues(colorPaneView.getY(), -view.getHeight());
 		}
 		animColor.start();
 	}
@@ -640,7 +636,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 		if (visible) {
 			// animasikan proppane
 			if (vis == View.GONE) {
-				propertyPane.setY(-propertyPane.getHeight());
+				propertyPane.setY(-view.getHeight());
 				propertyPane.setVisibility(View.VISIBLE);
 			}
 			animProp.setFloatValues(propertyPane.getY(), topbar.getHeight());
@@ -766,8 +762,7 @@ public class WorkspaceActivity extends Activity implements OnClickListener,
 			}
 		} else {
 			// sembunyikan proppane
-			animProp.setFloatValues(propertyPane.getY(),
-					-propertyPane.getHeight());
+			animProp.setFloatValues(propertyPane.getY(), -view.getHeight());
 			colorConsumer = null;
 			animateColorDialog(false);
 		}
